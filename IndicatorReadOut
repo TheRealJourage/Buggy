@@ -21,19 +21,11 @@ void loop() {
   outputIntOld = outputInt;
   // read the analog in value:
   sensor1Value1 = analogRead(analogInPin);
-  delay(10);
   sensor1Value2 = analogRead(analogInPin);
-  delay(10);
   sensor1Value3 = analogRead(analogInPin);
-
-  if (sensor1Value1 != sensor1Value2) {
-    if (sensor1Value2 == sensor1Value3) {
-      sensor1Value1 = sensor1Value2;
-    }else if(sensor1Value1 == sensor1Value3){
-      sensor1Value1 = sensor1Value3;
-      }else{
-        sensor1Value1 = 0;
-      }
+  
+  if(sensor1Value2 == sensor1Value3){
+    sensor1Value1 = sensor1Value2;
   }
   
   switch (sensor1Value1) {
