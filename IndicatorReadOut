@@ -27,6 +27,11 @@ void loop() {
   if(sensor1Value2 == sensor1Value3){
     sensor1Value1 = sensor1Value2;
   }
+  if(sensor1Value1 != sensor1Value2 && sensor1Value1 != sensor1Value3 && sensor1Value2 != sensor1Value3){
+    sensor1Value1 = 0;
+  }
+  
+  
   
   switch (sensor1Value1) {
     case 510:
@@ -79,7 +84,7 @@ void loop() {
   */
 
   if(outputInt != outputIntOld && outputInt != 255 && outputIntOld != 255){
-    Wire.beginTransmission(8); // Send to Slave #1
+    Wire.beginTransmission(8); // Send to Slave #8
     Wire.write(outputInt);     // Send one byte  
     Wire.endTransmission();    // Stop sending
     }
