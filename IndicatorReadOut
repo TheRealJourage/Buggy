@@ -82,12 +82,13 @@ void loop() {
   Wire.write(sensor1Value1);     // Send one byte
   Wire.endTransmission();    // Stop sending
   */
+  
 
   if(outputInt != outputIntOld && outputInt != 255 && outputIntOld != 255){
-    Wire.beginTransmission(8); // Send to Slave #8
-    Wire.write(outputInt);     // Send one byte  
-    Wire.endTransmission();    // Stop sending
+        Serial.print(outoutInt);
     }
+  
+  
   
   delay(2);
 }
