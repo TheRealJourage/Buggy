@@ -1,0 +1,96 @@
+#include <Wire.h>
+
+// These constants won't change. They're used to give names to the pins used:
+const int analogInPin = A0;  // Analog input pin that the potentiometer is attached to
+const int analogOutPin = A1; // Analog output pin that the LED is attached to
+
+int sensor1Value1 = 0;        // value read from the pot
+int sensor1Value2 = 0;
+int sensor1Value3 = 0;
+int test = 0;
+int outputInt = 0;
+int outputIntOld = 0;
+
+void setup() {
+  Wire.begin(5); // join i2c bus (address optional for master)
+  //Serial.begin(9600);
+}
+
+void loop() {
+
+  outputIntOld = outputInt;
+  // read the analog in value:
+  sensor1Value1 = analogRead(analogInPin);
+  delay(10);
+  sensor1Value2 = analogRead(analogInPin);
+  delay(10);
+  sensor1Value3 = analogRead(analogInPin);
+
+  if (sensor1Value1 != sensor1Value2) {
+    if (sensor1Value2 == sensor1Value3) {
+      sensor1Value1 = sensor1Value2;
+    }else if(sensor1Value1 == sensor1Value3){
+      sensor1Value1 = sensor1Value3;
+      }else{
+        sensor1Value1 = 0;
+      }
+  }
+  
+  switch (sensor1Value1) {
+    case 510:
+    case 509:
+      outputInt = 88; //BlinkerNull
+      test = 0;
+      break;
+    case 92:
+    case 91:
+      outputInt = 20; //BlinkerRechts
+      test = 1;
+      break;
+    case 248:
+    case 249:
+    case 250:
+      outputInt = 40; //BlinkerLinks
+      test = 1;
+      break;
+    case 771:
+    case 772:
+    case 773:
+      outputInt = 60; //LichtHupe
+      break;
+    case 930:
+    case 929:
+      outputInt = 80; //Fernlich
+      break;
+    //KombiCase
+    case 242:
+    case 241:
+      if(test == 1){
+      outputInt = 120; //BlinkerRechts+LichHupe
+      }
+      break;
+    case 511:
+    case 512:
+      if(test == 1){
+      outputInt = 140; //BlinkerLinks+LichtHupe
+      }
+      break;
+    default: outputInt = 255;
+      break;
+  }
+
+  /*
+  sensor1Value1 = sensor1Value1/10;
+  Wire.beginTransmission(8); // Send to Slave #8
+  Wire.write(sensor1Value1);     // Send one byte
+  Wire.endTransmission();    // Stop sending
+  */
+
+  if(outputInt != outputIntOld && outputInt != 255 && outputIntOld != 255){
+    Wire.beginTransmission(8); // Send to Slave #1
+    Wire.write(outputInt);     // Send one byte  
+    Wire.endTransmission();    // Stop sending
+    }
+  
+  delay(2);
+}
