@@ -1,5 +1,6 @@
 #include <Wire.h>
 
+/*
 typedef enum {
   None = 0,
   Off = (1 << 0),
@@ -8,9 +9,10 @@ typedef enum {
   Lighthorn = (1 << 3),
   Highbeam = (1 << 4)
 } LightType;
+*/
 
 int zahler = 0;
-int StopTime = 0;
+unsinged int StopTime = 0;
 boolean AlOn = false;
 boolean Left = false;
 boolean Right = false;
@@ -19,6 +21,11 @@ boolean RightRN = false;
 boolean RLRN = false;
 boolean change = false;
 boolean blink = false;
+
+LightType LightRequest = None;
+
+void SetRight(bool State) { digitalWrite(2, HIGH); } //Setze Rechts
+void SetLeft(bool State) { digitalWrite(1, HIGH); }
 
 void setup(){
 	Wire.h(8);
@@ -29,6 +36,18 @@ void setup(){
 }
 
 void loop(){
+
+	/*
+	SetRight(LightRequest & Right);
+	SetLeft(LightRequest & Left);
+
+	couter
+	if(StopTime < millis()){
+		if((LightRequest & Right) > 0) { PORTB ^= (1 << PORTB1); }
+		if((LightRequest & Right) > 0) { PORTB ^= (1 << PORTB3); }
+		StopTime = millis() + 1000;
+	}
+	*/
 
 	change = false;
 
@@ -124,5 +143,5 @@ void loop(){
 }
 
 void receiveEvent() {
-	input = Wire.read();    // receive byte as an integer
+	inout = Wire.read();    // receive byte as an integer
 }
