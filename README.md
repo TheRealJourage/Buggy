@@ -10,4 +10,4 @@ IndicatorReadOut ließt analoge Werte der Blinker/Scheibenwischerhebel aus und g
 
 ButtonPanal ließt digitale Werte von 6-8 Knöpfen aus und gibt sie über I2C weiter
 
-I2C-Reader ist ein TestProgramm zum auslesen der I2C Nachrichten
+I2C-Reciever ist ein TestProgramm zum auslesen der I2C Nachrichten
