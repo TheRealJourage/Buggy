@@ -123,6 +123,6 @@ void loop(){
 	
 }
 
-void receiveEvent(int howMany) {
+void receiveEvent() {
 	input = Wire.read();    // receive byte as an integer
 }
