@@ -1,0 +1,47 @@
+#include <Wire.h>
+
+int value = 0;
+boolean valueFree = true;
+
+void setup(){
+	Wire.h(2);
+	Wire.onReceive(receiveEvent);
+	
+	pinMode(1, INPUT); //Button #1
+	pinMode(2, INPUT); //Button #2
+	pinMode(3, INPUT); //Button #3
+	pinMode(4, INPUT); //Button #4
+	pinMode(5, INPUT); //Button #5
+	pinMode(6, INPUT); //Button #6
+}
+
+void loop(){
+	if(digitalRead(1) = 1 && valueFree){ //Button #1 pressed
+		value = 1;
+		valueFree = false;
+	}
+	if(digitalRead(2) = 1 && valueFree){ //Button #2 pressed
+		value = 2;
+		valueFree = false;
+	}
+	if(digitalRead(3) = 1 && valueFree){ //Button #3 pressed
+		value = 3;
+		valueFree = false;
+	}
+	if(digitalRead(4) = 1 && valueFree){ //Button #4 pressed
+		value = 4;
+		valueFree = false;
+	}
+	if(digitalRead(5) = 1 && valueFree){ //Button #5 pressed
+		value = 5;
+		valueFree = false;
+	}
+	if(digitalRead(6) = 1 && valueFree){ //Button #6 pressed
+		value = 6;
+		valueFree = false;
+	}
+	
+	Wire.beginTransmission(5); // transmit to device #5
+	Wire.write(x);              // sends one byte
+	Wire.endTransmission();    // stop transmitting
+}
