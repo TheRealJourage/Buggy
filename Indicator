@@ -1,0 +1,119 @@
+#include <Wire.h>
+
+int zahler = 0;
+int StopTime = 0;
+boolean AlOn = false;
+boolean Left = false;
+boolean Right = false;
+boolean LeftRN = false;
+boolean RightRN = false;
+boolean RLRN = false;
+boolean change = false;
+boolean blink = false;
+
+void setup(){
+	Wire.h(8);
+	Wire.onReceive(receiveEvent);
+	
+	pinMode(1, OUTPUT); //Blinker Links
+	pinMode(2, OUTPUT); //Blinker Rechts
+}
+
+void loop(){
+
+	change = false;
+
+	switch(input){
+		case 0:
+			Left = false;
+			Right = false;
+			break;
+		case 1:
+			if(Right){
+				change = true;
+				Right = false;
+			}
+			Left = true;
+			break;
+		case 2:
+			if(Left){
+					change = true;
+					Left = false;
+				}
+			Right = true;
+			break;
+		case 3:
+			if(!RLRN){
+				RLRN = true;
+			}else{
+				RLRN = false;
+			}
+			break;
+		case 4:
+			if(AlOn){
+				digitalWrite(1, HIGH);
+				digitalWrite(2, HIGH);
+			}else{
+				digitalWrite(1, LOW);
+				digitalWrite(2, LOW);
+			}
+			break;
+		
+	}
+	
+	if(Left||Right||RLRN){
+		zahler = 3;
+		if(Left){
+			LeftRN = true;
+			RightRN = false;
+		}elseif(Right){
+			RightRN = true;
+			LEftRN = false;
+		}
+	}
+	
+	if(zahler > 0){
+		if(LeftRN){
+			if(StopTime <= mills() && StopTime != 0){
+				if(!blink){
+					digitalWrite(1, HIGH);
+					blink = true;
+				}else{
+					digitalWrite(1, LOW);
+					blink = false;
+				}
+			StopTime = (mills()/1000) + 1;
+			}
+		}else if(RightRN){
+				if(StopTime <= mills() && StopTime != 0){
+					if(!blink){
+						digitalWrite(1, HIGH);
+						blink = true;
+					}else{
+						digitalWrite(1, LOW);
+						blink = false;
+					}
+				StopTime = (mills()/1000) + 1;
+				}
+		}else if(RLRN){
+				if(StopTime <= mills() && StopTime != 0){
+					if(!blink){
+						digitalWrite(1, HIGH);
+						blink = true;
+					}else{
+						digitalWrite(1, LOW);
+						blink = false;
+					}
+				StopTime = (mills()/1000) + 1;
+				}
+		}
+	}else{
+		LeftRN = false;
+		RightRN = false;
+	}
+	
+}
+
+void receiveEvent(int howMany) {
+	input = Wire.read();    // receive byte as an integer
+}
