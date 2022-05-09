@@ -1,0 +1,77 @@
+#include <Wire.h>
+
+#define IS_BLINKER_NULL(sv) (508 <= (sv) && (sv) <= 510)
+#define IS_BLINKER_RIGHT(sv) (90 <= (sv) && (sv) <= 94)
+#define IS_BLINKER_LEFT(sv) (248 <= (sv) && (sv) <= 250)
+#define IS_BLINKER_LIGHTHORN(sv) (770 <= (sv) && (sv) <= 775)
+#define IS_BLINKER_HIGHBEAM(sv) (928 <= (sv) && (sv) <= 931)
+#define IS_BLINKER_RHB(sv) (240 <= (sv) && (sv) <= 244 && test == 1)
+#define IS_BLINKER_LHB(sv) (511 <= (sv) && (sv) <= 513 && test == 1)
+
+typedef enum {
+  None = 0,
+  Off = (1 << 0),
+  Right = (1 << 1),
+  Left = (1 << 2),
+  Lighthorn = (1 << 3),
+  Highbeam = (1 << 4)
+} LightType;
+
+// These constants won't change. They're used to give names to the pins used:
+const int analogInPin = A0;  // Analog input pin that the potentiometer is attached to
+const int analogOutPin = A1; // Analog output pin that the LED is attached to
+
+int sensor1Value1 = 0;        // value read from the pot
+int sensor1Value2 = 0;
+int sensor1Value3 = 0;
+int test = 0;
+LightType outputInt = None;
+LightType outputIntOld = None;
+
+void setup() {
+  Wire.begin(5); // join i2c bus (address optional for master)
+  Serial.begin(9600);
+}
+
+void loop() {
+
+  outputIntOld = outputInt;
+  // read the analog in value:
+  sensor1Value1 = analogRead(analogInPin);
+  //Serial.println("sensor1Value1: " + String(sensor1Value1));
+  //delay(500);
+  sensor1Value2 = analogRead(analogInPin);
+  //Serial.println("sensor1Value2: " + String(sensor1Value2));
+  //delay(500);
+  sensor1Value3 = analogRead(analogInPin);
+  //Serial.println("sensor1Value3: " + String(sensor1Value3));
+  //delay(500);
+  
+  if(sensor1Value2 == sensor1Value3){
+    sensor1Value1 = sensor1Value2;
+  }
+  if(sensor1Value1 != sensor1Value2 && sensor1Value1 != sensor1Value3 && sensor1Value2 != sensor1Value3){
+    sensor1Value1 = 0;
+  }
+
+  //Serial.println("sensor1Value1: " + String(sensor1Value1));
+  //delay(500);
+  
+
+  if      (IS_BLINKER_NULL(sensor1Value1))             { outputInt = Off; test = 0; }
+  else if (IS_BLINKER_RIGHT(sensor1Value1))            { outputInt = Right; test = 1; }
+  else if (IS_BLINKER_LEFT(sensor1Value1))             { outputInt = Left; test = 1; }
+  else if (IS_BLINKER_LIGHTHORN(sensor1Value1))        { outputInt = Lighthorn; }
+  else if (IS_BLINKER_HIGHBEAM(sensor1Value1))         { outputInt = Highbeam; }
+  else if (IS_BLINKER_RHB(sensor1Value1))              { outputInt = Right | Lighthorn; }
+  else if (IS_BLINKER_LHB(sensor1Value1))              { outputInt = Left | Lighthorn; }
+  else                                                 { outputInt = None; }
+  
+  if (outputInt != outputIntOld && outputInt != None && outputIntOld != None)
+  {
+    Serial.println("Got it!");
+    printf("%08b\n", (int)outputInt);
+  }
+  
+  //delay(500);
+}
