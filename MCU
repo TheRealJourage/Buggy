@@ -1,0 +1,74 @@
+#include <Wire.h>
+
+int input = 0;
+boolean LightHorn = false;
+boolean HighBeam = false;
+StopTime = 0;
+
+void setup(){
+	Wire.h(5);
+	Wire.onReceive(receiveEvent);
+	
+	pinMode(11, OUTPUT); //Fernlich Relay
+	pinMode(12, OUTPUT); //Funk I/O
+	pinMode(13, OUTPUT); //Hupe 1
+	pinMode(14, OUTPUT); //Hupe 2
+	pinMode(15, OUTPUT); //Hupe 3
+	pinMode(16, OUTPUT); //Hupe 4
+	pinMode(17, OUTPUT); //Hupe auf Mic
+}
+
+
+void loop(){
+	switch(input){
+		case 1:
+			digitalWrite(13, HIGH); //LichtHupe
+			LightHorn = true;
+			break;
+		case 2:
+			if(LighHorn){
+				digitalWrite(13, LOW);
+				}
+			break;
+		case 3:
+			if(!HighBeam){
+				digitalWrite(13, HIGH); //Fernlicht an
+				HighBeam = true;
+			}else{
+				digitalWrite(13, LOW); //Fernlicht aus
+				HighBeam = false;
+				}
+			break;
+		case 4:
+			if(TimeStop != 0){
+				digitalWrite(15, HIGH); //RelayHupe an
+				digitalWrite(16, HIGH); //HupTon 16 an;
+				delay(5);
+				digitalWrite(16, LOW); //HupTon 16 aus;
+				StopTime = mills();
+			}
+			break;
+		case 5:
+			if(TimeStop != 0){
+				digitalWrite(15, HIGH); //RelayHupe an
+				digitalWrite(17, HIGH); //HupTon 16 an;
+				delay(5);
+				digitalWrite(17, LOW); //HupTon 16 aus;
+				StopTime = mills();
+			}
+			break;
+		default:
+			break;
+	}
+
+	if(StopTime != 0){
+		if(mills() >= StopTime){
+			digitalWrite(15, LOW); //RelayHupe aus
+		}
+	}
+}
+
+
+void receiveEvent(int howMany) {
+	input = Wire.read();    // receive byte as an integer
+}
