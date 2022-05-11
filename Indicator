@@ -97,10 +97,13 @@ void loop() {
 
 void receiveEvent() {
   input = Wire.read();    // receive byte as an integer
-  if ( input == 0 ) { zero = true; hazard = false; }
-  if ( input == 1 ) { anzahl = 3; zero = false; }
-  if ( input == 2 ) { anzahl = -3; zero = false; }
-  if ( input == 3 ) { hazard = true; }
-  if ( input == 4 ) { allways = true; }
-  
+  if ( input == 10 ) { zero = true; hazard = false; Serial.println("Case NULL");}
+  if ( input == 20 ) { anzahl = 6; zero = false; Serial.println("Case Links");}
+  if ( input == 30 ) { anzahl = -6; zero = false; Serial.println("Case Rechts");}
+  if ( input == 40 ) { hazard = !hazard ; zero = !zero; Serial.println("Case Warn");}
+  if ( input == 50 ) { anzahl = 0;
+                      digitalWrite(PIN_LEFT, !digitalRead(PIN_LEFT));
+                      digitalWrite(PIN_RIGHT, !digitalRead(PIN_RIGHT));
+                      Serial.println("Case HI");
+                      }
 }
