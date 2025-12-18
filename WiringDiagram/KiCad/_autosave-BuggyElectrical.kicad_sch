@@ -1,0 +1,182 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "fb5c3fc8-0716-4f8d-bffb-d0702b025ae2")
+	(paper "A4")
+	(lib_symbols)
+	(sheet
+		(at -316.23 87.63)
+		(size 304.8 209.55)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "4d1470d1-cf0c-4cfb-a93d-6a376ab15676")
+		(property "Sheetname" "RearWiringHarnessTop"
+			(at -316.23 86.9184 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "RearWiringHarness.kicad_sch"
+			(at -316.23 297.7646 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "BuggyElectrical"
+				(path "/fb5c3fc8-0716-4f8d-bffb-d0702b025ae2"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 300.99 10.16)
+		(size 303.53 190.5)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "9fe9d354-c0d7-4172-b452-71395374b242")
+		(property "Sheetname" "SteeringWheelHarness"
+			(at 300.99 9.4484 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "SteeringWheelHarness.kicad_sch"
+			(at 300.99 201.2446 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "BuggyElectrical"
+				(path "/fb5c3fc8-0716-4f8d-bffb-d0702b025ae2"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet
+		(at -316.23 -121.92)
+		(size 304.8 194.31)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "c2a4259e-1af8-402e-99c4-d0b0fc7a407f")
+		(property "Sheetname" "AHKHarness"
+			(at -316.23 -122.6316 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "AHKHarness.kicad_sch"
+			(at -316.23 72.9746 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "BuggyElectrical"
+				(path "/fb5c3fc8-0716-4f8d-bffb-d0702b025ae2"
+					(page "4")
+				)
+			)
+		)
+	)
+	(sheet
+		(at -3.81 -121.92)
+		(size 163.83 116.84)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "e11da5a1-efd4-4901-8c7f-8c65479ecb2f")
+		(property "Sheetname" "RelaySafetyBox"
+			(at -3.81 -122.6316 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "RelaySafetyBox.kicad_sch"
+			(at -3.81 -4.4954 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "BuggyElectrical"
+				(path "/fb5c3fc8-0716-4f8d-bffb-d0702b025ae2"
+					(page "5")
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)
