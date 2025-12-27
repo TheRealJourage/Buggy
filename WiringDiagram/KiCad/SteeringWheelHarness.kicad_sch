@@ -4859,7 +4859,7 @@
 			)
 		)
 		(pin "3"
-			(uuid "cf8b33ae-ac74-4a4d-af1b-0ae63026cb8d")
+			(uuid "cf8b33ae-ac74-4a4d-af1b-0ae63026cb8e")
 		)
 		(pin "2"
 			(uuid "66d60423-57c8-4b26-9e51-99c3b0734210")
@@ -4868,7 +4868,7 @@
 			(uuid "29e7257f-26aa-4862-b87b-6b5114d71aaf")
 		)
 		(pin "4"
-			(uuid "adbe1ebd-4487-4038-b621-3b2f3ec01c4d")
+			(uuid "adbe1ebd-4487-4038-b621-3b2f3ec01c4e")
 		)
 		(instances
 			(project ""

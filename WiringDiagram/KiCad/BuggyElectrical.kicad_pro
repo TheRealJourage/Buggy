@@ -442,6 +442,18 @@
     [
       "9fe9d354-c0d7-4172-b452-71395374b242",
       "SteeringWheelHarness"
+    ],
+    [
+      "4d1470d1-cf0c-4cfb-a93d-6a376ab15676",
+      "RearWiringHarnessTop"
+    ],
+    [
+      "c2a4259e-1af8-402e-99c4-d0b0fc7a407f",
+      "AHKHarness"
+    ],
+    [
+      "e11da5a1-efd4-4901-8c7f-8c65479ecb2f",
+      "RelaySafetyBox"
     ]
   ],
   "text_variables": {}
