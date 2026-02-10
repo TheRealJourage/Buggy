@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(del \"c:\\\\Users\\\\ft-kr\\\\Documents\\\\PlatformIO\\\\Projects\\\\bno08x_test\\\\src\\\\i2c_scanner.cpp\")"
+    ]
+  }
+}
