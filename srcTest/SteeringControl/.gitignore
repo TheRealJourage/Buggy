@@ -1,0 +1,45 @@
+# PlatformIO build files
+.pio/
+.vscode/.browse.c_cpp.db*
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+.vscode/ipch
+
+# Compiled files
+*.bin
+*.hex
+*.elf
+*.eep
+*.map
+*.lst
+*.sym
+*.lss
+*.o
+*.d
+
+# IDE files
+.vscode/
+*.code-workspace
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Python (if using extra scripts)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Documentation build
+docs/_build/
