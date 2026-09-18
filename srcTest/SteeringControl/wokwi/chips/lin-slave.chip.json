@@ -1,0 +1,10 @@
+{
+  "name": "LIN Slave (model)",
+  "author": "Buggy",
+  "pins": ["TX", "RX", "CS", "GND"],
+  "controls": [
+    { "id": "buttons", "label": "Buttons (bit 0-6)", "type": "range", "min": 0, "max": 127, "step": 1 },
+    { "id": "pot1", "label": "POT1 (0-4095)", "type": "range", "min": 0, "max": 4095, "step": 1 },
+    { "id": "pot2", "label": "POT2 (0-4095)", "type": "range", "min": 0, "max": 4095, "step": 1 }
+  ]
+}

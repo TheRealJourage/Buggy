@@ -1,0 +1,5 @@
+{
+  "name": "LIN Master (model)",
+  "author": "Buggy",
+  "pins": ["TX", "RX", "CS", "GND"]
+}

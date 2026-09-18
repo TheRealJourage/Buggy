@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "author": "Buggy",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-pi-pico", "id": "pico", "top": 0, "left": 0, "attrs": {} },
+
+    { "type": "chip-mcp2003", "id": "lin1", "top": 330, "left": 140, "attrs": { "vbb": "12", "node": "1" } },
+    { "type": "wokwi-resistor", "id": "r_rxd1", "top": 280, "left": 40, "rotate": 90, "attrs": { "value": "4700" } },
+
+    { "type": "chip-mcp2003", "id": "lin2", "top": 330, "left": 480, "attrs": { "vbb": "12", "node": "2" } },
+    { "type": "wokwi-resistor", "id": "r_rxd2", "top": 280, "left": 420, "rotate": 90, "attrs": { "value": "4700" } },
+    { "type": "wokwi-vcc", "id": "vcc_5v", "top": 240, "left": 440, "attrs": {} },
+    { "type": "chip-lin-master", "id": "master", "top": 330, "left": 660, "attrs": {} },
+    { "type": "wokwi-resistor", "id": "r_lin_master", "top": 430, "left": 330, "rotate": 90, "attrs": { "value": "1000" } },
+    { "type": "wokwi-vcc", "id": "vbb_rail", "top": 380, "left": 360, "attrs": {} },
+
+    { "type": "wokwi-pushbutton", "id": "btn1", "top": -130, "left": 150, "attrs": { "color": "red", "label": "B1 GP6" } },
+    { "type": "wokwi-pushbutton", "id": "btn2", "top": -130, "left": 230, "attrs": { "color": "red", "label": "B2 GP7" } },
+    { "type": "wokwi-pushbutton", "id": "btn3", "top": -130, "left": 310, "attrs": { "color": "red", "label": "B3 GP8" } },
+    { "type": "wokwi-pushbutton", "id": "btn4", "top": -130, "left": 390, "attrs": { "color": "blue", "label": "B4 GP9" } },
+    { "type": "wokwi-pushbutton", "id": "btn5", "top": -60, "left": 150, "attrs": { "color": "blue", "label": "B5 GP10" } },
+    { "type": "wokwi-pushbutton", "id": "btn6", "top": -60, "left": 230, "attrs": { "color": "green", "label": "B6 GP11" } },
+    { "type": "wokwi-pushbutton", "id": "btn7", "top": -60, "left": 310, "attrs": { "color": "green", "label": "B7 GP12" } },
+
+    { "type": "wokwi-potentiometer", "id": "pot1", "top": 60, "left": 200, "attrs": {} },
+    { "type": "wokwi-potentiometer", "id": "pot2", "top": 60, "left": 300, "attrs": {} },
+
+    { "type": "wokwi-gnd", "id": "gnd1", "top": 480, "left": 220, "attrs": {} },
+    { "type": "wokwi-gnd", "id": "gnd2", "top": 480, "left": 580, "attrs": {} },
+    { "type": "wokwi-gnd", "id": "gnd3", "top": -150, "left": 480, "attrs": {} }
+  ],
+  "connections": [
+    [ "pico:GP0", "lin1:TXD", "green", [] ],
+    [ "pico:GP1", "lin1:RXD", "blue", [] ],
+    [ "lin1:RXD", "r_rxd1:2", "blue", [] ],
+    [ "r_rxd1:1", "pico:3V3", "red", [] ],
+    [ "pico:GP2", "lin1:CS", "orange", [] ],
+    [ "pico:GND.8", "lin1:VSS", "black", [] ],
+    [ "lin1:VSS", "gnd1:GND", "black", [] ],
+    [ "lin1:VBB", "vbb_rail:VCC", "red", [] ],
+
+    [ "lin1:LBUS", "lin2:LBUS", "yellow", [] ],
+    [ "lin2:LBUS", "r_lin_master:2", "yellow", [] ],
+    [ "r_lin_master:1", "vbb_rail:VCC", "red", [] ],
+
+    [ "master:TX", "lin2:TXD", "green", [] ],
+    [ "master:RX", "lin2:RXD", "blue", [] ],
+    [ "lin2:RXD", "r_rxd2:2", "blue", [] ],
+    [ "r_rxd2:1", "vcc_5v:VCC", "red", [] ],
+    [ "master:CS", "lin2:CS", "orange", [] ],
+    [ "master:GND", "gnd2:GND", "black", [] ],
+    [ "lin2:VSS", "gnd2:GND", "black", [] ],
+    [ "lin2:VBB", "vbb_rail:VCC", "red", [] ],
+
+    [ "pico:GP6", "btn1:1.l", "violet", [] ],
+    [ "pico:GP7", "btn2:1.l", "violet", [] ],
+    [ "pico:GP8", "btn3:1.l", "violet", [] ],
+    [ "pico:GP9", "btn4:1.l", "violet", [] ],
+    [ "pico:GP10", "btn5:1.l", "violet", [] ],
+    [ "pico:GP11", "btn6:1.l", "violet", [] ],
+    [ "pico:GP12", "btn7:1.l", "violet", [] ],
+    [ "btn1:2.r", "gnd3:GND", "black", [] ],
+    [ "btn2:2.r", "gnd3:GND", "black", [] ],
+    [ "btn3:2.r", "gnd3:GND", "black", [] ],
+    [ "btn4:2.r", "gnd3:GND", "black", [] ],
+    [ "btn5:2.r", "gnd3:GND", "black", [] ],
+    [ "btn6:2.r", "gnd3:GND", "black", [] ],
+    [ "btn7:2.r", "gnd3:GND", "black", [] ],
+
+    [ "pot1:SIG", "pico:GP26", "purple", [] ],
+    [ "pot1:VCC", "pico:3V3", "red", [] ],
+    [ "pot1:GND", "pico:GND.6", "black", [] ],
+    [ "pot2:SIG", "pico:GP27", "purple", [] ],
+    [ "pot2:VCC", "pico:3V3", "red", [] ],
+    [ "pot2:GND", "pico:GND.6", "black", [] ]
+  ],
+  "dependencies": {}
+}
