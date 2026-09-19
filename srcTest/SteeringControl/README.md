@@ -206,9 +206,14 @@ pio run -e uno_master  -t upload    # master/lin_bus_master.ino
 - RP2040 not detected → hold BOOTSEL while plugging in USB.
 - Uno upload fails → disconnect MCP2003 from D0/D1 first.
 
-> **Current state of the sketches:** `slave/` holds a GPIO/UART diagnostic and `master/` an LED input test.
-> The full LIN slave/master are in commit `65c6823`:
-> `git show 65c6823:srcTest/SteeringControl/steering_wheel_controller.ino`
+| Environment | Folder | Purpose |
+|-------------|--------|---------|
+| `rp2040_slave` | `slave/` | LIN slave firmware v3.0 |
+| `uno_master` | `master/` | LIN master firmware v3.0 |
+| `rp2040_bus_test` | `test_rp2040/` | Wiring test: echo self-test, counts bytes from the Uno (USB serial) |
+| `uno_bus_test` | `test_uno/` | Wiring test: D7→GND sends 0x55 + checks echo, LEDs show bytes from the RP2040 |
+
+The former GPIO/UART diagnostic and LED input test sketches are in commit `1ccbb05` and earlier.
 
 ---
 
@@ -232,18 +237,26 @@ pio run -e uno_master  -t upload    # master/lin_bus_master.ino
 
 ---
 
-## Known Firmware Issues
+## Firmware Fixes (v3.0)
 
-Found by code review of commit `65c6823`, to be confirmed in simulation:
+Issues found by code review of commit `65c6823` and fixed in `master/` and `slave/` v3.0:
 
-1. **Master reads its own echo.** RXD mirrors the bus, so after sending `0x55 0x3C` the master's RX buffer contains
-   those two bytes before the slave's response. `requestSlaveData()` reads them as response bytes 0–1 → checksum fails
-   every frame. Fix: discard the echoed header bytes before reading the response.
-2. **Slave blocks for 100ms after each response** (`delay(LED_BLINK_TIME)`), equal to the master's poll interval,
-   while the master only waits 20ms. Expect roughly every second request to time out. Fix: non-blocking LED.
-3. **Status LED on GPIO25** does not exist on the RP2040-Tiny (see Wiring).
-4. The slave also receives the echo of its own 6-byte response; harmless unless a data byte happens to be `0x55`
-   followed by `0x3C`.
+1. **Master read its own echo.** RXD mirrors the bus, so after sending `0x55 0x3C` the master's RX buffer contained
+   those two bytes before the slave's response → checksum failed every frame.
+   *Fix:* `requestSlaveData()` reads and checks the 2 echo bytes, then the 6 response bytes.
+2. **Slave blocked for 100ms after each response** (`delay(LED_BLINK_TIME)`), equal to the master's poll interval,
+   while the master only waits 20ms → roughly every second request timed out.
+   *Fix:* non-blocking status LED (`updateStatusLED()`).
+3. **Slave frame detection dropped the SYNC byte.** The "break gap" was measured when new bytes had already
+   arrived and then flushed the RX buffer. Arduino-Pico discards the break byte (framing error), so the first byte
+   after the 100ms pause is always `0x55` — and exactly that byte was flushed: the old slave never answered.
+   *Fix:* byte-stream state machine (`0x55` directly followed by `0x3C` = request).
+4. **Slave received the echo of its own response** (`0x55` in buttons + `0x3C` in ADC0_MSB would look like a request).
+   *Fix:* the 6 echo bytes are read back right after sending.
+5. **Status LED on GPIO25** does not exist on the RP2040-Tiny. *Fix:* GPIO14.
+6. **Master error LED blocked the poll loop for 300ms.** *Fix:* non-blocking blink.
+
+The original versions are in `wokwi/simA-master` and `wokwi/simB-slave` to reproduce the bugs in simulation.
 
 ---
 
@@ -253,8 +266,9 @@ Found by code review of commit `65c6823`, to be confirmed in simulation:
 |---------|--------------|
 | No response at all, RXD always HIGH | VBB < 5.5V (chip stuck in POR), or CS never driven HIGH |
 | LBUS ≈ 0V permanently | a resistor from LBUS to GND (old README wiring), short, or TXD held LOW |
-| Checksum error on every frame | echo not discarded (Known Issue 1) |
-| Every second frame times out | blocking delay in slave (Known Issue 2) |
+| Checksum error on every frame | firmware older than v3.0 (echo not discarded) |
+| Every second frame times out | firmware older than v3.0 (blocking delay in slave) |
+| Wiring unclear | flash `uno_bus_test` / `rp2040_bus_test` and follow the measurement guide |
 | Chip transmits nothing although VBB is fine | RXD pull-up missing → RXD monitoring fault → Transmitter-Off mode |
 | Uno upload fails | MCP2003 still connected to D0/D1 |
 | Pots noisy | 100nF wiper→GND missing, or pot connected to 5V instead of 3.3V |
