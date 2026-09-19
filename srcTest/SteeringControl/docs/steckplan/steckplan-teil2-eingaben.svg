@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Eingaben am RP2040-Tiny: 7 Taster, 2 Potis, Status-LED" xmlns="http://www.w3.org/2000/svg"><style>svg{  --bg: #e9eeec;  --panel: #fbfcfc;  --ink: #16201c;  --muted: #5d6c66;  --faint: #d5ddda;  --accent: #0f6b62;  --board-uno: #d8ebee;  --board-uno-s: #2f7d8c;  --board-tiny: #dde4f4; --board-tiny-s: #3b5aa3;  --board-psu: #f1e3e1;  --board-psu-s: #9b4a3f;  --chip: #262b2a; --chip-ink: #eef2f1;  --w12: #d1242f; --wg: #2a3531; --w5: #d9730d; --w33: #b3246b;  --wrx: #1d63c7; --wtx: #1b8a3a; --wcs: #7b3fc4; --wlin: #b07d00;  --wsig: #0f7a70; --wbtn: #8a5a14; --wpot: #0e7490;  --led-g: #36b24a; --led-r: #e0413a;  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;  --sans: "Segoe UI", system-ui, sans-serif;}.c12 { --c: var(--w12); } .cg { --c: var(--wg); } .c5 { --c: var(--w5); } .c33 { --c: var(--w33); }
+.crx { --c: var(--wrx); } .ctx { --c: var(--wtx); } .ccs { --c: var(--wcs); } .clin { --c: var(--wlin); }
+.csig { --c: var(--wsig); } .cbtn { --c: var(--wbtn); } .cpot { --c: var(--wpot); }
+.cg.num { color: var(--panel); }
+svg text { font-family: var(--mono); fill: var(--ink); }
+svg .w { fill: none; stroke: var(--c); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+svg .dot { fill: var(--c); }
+svg .badge circle { fill: var(--c); stroke: var(--panel); stroke-width: 2; }
+svg .badge text { font-size: 11px; font-weight: 600; fill: #fff; }
+svg .badge.cg text, svg .badge.clin text { fill: var(--panel); }
+svg .board { stroke-width: 2; }
+svg .uno { fill: var(--board-uno); stroke: var(--board-uno-s); }
+svg .tiny { fill: var(--board-tiny); stroke: var(--board-tiny-s); }
+svg .psu { fill: var(--board-psu); stroke: var(--board-psu-s); }
+svg .port { fill: var(--panel); stroke: var(--muted); stroke-width: 1.5; }
+svg .mcu { fill: var(--chip); }
+svg .mcu + text, svg .porttxt { font-size: 10px; fill: var(--muted); }
+svg .mcu + text { fill: var(--chip-ink); }
+svg .boardname { font-family: var(--sans); font-weight: 700; font-size: 14px; }
+svg .boardname.big { font-size: 18px; }
+svg .chipname { font-family: var(--sans); font-weight: 700; font-size: 14px; }
+svg .chipsub { font-family: var(--sans); font-size: 12px; fill: var(--muted); }
+svg .hdr { font-size: 10px; letter-spacing: .08em; fill: var(--muted); }
+svg .rail { font-size: 12px; font-weight: 600; fill: var(--muted); }
+svg .chip { fill: var(--chip); }
+svg .notch { fill: var(--panel); }
+svg .pin1 { fill: var(--chip-ink); }
+svg .pinname { font-size: 11px; fill: var(--chip-ink); }
+svg .lead { stroke: var(--muted); stroke-width: 3; }
+svg .pad { fill: var(--panel); stroke: var(--muted); stroke-width: 1.2; }
+svg .pad.used { fill: var(--ink); stroke: var(--ink); }
+svg .lbl { font-size: 10px; fill: var(--muted); }
+svg .lbl.used { fill: var(--ink); font-weight: 600; }
+svg .val { font-size: 11px; fill: var(--ink); }
+svg .val.strong { font-weight: 600; font-family: var(--sans); font-size: 12px; }
+svg .part { fill: var(--panel); stroke: var(--ink); stroke-width: 1.8; }
+svg .cut { fill: var(--panel); }
+svg .plate { stroke: var(--ink); stroke-width: 2.4; }
+svg .dio { fill: var(--ink); }
+svg .dio.led-g { fill: var(--led-g); }
+svg .dio.led-r { fill: var(--led-r); }
+svg .rays { stroke: var(--ink); stroke-width: 1.3; fill: none; }
+svg .term { fill: var(--panel); stroke: var(--ink); stroke-width: 1.5; }
+svg .term.plus { stroke: var(--w12); stroke-width: 2.5; }
+svg .term.minus { stroke: var(--wg); stroke-width: 2.5; }
+svg .termtxt { font-size: 11px; font-weight: 600; }
+svg .arrowhead { fill: var(--ink); }
+svg .ncx { stroke: var(--w12); stroke-width: 2.4; }
+svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect width="960" height="540" fill="#fbfcfc"/><rect x="400" y="120" width="160" height="250" rx="10" class="board tiny"/><rect x="448" y="114" width="64" height="18" rx="2" class="port"/><text x="480" y="127" class="porttxt" text-anchor="middle">FPC</text><rect x="452" y="200" width="56" height="56" rx="3" class="mcu"/><text x="480" y="232" class="porttxt" text-anchor="middle">RP2040</text><text x="480" y="106" class="boardname" text-anchor="middle">RP2040-Tiny</text>
+<text x="630" y="72" class="rail" text-anchor="middle">GND (vom GND-Pin des Tiny)</text><path d="M400,170 L380,170 L380,80 L100,80 L100,470" class="w cg"/>
+<path d="M380,80 L880,80 L880,494" class="w cg"/>
+<path d="M560,270 L620,270 L620,150 L880,150" class="w cbtn"/>
+<path d="M560,290 L640,290 L640,200 L880,200" class="w cbtn"/>
+<path d="M560,310 L660,310 L660,250 L880,250" class="w cbtn"/>
+<path d="M560,330 L680,330 L680,300 L880,300" class="w cbtn"/>
+<path d="M515,370 L515,410 L880,410" class="w cbtn"/>
+<path d="M490,370 L490,452 L880,452" class="w cbtn"/>
+<path d="M465,370 L465,494 L880,494" class="w cbtn"/>
+<path d="M400,190 L300,190 L300,210 L150,210 L150,250" class="w c33"/>
+<path d="M230,210 L230,250" class="w c33"/>
+<path d="M150,310 L150,400 L100,400" class="w cg"/>
+<path d="M230,310 L230,344 A6,6 0 0 1 230,356 L230,400 L150,400" class="w cg"/>
+<path d="M165,280 L190,280 L190,350 L290,350 L290,270 L400,270" class="w cpot"/>
+<path d="M245,280 L270,280 L270,250 L400,250" class="w cpot"/>
+<path d="M400,310 L340,310 L340,470 L100,470" class="w csig"/><rect x="555.5" y="145.5" width="9" height="9" class="pad"/>
+<text x="551" y="154" class="lbl" text-anchor="end">GP0</text>
+<rect x="555.5" y="165.5" width="9" height="9" class="pad"/>
+<text x="551" y="174" class="lbl" text-anchor="end">GP1</text>
+<rect x="555.5" y="185.5" width="9" height="9" class="pad"/>
+<text x="551" y="194" class="lbl" text-anchor="end">GP2</text>
+<rect x="555.5" y="205.5" width="9" height="9" class="pad"/>
+<text x="551" y="214" class="lbl" text-anchor="end">GP3</text>
+<rect x="555.5" y="225.5" width="9" height="9" class="pad"/>
+<text x="551" y="234" class="lbl" text-anchor="end">GP4</text>
+<rect x="555.5" y="245.5" width="9" height="9" class="pad"/>
+<text x="551" y="254" class="lbl" text-anchor="end">GP5</text>
+<rect x="555.5" y="265.5" width="9" height="9" class="pad used"/>
+<text x="551" y="274" class="lbl used" text-anchor="end">GP6</text>
+<rect x="555.5" y="285.5" width="9" height="9" class="pad used"/>
+<text x="551" y="294" class="lbl used" text-anchor="end">GP7</text>
+<rect x="555.5" y="305.5" width="9" height="9" class="pad used"/>
+<text x="551" y="314" class="lbl used" text-anchor="end">GP8</text>
+<rect x="555.5" y="325.5" width="9" height="9" class="pad used"/>
+<text x="551" y="334" class="lbl used" text-anchor="end">GP9</text>
+<rect x="395.5" y="145.5" width="9" height="9" class="pad"/>
+<text x="409" y="154" class="lbl" text-anchor="start">5V</text>
+<rect x="395.5" y="165.5" width="9" height="9" class="pad used"/>
+<text x="409" y="174" class="lbl used" text-anchor="start">GND</text>
+<rect x="395.5" y="185.5" width="9" height="9" class="pad used"/>
+<text x="409" y="194" class="lbl used" text-anchor="start">3V3</text>
+<rect x="395.5" y="205.5" width="9" height="9" class="pad"/>
+<text x="409" y="214" class="lbl" text-anchor="start">GP29</text>
+<rect x="395.5" y="225.5" width="9" height="9" class="pad"/>
+<text x="409" y="234" class="lbl" text-anchor="start">GP28</text>
+<rect x="395.5" y="245.5" width="9" height="9" class="pad used"/>
+<text x="409" y="254" class="lbl used" text-anchor="start">GP27</text>
+<rect x="395.5" y="265.5" width="9" height="9" class="pad used"/>
+<text x="409" y="274" class="lbl used" text-anchor="start">GP26</text>
+<rect x="395.5" y="285.5" width="9" height="9" class="pad"/>
+<text x="409" y="294" class="lbl" text-anchor="start">GP15</text>
+<rect x="395.5" y="305.5" width="9" height="9" class="pad used"/>
+<text x="409" y="314" class="lbl used" text-anchor="start">GP14</text>
+<rect x="435.5" y="365.5" width="9" height="9" class="pad"/>
+<text x="440" y="360" class="lbl" text-anchor="middle">13</text>
+<rect x="460.5" y="365.5" width="9" height="9" class="pad used"/>
+<text x="465" y="360" class="lbl used" text-anchor="middle">12</text>
+<rect x="485.5" y="365.5" width="9" height="9" class="pad used"/>
+<text x="490" y="360" class="lbl used" text-anchor="middle">11</text>
+<rect x="510.5" y="365.5" width="9" height="9" class="pad used"/>
+<text x="515" y="360" class="lbl used" text-anchor="middle">10</text>
+<rect x="744" y="136" width="32" height="20" class="cut"/>
+<circle cx="746" cy="150" r="2.5" class="term"/><circle cx="774" cy="150" r="2.5" class="term"/><line x1="746" y1="142" x2="774" y2="142" class="plate"/><line x1="760" y1="142" x2="760" y2="135" class="plate"/><line x1="755" y1="135" x2="765" y2="135" class="plate"/>
+<text x="760" y="170" class="val" text-anchor="middle">Taster 1</text>
+<rect x="744" y="186" width="32" height="20" class="cut"/>
+<circle cx="746" cy="200" r="2.5" class="term"/><circle cx="774" cy="200" r="2.5" class="term"/><line x1="746" y1="192" x2="774" y2="192" class="plate"/><line x1="760" y1="192" x2="760" y2="185" class="plate"/><line x1="755" y1="185" x2="765" y2="185" class="plate"/>
+<text x="760" y="220" class="val" text-anchor="middle">Taster 2</text>
+<rect x="744" y="236" width="32" height="20" class="cut"/>
+<circle cx="746" cy="250" r="2.5" class="term"/><circle cx="774" cy="250" r="2.5" class="term"/><line x1="746" y1="242" x2="774" y2="242" class="plate"/><line x1="760" y1="242" x2="760" y2="235" class="plate"/><line x1="755" y1="235" x2="765" y2="235" class="plate"/>
+<text x="760" y="270" class="val" text-anchor="middle">Taster 3</text>
+<rect x="744" y="286" width="32" height="20" class="cut"/>
+<circle cx="746" cy="300" r="2.5" class="term"/><circle cx="774" cy="300" r="2.5" class="term"/><line x1="746" y1="292" x2="774" y2="292" class="plate"/><line x1="760" y1="292" x2="760" y2="285" class="plate"/><line x1="755" y1="285" x2="765" y2="285" class="plate"/>
+<text x="760" y="320" class="val" text-anchor="middle">Taster 4</text>
+<rect x="744" y="396" width="32" height="20" class="cut"/>
+<circle cx="746" cy="410" r="2.5" class="term"/><circle cx="774" cy="410" r="2.5" class="term"/><line x1="746" y1="402" x2="774" y2="402" class="plate"/><line x1="760" y1="402" x2="760" y2="395" class="plate"/><line x1="755" y1="395" x2="765" y2="395" class="plate"/>
+<text x="760" y="430" class="val" text-anchor="middle">Taster 5</text>
+<rect x="744" y="438" width="32" height="20" class="cut"/>
+<circle cx="746" cy="452" r="2.5" class="term"/><circle cx="774" cy="452" r="2.5" class="term"/><line x1="746" y1="444" x2="774" y2="444" class="plate"/><line x1="760" y1="444" x2="760" y2="437" class="plate"/><line x1="755" y1="437" x2="765" y2="437" class="plate"/>
+<text x="760" y="472" class="val" text-anchor="middle">Taster 6</text>
+<rect x="744" y="480" width="32" height="20" class="cut"/>
+<circle cx="746" cy="494" r="2.5" class="term"/><circle cx="774" cy="494" r="2.5" class="term"/><line x1="746" y1="486" x2="774" y2="486" class="plate"/><line x1="760" y1="486" x2="760" y2="479" class="plate"/><line x1="755" y1="479" x2="765" y2="479" class="plate"/>
+<text x="760" y="514" class="val" text-anchor="middle">Taster 7</text>
+<rect x="143" y="250" width="14" height="60" class="part"/><polygon points="157,280.0 165,275.0 165,285.0" class="arrowhead"/>
+<text x="140" y="244" class="val" text-anchor="end">POT 1</text>
+<rect x="223" y="250" width="14" height="60" class="part"/><polygon points="237,280.0 245,275.0 245,285.0" class="arrowhead"/>
+<text x="220" y="244" class="val" text-anchor="end">POT 2</text>
+<rect x="271.0" y="464.0" width="38" height="12" class="part"/>
+<text x="290" y="458" class="val" text-anchor="middle">220 Ω</text>
+<rect x="191" y="461" width="18" height="18" class="cut"/>
+<polygon points="207,462 207,478 194,470" class="dio led-g"/><line x1="193" y1="462" x2="193" y2="478" class="plate"/><path d="M198,459 l5,-7 M204,459 l5,-7" class="rays"/>
+<text x="200" y="492" class="val" text-anchor="middle">Status-LED</text><circle cx="380" cy="80" r="4" class="dot cg"/>
+<circle cx="880" cy="150" r="4" class="dot cg"/>
+<circle cx="880" cy="200" r="4" class="dot cg"/>
+<circle cx="880" cy="250" r="4" class="dot cg"/>
+<circle cx="880" cy="300" r="4" class="dot cg"/>
+<circle cx="880" cy="410" r="4" class="dot cg"/>
+<circle cx="880" cy="452" r="4" class="dot cg"/>
+<circle cx="230" cy="210" r="4" class="dot c33"/>
+<circle cx="100" cy="400" r="4" class="dot cg"/>
+<circle cx="150" cy="400" r="4" class="dot cg"/><g class="badge cg"><circle cx="240" cy="80" r="10"/><text x="240" y="84" text-anchor="middle">G</text></g>
+<g class="badge cbtn"><circle cx="620" cy="210.0" r="10"/><text x="620" y="214.0" text-anchor="middle">T1</text></g>
+<g class="badge cbtn"><circle cx="640" cy="245.0" r="10"/><text x="640" y="249.0" text-anchor="middle">T2</text></g>
+<g class="badge cbtn"><circle cx="660" cy="280.0" r="10"/><text x="660" y="284.0" text-anchor="middle">T3</text></g>
+<g class="badge cbtn"><circle cx="680" cy="315.0" r="10"/><text x="680" y="319.0" text-anchor="middle">T4</text></g>
+<g class="badge cbtn"><circle cx="640" cy="410" r="10"/><text x="640" y="414" text-anchor="middle">T5</text></g>
+<g class="badge cbtn"><circle cx="640" cy="452" r="10"/><text x="640" y="456" text-anchor="middle">T6</text></g>
+<g class="badge cbtn"><circle cx="640" cy="494" r="10"/><text x="640" y="498" text-anchor="middle">T7</text></g>
+<g class="badge c33"><circle cx="340" cy="190" r="10"/><text x="340" y="194" text-anchor="middle">V</text></g>
+<g class="badge cpot"><circle cx="330" cy="270" r="10"/><text x="330" y="274" text-anchor="middle">P1</text></g>
+<g class="badge cpot"><circle cx="330" cy="250" r="10"/><text x="330" y="254" text-anchor="middle">P2</text></g>
+<g class="badge csig"><circle cx="340" cy="420" r="10"/><text x="340" y="424" text-anchor="middle">L</text></g></svg>
