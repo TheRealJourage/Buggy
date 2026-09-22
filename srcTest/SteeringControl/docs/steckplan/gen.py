@@ -56,20 +56,21 @@ class Fig:
 # ─── symbols (drawn over wires, bg-filled) ─────────────────────────────────────
 BAND = {"schwarz": "#111111", "braun": "#7a4a1f", "rot": "#d42a1e", "gelb": "#f2c200",
         "violett": "#7d3cc4", "gold": "#c9a227"}
-CODE4 = {"220 Ω": ("rot", "rot", "braun", "gold"),
-         "1 kΩ": ("braun", "schwarz", "rot", "gold"),
-         "4,7 kΩ": ("gelb", "violett", "rot", "gold")}
+# 5-band metal film (blue body), the parts actually in the kit
+CODE5 = {"220 Ω": ("rot", "rot", "schwarz", "schwarz", "braun"),
+         "1 kΩ": ("braun", "schwarz", "schwarz", "braun", "braun"),
+         "4,7 kΩ": ("gelb", "violett", "schwarz", "braun", "braun")}
 
 
 def resistor(f, x, y, vertical, value, label_side=1):
     w, h = (12, 38) if vertical else (38, 12)
     f.overlays.append(f'<rect x="{x - w / 2}" y="{y - h / 2}" width="{w}" height="{h}" rx="3" class="part rbody"/>')
-    # 4-band code, first band at the left/top end, tolerance band set apart
-    for off, name in zip((-13, -7, -1, 10), CODE4[value]):
+    # first band at the left/top end, tolerance band set apart
+    for off, name in zip((-13, -8, -3, 2, 11), CODE5[value]):
         if vertical:
-            f.overlays.append(f'<rect x="{x - w / 2 + 0.9}" y="{y + off - 1.6}" width="{w - 1.8}" height="3.2" fill="{BAND[name]}"/>')
+            f.overlays.append(f'<rect x="{x - w / 2 + 0.9}" y="{y + off - 1.4}" width="{w - 1.8}" height="2.8" fill="{BAND[name]}"/>')
         else:
-            f.overlays.append(f'<rect x="{x + off - 1.6}" y="{y - h / 2 + 0.9}" width="3.2" height="{h - 1.8}" fill="{BAND[name]}"/>')
+            f.overlays.append(f'<rect x="{x + off - 1.4}" y="{y - h / 2 + 0.9}" width="2.8" height="{h - 1.8}" fill="{BAND[name]}"/>')
     if vertical:
         f.overlays.append(f'<text x="{x + label_side * 12}" y="{y + 4}" class="val" text-anchor="{"start" if label_side > 0 else "end"}">{value}</text>')
     else:
