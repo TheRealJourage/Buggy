@@ -104,6 +104,9 @@ def diode_left(f, x, y, label, led_cls):
     f.overlays.append(f'<polygon points="{x + 7},{y - 8} {x + 7},{y + 8} {x - 6},{y}" class="dio {led_cls}"/>'
                       f'<line x1="{x - 7}" y1="{y - 8}" x2="{x - 7}" y2="{y + 8}" class="plate"/>'
                       f'<path d="M{x - 2},{y - 11} l5,-7 M{x + 4},{y - 11} l5,-7" class="rays"/>')
+    # leg length marks: long leg = anode (+), short leg = cathode (-)
+    f.overlays.append(f'<text x="{x + 11}" y="{y - 5}" class="pol" text-anchor="start">+lang</text>'
+                      f'<text x="{x - 11}" y="{y - 5}" class="pol" text-anchor="end">−kurz</text>')
     f.overlays.append(f'<text x="{x}" y="{y + 22}" class="val" text-anchor="middle">{label}</text>')
 
 

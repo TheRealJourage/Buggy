@@ -42,6 +42,7 @@ svg .plate { stroke: var(--ink); stroke-width: 2.4; }
 svg .dio { fill: var(--ink); }
 svg .dio.led-g { fill: var(--led-g); }
 svg .dio.led-r { fill: var(--led-r); }
+svg .pol { font-size: 9px; font-weight: 600; fill: var(--ink); }
 svg .rays { stroke: var(--ink); stroke-width: 1.3; fill: none; }
 svg .term { fill: var(--panel); stroke: var(--ink); stroke-width: 1.5; }
 svg .term.plus { stroke: var(--w12); stroke-width: 2.5; }
@@ -144,6 +145,7 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <text x="290" y="458" class="val" text-anchor="middle">220 Ω</text>
 <rect x="191" y="461" width="18" height="18" class="cut"/>
 <polygon points="207,462 207,478 194,470" class="dio led-g"/><line x1="193" y1="462" x2="193" y2="478" class="plate"/><path d="M198,459 l5,-7 M204,459 l5,-7" class="rays"/>
+<text x="211" y="465" class="pol" text-anchor="start">+lang</text><text x="189" y="465" class="pol" text-anchor="end">−kurz</text>
 <text x="200" y="492" class="val" text-anchor="middle">Status-LED</text><circle cx="380" cy="80" r="4" class="dot cg"/>
 <circle cx="880" cy="150" r="4" class="dot cg"/>
 <circle cx="880" cy="200" r="4" class="dot cg"/>

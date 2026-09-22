@@ -141,6 +141,7 @@ svg .plate { stroke: var(--ink); stroke-width: 2.4; }
 svg .dio { fill: var(--ink); }
 svg .dio.led-g { fill: var(--led-g); }
 svg .dio.led-r { fill: var(--led-r); }
+svg .pol { font-size: 9px; font-weight: 600; fill: var(--ink); }
 svg .rays { stroke: var(--ink); stroke-width: 1.3; fill: none; }
 svg .term { fill: var(--panel); stroke: var(--ink); stroke-width: 1.5; }
 svg .term.plus { stroke: var(--w12); stroke-width: 2.5; }
@@ -233,11 +234,11 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
         <tr><td class="check"><input type="checkbox" id="w7" aria-label="Kabel 7 gesteckt"></td><td class="n"><span class="num c5">7</span></td><td>#2 Pin 1 <b>RXD</b></td><td>4,7 kΩ<span class="rc" aria-hidden="true"><i class="b-gelb"></i><i class="b-violett"></i><i class="b-rot"></i><i class="b-gold tol"></i></span> → Uno <b>5V</b></td><td>RXD ist Open-Drain und braucht diesen Pull-up</td></tr>
         <tr><td class="check"><input type="checkbox" id="w8" aria-label="Kabel 8 gesteckt"></td><td class="n"><span class="num c12">8</span></td><td>+12-V-Schiene</td><td>#2 Pin 7 <b>VBB</b></td><td></td></tr>
         <tr><td class="check"><input type="checkbox" id="w9" aria-label="Kabel 9 gesteckt"></td><td class="n"><span class="num cg">9</span></td><td>#2 Pin 5 <b>VSS</b></td><td>GND-Schiene</td><td></td></tr>
-        <tr><td class="check"><input type="checkbox" id="w10" aria-label="Bauteil 10 gesteckt"></td><td class="n"><span class="num cg">10</span></td><td>100 nF</td><td>#2 Pin 7 ↔ Pin 5</td><td>so nah wie möglich am Chip</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w11" aria-label="Bauteil 11 gesteckt"></td><td class="n"><span class="num c12">11</span></td><td>+12-V-Schiene → <b>1N4148</b> → <b>1 kΩ</b><span class="rc" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-gold tol"></i></span></td><td>#2 Pin 6 <b>LBUS</b></td><td>Diode: Ring (Kathode) zeigt zum Widerstand, weg von 12 V</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w12" aria-label="Bauteil 12 gesteckt"></td><td class="n"><span class="num clin">12</span></td><td>220 pF</td><td>#2 Pin 6 ↔ GND</td><td>ersetzt die alten 100 nF</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w23" aria-label="Kabel 23 gesteckt"></td><td class="n"><span class="num csig">23</span></td><td>Uno <b>D12</b></td><td>220 Ω<span class="rc" aria-hidden="true"><i class="b-rot"></i><i class="b-rot"></i><i class="b-braun"></i><i class="b-gold tol"></i></span> → LED grün → Uno <b>GND</b> (oben)</td><td>Status: flackert, wenn Frames ankommen</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w24" aria-label="Kabel 24 gesteckt"></td><td class="n"><span class="num csig">24</span></td><td>Uno <b>D13</b></td><td>220 Ω<span class="rc" aria-hidden="true"><i class="b-rot"></i><i class="b-rot"></i><i class="b-braun"></i><i class="b-gold tol"></i></span> → LED rot → Uno <b>GND</b> (oben)</td><td>Fehler: 3× kurz pro Fehler</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w10" aria-label="Bauteil 10 gesteckt"></td><td class="n"><span class="num cg">10</span></td><td>100 nF</td><td>#2 Pin 7 ↔ Pin 5</td><td>so nah wie möglich am Chip. Keramik: <b>Richtung egal</b></td></tr>
+        <tr><td class="check"><input type="checkbox" id="w11" aria-label="Bauteil 11 gesteckt"></td><td class="n"><span class="num c12">11</span></td><td>+12-V-Schiene → <b>1N4148</b> → <b>1 kΩ</b><span class="rc" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-gold tol"></i></span></td><td>#2 Pin 6 <b>LBUS</b></td><td>Diode: <b>Ring (Kathode) zeigt zum Widerstand</b>, weg von 12 V. Widerstand: Richtung egal</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w12" aria-label="Bauteil 12 gesteckt"></td><td class="n"><span class="num clin">12</span></td><td>220 pF</td><td>#2 Pin 6 ↔ GND</td><td>ersetzt die alten 100 nF. Keramik: <b>Richtung egal</b></td></tr>
+        <tr><td class="check"><input type="checkbox" id="w23" aria-label="Kabel 23 gesteckt"></td><td class="n"><span class="num csig">23</span></td><td>Uno <b>D12</b></td><td>220 Ω<span class="rc" aria-hidden="true"><i class="b-rot"></i><i class="b-rot"></i><i class="b-braun"></i><i class="b-gold tol"></i></span> → LED grün → Uno <b>GND</b> (oben)</td><td>Status: flackert, wenn Frames ankommen. LED: <b>langes Bein (+)</b> zum Widerstand, <b>kurzes Bein (−)</b> bzw. abgeflachte Seite nach GND</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w24" aria-label="Kabel 24 gesteckt"></td><td class="n"><span class="num csig">24</span></td><td>Uno <b>D13</b></td><td>220 Ω<span class="rc" aria-hidden="true"><i class="b-rot"></i><i class="b-rot"></i><i class="b-braun"></i><i class="b-gold tol"></i></span> → LED rot → Uno <b>GND</b> (oben)</td><td>Fehler: 3× kurz pro Fehler. LED: <b>langes Bein (+)</b> zum Widerstand, <b>kurzes Bein (−)</b> bzw. abgeflachte Seite nach GND</td></tr>
         <tr class="group"><td colspan="5">Bus</td></tr>
         <tr><td class="check"><input type="checkbox" id="w13" aria-label="Kabel 13 gesteckt"></td><td class="n"><span class="num clin">13</span></td><td>#2 Pin 6 <b>LBUS</b></td><td>#1 Pin 6 <b>LBUS</b></td><td>der LIN-Draht</td></tr>
         <tr class="group"><td colspan="5">MCP2003 #1 · Slave-Seite (Tiny)</td></tr>
@@ -247,8 +248,8 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
         <tr><td class="check"><input type="checkbox" id="w21" aria-label="Kabel 21 gesteckt"></td><td class="n"><span class="num c33">21</span></td><td>#1 Pin 1 <b>RXD</b></td><td>4,7 kΩ<span class="rc" aria-hidden="true"><i class="b-gelb"></i><i class="b-violett"></i><i class="b-rot"></i><i class="b-gold tol"></i></span> → Tiny <b>3V3</b></td><td>an 3,3 V, <b>nicht</b> an 5 V</td></tr>
         <tr><td class="check"><input type="checkbox" id="w14" aria-label="Kabel 14 gesteckt"></td><td class="n"><span class="num c12">14</span></td><td>+12-V-Schiene</td><td>#1 Pin 7 <b>VBB</b></td><td></td></tr>
         <tr><td class="check"><input type="checkbox" id="w15" aria-label="Kabel 15 gesteckt"></td><td class="n"><span class="num cg">15</span></td><td>#1 Pin 5 <b>VSS</b></td><td>GND-Schiene</td><td></td></tr>
-        <tr><td class="check"><input type="checkbox" id="w16" aria-label="Bauteil 16 gesteckt"></td><td class="n"><span class="num cg">16</span></td><td>100 nF</td><td>#1 Pin 7 ↔ Pin 5</td><td>so nah wie möglich am Chip</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w17" aria-label="Bauteil 17 gesteckt"></td><td class="n"><span class="num clin">17</span></td><td>220 pF</td><td>#1 Pin 6 ↔ GND</td><td>kein Pull-up auf der Slave-Seite</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w16" aria-label="Bauteil 16 gesteckt"></td><td class="n"><span class="num cg">16</span></td><td>100 nF</td><td>#1 Pin 7 ↔ Pin 5</td><td>so nah wie möglich am Chip. Keramik: <b>Richtung egal</b></td></tr>
+        <tr><td class="check"><input type="checkbox" id="w17" aria-label="Bauteil 17 gesteckt"></td><td class="n"><span class="num clin">17</span></td><td>220 pF</td><td>#1 Pin 6 ↔ GND</td><td>kein Pull-up auf der Slave-Seite. Keramik: <b>Richtung egal</b></td></tr>
       </tbody>
     </table>
     </div>
@@ -279,7 +280,7 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
         <tr><td class="check"><input type="checkbox" id="p2" aria-label="Poti 2 gesteckt"></td><td class="n"><span class="num cpot">P2</span></td><td>POT 2 Schleifer (Mitte)</td><td>Tiny <b>GP27</b></td><td>Poti-Enden: 3,3 V und GND</td></tr>
         <tr><td class="check"><input type="checkbox" id="v" aria-label="3,3 V gesteckt"></td><td class="n"><span class="num c33">V</span></td><td>Tiny <b>3V3</b> (linke Kante, 3. Pin)</td><td>beide Poti-Enden oben</td><td></td></tr>
         <tr><td class="check"><input type="checkbox" id="g" aria-label="GND gesteckt"></td><td class="n"><span class="num cg">G</span></td><td>Tiny <b>GND</b> (linke Kante, 2. Pin)</td><td>alle Taster, Poti-Enden unten, LED</td><td></td></tr>
-        <tr><td class="check"><input type="checkbox" id="l" aria-label="LED gesteckt"></td><td class="n"><span class="num csig">L</span></td><td>Tiny <b>GP14</b> (linke Kante, unterster Pin)</td><td>220 Ω → LED → GND</td><td>blitzt 10×/s, wenn der Master anfragt</td></tr>
+        <tr><td class="check"><input type="checkbox" id="l" aria-label="LED gesteckt"></td><td class="n"><span class="num csig">L</span></td><td>Tiny <b>GP14</b> (linke Kante, unterster Pin)</td><td>220 Ω → LED → GND</td><td>blitzt 10×/s, wenn der Master anfragt. LED: <b>langes Bein (+)</b> zum Widerstand, <b>kurzes Bein (−)</b> bzw. abgeflachte Seite nach GND</td></tr>
       </tbody>
     </table>
     </div>
