@@ -16,7 +16,7 @@
   --chip: #262b2a; --chip-ink: #eef2f1;
   --w12: #d42a1e; --wg: #161616; --w5: #f07c00; --w33: #f07c00;
   --wrx: #1f5fd1; --wtx: #1f9d3a; --wcs: #ffffff; --wlin: #f2c200;
-  --wsig: #ffffff; --wbtn: #8a5a14; --wpot: #0e7490;
+  --wsig: #ffffff; --wbtn: #f2c200; --wpot: #1f9d3a;
   --casing: #7d8a85;
   --led-g: #36b24a; --led-r: #e0413a;
   --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
@@ -29,7 +29,7 @@
     --board-tiny: #182441; --board-tiny-s: #7894d6;
     --board-psu: #3a1f1c; --board-psu-s: #d08a7f;
     --chip: #3a4240; --chip-ink: #eef2f1;
-    --wbtn: #e0a458; --wpot: #67d4ea; --casing: #8f9c97;
+    --casing: #8f9c97;
   }
 }
 :root[data-theme="dark"] {
@@ -38,7 +38,7 @@
   --board-tiny: #182441; --board-tiny-s: #7894d6;
   --board-psu: #3a1f1c; --board-psu-s: #d08a7f;
   --chip: #3a4240; --chip-ink: #eef2f1;
-  --wbtn: #e0a458; --wpot: #67d4ea; --casing: #8f9c97;
+  --casing: #8f9c97;
 }
 
 body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--sans); }
@@ -92,7 +92,7 @@ a:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline
 .crx { --c: var(--wrx); } .ctx { --c: var(--wtx); } .ccs { --c: var(--wcs); } .clin { --c: var(--wlin); }
 .csig { --c: var(--wsig); } .cbtn { --c: var(--wbtn); } .cpot { --c: var(--wpot); }
 .num, .legend i { background: var(--c); box-shadow: inset 0 0 0 1px var(--casing); }
-.clin.num, .c5.num, .c33.num, .ccs.num, .csig.num { color: #161616; }
+.clin.num, .cbtn.num, .c5.num, .c33.num, .ccs.num, .csig.num { color: #161616; }
 .rc { display: inline-flex; align-items: center; gap: 3px; height: 16px; padding: 0 6px; margin-left: 6px; border-radius: 8px; background: #e6d3a8; border: 1px solid #8a7550; vertical-align: -3px; }
 .rc.metal { background: #9cc3e6; border-color: #4f7aa3; }
 .rc i { width: 5px; height: 14px; }
@@ -108,7 +108,7 @@ svg .w { fill: none; stroke: var(--c); stroke-width: 3; stroke-linejoin: round; 
 svg .dot { fill: var(--c); stroke: var(--casing); stroke-width: 1; }
 svg .badge circle { fill: var(--c); stroke: var(--casing); stroke-width: 1.5; }
 svg .badge text { font-size: 11px; font-weight: 600; fill: #fff; }
-svg .badge.clin text, svg .badge.c5 text, svg .badge.c33 text, svg .badge.ccs text, svg .badge.csig text { fill: #161616; }
+svg .badge.clin text, svg .badge.cbtn text, svg .badge.c5 text, svg .badge.c33 text, svg .badge.ccs text, svg .badge.csig text { fill: #161616; }
 svg .board { stroke-width: 2; }
 svg .uno { fill: var(--board-uno); stroke: var(--board-uno-s); }
 svg .tiny { fill: var(--board-tiny); stroke: var(--board-tiny-s); }
@@ -259,11 +259,11 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
   <section class="sheet">
     <h2>Teil 2 · Eingaben am RP2040-Tiny</h2>
     <div class="legend" aria-label="Farblegende Teil 2">
-      <span class="cbtn"><i></i>Taster → GPIO</span>
-      <span class="cpot"><i></i>Poti-Schleifer → ADC</span>
-      <span class="c33"><i></i>3,3 V</span>
-      <span class="cg"><i></i>GND</span>
-      <span class="csig"><i></i>Status-LED</span>
+      <span class="cbtn"><i></i>Taster → GPIO · gelb</span>
+      <span class="cpot"><i></i>Poti-Schleifer → ADC · grün</span>
+      <span class="c33"><i></i>3,3 V · orange</span>
+      <span class="cg"><i></i>GND · schwarz</span>
+      <span class="csig"><i></i>Status-LED · weiß</span>
     </div>
     <figure class="scroll small" style="margin:0">
       {{FIG2}}
