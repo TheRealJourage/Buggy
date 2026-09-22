@@ -4,6 +4,8 @@
 .csig { --c: var(--wsig); } .cbtn { --c: var(--wbtn); } .cpot { --c: var(--wpot); }
 .clin.num, .cbtn.num, .c5.num, .c33.num, .ccs.num, .csig.num { color: #161616; }
 svg text { font-family: var(--mono); fill: var(--ink); }
+svg .wc.later, svg .w.later { stroke-dasharray: 7 6; opacity: .45; }
+svg .badge.later { opacity: .45; }
 svg .wc { fill: none; stroke: var(--casing); stroke-width: 5; stroke-linejoin: round; stroke-linecap: round; }
 svg .w { fill: none; stroke: var(--c); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
 svg .dot { fill: var(--c); stroke: var(--casing); stroke-width: 1; }

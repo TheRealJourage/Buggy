@@ -44,7 +44,8 @@ class Fig:
                     for cy in cross:
                         d += f" L{x1},{cy - step * HOP} A{HOP},{HOP} 0 0 {1 if step > 0 else 0} {x1},{cy + step * HOP}"
                 d += f" L{x2},{y2}"
-            out.append(f'<path d="{d}" class="wc"/><path d="{d}" class="w {cls}"/>')
+            later = " later" if "later" in cls else ""
+            out.append(f'<path d="{d}" class="wc{later}"/><path d="{d}" class="w {cls}"/>')
         return "\n".join(out)
 
     def svg(self, vb, label, extra_top=""):
@@ -349,13 +350,14 @@ for i, (gp, by) in enumerate((("GP6", 150), ("GP7", 200), ("GP8", 250), ("GP9", 
     xv = 620 + i * 20
     f2.wire(f"b{i}", "cbtn", [(X0 + W, r[gp]), (xv, r[gp]), (xv, by), (GX, by)])
     button(f2, 760, by, f"Taster {i + 1}"); f2.dot(GX, by, "cg"); f2.badge(xv, by + (r[gp] - by) / 2, f"T{i + 1}", "cbtn")
-# buttons B5..B7 on GP10..GP12 (bottom edge)
+# buttons B5..B7 on GP10..GP12 (bottom edge) - left out for the first test
 for i, (gp, by) in enumerate((("GP10", 410), ("GP11", 452), ("GP12", 494))):
-    f2.wire(f"b{i + 4}", "cbtn", [(b[gp], Y0 + H), (b[gp], by), (GX, by)])
+    f2.wire(f"b{i + 4}", "cbtn later", [(b[gp], Y0 + H), (b[gp], by), (GX, by)])
     button(f2, 760, by, f"Taster {i + 5}")
     if i < 2:
         f2.dot(GX, by, "cg")
-    f2.badge(640, by, f"T{i + 5}", "cbtn")
+    f2.badge(640, by, f"T{i + 5}", "cbtn later")
+f2.overlays.append('<text x="585" y="530" class="val strong" text-anchor="middle">T5–T7 später · GP10–12 offen lassen</text>')
 # pots: 3V3 bus, GND bus, wipers
 f2.wire("3v3", "c33", [(X0, l["3V3"]), (300, l["3V3"]), (300, 210), (150, 210), (150, 250)])
 f2.wire("3v3", "c33", [(230, 210), (230, 250)]); f2.dot(230, 210, "c33"); f2.badge(340, l["3V3"], "V", "c33")

@@ -103,6 +103,8 @@ a:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline
 
 /* SVG */
 svg text { font-family: var(--mono); fill: var(--ink); }
+svg .wc.later, svg .w.later { stroke-dasharray: 7 6; opacity: .45; }
+svg .badge.later { opacity: .45; }
 svg .wc { fill: none; stroke: var(--casing); stroke-width: 5; stroke-linejoin: round; stroke-linecap: round; }
 svg .w { fill: none; stroke: var(--c); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
 svg .dot { fill: var(--c); stroke: var(--casing); stroke-width: 1; }
@@ -275,7 +277,7 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
       <thead><tr><th></th><th>Nr.</th><th>Von</th><th>Nach</th><th>Hinweis</th></tr></thead>
       <tbody>
         <tr><td class="check"><input type="checkbox" id="t1" aria-label="Taster 1 gesteckt"></td><td class="n"><span class="num cbtn">T1–T4</span></td><td>Tiny <b>GP6 · GP7 · GP8 · GP9</b> (rechte Kante, Pin 7–10)</td><td>Taster 1–4 → GND</td><td></td></tr>
-        <tr><td class="check"><input type="checkbox" id="t5" aria-label="Taster 5 bis 7 gesteckt"></td><td class="n"><span class="num cbtn">T5–T7</span></td><td>Tiny <b>GP10 · GP11 · GP12</b> (Unterkante)</td><td>Taster 5–7 → GND</td><td>Unterkante von rechts nach links: 10, 11, 12, 13</td></tr>
+        <tr><td class="check"><input type="checkbox" id="t5" aria-label="Taster 5 bis 7 gesteckt"></td><td class="n"><span class="num cbtn">T5–T7</span></td><td>Tiny <b>GP10 · GP11 · GP12</b> (Unterkante)</td><td>Taster 5–7 → GND</td><td><b>Erst mal weglassen</b>, GP10–12 offen lassen (nicht auf GND, sonst „dauernd gedrückt“). Unterkante von rechts nach links: 10, 11, 12, 13</td></tr>
         <tr><td class="check"><input type="checkbox" id="p1" aria-label="Poti 1 gesteckt"></td><td class="n"><span class="num cpot">P1</span></td><td>POT 1 Schleifer (Mitte)</td><td>Tiny <b>GP26</b></td><td>Poti-Enden: 3,3 V und GND</td></tr>
         <tr><td class="check"><input type="checkbox" id="p2" aria-label="Poti 2 gesteckt"></td><td class="n"><span class="num cpot">P2</span></td><td>POT 2 Schleifer (Mitte)</td><td>Tiny <b>GP27</b></td><td>Poti-Enden: 3,3 V und GND</td></tr>
         <tr><td class="check"><input type="checkbox" id="v" aria-label="3,3 V gesteckt"></td><td class="n"><span class="num c33">V</span></td><td>Tiny <b>3V3</b> (linke Kante, 3. Pin)</td><td>beide Poti-Enden oben</td><td></td></tr>

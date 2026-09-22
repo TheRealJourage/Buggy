@@ -104,6 +104,8 @@ a:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline
 
 /* SVG */
 svg text { font-family: var(--mono); fill: var(--ink); }
+svg .wc.later, svg .w.later { stroke-dasharray: 7 6; opacity: .45; }
+svg .badge.later { opacity: .45; }
 svg .wc { fill: none; stroke: var(--casing); stroke-width: 5; stroke-linejoin: round; stroke-linecap: round; }
 svg .w { fill: none; stroke: var(--c); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
 svg .dot { fill: var(--c); stroke: var(--casing); stroke-width: 1; }
@@ -548,9 +550,9 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
 <path d="M560,290 L640,290 L640,200 L880,200" class="wc"/><path d="M560,290 L640,290 L640,200 L880,200" class="w cbtn"/>
 <path d="M560,310 L660,310 L660,250 L880,250" class="wc"/><path d="M560,310 L660,310 L660,250 L880,250" class="w cbtn"/>
 <path d="M560,330 L680,330 L680,300 L880,300" class="wc"/><path d="M560,330 L680,330 L680,300 L880,300" class="w cbtn"/>
-<path d="M515,370 L515,410 L880,410" class="wc"/><path d="M515,370 L515,410 L880,410" class="w cbtn"/>
-<path d="M490,370 L490,452 L880,452" class="wc"/><path d="M490,370 L490,452 L880,452" class="w cbtn"/>
-<path d="M465,370 L465,494 L880,494" class="wc"/><path d="M465,370 L465,494 L880,494" class="w cbtn"/>
+<path d="M515,370 L515,410 L880,410" class="wc later"/><path d="M515,370 L515,410 L880,410" class="w cbtn later"/>
+<path d="M490,370 L490,452 L880,452" class="wc later"/><path d="M490,370 L490,452 L880,452" class="w cbtn later"/>
+<path d="M465,370 L465,494 L880,494" class="wc later"/><path d="M465,370 L465,494 L880,494" class="w cbtn later"/>
 <path d="M400,190 L300,190 L300,210 L150,210 L150,250" class="wc"/><path d="M400,190 L300,190 L300,210 L150,210 L150,250" class="w c33"/>
 <path d="M230,210 L230,250" class="wc"/><path d="M230,210 L230,250" class="w c33"/>
 <path d="M150,310 L150,400 L100,400" class="wc"/><path d="M150,310 L150,400 L100,400" class="w cg"/>
@@ -625,6 +627,7 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
 <rect x="744" y="480" width="32" height="20" class="cut"/>
 <circle cx="746" cy="494" r="2.5" class="term"/><circle cx="774" cy="494" r="2.5" class="term"/><line x1="746" y1="486" x2="774" y2="486" class="plate"/><line x1="760" y1="486" x2="760" y2="479" class="plate"/><line x1="755" y1="479" x2="765" y2="479" class="plate"/>
 <text x="760" y="514" class="val" text-anchor="middle">Taster 7</text>
+<text x="585" y="530" class="val strong" text-anchor="middle">T5–T7 später · GP10–12 offen lassen</text>
 <rect x="143" y="250" width="14" height="60" class="part"/><polygon points="157,280.0 165,275.0 165,285.0" class="arrowhead"/>
 <text x="140" y="244" class="val" text-anchor="end">POT 1</text>
 <rect x="223" y="250" width="14" height="60" class="part"/><polygon points="237,280.0 245,275.0 245,285.0" class="arrowhead"/>
@@ -653,9 +656,9 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
 <g class="badge cbtn"><circle cx="640" cy="245.0" r="10"/><text x="640" y="249.0" text-anchor="middle">T2</text></g>
 <g class="badge cbtn"><circle cx="660" cy="280.0" r="10"/><text x="660" y="284.0" text-anchor="middle">T3</text></g>
 <g class="badge cbtn"><circle cx="680" cy="315.0" r="10"/><text x="680" y="319.0" text-anchor="middle">T4</text></g>
-<g class="badge cbtn"><circle cx="640" cy="410" r="10"/><text x="640" y="414" text-anchor="middle">T5</text></g>
-<g class="badge cbtn"><circle cx="640" cy="452" r="10"/><text x="640" y="456" text-anchor="middle">T6</text></g>
-<g class="badge cbtn"><circle cx="640" cy="494" r="10"/><text x="640" y="498" text-anchor="middle">T7</text></g>
+<g class="badge cbtn later"><circle cx="640" cy="410" r="10"/><text x="640" y="414" text-anchor="middle">T5</text></g>
+<g class="badge cbtn later"><circle cx="640" cy="452" r="10"/><text x="640" y="456" text-anchor="middle">T6</text></g>
+<g class="badge cbtn later"><circle cx="640" cy="494" r="10"/><text x="640" y="498" text-anchor="middle">T7</text></g>
 <g class="badge c33"><circle cx="340" cy="190" r="10"/><text x="340" y="194" text-anchor="middle">V</text></g>
 <g class="badge cpot"><circle cx="330" cy="270" r="10"/><text x="330" y="274" text-anchor="middle">P1</text></g>
 <g class="badge cpot"><circle cx="330" cy="250" r="10"/><text x="330" y="254" text-anchor="middle">P2</text></g>
@@ -668,7 +671,7 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
       <thead><tr><th></th><th>Nr.</th><th>Von</th><th>Nach</th><th>Hinweis</th></tr></thead>
       <tbody>
         <tr><td class="check"><input type="checkbox" id="t1" aria-label="Taster 1 gesteckt"></td><td class="n"><span class="num cbtn">T1–T4</span></td><td>Tiny <b>GP6 · GP7 · GP8 · GP9</b> (rechte Kante, Pin 7–10)</td><td>Taster 1–4 → GND</td><td></td></tr>
-        <tr><td class="check"><input type="checkbox" id="t5" aria-label="Taster 5 bis 7 gesteckt"></td><td class="n"><span class="num cbtn">T5–T7</span></td><td>Tiny <b>GP10 · GP11 · GP12</b> (Unterkante)</td><td>Taster 5–7 → GND</td><td>Unterkante von rechts nach links: 10, 11, 12, 13</td></tr>
+        <tr><td class="check"><input type="checkbox" id="t5" aria-label="Taster 5 bis 7 gesteckt"></td><td class="n"><span class="num cbtn">T5–T7</span></td><td>Tiny <b>GP10 · GP11 · GP12</b> (Unterkante)</td><td>Taster 5–7 → GND</td><td><b>Erst mal weglassen</b>, GP10–12 offen lassen (nicht auf GND, sonst „dauernd gedrückt“). Unterkante von rechts nach links: 10, 11, 12, 13</td></tr>
         <tr><td class="check"><input type="checkbox" id="p1" aria-label="Poti 1 gesteckt"></td><td class="n"><span class="num cpot">P1</span></td><td>POT 1 Schleifer (Mitte)</td><td>Tiny <b>GP26</b></td><td>Poti-Enden: 3,3 V und GND</td></tr>
         <tr><td class="check"><input type="checkbox" id="p2" aria-label="Poti 2 gesteckt"></td><td class="n"><span class="num cpot">P2</span></td><td>POT 2 Schleifer (Mitte)</td><td>Tiny <b>GP27</b></td><td>Poti-Enden: 3,3 V und GND</td></tr>
         <tr><td class="check"><input type="checkbox" id="v" aria-label="3,3 V gesteckt"></td><td class="n"><span class="num c33">V</span></td><td>Tiny <b>3V3</b> (linke Kante, 3. Pin)</td><td>beide Poti-Enden oben</td><td></td></tr>
