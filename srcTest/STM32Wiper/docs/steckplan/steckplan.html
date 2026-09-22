@@ -182,7 +182,7 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
     <span class="fact">Pull-ups an <b>3,3 V</b> (nie 5 V)</span>
     <span class="fact">Pull-up <b>220 Ω</b> je Signalader</span>
     <span class="fact">ADC <b>12 bit</b> (0–4095)</span>
-    <span class="fact">weiß = Masse <b>(Annahme)</b></span>
+    <span class="fact">gelb-schwarz = <b>Masse</b></span>
     <span class="fact">Nucleo über <b>USB</b></span>
   </div>
 
@@ -193,8 +193,8 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
       <span class="cg"><i></i>GND · schwarz</span>
       <span class="crx"><i></i>A0 Licht weiß-schwarz · blau</span>
       <span class="ctx"><i></i>A1 Wischer weiß-schwarz · grün</span>
-      <span class="clin"><i></i>A2 Licht gelb-schwarz · gelb</span>
-      <span class="ccs"><i></i>A3 Wischer gelb-schwarz · weiß</span>
+      <span class="clin"><i></i>A2 Licht weiß · gelb</span>
+      <span class="ccs"><i></i>A3 Wischer weiß · weiß</span>
       <span class="csig"><i></i>D7 Taster · weiß</span>
       <span><i class="sym">●</i>verbunden</span>
       <span><i class="sym">⌒</i>Kreuzung, nicht verbunden</span>
@@ -284,12 +284,12 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
 <text x="730" y="644" class="lbl" text-anchor="end">D1</text>
 <rect x="735.5" y="655.5" width="9" height="9" class="pad"/>
 <text x="730" y="664" class="lbl" text-anchor="end">D0</text>
-<circle cx="190" cy="400" r="4" class="term"/><text x="180" y="404" class="val" text-anchor="end">weiß (Masse?)</text>
+<circle cx="190" cy="400" r="4" class="term"/><text x="180" y="404" class="val" text-anchor="end">gelb-schwarz (Masse)</text>
 <circle cx="190" cy="450" r="4" class="term"/><text x="180" y="454" class="val" text-anchor="end">weiß-schwarz</text>
-<circle cx="190" cy="500" r="4" class="term"/><text x="180" y="504" class="val" text-anchor="end">gelb-schwarz</text>
-<circle cx="190" cy="590" r="4" class="term"/><text x="180" y="594" class="val" text-anchor="end">weiß (Masse?)</text>
+<circle cx="190" cy="500" r="4" class="term"/><text x="180" y="504" class="val" text-anchor="end">weiß</text>
+<circle cx="190" cy="590" r="4" class="term"/><text x="180" y="594" class="val" text-anchor="end">gelb-schwarz (Masse)</text>
 <circle cx="190" cy="640" r="4" class="term"/><text x="180" y="644" class="val" text-anchor="end">weiß-schwarz</text>
-<circle cx="190" cy="690" r="4" class="term"/><text x="180" y="694" class="val" text-anchor="end">gelb-schwarz</text>
+<circle cx="190" cy="690" r="4" class="term"/><text x="180" y="694" class="val" text-anchor="end">weiß</text>
 <rect x="321.0" y="419.0" width="38" height="12" rx="3" class="part rbody"/>
 <rect x="325.6" y="419.9" width="2.8" height="10.2" fill="#d42a1e"/>
 <rect x="330.6" y="419.9" width="2.8" height="10.2" fill="#d42a1e"/>
@@ -356,14 +356,14 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
       <tbody>
         <tr class="group"><td colspan="5">Versorgung</td></tr>
         <tr><td class="check"><input type="checkbox" id="w1" aria-label="Kabel 1 gesteckt"></td><td class="n"><span class="num c33">1</span></td><td>Nucleo <b>+3V3</b> (CN6, linke Leiste, 4. Pin)</td><td>3,3-V-Schiene</td><td><b>nicht 5 V</b>: die ADC-Pins vertragen im Analogbetrieb nur 3,3 V</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w2" aria-label="Kabel 2 gesteckt"></td><td class="n"><span class="num cg">2</span></td><td>Nucleo <b>GND</b> (CN6, 6. Pin)</td><td>Lichthebel <b>weiß</b></td><td>Annahme: weiß = gemeinsame Masse, siehe Test unten</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w3" aria-label="Kabel 3 gesteckt"></td><td class="n"><span class="num cg">3</span></td><td>GND (von Nr. 2 abzweigen)</td><td>Wischerhebel <b>weiß</b></td><td></td></tr>
+        <tr><td class="check"><input type="checkbox" id="w2" aria-label="Kabel 2 gesteckt"></td><td class="n"><span class="num cg">2</span></td><td>Nucleo <b>GND</b> (CN6, 6. Pin)</td><td>Lichthebel <b>gelb-schwarz</b></td><td>gemeinsame Masse, gemessen 2026-09-22</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w3" aria-label="Kabel 3 gesteckt"></td><td class="n"><span class="num cg">3</span></td><td>GND (von Nr. 2 abzweigen)</td><td>Wischerhebel <b>gelb-schwarz</b></td><td>vermutlich wie beim Lichthebel, noch nicht gemessen</td></tr>
         <tr class="group"><td colspan="5">Lichthebel → ADC</td></tr>
         <tr><td class="check"><input type="checkbox" id="w4" aria-label="Kabel 4 gesteckt"></td><td class="n"><span class="num crx">4</span></td><td>Lichthebel <b>weiß-schwarz</b></td><td>Nucleo <b>A0</b> (PA0)</td><td>vermutlich Blinker</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w5" aria-label="Kabel 5 gesteckt"></td><td class="n"><span class="num clin">5</span></td><td>Lichthebel <b>gelb-schwarz</b></td><td>Nucleo <b>A2</b> (PA4)</td><td>vermutlich Fernlicht/Lichthupe</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w5" aria-label="Kabel 5 gesteckt"></td><td class="n"><span class="num clin">5</span></td><td>Lichthebel <b>weiß</b></td><td>Nucleo <b>A2</b> (PA4)</td><td>vermutlich Fernlicht/Lichthupe</td></tr>
         <tr class="group"><td colspan="5">Wischerhebel → ADC</td></tr>
         <tr><td class="check"><input type="checkbox" id="w6" aria-label="Kabel 6 gesteckt"></td><td class="n"><span class="num ctx">6</span></td><td>Wischerhebel <b>weiß-schwarz</b></td><td>Nucleo <b>A1</b> (PA1)</td><td></td></tr>
-        <tr><td class="check"><input type="checkbox" id="w7" aria-label="Kabel 7 gesteckt"></td><td class="n"><span class="num ccs">7</span></td><td>Wischerhebel <b>gelb-schwarz</b></td><td>Nucleo <b>A3</b> (PB0)</td><td></td></tr>
+        <tr><td class="check"><input type="checkbox" id="w7" aria-label="Kabel 7 gesteckt"></td><td class="n"><span class="num ccs">7</span></td><td>Wischerhebel <b>weiß</b></td><td>Nucleo <b>A3</b> (PB0)</td><td></td></tr>
         <tr class="group"><td colspan="5">Pull-ups (je einer pro Signalader)</td></tr>
         <tr><td class="check"><input type="checkbox" id="w8" aria-label="Kabel 8 gesteckt"></td><td class="n"><span class="num c33">8</span></td><td>3,3-V-Schiene</td><td>220 Ω<span class="rc metal" aria-hidden="true"><i class="b-rot"></i><i class="b-rot"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-braun tol"></i></span> → <b>A0</b></td><td>Richtung egal</td></tr>
         <tr><td class="check"><input type="checkbox" id="w9" aria-label="Kabel 9 gesteckt"></td><td class="n"><span class="num c33">9</span></td><td>3,3-V-Schiene</td><td>220 Ω<span class="rc metal" aria-hidden="true"><i class="b-rot"></i><i class="b-rot"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-braun tol"></i></span> → <b>A2</b></td><td>Richtung egal</td></tr>
@@ -403,11 +403,10 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
       </ul>
     </div>
     <div class="note warn">
-      <h3>Stimmt „weiß = Masse“? Test ohne Multimeter</h3>
-      <p>Falsch gesteckt ist ungefährlich: Die 220 Ω begrenzen den Strom, an den Pins liegen nie mehr als 3,3 V.
-        <b>Richtig:</b> In Ruhe zeigen beide Kanäle eines Hebels einen hohen Wert (≈ 3500 von 4095). Jeder Kanal reagiert nur auf seine eigenen Funktionen,
-        z. B. A0 nur auf Blinker, A2 nur auf Lichthupe/Fernlicht.
-        <b>Falsch:</b> Ein Kanal reagiert auf <b>alle</b> Funktionen des Hebels. Dann ist eine Signalader an GND: die Ader an GND mit der Ader tauschen, deren Kanal auf alles reagiert.</p>
+      <h3>Offen: weiß ↔ weiß-schwarz verbunden (≈ 3 Ω)</h3>
+      <p>Am Lichthebel sind die beiden Signaladern direkt verbunden (gemessen 2026-09-22 mit <code>adc_test</code>). Dann sehen A0 und A2 dasselbe:
+        beide Kaskaden parallel, Blinker rechts und Fernlicht sind nicht unterscheidbar (beide ≈ 140 Ω). Laut Recherche müssten zwischen weiß und weiß-schwarz in Ruhe ≈ 3 kΩ liegen.
+        <b>Nächster Test:</b> Durchgang weiß ↔ weiß-schwarz mit dem Multimeter direkt an den Hebelkontakten, um Kabel/Stecker vom Hebel zu trennen.</p>
     </div>
     <div class="note">
       <h3>Danach</h3>

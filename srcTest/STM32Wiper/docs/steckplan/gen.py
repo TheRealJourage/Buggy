@@ -141,7 +141,7 @@ SX, SW = 40, 150
 TX = SX + SW
 stalks = [("Lichthebel", "Blinker · Fernlicht · Lichthupe", 370, {"GND": 400, "A0": 450, "A2": 500}),
           ("Wischerhebel", "Front · Heck · Waschen", 560, {"GND": 590, "A1": 640, "A3": 690})]
-wire_col = {"GND": "weiß (Masse?)", "A0": "weiß-schwarz", "A2": "gelb-schwarz", "A1": "weiß-schwarz", "A3": "gelb-schwarz"}
+wire_col = {"GND": "gelb-schwarz (Masse)", "A0": "weiß-schwarz", "A2": "weiß", "A1": "weiß-schwarz", "A3": "weiß"}
 term = {}
 for name, sub, sy, t in stalks:
     f.under.append(f'<rect x="{SX}" y="{sy}" width="{SW}" height="150" rx="8" class="board stalk"/>'

@@ -139,12 +139,12 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <text x="730" y="644" class="lbl" text-anchor="end">D1</text>
 <rect x="735.5" y="655.5" width="9" height="9" class="pad"/>
 <text x="730" y="664" class="lbl" text-anchor="end">D0</text>
-<circle cx="190" cy="400" r="4" class="term"/><text x="180" y="404" class="val" text-anchor="end">weiß (Masse?)</text>
+<circle cx="190" cy="400" r="4" class="term"/><text x="180" y="404" class="val" text-anchor="end">gelb-schwarz (Masse)</text>
 <circle cx="190" cy="450" r="4" class="term"/><text x="180" y="454" class="val" text-anchor="end">weiß-schwarz</text>
-<circle cx="190" cy="500" r="4" class="term"/><text x="180" y="504" class="val" text-anchor="end">gelb-schwarz</text>
-<circle cx="190" cy="590" r="4" class="term"/><text x="180" y="594" class="val" text-anchor="end">weiß (Masse?)</text>
+<circle cx="190" cy="500" r="4" class="term"/><text x="180" y="504" class="val" text-anchor="end">weiß</text>
+<circle cx="190" cy="590" r="4" class="term"/><text x="180" y="594" class="val" text-anchor="end">gelb-schwarz (Masse)</text>
 <circle cx="190" cy="640" r="4" class="term"/><text x="180" y="644" class="val" text-anchor="end">weiß-schwarz</text>
-<circle cx="190" cy="690" r="4" class="term"/><text x="180" y="694" class="val" text-anchor="end">gelb-schwarz</text>
+<circle cx="190" cy="690" r="4" class="term"/><text x="180" y="694" class="val" text-anchor="end">weiß</text>
 <rect x="321.0" y="419.0" width="38" height="12" rx="3" class="part rbody"/>
 <rect x="325.6" y="419.9" width="2.8" height="10.2" fill="#d42a1e"/>
 <rect x="330.6" y="419.9" width="2.8" height="10.2" fill="#d42a1e"/>
