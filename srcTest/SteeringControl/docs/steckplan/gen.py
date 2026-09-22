@@ -44,7 +44,7 @@ class Fig:
                     for cy in cross:
                         d += f" L{x1},{cy - step * HOP} A{HOP},{HOP} 0 0 {1 if step > 0 else 0} {x1},{cy + step * HOP}"
                 d += f" L{x2},{y2}"
-            out.append(f'<path d="{d}" class="w {cls}"/>')
+            out.append(f'<path d="{d}" class="wc"/><path d="{d}" class="w {cls}"/>')
         return "\n".join(out)
 
     def svg(self, vb, label, extra_top=""):

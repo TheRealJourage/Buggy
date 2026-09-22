@@ -14,9 +14,10 @@
   --board-tiny: #dde4f4; --board-tiny-s: #3b5aa3;
   --board-psu: #f1e3e1;  --board-psu-s: #9b4a3f;
   --chip: #262b2a; --chip-ink: #eef2f1;
-  --w12: #d1242f; --wg: #2a3531; --w5: #d9730d; --w33: #b3246b;
-  --wrx: #1d63c7; --wtx: #1b8a3a; --wcs: #7b3fc4; --wlin: #b07d00;
-  --wsig: #0f7a70; --wbtn: #8a5a14; --wpot: #0e7490;
+  --w12: #d42a1e; --wg: #161616; --w5: #f07c00; --w33: #f07c00;
+  --wrx: #1f5fd1; --wtx: #1f9d3a; --wcs: #ffffff; --wlin: #f2c200;
+  --wsig: #ffffff; --wbtn: #8a5a14; --wpot: #0e7490;
+  --casing: #7d8a85;
   --led-g: #36b24a; --led-r: #e0413a;
   --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
   --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
@@ -28,9 +29,7 @@
     --board-tiny: #182441; --board-tiny-s: #7894d6;
     --board-psu: #3a1f1c; --board-psu-s: #d08a7f;
     --chip: #3a4240; --chip-ink: #eef2f1;
-    --w12: #ff6b6b; --wg: #cfd8d3; --w5: #ffa94d; --w33: #f48cc2;
-    --wrx: #6fa8ff; --wtx: #5fd07a; --wcs: #b794f6; --wlin: #f2c14e;
-    --wsig: #4fd1c5; --wbtn: #e0a458; --wpot: #67d4ea;
+    --wbtn: #e0a458; --wpot: #67d4ea; --casing: #8f9c97;
   }
 }
 :root[data-theme="dark"] {
@@ -39,9 +38,7 @@
   --board-tiny: #182441; --board-tiny-s: #7894d6;
   --board-psu: #3a1f1c; --board-psu-s: #d08a7f;
   --chip: #3a4240; --chip-ink: #eef2f1;
-  --w12: #ff6b6b; --wg: #cfd8d3; --w5: #ffa94d; --w33: #f48cc2;
-  --wrx: #6fa8ff; --wtx: #5fd07a; --wcs: #b794f6; --wlin: #f2c14e;
-  --wsig: #4fd1c5; --wbtn: #e0a458; --wpot: #67d4ea;
+  --wbtn: #e0a458; --wpot: #67d4ea; --casing: #8f9c97;
 }
 
 body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--sans); }
@@ -68,7 +65,7 @@ figcaption { color: var(--muted); font-size: 14px; max-width: 80ch; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; }
 .legend span { display: inline-flex; align-items: center; gap: 7px; }
 .legend i { width: 22px; height: 4px; border-radius: 2px; display: inline-block; }
-.legend i.sym { width: auto; height: auto; background: none; font-style: normal; font: 600 13px var(--mono); }
+.legend i.sym { width: auto; height: auto; background: none; box-shadow: none; font-style: normal; font: 600 13px var(--mono); }
 
 table { border-collapse: collapse; width: 100%; font-size: 14px; }
 th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--faint); vertical-align: top; }
@@ -94,8 +91,8 @@ a:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline
 .c12 { --c: var(--w12); } .cg { --c: var(--wg); } .c5 { --c: var(--w5); } .c33 { --c: var(--w33); }
 .crx { --c: var(--wrx); } .ctx { --c: var(--wtx); } .ccs { --c: var(--wcs); } .clin { --c: var(--wlin); }
 .csig { --c: var(--wsig); } .cbtn { --c: var(--wbtn); } .cpot { --c: var(--wpot); }
-.num, .legend i { background: var(--c); }
-.cg.num { color: var(--panel); }
+.num, .legend i { background: var(--c); box-shadow: inset 0 0 0 1px var(--casing); }
+.clin.num, .c5.num, .c33.num, .ccs.num, .csig.num { color: #161616; }
 .rc { display: inline-flex; align-items: center; gap: 3px; height: 16px; padding: 0 6px; margin-left: 6px; border-radius: 8px; background: #e6d3a8; border: 1px solid #8a7550; vertical-align: -3px; }
 .rc.metal { background: #9cc3e6; border-color: #4f7aa3; }
 .rc i { width: 5px; height: 14px; }
@@ -106,11 +103,12 @@ a:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline
 
 /* SVG */
 svg text { font-family: var(--mono); fill: var(--ink); }
+svg .wc { fill: none; stroke: var(--casing); stroke-width: 5; stroke-linejoin: round; stroke-linecap: round; }
 svg .w { fill: none; stroke: var(--c); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
-svg .dot { fill: var(--c); }
-svg .badge circle { fill: var(--c); stroke: var(--panel); stroke-width: 2; }
+svg .dot { fill: var(--c); stroke: var(--casing); stroke-width: 1; }
+svg .badge circle { fill: var(--c); stroke: var(--casing); stroke-width: 1.5; }
 svg .badge text { font-size: 11px; font-weight: 600; fill: #fff; }
-svg .badge.cg text, svg .badge.clin text { fill: var(--panel); }
+svg .badge.clin text, svg .badge.c5 text, svg .badge.c33 text, svg .badge.ccs text, svg .badge.csig text { fill: #161616; }
 svg .board { stroke-width: 2; }
 svg .uno { fill: var(--board-uno); stroke: var(--board-uno-s); }
 svg .tiny { fill: var(--board-tiny); stroke: var(--board-tiny-s); }
@@ -179,15 +177,15 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
   <section class="sheet">
     <h2>Teil 1 · LIN-Strecke</h2>
     <div class="legend" aria-label="Farblegende">
-      <span class="c12"><i></i>+12 V</span>
-      <span class="cg"><i></i>GND</span>
-      <span class="c5"><i></i>5 V (Uno)</span>
-      <span class="c33"><i></i>3,3 V (Tiny)</span>
-      <span class="ctx"><i></i>TX → TXD</span>
-      <span class="crx"><i></i>RXD → RX</span>
-      <span class="ccs"><i></i>CS</span>
-      <span class="clin"><i></i>LIN-Bus</span>
-      <span class="csig"><i></i>Status-LEDs</span>
+      <span class="c12"><i></i>+12 V · rot</span>
+      <span class="cg"><i></i>GND · schwarz</span>
+      <span class="c5"><i></i>5 V (Uno) · orange</span>
+      <span class="c33"><i></i>3,3 V (Tiny) · orange</span>
+      <span class="ctx"><i></i>TX → TXD · grün</span>
+      <span class="crx"><i></i>RXD → RX · blau</span>
+      <span class="ccs"><i></i>CS · weiß</span>
+      <span class="clin"><i></i>LIN-Bus · gelb</span>
+      <span class="csig"><i></i>Status-LEDs · weiß</span>
       <span><i class="sym">●</i>verbunden</span>
       <span><i class="sym">⌒</i>Kreuzung, nicht verbunden</span>
       <span><i class="sym" style="color:var(--w12)">✕</i>Pin frei lassen</span>

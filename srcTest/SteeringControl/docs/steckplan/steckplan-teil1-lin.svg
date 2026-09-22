@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="1500" height="780" viewBox="0 0 1500 780" role="img" aria-label="Verkabelung der LIN-Strecke: Uno, zwei MCP2003, RP2040-Tiny, 12-V-Netzteil" xmlns="http://www.w3.org/2000/svg"><style>svg{  --bg: #e9eeec;  --panel: #fbfcfc;  --ink: #16201c;  --muted: #5d6c66;  --faint: #d5ddda;  --accent: #0f6b62;  --board-uno: #d8ebee;  --board-uno-s: #2f7d8c;  --board-tiny: #dde4f4; --board-tiny-s: #3b5aa3;  --board-psu: #f1e3e1;  --board-psu-s: #9b4a3f;  --chip: #262b2a; --chip-ink: #eef2f1;  --w12: #d1242f; --wg: #2a3531; --w5: #d9730d; --w33: #b3246b;  --wrx: #1d63c7; --wtx: #1b8a3a; --wcs: #7b3fc4; --wlin: #b07d00;  --wsig: #0f7a70; --wbtn: #8a5a14; --wpot: #0e7490;  --led-g: #36b24a; --led-r: #e0413a;  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;  --sans: "Segoe UI", system-ui, sans-serif;}.c12 { --c: var(--w12); } .cg { --c: var(--wg); } .c5 { --c: var(--w5); } .c33 { --c: var(--w33); }
+<svg width="1500" height="780" viewBox="0 0 1500 780" role="img" aria-label="Verkabelung der LIN-Strecke: Uno, zwei MCP2003, RP2040-Tiny, 12-V-Netzteil" xmlns="http://www.w3.org/2000/svg"><style>svg{  --bg: #e9eeec;  --panel: #fbfcfc;  --ink: #16201c;  --muted: #5d6c66;  --faint: #d5ddda;  --accent: #0f6b62;  --board-uno: #d8ebee;  --board-uno-s: #2f7d8c;  --board-tiny: #dde4f4; --board-tiny-s: #3b5aa3;  --board-psu: #f1e3e1;  --board-psu-s: #9b4a3f;  --chip: #262b2a; --chip-ink: #eef2f1;  --w12: #d42a1e; --wg: #161616; --w5: #f07c00; --w33: #f07c00;  --wrx: #1f5fd1; --wtx: #1f9d3a; --wcs: #ffffff; --wlin: #f2c200;  --wsig: #ffffff; --wbtn: #8a5a14; --wpot: #0e7490;  --casing: #7d8a85;  --led-g: #36b24a; --led-r: #e0413a;  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;  --sans: "Segoe UI", system-ui, sans-serif;}.c12 { --c: var(--w12); } .cg { --c: var(--wg); } .c5 { --c: var(--w5); } .c33 { --c: var(--w33); }
 .crx { --c: var(--wrx); } .ctx { --c: var(--wtx); } .ccs { --c: var(--wcs); } .clin { --c: var(--wlin); }
 .csig { --c: var(--wsig); } .cbtn { --c: var(--wbtn); } .cpot { --c: var(--wpot); }
-.cg.num { color: var(--panel); }
+.clin.num, .c5.num, .c33.num, .ccs.num, .csig.num { color: #161616; }
 svg text { font-family: var(--mono); fill: var(--ink); }
+svg .wc { fill: none; stroke: var(--casing); stroke-width: 5; stroke-linejoin: round; stroke-linecap: round; }
 svg .w { fill: none; stroke: var(--c); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
-svg .dot { fill: var(--c); }
-svg .badge circle { fill: var(--c); stroke: var(--panel); stroke-width: 2; }
+svg .dot { fill: var(--c); stroke: var(--casing); stroke-width: 1; }
+svg .badge circle { fill: var(--c); stroke: var(--casing); stroke-width: 1.5; }
 svg .badge text { font-size: 11px; font-weight: 600; fill: #fff; }
-svg .badge.cg text, svg .badge.clin text { fill: var(--panel); }
+svg .badge.clin text, svg .badge.c5 text, svg .badge.c33 text, svg .badge.ccs text, svg .badge.csig text { fill: #161616; }
 svg .board { stroke-width: 2; }
 svg .uno { fill: var(--board-uno); stroke: var(--board-uno-s); }
 svg .tiny { fill: var(--board-tiny); stroke: var(--board-tiny-s); }
@@ -71,36 +72,36 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <line x1="1340" y1="336" x2="1360" y2="336" class="lead"/><text x="1334" y="340" class="pinname" text-anchor="end">VBB 7</text>
 <line x1="1340" y1="372" x2="1360" y2="372" class="lead"/><text x="1334" y="376" class="pinname" text-anchor="end">LBUS 6</text>
 <line x1="1340" y1="408" x2="1360" y2="408" class="lead"/><text x="1334" y="412" class="pinname" text-anchor="end">VSS 5</text>
-<rect x="980" y="250" width="160" height="250" rx="10" class="board tiny"/><rect x="1028" y="244" width="64" height="18" rx="2" class="port"/><text x="1060" y="257" class="porttxt" text-anchor="middle">FPC</text><rect x="1032" y="330" width="56" height="56" rx="3" class="mcu"/><text x="1060" y="362" class="porttxt" text-anchor="middle">RP2040</text><text x="1060" y="222" class="boardname" text-anchor="middle">RP2040-Tiny</text><text x="1060" y="237" class="chipsub" text-anchor="middle">Slave · USB über Adapter</text><path d="M150,120 L1480,120" class="w c12"/>
-<path d="M22,748 L1480,748" class="w cg"/>
-<path d="M200,86 L200,120" class="w c12"/>
-<path d="M60,86 L60,100 L22,100 L22,748" class="w cg"/>
-<path d="M510,236 L510,212 A6,6 0 0 0 510,200 L510,202 A6,6 0 0 0 510,190 L510,186 L620,186 L620,300 L640,300" class="w crx"/>
-<path d="M474,236 L474,196 L605,196 L605,336 L640,336" class="w ccs"/>
-<path d="M492,236 L492,206 L590,206 L590,408 L640,408" class="w ctx"/>
-<path d="M628,300 L628,330 A6,6 0 0 1 628,342 L628,402 A6,6 0 0 1 628,414 L628,582 L272,582 L272,504" class="w c5"/>
-<path d="M290,504 L290,576 A6,6 0 0 1 290,588 L290,748" class="w cg"/>
-<path d="M282,236 L282,150 L112,150" class="w csig"/>
-<path d="M264,236 L264,178 L112,178" class="w csig"/>
-<path d="M112,150 L96,150 L96,206 L246,206 L246,236" class="w cg"/>
-<path d="M112,178 L96,178" class="w cg"/>
-<path d="M800,336 L850,336 L850,120" class="w c12"/>
-<path d="M800,408 L830,408 L830,748" class="w cg"/>
-<path d="M830,336 L830,354.0" class="w c12"/>
-<path d="M830,354.0 L830,366 A6,6 0 0 1 830,378 L830,408" class="w cg"/>
-<path d="M800,372 L870,372 L870,692 L1430,692 L1430,372 L1360,372" class="w clin"/>
-<path d="M870,612 L830,612" class="w clin"/>
-<path d="M920,120 L920,520 L870,520" class="w c12"/>
-<path d="M1360,336 L1410,336 L1410,120" class="w c12"/>
-<path d="M1360,408 L1390,408 L1390,686 A6,6 0 0 1 1390,698 L1390,748" class="w cg"/>
-<path d="M1390,336 L1390,354.0" class="w c12"/>
-<path d="M1390,354.0 L1390,366 A6,6 0 0 1 1390,378 L1390,408" class="w cg"/>
-<path d="M1430,612 L1390,612" class="w clin"/>
-<path d="M1140,300 L1200,300" class="w crx"/>
-<path d="M1140,320 L1150,320 L1150,336 L1200,336" class="w ccs"/>
-<path d="M1140,280 L1162,280 L1162,294 A6,6 0 0 1 1162,306 L1162,330 A6,6 0 0 1 1162,342 L1162,408 L1200,408" class="w ctx"/>
-<path d="M980,320 L945,320 L945,196 L1188,196 L1188,300" class="w c33"/>
-<path d="M980,300 L958,300 L958,314 A6,6 0 0 1 958,326 L958,686 A6,6 0 0 1 958,698 L958,748" class="w cg"/><circle cx="60" cy="80" r="6" class="term minus"/><circle cx="200" cy="80" r="6" class="term plus"/><text x="60" y="84" class="termtxt" text-anchor="middle">−</text><text x="200" y="84" class="termtxt" text-anchor="middle">+</text>
+<rect x="980" y="250" width="160" height="250" rx="10" class="board tiny"/><rect x="1028" y="244" width="64" height="18" rx="2" class="port"/><text x="1060" y="257" class="porttxt" text-anchor="middle">FPC</text><rect x="1032" y="330" width="56" height="56" rx="3" class="mcu"/><text x="1060" y="362" class="porttxt" text-anchor="middle">RP2040</text><text x="1060" y="222" class="boardname" text-anchor="middle">RP2040-Tiny</text><text x="1060" y="237" class="chipsub" text-anchor="middle">Slave · USB über Adapter</text><path d="M150,120 L1480,120" class="wc"/><path d="M150,120 L1480,120" class="w c12"/>
+<path d="M22,748 L1480,748" class="wc"/><path d="M22,748 L1480,748" class="w cg"/>
+<path d="M200,86 L200,120" class="wc"/><path d="M200,86 L200,120" class="w c12"/>
+<path d="M60,86 L60,100 L22,100 L22,748" class="wc"/><path d="M60,86 L60,100 L22,100 L22,748" class="w cg"/>
+<path d="M510,236 L510,212 A6,6 0 0 0 510,200 L510,202 A6,6 0 0 0 510,190 L510,186 L620,186 L620,300 L640,300" class="wc"/><path d="M510,236 L510,212 A6,6 0 0 0 510,200 L510,202 A6,6 0 0 0 510,190 L510,186 L620,186 L620,300 L640,300" class="w crx"/>
+<path d="M474,236 L474,196 L605,196 L605,336 L640,336" class="wc"/><path d="M474,236 L474,196 L605,196 L605,336 L640,336" class="w ccs"/>
+<path d="M492,236 L492,206 L590,206 L590,408 L640,408" class="wc"/><path d="M492,236 L492,206 L590,206 L590,408 L640,408" class="w ctx"/>
+<path d="M628,300 L628,330 A6,6 0 0 1 628,342 L628,402 A6,6 0 0 1 628,414 L628,582 L272,582 L272,504" class="wc"/><path d="M628,300 L628,330 A6,6 0 0 1 628,342 L628,402 A6,6 0 0 1 628,414 L628,582 L272,582 L272,504" class="w c5"/>
+<path d="M290,504 L290,576 A6,6 0 0 1 290,588 L290,748" class="wc"/><path d="M290,504 L290,576 A6,6 0 0 1 290,588 L290,748" class="w cg"/>
+<path d="M282,236 L282,150 L112,150" class="wc"/><path d="M282,236 L282,150 L112,150" class="w csig"/>
+<path d="M264,236 L264,178 L112,178" class="wc"/><path d="M264,236 L264,178 L112,178" class="w csig"/>
+<path d="M112,150 L96,150 L96,206 L246,206 L246,236" class="wc"/><path d="M112,150 L96,150 L96,206 L246,206 L246,236" class="w cg"/>
+<path d="M112,178 L96,178" class="wc"/><path d="M112,178 L96,178" class="w cg"/>
+<path d="M800,336 L850,336 L850,120" class="wc"/><path d="M800,336 L850,336 L850,120" class="w c12"/>
+<path d="M800,408 L830,408 L830,748" class="wc"/><path d="M800,408 L830,408 L830,748" class="w cg"/>
+<path d="M830,336 L830,354.0" class="wc"/><path d="M830,336 L830,354.0" class="w c12"/>
+<path d="M830,354.0 L830,366 A6,6 0 0 1 830,378 L830,408" class="wc"/><path d="M830,354.0 L830,366 A6,6 0 0 1 830,378 L830,408" class="w cg"/>
+<path d="M800,372 L870,372 L870,692 L1430,692 L1430,372 L1360,372" class="wc"/><path d="M800,372 L870,372 L870,692 L1430,692 L1430,372 L1360,372" class="w clin"/>
+<path d="M870,612 L830,612" class="wc"/><path d="M870,612 L830,612" class="w clin"/>
+<path d="M920,120 L920,520 L870,520" class="wc"/><path d="M920,120 L920,520 L870,520" class="w c12"/>
+<path d="M1360,336 L1410,336 L1410,120" class="wc"/><path d="M1360,336 L1410,336 L1410,120" class="w c12"/>
+<path d="M1360,408 L1390,408 L1390,686 A6,6 0 0 1 1390,698 L1390,748" class="wc"/><path d="M1360,408 L1390,408 L1390,686 A6,6 0 0 1 1390,698 L1390,748" class="w cg"/>
+<path d="M1390,336 L1390,354.0" class="wc"/><path d="M1390,336 L1390,354.0" class="w c12"/>
+<path d="M1390,354.0 L1390,366 A6,6 0 0 1 1390,378 L1390,408" class="wc"/><path d="M1390,354.0 L1390,366 A6,6 0 0 1 1390,378 L1390,408" class="w cg"/>
+<path d="M1430,612 L1390,612" class="wc"/><path d="M1430,612 L1390,612" class="w clin"/>
+<path d="M1140,300 L1200,300" class="wc"/><path d="M1140,300 L1200,300" class="w crx"/>
+<path d="M1140,320 L1150,320 L1150,336 L1200,336" class="wc"/><path d="M1140,320 L1150,320 L1150,336 L1200,336" class="w ccs"/>
+<path d="M1140,280 L1162,280 L1162,294 A6,6 0 0 1 1162,306 L1162,330 A6,6 0 0 1 1162,342 L1162,408 L1200,408" class="wc"/><path d="M1140,280 L1162,280 L1162,294 A6,6 0 0 1 1162,306 L1162,330 A6,6 0 0 1 1162,342 L1162,408 L1200,408" class="w ctx"/>
+<path d="M980,320 L945,320 L945,196 L1188,196 L1188,300" class="wc"/><path d="M980,320 L945,320 L945,196 L1188,196 L1188,300" class="w c33"/>
+<path d="M980,300 L958,300 L958,314 A6,6 0 0 1 958,326 L958,686 A6,6 0 0 1 958,698 L958,748" class="wc"/><path d="M980,300 L958,300 L958,314 A6,6 0 0 1 958,326 L958,686 A6,6 0 0 1 958,698 L958,748" class="w cg"/><circle cx="60" cy="80" r="6" class="term minus"/><circle cx="200" cy="80" r="6" class="term plus"/><text x="60" y="84" class="termtxt" text-anchor="middle">−</text><text x="200" y="84" class="termtxt" text-anchor="middle">+</text>
 <rect x="505.5" y="231.5" width="9" height="9" class="pad used"/>
 <text x="513.5" y="245" class="lbl used" text-anchor="end" transform="rotate(-90 513.5 245)">RX 0</text>
 <rect x="487.5" y="231.5" width="9" height="9" class="pad used"/>
