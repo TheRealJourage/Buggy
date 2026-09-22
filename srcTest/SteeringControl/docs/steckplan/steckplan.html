@@ -97,6 +97,13 @@ a:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline
 .csig { --c: var(--wsig); } .cbtn { --c: var(--wbtn); } .cpot { --c: var(--wpot); }
 .num, .legend i { background: var(--c); }
 .cg.num { color: var(--panel); }
+.rc { display: inline-flex; align-items: center; gap: 3px; height: 16px; padding: 0 6px; margin-left: 6px; border-radius: 8px; background: #e6d3a8; border: 1px solid #8a7550; vertical-align: -3px; }
+.rc.metal { background: #9cc3e6; border-color: #4f7aa3; }
+.rc i { width: 5px; height: 14px; }
+.rc i.tol { margin-left: 5px; }
+.b-schwarz { background: #111; } .b-braun { background: #7a4a1f; } .b-rot { background: #d42a1e; }
+.b-gelb { background: #f2c200; } .b-violett { background: #7d3cc4; } .b-gold { background: #c9a227; }
+.bands { font-size: 13px; color: var(--muted); }
 
 /* SVG */
 svg text { font-family: var(--mono); fill: var(--ink); }
@@ -131,6 +138,7 @@ svg .lbl.used { fill: var(--ink); font-weight: 600; }
 svg .val { font-size: 11px; fill: var(--ink); }
 svg .val.strong { font-weight: 600; font-family: var(--sans); font-size: 12px; }
 svg .part { fill: var(--panel); stroke: var(--ink); stroke-width: 1.8; }
+svg .part.rbody { fill: #e6d3a8; stroke-width: 1.2; }
 svg .cut { fill: var(--panel); }
 svg .plate { stroke: var(--ink); stroke-width: 2.4; }
 svg .dio { fill: var(--ink); }
@@ -350,16 +358,28 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
 <text x="1070" y="490" class="lbl" text-anchor="middle">11</text>
 <rect x="1090.5" y="495.5" width="9" height="9" class="pad"/>
 <text x="1095" y="490" class="lbl" text-anchor="middle">10</text>
-<rect x="451.0" y="576.0" width="38" height="12" class="part"/>
+<rect x="451.0" y="576.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="455.4" y="576.9" width="3.2" height="10.2" fill="#f2c200"/>
+<rect x="461.4" y="576.9" width="3.2" height="10.2" fill="#7d3cc4"/>
+<rect x="467.4" y="576.9" width="3.2" height="10.2" fill="#d42a1e"/>
+<rect x="478.4" y="576.9" width="3.2" height="10.2" fill="#c9a227"/>
 <text x="470" y="570" class="val" text-anchor="middle">4,7 kΩ</text>
 <path d="M635,367 l10,10 M645,367 l-10,10" class="ncx"/>
-<rect x="181.0" y="144.0" width="38" height="12" class="part"/>
+<rect x="181.0" y="144.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="185.4" y="144.9" width="3.2" height="10.2" fill="#d42a1e"/>
+<rect x="191.4" y="144.9" width="3.2" height="10.2" fill="#d42a1e"/>
+<rect x="197.4" y="144.9" width="3.2" height="10.2" fill="#7a4a1f"/>
+<rect x="208.4" y="144.9" width="3.2" height="10.2" fill="#c9a227"/>
 <text x="200" y="138" class="val" text-anchor="middle">220 Ω</text>
 <rect x="131" y="141" width="18" height="18" class="cut"/>
 <polygon points="147,142 147,158 134,150" class="dio led-g"/><line x1="133" y1="142" x2="133" y2="158" class="plate"/><path d="M138,139 l5,-7 M144,139 l5,-7" class="rays"/>
 <text x="140" y="172" class="val" text-anchor="middle"></text>
 <text x="88" y="154" class="val" text-anchor="end">LED grün</text>
-<rect x="181.0" y="172.0" width="38" height="12" class="part"/>
+<rect x="181.0" y="172.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="185.4" y="172.9" width="3.2" height="10.2" fill="#d42a1e"/>
+<rect x="191.4" y="172.9" width="3.2" height="10.2" fill="#d42a1e"/>
+<rect x="197.4" y="172.9" width="3.2" height="10.2" fill="#7a4a1f"/>
+<rect x="208.4" y="172.9" width="3.2" height="10.2" fill="#c9a227"/>
 <text x="200" y="194" class="val" text-anchor="middle">220 Ω</text>
 <rect x="131" y="169" width="18" height="18" class="cut"/>
 <polygon points="147,170 147,186 134,178" class="dio led-r"/><line x1="133" y1="170" x2="133" y2="186" class="plate"/><path d="M138,167 l5,-7 M144,167 l5,-7" class="rays"/>
@@ -378,7 +398,11 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
 <polygon points="912,153 928,153 920,166" class="dio "/><line x1="912" y1="167" x2="928" y2="167" class="plate"/>
 <text x="934" y="164" class="val">1N4148, Ring unten</text>
 <text x="934" y="180" class="val strong">Master-Pull-up</text>
-<rect x="914.0" y="243.0" width="12" height="38" class="part"/>
+<rect x="914.0" y="243.0" width="12" height="38" rx="3" class="part rbody"/>
+<rect x="914.9" y="247.4" width="10.2" height="3.2" fill="#7a4a1f"/>
+<rect x="914.9" y="253.4" width="10.2" height="3.2" fill="#111111"/>
+<rect x="914.9" y="259.4" width="10.2" height="3.2" fill="#d42a1e"/>
+<rect x="914.9" y="270.4" width="10.2" height="3.2" fill="#c9a227"/>
 <text x="908" y="266" class="val" text-anchor="end">1 kΩ</text>
 <path d="M1355,295 l10,10 M1365,295 l-10,10" class="ncx"/>
 <text x="1370" y="304" class="nc" text-anchor="start">frei</text>
@@ -389,7 +413,11 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
 <line x1="1407" y1="603" x2="1407" y2="621" class="plate"/><line x1="1413" y1="603" x2="1413" y2="621" class="plate"/>
 <text x="1410" y="634" class="val" text-anchor="middle">220 pF</text>
 <path d="M1195,367 l10,10 M1205,367 l-10,10" class="ncx"/>
-<rect x="1111.0" y="190.0" width="38" height="12" class="part"/>
+<rect x="1111.0" y="190.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="1115.4" y="190.9" width="3.2" height="10.2" fill="#f2c200"/>
+<rect x="1121.4" y="190.9" width="3.2" height="10.2" fill="#7d3cc4"/>
+<rect x="1127.4" y="190.9" width="3.2" height="10.2" fill="#d42a1e"/>
+<rect x="1138.4" y="190.9" width="3.2" height="10.2" fill="#c9a227"/>
 <text x="1130" y="184" class="val" text-anchor="middle">4,7 kΩ</text><circle cx="200" cy="120" r="4" class="dot c12"/>
 <circle cx="628" cy="300" r="4" class="dot crx"/>
 <circle cx="290" cy="748" r="4" class="dot cg"/>
@@ -440,6 +468,24 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
   </section>
 
   <section class="sheet">
+    <h2>Widerstände Teil 1 · Farbcode</h2>
+    <div class="scroll">
+    <table>
+      <thead><tr><th>Wert</th><th>Anzahl</th><th>4 Ringe (Kohle, beige, ±5 %)</th><th>5 Ringe (Metall, blau, ±1 %)</th><th>Wo</th></tr></thead>
+      <tbody>
+        <tr><td><b>4,7 kΩ</b></td><td>2×</td><td><span class="rc" aria-hidden="true"><i class="b-gelb"></i><i class="b-violett"></i><i class="b-rot"></i><i class="b-gold tol"></i></span><br><span class="bands">gelb – violett – rot – gold</span></td><td><span class="rc metal" aria-hidden="true"><i class="b-gelb"></i><i class="b-violett"></i><i class="b-schwarz"></i><i class="b-braun"></i><i class="b-braun tol"></i></span><br><span class="bands">gelb – violett – schwarz – braun – braun</span></td><td>Nr. 7 (RXD #2 → 5V) und Nr. 21 (RXD #1 → 3V3)</td></tr>
+        <tr><td><b>1 kΩ</b></td><td>1×</td><td><span class="rc" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-gold tol"></i></span><br><span class="bands">braun – schwarz – rot – gold</span></td><td><span class="rc metal" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-braun"></i><i class="b-braun tol"></i></span><br><span class="bands">braun – schwarz – schwarz – braun – braun</span></td><td>Nr. 11 (Master-Pull-up, hinter der 1N4148)</td></tr>
+        <tr><td><b>220 Ω</b></td><td>2×</td><td><span class="rc" aria-hidden="true"><i class="b-rot"></i><i class="b-rot"></i><i class="b-braun"></i><i class="b-gold tol"></i></span><br><span class="bands">rot – rot – braun – gold</span></td><td><span class="rc metal" aria-hidden="true"><i class="b-rot"></i><i class="b-rot"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-braun tol"></i></span><br><span class="bands">rot – rot – schwarz – schwarz – braun</span></td><td>Nr. 23 und 24 (Vorwiderstände der Status-LEDs)</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="hint">Lesen: Den Widerstand so halten, dass der abgesetzte Toleranzring (gold bzw. braun) <b>rechts</b> liegt, dann von links lesen.
+      Bei 5 Ringen sind erster und letzter Ring beim 1 kΩ beide braun. Von der falschen Seite gelesen ergäbe sich 110 Ω, das passt zu keinem Bauteil hier.
+      Verwechslungsgefahr: <b>rot ↔ orange</b> (orange als 3. Ring wäre 22 kΩ statt 220 Ω bzw. 47 kΩ statt 4,7 kΩ) und <b>braun ↔ rot</b>.
+      Bei Kunstlicht im Zweifel bei Tageslicht nachsehen.</p>
+  </section>
+
+  <section class="sheet">
     <h2>Kabelliste Teil 1</h2>
     <div class="scroll">
     <table>
@@ -454,21 +500,21 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
         <tr><td class="check"><input type="checkbox" id="w4" aria-label="Kabel 4 gesteckt"></td><td class="n"><span class="num ctx">4</span></td><td>Uno <b>D1 (TX)</b></td><td>#2 Pin 4 <b>TXD</b></td><td>beim Upload abziehen</td></tr>
         <tr><td class="check"><input type="checkbox" id="w5" aria-label="Kabel 5 gesteckt"></td><td class="n"><span class="num crx">5</span></td><td>Uno <b>D0 (RX)</b></td><td>#2 Pin 1 <b>RXD</b></td><td>beim Upload abziehen</td></tr>
         <tr><td class="check"><input type="checkbox" id="w6" aria-label="Kabel 6 gesteckt"></td><td class="n"><span class="num ccs">6</span></td><td>Uno <b>D2</b></td><td>#2 Pin 2 <b>CS</b></td><td>kein Pull-up an CS</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w7" aria-label="Kabel 7 gesteckt"></td><td class="n"><span class="num c5">7</span></td><td>#2 Pin 1 <b>RXD</b></td><td>4,7 kΩ → Uno <b>5V</b></td><td>RXD ist Open-Drain und braucht diesen Pull-up</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w7" aria-label="Kabel 7 gesteckt"></td><td class="n"><span class="num c5">7</span></td><td>#2 Pin 1 <b>RXD</b></td><td>4,7 kΩ<span class="rc" aria-hidden="true"><i class="b-gelb"></i><i class="b-violett"></i><i class="b-rot"></i><i class="b-gold tol"></i></span> → Uno <b>5V</b></td><td>RXD ist Open-Drain und braucht diesen Pull-up</td></tr>
         <tr><td class="check"><input type="checkbox" id="w8" aria-label="Kabel 8 gesteckt"></td><td class="n"><span class="num c12">8</span></td><td>+12-V-Schiene</td><td>#2 Pin 7 <b>VBB</b></td><td></td></tr>
         <tr><td class="check"><input type="checkbox" id="w9" aria-label="Kabel 9 gesteckt"></td><td class="n"><span class="num cg">9</span></td><td>#2 Pin 5 <b>VSS</b></td><td>GND-Schiene</td><td></td></tr>
         <tr><td class="check"><input type="checkbox" id="w10" aria-label="Bauteil 10 gesteckt"></td><td class="n"><span class="num cg">10</span></td><td>100 nF</td><td>#2 Pin 7 ↔ Pin 5</td><td>so nah wie möglich am Chip</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w11" aria-label="Bauteil 11 gesteckt"></td><td class="n"><span class="num c12">11</span></td><td>+12-V-Schiene → <b>1N4148</b> → <b>1 kΩ</b></td><td>#2 Pin 6 <b>LBUS</b></td><td>Diode: Ring (Kathode) zeigt zum Widerstand, weg von 12 V</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w11" aria-label="Bauteil 11 gesteckt"></td><td class="n"><span class="num c12">11</span></td><td>+12-V-Schiene → <b>1N4148</b> → <b>1 kΩ</b><span class="rc" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-gold tol"></i></span></td><td>#2 Pin 6 <b>LBUS</b></td><td>Diode: Ring (Kathode) zeigt zum Widerstand, weg von 12 V</td></tr>
         <tr><td class="check"><input type="checkbox" id="w12" aria-label="Bauteil 12 gesteckt"></td><td class="n"><span class="num clin">12</span></td><td>220 pF</td><td>#2 Pin 6 ↔ GND</td><td>ersetzt die alten 100 nF</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w23" aria-label="Kabel 23 gesteckt"></td><td class="n"><span class="num csig">23</span></td><td>Uno <b>D12</b></td><td>220 Ω → LED grün → Uno <b>GND</b> (oben)</td><td>Status: flackert, wenn Frames ankommen</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w24" aria-label="Kabel 24 gesteckt"></td><td class="n"><span class="num csig">24</span></td><td>Uno <b>D13</b></td><td>220 Ω → LED rot → Uno <b>GND</b> (oben)</td><td>Fehler: 3× kurz pro Fehler</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w23" aria-label="Kabel 23 gesteckt"></td><td class="n"><span class="num csig">23</span></td><td>Uno <b>D12</b></td><td>220 Ω<span class="rc" aria-hidden="true"><i class="b-rot"></i><i class="b-rot"></i><i class="b-braun"></i><i class="b-gold tol"></i></span> → LED grün → Uno <b>GND</b> (oben)</td><td>Status: flackert, wenn Frames ankommen</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w24" aria-label="Kabel 24 gesteckt"></td><td class="n"><span class="num csig">24</span></td><td>Uno <b>D13</b></td><td>220 Ω<span class="rc" aria-hidden="true"><i class="b-rot"></i><i class="b-rot"></i><i class="b-braun"></i><i class="b-gold tol"></i></span> → LED rot → Uno <b>GND</b> (oben)</td><td>Fehler: 3× kurz pro Fehler</td></tr>
         <tr class="group"><td colspan="5">Bus</td></tr>
         <tr><td class="check"><input type="checkbox" id="w13" aria-label="Kabel 13 gesteckt"></td><td class="n"><span class="num clin">13</span></td><td>#2 Pin 6 <b>LBUS</b></td><td>#1 Pin 6 <b>LBUS</b></td><td>der LIN-Draht</td></tr>
         <tr class="group"><td colspan="5">MCP2003 #1 · Slave-Seite (Tiny)</td></tr>
         <tr><td class="check"><input type="checkbox" id="w18" aria-label="Kabel 18 gesteckt"></td><td class="n"><span class="num ctx">18</span></td><td>Tiny <b>GP0</b> (rechte Kante, 1. Pin)</td><td>#1 Pin 4 <b>TXD</b></td><td></td></tr>
         <tr><td class="check"><input type="checkbox" id="w19" aria-label="Kabel 19 gesteckt"></td><td class="n"><span class="num crx">19</span></td><td>Tiny <b>GP1</b> (rechte Kante, 2. Pin)</td><td>#1 Pin 1 <b>RXD</b></td><td></td></tr>
         <tr><td class="check"><input type="checkbox" id="w20" aria-label="Kabel 20 gesteckt"></td><td class="n"><span class="num ccs">20</span></td><td>Tiny <b>GP2</b> (rechte Kante, 3. Pin)</td><td>#1 Pin 2 <b>CS</b></td><td>kein Pull-up an CS</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w21" aria-label="Kabel 21 gesteckt"></td><td class="n"><span class="num c33">21</span></td><td>#1 Pin 1 <b>RXD</b></td><td>4,7 kΩ → Tiny <b>3V3</b></td><td>an 3,3 V, <b>nicht</b> an 5 V</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w21" aria-label="Kabel 21 gesteckt"></td><td class="n"><span class="num c33">21</span></td><td>#1 Pin 1 <b>RXD</b></td><td>4,7 kΩ<span class="rc" aria-hidden="true"><i class="b-gelb"></i><i class="b-violett"></i><i class="b-rot"></i><i class="b-gold tol"></i></span> → Tiny <b>3V3</b></td><td>an 3,3 V, <b>nicht</b> an 5 V</td></tr>
         <tr><td class="check"><input type="checkbox" id="w14" aria-label="Kabel 14 gesteckt"></td><td class="n"><span class="num c12">14</span></td><td>+12-V-Schiene</td><td>#1 Pin 7 <b>VBB</b></td><td></td></tr>
         <tr><td class="check"><input type="checkbox" id="w15" aria-label="Kabel 15 gesteckt"></td><td class="n"><span class="num cg">15</span></td><td>#1 Pin 5 <b>VSS</b></td><td>GND-Schiene</td><td></td></tr>
         <tr><td class="check"><input type="checkbox" id="w16" aria-label="Bauteil 16 gesteckt"></td><td class="n"><span class="num cg">16</span></td><td>100 nF</td><td>#1 Pin 7 ↔ Pin 5</td><td>so nah wie möglich am Chip</td></tr>
@@ -576,7 +622,11 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
 <text x="140" y="244" class="val" text-anchor="end">POT 1</text>
 <rect x="223" y="250" width="14" height="60" class="part"/><polygon points="237,280.0 245,275.0 245,285.0" class="arrowhead"/>
 <text x="220" y="244" class="val" text-anchor="end">POT 2</text>
-<rect x="271.0" y="464.0" width="38" height="12" class="part"/>
+<rect x="271.0" y="464.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="275.4" y="464.9" width="3.2" height="10.2" fill="#d42a1e"/>
+<rect x="281.4" y="464.9" width="3.2" height="10.2" fill="#d42a1e"/>
+<rect x="287.4" y="464.9" width="3.2" height="10.2" fill="#7a4a1f"/>
+<rect x="298.4" y="464.9" width="3.2" height="10.2" fill="#c9a227"/>
 <text x="290" y="458" class="val" text-anchor="middle">220 Ω</text>
 <rect x="191" y="461" width="18" height="18" class="cut"/>
 <polygon points="207,462 207,478 194,470" class="dio led-g"/><line x1="193" y1="462" x2="193" y2="478" class="plate"/><path d="M198,459 l5,-7 M204,459 l5,-7" class="rays"/>

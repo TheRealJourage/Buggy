@@ -1,7 +1,7 @@
 """Generates the SteeringControl wiring page (wiring.html)."""
 import os
 
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "wiring.html")  # body only; steckplan.html wraps it
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "steckplan.html")
 
 HOP = 6
 
@@ -54,9 +54,22 @@ class Fig:
 
 
 # ─── symbols (drawn over wires, bg-filled) ─────────────────────────────────────
+BAND = {"schwarz": "#111111", "braun": "#7a4a1f", "rot": "#d42a1e", "gelb": "#f2c200",
+        "violett": "#7d3cc4", "gold": "#c9a227"}
+CODE4 = {"220 Ω": ("rot", "rot", "braun", "gold"),
+         "1 kΩ": ("braun", "schwarz", "rot", "gold"),
+         "4,7 kΩ": ("gelb", "violett", "rot", "gold")}
+
+
 def resistor(f, x, y, vertical, value, label_side=1):
     w, h = (12, 38) if vertical else (38, 12)
-    f.overlays.append(f'<rect x="{x - w / 2}" y="{y - h / 2}" width="{w}" height="{h}" class="part"/>')
+    f.overlays.append(f'<rect x="{x - w / 2}" y="{y - h / 2}" width="{w}" height="{h}" rx="3" class="part rbody"/>')
+    # 4-band code, first band at the left/top end, tolerance band set apart
+    for off, name in zip((-13, -7, -1, 10), CODE4[value]):
+        if vertical:
+            f.overlays.append(f'<rect x="{x - w / 2 + 0.9}" y="{y + off - 1.6}" width="{w - 1.8}" height="3.2" fill="{BAND[name]}"/>')
+        else:
+            f.overlays.append(f'<rect x="{x + off - 1.6}" y="{y - h / 2 + 0.9}" width="3.2" height="{h - 1.8}" fill="{BAND[name]}"/>')
     if vertical:
         f.overlays.append(f'<text x="{x + label_side * 12}" y="{y + 4}" class="val" text-anchor="{"start" if label_side > 0 else "end"}">{value}</text>')
     else:
@@ -357,6 +370,8 @@ FIG2 = f2.svg("0 0 960 540", "Eingaben am RP2040-Tiny: 7 Taster, 2 Potis, Status
 
 html = open(os.path.join(os.path.dirname(OUT), "template.html"), encoding="utf-8").read()
 html = html.replace("{{FIG1}}", FIG1).replace("{{FIG2}}", FIG2)
+html = ('<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">\n'
+        + html.replace("</style>\n", "</style>\n</head><body>\n", 1) + "</body></html>\n")
 open(OUT, "w", encoding="utf-8").write(html)
 print("written", OUT, len(html))
 

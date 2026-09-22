@@ -35,6 +35,7 @@ svg .lbl.used { fill: var(--ink); font-weight: 600; }
 svg .val { font-size: 11px; fill: var(--ink); }
 svg .val.strong { font-weight: 600; font-family: var(--sans); font-size: 12px; }
 svg .part { fill: var(--panel); stroke: var(--ink); stroke-width: 1.8; }
+svg .part.rbody { fill: #e6d3a8; stroke-width: 1.2; }
 svg .cut { fill: var(--panel); }
 svg .plate { stroke: var(--ink); stroke-width: 2.4; }
 svg .dio { fill: var(--ink); }
@@ -134,7 +135,11 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <text x="140" y="244" class="val" text-anchor="end">POT 1</text>
 <rect x="223" y="250" width="14" height="60" class="part"/><polygon points="237,280.0 245,275.0 245,285.0" class="arrowhead"/>
 <text x="220" y="244" class="val" text-anchor="end">POT 2</text>
-<rect x="271.0" y="464.0" width="38" height="12" class="part"/>
+<rect x="271.0" y="464.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="275.4" y="464.9" width="3.2" height="10.2" fill="#d42a1e"/>
+<rect x="281.4" y="464.9" width="3.2" height="10.2" fill="#d42a1e"/>
+<rect x="287.4" y="464.9" width="3.2" height="10.2" fill="#7a4a1f"/>
+<rect x="298.4" y="464.9" width="3.2" height="10.2" fill="#c9a227"/>
 <text x="290" y="458" class="val" text-anchor="middle">220 Ω</text>
 <rect x="191" y="461" width="18" height="18" class="cut"/>
 <polygon points="207,462 207,478 194,470" class="dio led-g"/><line x1="193" y1="462" x2="193" y2="478" class="plate"/><path d="M198,459 l5,-7 M204,459 l5,-7" class="rays"/>

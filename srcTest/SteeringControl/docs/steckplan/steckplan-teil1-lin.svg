@@ -35,6 +35,7 @@ svg .lbl.used { fill: var(--ink); font-weight: 600; }
 svg .val { font-size: 11px; fill: var(--ink); }
 svg .val.strong { font-weight: 600; font-family: var(--sans); font-size: 12px; }
 svg .part { fill: var(--panel); stroke: var(--ink); stroke-width: 1.8; }
+svg .part.rbody { fill: #e6d3a8; stroke-width: 1.2; }
 svg .cut { fill: var(--panel); }
 svg .plate { stroke: var(--ink); stroke-width: 2.4; }
 svg .dio { fill: var(--ink); }
@@ -210,16 +211,28 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <text x="1070" y="490" class="lbl" text-anchor="middle">11</text>
 <rect x="1090.5" y="495.5" width="9" height="9" class="pad"/>
 <text x="1095" y="490" class="lbl" text-anchor="middle">10</text>
-<rect x="451.0" y="576.0" width="38" height="12" class="part"/>
+<rect x="451.0" y="576.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="455.4" y="576.9" width="3.2" height="10.2" fill="#f2c200"/>
+<rect x="461.4" y="576.9" width="3.2" height="10.2" fill="#7d3cc4"/>
+<rect x="467.4" y="576.9" width="3.2" height="10.2" fill="#d42a1e"/>
+<rect x="478.4" y="576.9" width="3.2" height="10.2" fill="#c9a227"/>
 <text x="470" y="570" class="val" text-anchor="middle">4,7 kΩ</text>
 <path d="M635,367 l10,10 M645,367 l-10,10" class="ncx"/>
-<rect x="181.0" y="144.0" width="38" height="12" class="part"/>
+<rect x="181.0" y="144.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="185.4" y="144.9" width="3.2" height="10.2" fill="#d42a1e"/>
+<rect x="191.4" y="144.9" width="3.2" height="10.2" fill="#d42a1e"/>
+<rect x="197.4" y="144.9" width="3.2" height="10.2" fill="#7a4a1f"/>
+<rect x="208.4" y="144.9" width="3.2" height="10.2" fill="#c9a227"/>
 <text x="200" y="138" class="val" text-anchor="middle">220 Ω</text>
 <rect x="131" y="141" width="18" height="18" class="cut"/>
 <polygon points="147,142 147,158 134,150" class="dio led-g"/><line x1="133" y1="142" x2="133" y2="158" class="plate"/><path d="M138,139 l5,-7 M144,139 l5,-7" class="rays"/>
 <text x="140" y="172" class="val" text-anchor="middle"></text>
 <text x="88" y="154" class="val" text-anchor="end">LED grün</text>
-<rect x="181.0" y="172.0" width="38" height="12" class="part"/>
+<rect x="181.0" y="172.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="185.4" y="172.9" width="3.2" height="10.2" fill="#d42a1e"/>
+<rect x="191.4" y="172.9" width="3.2" height="10.2" fill="#d42a1e"/>
+<rect x="197.4" y="172.9" width="3.2" height="10.2" fill="#7a4a1f"/>
+<rect x="208.4" y="172.9" width="3.2" height="10.2" fill="#c9a227"/>
 <text x="200" y="194" class="val" text-anchor="middle">220 Ω</text>
 <rect x="131" y="169" width="18" height="18" class="cut"/>
 <polygon points="147,170 147,186 134,178" class="dio led-r"/><line x1="133" y1="170" x2="133" y2="186" class="plate"/><path d="M138,167 l5,-7 M144,167 l5,-7" class="rays"/>
@@ -238,7 +251,11 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <polygon points="912,153 928,153 920,166" class="dio "/><line x1="912" y1="167" x2="928" y2="167" class="plate"/>
 <text x="934" y="164" class="val">1N4148, Ring unten</text>
 <text x="934" y="180" class="val strong">Master-Pull-up</text>
-<rect x="914.0" y="243.0" width="12" height="38" class="part"/>
+<rect x="914.0" y="243.0" width="12" height="38" rx="3" class="part rbody"/>
+<rect x="914.9" y="247.4" width="10.2" height="3.2" fill="#7a4a1f"/>
+<rect x="914.9" y="253.4" width="10.2" height="3.2" fill="#111111"/>
+<rect x="914.9" y="259.4" width="10.2" height="3.2" fill="#d42a1e"/>
+<rect x="914.9" y="270.4" width="10.2" height="3.2" fill="#c9a227"/>
 <text x="908" y="266" class="val" text-anchor="end">1 kΩ</text>
 <path d="M1355,295 l10,10 M1365,295 l-10,10" class="ncx"/>
 <text x="1370" y="304" class="nc" text-anchor="start">frei</text>
@@ -249,7 +266,11 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <line x1="1407" y1="603" x2="1407" y2="621" class="plate"/><line x1="1413" y1="603" x2="1413" y2="621" class="plate"/>
 <text x="1410" y="634" class="val" text-anchor="middle">220 pF</text>
 <path d="M1195,367 l10,10 M1205,367 l-10,10" class="ncx"/>
-<rect x="1111.0" y="190.0" width="38" height="12" class="part"/>
+<rect x="1111.0" y="190.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="1115.4" y="190.9" width="3.2" height="10.2" fill="#f2c200"/>
+<rect x="1121.4" y="190.9" width="3.2" height="10.2" fill="#7d3cc4"/>
+<rect x="1127.4" y="190.9" width="3.2" height="10.2" fill="#d42a1e"/>
+<rect x="1138.4" y="190.9" width="3.2" height="10.2" fill="#c9a227"/>
 <text x="1130" y="184" class="val" text-anchor="middle">4,7 kΩ</text><circle cx="200" cy="120" r="4" class="dot c12"/>
 <circle cx="628" cy="300" r="4" class="dot crx"/>
 <circle cx="290" cy="748" r="4" class="dot cg"/>
