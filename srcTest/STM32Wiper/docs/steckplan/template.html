@@ -1,0 +1,284 @@
+<title>Lenkstockschalter Steckplan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #e9eeec;
+  --panel: #fbfcfc;
+  --ink: #16201c;
+  --muted: #5d6c66;
+  --faint: #d5ddda;
+  --accent: #0f6b62;
+  --board-uno: #d8ebee;  --board-uno-s: #2f7d8c;
+  --board-tiny: #dde4f4; --board-tiny-s: #3b5aa3;
+  --board-psu: #f1e3e1;  --board-psu-s: #9b4a3f;
+  --board-nucleo: #e4e9f2; --board-nucleo-s: #56627a;
+  --chip: #262b2a; --chip-ink: #eef2f1;
+  --w12: #d42a1e; --wg: #161616; --w5: #f07c00; --w33: #f07c00;
+  --wrx: #1f5fd1; --wtx: #1f9d3a; --wcs: #ffffff; --wlin: #f2c200;
+  --wsig: #ffffff; --wbtn: #f2c200; --wpot: #1f9d3a;
+  --casing: #7d8a85;
+  --led-g: #36b24a; --led-r: #e0413a;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1412; --panel: #141c19; --ink: #e2eae6; --muted: #93a39c; --faint: #26332e; --accent: #4fc3b4;
+    --board-uno: #10303a; --board-uno-s: #4aa3b5;
+    --board-tiny: #182441; --board-tiny-s: #7894d6;
+    --board-psu: #3a1f1c; --board-psu-s: #d08a7f;
+    --board-nucleo: #1c2230; --board-nucleo-s: #8f9bb5;
+    --chip: #3a4240; --chip-ink: #eef2f1;
+    --casing: #8f9c97;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1412; --panel: #141c19; --ink: #e2eae6; --muted: #93a39c; --faint: #26332e; --accent: #4fc3b4;
+  --board-uno: #10303a; --board-uno-s: #4aa3b5;
+  --board-tiny: #182441; --board-tiny-s: #7894d6;
+  --board-psu: #3a1f1c; --board-psu-s: #d08a7f;
+  --board-nucleo: #1c2230; --board-nucleo-s: #8f9bb5;
+  --chip: #3a4240; --chip-ink: #eef2f1;
+  --casing: #8f9c97;
+}
+
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--sans); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 28px; }
+header { display: grid; gap: 6px; }
+.eyebrow { font: 600 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { font-size: clamp(26px, 4vw, 38px); line-height: 1.1; margin: 0; text-wrap: balance; font-weight: 700; }
+h2 { font-size: 21px; margin: 0; text-wrap: balance; }
+.lede { max-width: 72ch; color: var(--muted); margin: 0; }
+.lede b { color: var(--ink); }
+
+.facts { display: flex; flex-wrap: wrap; gap: 8px; }
+.fact { font: 500 13px/1 var(--mono); padding: 8px 10px; border: 1px solid var(--faint); border-radius: 6px; background: var(--panel); }
+.fact b { color: var(--accent); font-weight: 600; }
+
+section { display: grid; gap: 14px; }
+.sheet { background: var(--panel); border: 1px solid var(--faint); border-radius: 10px; padding: 18px; display: grid; gap: 14px; }
+.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.scroll svg { display: block; width: 100%; min-width: 980px; height: auto; }
+.scroll.small svg { min-width: 760px; }
+figcaption { color: var(--muted); font-size: 14px; max-width: 80ch; }
+.hint { font-size: 13px; color: var(--muted); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.legend i { width: 22px; height: 4px; border-radius: 2px; display: inline-block; }
+.legend i.sym { width: auto; height: auto; background: none; box-shadow: none; font-style: normal; font: 600 13px var(--mono); }
+
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--faint); vertical-align: top; }
+th { font: 600 12px var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+td.n { width: 44px; }
+td code, li code { font: 13px var(--mono); }
+.num { display: inline-grid; place-items: center; min-width: 26px; height: 26px; border-radius: 13px; font: 600 12px var(--mono); color: #fff; padding-inline: 4px; }
+td.check { width: 30px; }
+input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
+.group td { background: var(--bg); font: 600 12px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.note { background: var(--panel); border: 1px solid var(--faint); border-radius: 10px; padding: 14px 16px; }
+.note h3 { margin: 0 0 6px; font-size: 15px; }
+.note p, .note ul { margin: 0; font-size: 14px; color: var(--muted); }
+.note ul { padding-left: 18px; }
+.note.warn { border-color: var(--w12); }
+.note.warn h3 { color: var(--w12); }
+a { color: var(--accent); }
+a:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* colour swatches for badges / legend */
+.c12 { --c: var(--w12); } .cg { --c: var(--wg); } .c5 { --c: var(--w5); } .c33 { --c: var(--w33); }
+.crx { --c: var(--wrx); } .ctx { --c: var(--wtx); } .ccs { --c: var(--wcs); } .clin { --c: var(--wlin); }
+.csig { --c: var(--wsig); } .cbtn { --c: var(--wbtn); } .cpot { --c: var(--wpot); }
+.num, .legend i { background: var(--c); box-shadow: inset 0 0 0 1px var(--casing); }
+.clin.num, .cbtn.num, .c5.num, .c33.num, .ccs.num, .csig.num { color: #161616; }
+.rc { display: inline-flex; align-items: center; gap: 3px; height: 16px; padding: 0 6px; margin-left: 6px; border-radius: 8px; background: #e6d3a8; border: 1px solid #8a7550; vertical-align: -3px; }
+.rc.metal { background: #9cc3e6; border-color: #4f7aa3; }
+.rc i { width: 5px; height: 14px; }
+.rc i.tol { margin-left: 5px; }
+.b-schwarz { background: #111; } .b-braun { background: #7a4a1f; } .b-rot { background: #d42a1e; }
+.b-gelb { background: #f2c200; } .b-gruen { background: #1f9d3a; } .b-gold { background: #c9a227; }
+.bands { font-size: 13px; color: var(--muted); }
+
+/* SVG */
+svg text { font-family: var(--mono); fill: var(--ink); }
+svg .wc.later, svg .w.later { stroke-dasharray: 7 6; opacity: .45; }
+svg .badge.later { opacity: .45; }
+svg .wc { fill: none; stroke: var(--casing); stroke-width: 5; stroke-linejoin: round; stroke-linecap: round; }
+svg .w { fill: none; stroke: var(--c); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+svg .dot { fill: var(--c); stroke: var(--casing); stroke-width: 1; }
+svg .badge circle { fill: var(--c); stroke: var(--casing); stroke-width: 1.5; }
+svg .badge text { font-size: 11px; font-weight: 600; fill: #fff; }
+svg .badge.clin text, svg .badge.cbtn text, svg .badge.c5 text, svg .badge.c33 text, svg .badge.ccs text, svg .badge.csig text { fill: #161616; }
+svg .board { stroke-width: 2; }
+svg .uno { fill: var(--board-uno); stroke: var(--board-uno-s); }
+svg .tiny { fill: var(--board-tiny); stroke: var(--board-tiny-s); }
+svg .psu { fill: var(--board-psu); stroke: var(--board-psu-s); }
+svg .nucleo { fill: var(--board-nucleo); stroke: var(--board-nucleo-s); }
+svg .stalk { fill: var(--board-psu); stroke: var(--board-psu-s); }
+svg .stlink { fill: none; stroke: var(--board-nucleo-s); stroke-width: 1.2; stroke-dasharray: 4 3; }
+svg .port { fill: var(--panel); stroke: var(--muted); stroke-width: 1.5; }
+svg .mcu { fill: var(--chip); }
+svg .mcu + text, svg .porttxt { font-size: 10px; fill: var(--muted); }
+svg .mcu + text { fill: var(--chip-ink); }
+svg .boardname { font-family: var(--sans); font-weight: 700; font-size: 14px; }
+svg .boardname.big { font-size: 18px; }
+svg .chipname { font-family: var(--sans); font-weight: 700; font-size: 14px; }
+svg .chipsub { font-family: var(--sans); font-size: 12px; fill: var(--muted); }
+svg .hdr { font-size: 10px; letter-spacing: .08em; fill: var(--muted); }
+svg .rail { font-size: 12px; font-weight: 600; fill: var(--muted); }
+svg .chip { fill: var(--chip); }
+svg .notch { fill: var(--panel); }
+svg .pin1 { fill: var(--chip-ink); }
+svg .pinname { font-size: 11px; fill: var(--chip-ink); }
+svg .lead { stroke: var(--muted); stroke-width: 3; }
+svg .pad { fill: var(--panel); stroke: var(--muted); stroke-width: 1.2; }
+svg .pad.used { fill: var(--ink); stroke: var(--ink); }
+svg .lbl { font-size: 10px; fill: var(--muted); }
+svg .lbl.used { fill: var(--ink); font-weight: 600; }
+svg .val { font-size: 11px; fill: var(--ink); }
+svg .val.strong { font-weight: 600; font-family: var(--sans); font-size: 12px; }
+svg .part { fill: var(--panel); stroke: var(--ink); stroke-width: 1.8; }
+svg .part.rbody { fill: #9cc3e6; stroke-width: 1.2; }
+svg .cut { fill: var(--panel); }
+svg .plate { stroke: var(--ink); stroke-width: 2.4; }
+svg .dio { fill: var(--ink); }
+svg .dio.led-g { fill: var(--led-g); }
+svg .dio.led-r { fill: var(--led-r); }
+svg .pol { font-size: 9px; font-weight: 600; fill: var(--ink); }
+svg .rays { stroke: var(--ink); stroke-width: 1.3; fill: none; }
+svg .term { fill: var(--panel); stroke: var(--ink); stroke-width: 1.5; }
+svg .term.plus { stroke: var(--w12); stroke-width: 2.5; }
+svg .term.minus { stroke: var(--wg); stroke-width: 2.5; }
+svg .termtxt { font-size: 11px; font-weight: 600; }
+svg .arrowhead { fill: var(--ink); }
+svg .ncx { stroke: var(--w12); stroke-width: 2.4; }
+svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
+
+@media (max-width: 640px) {
+  .wrap { padding-inline: 16px; }
+  .sheet { padding: 12px; }
+  th, td { padding: 6px 6px; }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Buggy · STM32Wiper · Eingänge</span>
+    <h1>Lenkstockschalter: Steckplan</h1>
+    <p class="lede">Die originalen <b>Corsa-C-Lenkstockschalter</b> (Blinker/Fernlicht und Wischer) am <b>Nucleo-F446RE</b>.
+      Jeder Schalter ist eine Widerstandskaskade: Je nach Stellung ändert sich der Widerstand nach Masse, der Pull-up macht daraus eine Spannung am ADC.
+      Relais werden hier <b>nicht</b> verbaut, die Schalterstellungen gehen später per CAN an die Relaisbox.</p>
+  </header>
+
+  <div class="facts" aria-label="Eckdaten">
+    <span class="fact">Pull-ups an <b>3,3 V</b> (nie 5 V)</span>
+    <span class="fact">Pull-up <b>10 kΩ</b> (Wert prüfen)</span>
+    <span class="fact">ADC <b>12 bit</b> (0–4095)</span>
+    <span class="fact">Nucleo über <b>USB</b></span>
+  </div>
+
+  <section class="sheet">
+    <h2>Verkabelung</h2>
+    <div class="legend" aria-label="Farblegende">
+      <span class="c33"><i></i>3,3 V · orange</span>
+      <span class="cg"><i></i>GND · schwarz</span>
+      <span class="crx"><i></i>A0 Blinker · blau</span>
+      <span class="ctx"><i></i>A1 Frontwischer · grün</span>
+      <span class="clin"><i></i>A2 Fernlicht · gelb</span>
+      <span class="ccs"><i></i>A3 Heckwischer · weiß</span>
+      <span class="csig"><i></i>D7 Taster · weiß</span>
+      <span><i class="sym">●</i>verbunden</span>
+      <span><i class="sym">⌒</i>Kreuzung, nicht verbunden</span>
+    </div>
+    <figure class="scroll" style="margin:0">
+      {{FIG1}}
+    </figure>
+    <figcaption>Der Nucleo ist hochkant gezeichnet (ST-LINK-USB oben), so wie er vor dir liegt. Die Pins sind die inneren Arduino-Buchsenleisten:
+      links CN6 (Versorgung) und CN8 (A0–A5), rechts CN5 und CN9 (D15–D0). Welche Pins am Schalterstecker Signal und Masse sind, musst du am Schalter nachmessen.</figcaption>
+  </section>
+
+  <section class="sheet">
+    <h2>Kabelliste</h2>
+    <div class="scroll">
+    <table>
+      <thead><tr><th></th><th>Nr.</th><th>Von</th><th>Nach</th><th>Hinweis</th></tr></thead>
+      <tbody>
+        <tr class="group"><td colspan="5">Versorgung</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w1" aria-label="Kabel 1 gesteckt"></td><td class="n"><span class="num c33">1</span></td><td>Nucleo <b>+3V3</b> (CN6, linke Leiste, 4. Pin)</td><td>3,3-V-Schiene</td><td><b>nicht 5 V</b>: die ADC-Pins vertragen im Analogbetrieb nur 3,3 V</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w2" aria-label="Kabel 2 gesteckt"></td><td class="n"><span class="num cg">2</span></td><td>Nucleo <b>GND</b> (CN6, 6. Pin)</td><td>Masse der Lenkstockschalter</td><td>der Nucleo selbst hängt per USB (ST-LINK) am PC</td></tr>
+        <tr class="group"><td colspan="5">Schaltersignale → ADC</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w3" aria-label="Kabel 3 gesteckt"></td><td class="n"><span class="num crx">3</span></td><td>Blinker <b>SIG_A</b></td><td>Nucleo <b>A0</b> (PA0)</td><td></td></tr>
+        <tr><td class="check"><input type="checkbox" id="w4" aria-label="Kabel 4 gesteckt"></td><td class="n"><span class="num ctx">4</span></td><td>Frontwischer</td><td>Nucleo <b>A1</b> (PA1)</td><td></td></tr>
+        <tr><td class="check"><input type="checkbox" id="w5" aria-label="Kabel 5 gesteckt"></td><td class="n"><span class="num clin">5</span></td><td>Fernlicht <b>SIG_B</b></td><td>Nucleo <b>A2</b> (PA4)</td><td>die Firmware liest den Pin noch nicht aus (Stub)</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w6" aria-label="Kabel 6 gesteckt"></td><td class="n"><span class="num ccs">6</span></td><td>Heckwischer</td><td>Nucleo <b>A3</b> (PB0)</td><td></td></tr>
+        <tr class="group"><td colspan="5">Pull-ups (je einer pro ADC-Pin)</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w7" aria-label="Kabel 7 gesteckt"></td><td class="n"><span class="num c33">7</span></td><td>3,3-V-Schiene</td><td>10 kΩ<span class="rc metal" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-braun tol"></i></span> → <b>A0</b></td><td>Richtung egal</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w8" aria-label="Kabel 8 gesteckt"></td><td class="n"><span class="num c33">8</span></td><td>3,3-V-Schiene</td><td>10 kΩ<span class="rc metal" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-braun tol"></i></span> → <b>A1</b></td><td>Richtung egal</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w9" aria-label="Kabel 9 gesteckt"></td><td class="n"><span class="num c33">9</span></td><td>3,3-V-Schiene</td><td>10 kΩ<span class="rc metal" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-braun tol"></i></span> → <b>A2</b></td><td>Richtung egal</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w10" aria-label="Kabel 10 gesteckt"></td><td class="n"><span class="num c33">10</span></td><td>3,3-V-Schiene</td><td>10 kΩ<span class="rc metal" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-braun tol"></i></span> → <b>A3</b></td><td>Richtung egal</td></tr>
+        <tr class="group"><td colspan="5">Kalibrier-Taster</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w11" aria-label="Kabel 11 gesteckt"></td><td class="n"><span class="num c33">11</span></td><td>Nucleo <b>+3V3</b></td><td>Taster</td><td></td></tr>
+        <tr><td class="check"><input type="checkbox" id="w12" aria-label="Kabel 12 gesteckt"></td><td class="n"><span class="num csig">12</span></td><td>Taster</td><td>Nucleo <b>D7</b> (PA8, CN9, rechte Leiste)</td><td>Pull-down ist intern (<code>INPUT_PULLDOWN</code>), kein Widerstand nötig</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="hint">Die Häkchen merkt sich dein Browser auf diesem Gerät.</p>
+  </section>
+
+  <section class="sheet">
+    <h2>Widerstand · Farbcode</h2>
+    <div class="scroll">
+    <table>
+      <thead><tr><th>Wert</th><th>Anzahl</th><th>5 Ringe (Metall, blau, ±1 %)</th><th>Wo</th></tr></thead>
+      <tbody>
+        <tr><td><b>10 kΩ</b></td><td>4×</td><td><span class="rc metal" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-braun tol"></i></span><br><span class="bands">braun – schwarz – schwarz – rot – braun</span></td><td>Nr. 7–10, Pull-ups an A0–A3</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="hint">Achtung: Von der anderen Seite gelesen ergibt derselbe Widerstand braun – rot – schwarz – schwarz – braun = <b>120 Ω</b>. Beide Enden sind braun, deshalb mit dem Multimeter prüfen.
+      Der genaue Wert ist unkritisch, weil die Kalibrier-Firmware die Schwellen neu lernt. Er muss nur bei allen vier gleich sein, und nach einem Tausch neu kalibrieren.</p>
+  </section>
+
+  <div class="notes">
+    <div class="note warn">
+      <h3>Nicht anschließen</h3>
+      <ul>
+        <li>Pull-ups <b>nie an 5 V</b>: A0–A3 vertragen im Analogbetrieb nur 3,3 V.</li>
+        <li>Keine Fahrzeug-12-V an den Schalterstecker, solange er am Nucleo hängt.</li>
+        <li>Das Relaisboard entfällt, D3–D6 und D8–D10 bleiben frei.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h3>Danach</h3>
+      <p>Kalibrieren: <code>pio run -e calibrate -t upload</code>, im Monitor je Schalter <code>b</code>/<code>w</code>/<code>r</code> wählen, die Stellungen mit <code>0</code>–<code>4</code> erfassen, mit <code>s</code> speichern.
+        Die Rohwerte zeigt auch die Debug-Ausgabe der Hauptfirmware (115200 Baud).</p>
+    </div>
+    <div class="note">
+      <h3>Quellen</h3>
+      <ul>
+        <li><a href="https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf">ST UM1724</a> (Nucleo-64, Arduino-Leisten CN5/CN6/CN8/CN9)</li>
+        <li>Pinbelegung: <code>STM32Wiper/include/config.h</code></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const KEY = "wiper-steckplan-checks";
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { saved = {}; }
+  document.querySelectorAll('input[type="checkbox"]').forEach((box) => {
+    box.checked = !!saved[box.id];
+    box.addEventListener("change", () => {
+      saved[box.id] = box.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {}
+    });
+  });
+})();
+</script>

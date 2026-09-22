@@ -1,0 +1,423 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lenkstockschalter Steckplan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #e9eeec;
+  --panel: #fbfcfc;
+  --ink: #16201c;
+  --muted: #5d6c66;
+  --faint: #d5ddda;
+  --accent: #0f6b62;
+  --board-uno: #d8ebee;  --board-uno-s: #2f7d8c;
+  --board-tiny: #dde4f4; --board-tiny-s: #3b5aa3;
+  --board-psu: #f1e3e1;  --board-psu-s: #9b4a3f;
+  --board-nucleo: #e4e9f2; --board-nucleo-s: #56627a;
+  --chip: #262b2a; --chip-ink: #eef2f1;
+  --w12: #d42a1e; --wg: #161616; --w5: #f07c00; --w33: #f07c00;
+  --wrx: #1f5fd1; --wtx: #1f9d3a; --wcs: #ffffff; --wlin: #f2c200;
+  --wsig: #ffffff; --wbtn: #f2c200; --wpot: #1f9d3a;
+  --casing: #7d8a85;
+  --led-g: #36b24a; --led-r: #e0413a;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1412; --panel: #141c19; --ink: #e2eae6; --muted: #93a39c; --faint: #26332e; --accent: #4fc3b4;
+    --board-uno: #10303a; --board-uno-s: #4aa3b5;
+    --board-tiny: #182441; --board-tiny-s: #7894d6;
+    --board-psu: #3a1f1c; --board-psu-s: #d08a7f;
+    --board-nucleo: #1c2230; --board-nucleo-s: #8f9bb5;
+    --chip: #3a4240; --chip-ink: #eef2f1;
+    --casing: #8f9c97;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1412; --panel: #141c19; --ink: #e2eae6; --muted: #93a39c; --faint: #26332e; --accent: #4fc3b4;
+  --board-uno: #10303a; --board-uno-s: #4aa3b5;
+  --board-tiny: #182441; --board-tiny-s: #7894d6;
+  --board-psu: #3a1f1c; --board-psu-s: #d08a7f;
+  --board-nucleo: #1c2230; --board-nucleo-s: #8f9bb5;
+  --chip: #3a4240; --chip-ink: #eef2f1;
+  --casing: #8f9c97;
+}
+
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--sans); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 28px; }
+header { display: grid; gap: 6px; }
+.eyebrow { font: 600 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { font-size: clamp(26px, 4vw, 38px); line-height: 1.1; margin: 0; text-wrap: balance; font-weight: 700; }
+h2 { font-size: 21px; margin: 0; text-wrap: balance; }
+.lede { max-width: 72ch; color: var(--muted); margin: 0; }
+.lede b { color: var(--ink); }
+
+.facts { display: flex; flex-wrap: wrap; gap: 8px; }
+.fact { font: 500 13px/1 var(--mono); padding: 8px 10px; border: 1px solid var(--faint); border-radius: 6px; background: var(--panel); }
+.fact b { color: var(--accent); font-weight: 600; }
+
+section { display: grid; gap: 14px; }
+.sheet { background: var(--panel); border: 1px solid var(--faint); border-radius: 10px; padding: 18px; display: grid; gap: 14px; }
+.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.scroll svg { display: block; width: 100%; min-width: 980px; height: auto; }
+.scroll.small svg { min-width: 760px; }
+figcaption { color: var(--muted); font-size: 14px; max-width: 80ch; }
+.hint { font-size: 13px; color: var(--muted); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.legend i { width: 22px; height: 4px; border-radius: 2px; display: inline-block; }
+.legend i.sym { width: auto; height: auto; background: none; box-shadow: none; font-style: normal; font: 600 13px var(--mono); }
+
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--faint); vertical-align: top; }
+th { font: 600 12px var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+td.n { width: 44px; }
+td code, li code { font: 13px var(--mono); }
+.num { display: inline-grid; place-items: center; min-width: 26px; height: 26px; border-radius: 13px; font: 600 12px var(--mono); color: #fff; padding-inline: 4px; }
+td.check { width: 30px; }
+input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
+.group td { background: var(--bg); font: 600 12px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.note { background: var(--panel); border: 1px solid var(--faint); border-radius: 10px; padding: 14px 16px; }
+.note h3 { margin: 0 0 6px; font-size: 15px; }
+.note p, .note ul { margin: 0; font-size: 14px; color: var(--muted); }
+.note ul { padding-left: 18px; }
+.note.warn { border-color: var(--w12); }
+.note.warn h3 { color: var(--w12); }
+a { color: var(--accent); }
+a:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* colour swatches for badges / legend */
+.c12 { --c: var(--w12); } .cg { --c: var(--wg); } .c5 { --c: var(--w5); } .c33 { --c: var(--w33); }
+.crx { --c: var(--wrx); } .ctx { --c: var(--wtx); } .ccs { --c: var(--wcs); } .clin { --c: var(--wlin); }
+.csig { --c: var(--wsig); } .cbtn { --c: var(--wbtn); } .cpot { --c: var(--wpot); }
+.num, .legend i { background: var(--c); box-shadow: inset 0 0 0 1px var(--casing); }
+.clin.num, .cbtn.num, .c5.num, .c33.num, .ccs.num, .csig.num { color: #161616; }
+.rc { display: inline-flex; align-items: center; gap: 3px; height: 16px; padding: 0 6px; margin-left: 6px; border-radius: 8px; background: #e6d3a8; border: 1px solid #8a7550; vertical-align: -3px; }
+.rc.metal { background: #9cc3e6; border-color: #4f7aa3; }
+.rc i { width: 5px; height: 14px; }
+.rc i.tol { margin-left: 5px; }
+.b-schwarz { background: #111; } .b-braun { background: #7a4a1f; } .b-rot { background: #d42a1e; }
+.b-gelb { background: #f2c200; } .b-gruen { background: #1f9d3a; } .b-gold { background: #c9a227; }
+.bands { font-size: 13px; color: var(--muted); }
+
+/* SVG */
+svg text { font-family: var(--mono); fill: var(--ink); }
+svg .wc.later, svg .w.later { stroke-dasharray: 7 6; opacity: .45; }
+svg .badge.later { opacity: .45; }
+svg .wc { fill: none; stroke: var(--casing); stroke-width: 5; stroke-linejoin: round; stroke-linecap: round; }
+svg .w { fill: none; stroke: var(--c); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+svg .dot { fill: var(--c); stroke: var(--casing); stroke-width: 1; }
+svg .badge circle { fill: var(--c); stroke: var(--casing); stroke-width: 1.5; }
+svg .badge text { font-size: 11px; font-weight: 600; fill: #fff; }
+svg .badge.clin text, svg .badge.cbtn text, svg .badge.c5 text, svg .badge.c33 text, svg .badge.ccs text, svg .badge.csig text { fill: #161616; }
+svg .board { stroke-width: 2; }
+svg .uno { fill: var(--board-uno); stroke: var(--board-uno-s); }
+svg .tiny { fill: var(--board-tiny); stroke: var(--board-tiny-s); }
+svg .psu { fill: var(--board-psu); stroke: var(--board-psu-s); }
+svg .nucleo { fill: var(--board-nucleo); stroke: var(--board-nucleo-s); }
+svg .stalk { fill: var(--board-psu); stroke: var(--board-psu-s); }
+svg .stlink { fill: none; stroke: var(--board-nucleo-s); stroke-width: 1.2; stroke-dasharray: 4 3; }
+svg .port { fill: var(--panel); stroke: var(--muted); stroke-width: 1.5; }
+svg .mcu { fill: var(--chip); }
+svg .mcu + text, svg .porttxt { font-size: 10px; fill: var(--muted); }
+svg .mcu + text { fill: var(--chip-ink); }
+svg .boardname { font-family: var(--sans); font-weight: 700; font-size: 14px; }
+svg .boardname.big { font-size: 18px; }
+svg .chipname { font-family: var(--sans); font-weight: 700; font-size: 14px; }
+svg .chipsub { font-family: var(--sans); font-size: 12px; fill: var(--muted); }
+svg .hdr { font-size: 10px; letter-spacing: .08em; fill: var(--muted); }
+svg .rail { font-size: 12px; font-weight: 600; fill: var(--muted); }
+svg .chip { fill: var(--chip); }
+svg .notch { fill: var(--panel); }
+svg .pin1 { fill: var(--chip-ink); }
+svg .pinname { font-size: 11px; fill: var(--chip-ink); }
+svg .lead { stroke: var(--muted); stroke-width: 3; }
+svg .pad { fill: var(--panel); stroke: var(--muted); stroke-width: 1.2; }
+svg .pad.used { fill: var(--ink); stroke: var(--ink); }
+svg .lbl { font-size: 10px; fill: var(--muted); }
+svg .lbl.used { fill: var(--ink); font-weight: 600; }
+svg .val { font-size: 11px; fill: var(--ink); }
+svg .val.strong { font-weight: 600; font-family: var(--sans); font-size: 12px; }
+svg .part { fill: var(--panel); stroke: var(--ink); stroke-width: 1.8; }
+svg .part.rbody { fill: #9cc3e6; stroke-width: 1.2; }
+svg .cut { fill: var(--panel); }
+svg .plate { stroke: var(--ink); stroke-width: 2.4; }
+svg .dio { fill: var(--ink); }
+svg .dio.led-g { fill: var(--led-g); }
+svg .dio.led-r { fill: var(--led-r); }
+svg .pol { font-size: 9px; font-weight: 600; fill: var(--ink); }
+svg .rays { stroke: var(--ink); stroke-width: 1.3; fill: none; }
+svg .term { fill: var(--panel); stroke: var(--ink); stroke-width: 1.5; }
+svg .term.plus { stroke: var(--w12); stroke-width: 2.5; }
+svg .term.minus { stroke: var(--wg); stroke-width: 2.5; }
+svg .termtxt { font-size: 11px; font-weight: 600; }
+svg .arrowhead { fill: var(--ink); }
+svg .ncx { stroke: var(--w12); stroke-width: 2.4; }
+svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
+
+@media (max-width: 640px) {
+  .wrap { padding-inline: 16px; }
+  .sheet { padding: 12px; }
+  th, td { padding: 6px 6px; }
+}
+</style>
+</head><body>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Buggy · STM32Wiper · Eingänge</span>
+    <h1>Lenkstockschalter: Steckplan</h1>
+    <p class="lede">Die originalen <b>Corsa-C-Lenkstockschalter</b> (Blinker/Fernlicht und Wischer) am <b>Nucleo-F446RE</b>.
+      Jeder Schalter ist eine Widerstandskaskade: Je nach Stellung ändert sich der Widerstand nach Masse, der Pull-up macht daraus eine Spannung am ADC.
+      Relais werden hier <b>nicht</b> verbaut, die Schalterstellungen gehen später per CAN an die Relaisbox.</p>
+  </header>
+
+  <div class="facts" aria-label="Eckdaten">
+    <span class="fact">Pull-ups an <b>3,3 V</b> (nie 5 V)</span>
+    <span class="fact">Pull-up <b>10 kΩ</b> (Wert prüfen)</span>
+    <span class="fact">ADC <b>12 bit</b> (0–4095)</span>
+    <span class="fact">Nucleo über <b>USB</b></span>
+  </div>
+
+  <section class="sheet">
+    <h2>Verkabelung</h2>
+    <div class="legend" aria-label="Farblegende">
+      <span class="c33"><i></i>3,3 V · orange</span>
+      <span class="cg"><i></i>GND · schwarz</span>
+      <span class="crx"><i></i>A0 Blinker · blau</span>
+      <span class="ctx"><i></i>A1 Frontwischer · grün</span>
+      <span class="clin"><i></i>A2 Fernlicht · gelb</span>
+      <span class="ccs"><i></i>A3 Heckwischer · weiß</span>
+      <span class="csig"><i></i>D7 Taster · weiß</span>
+      <span><i class="sym">●</i>verbunden</span>
+      <span><i class="sym">⌒</i>Kreuzung, nicht verbunden</span>
+    </div>
+    <figure class="scroll" style="margin:0">
+      <svg viewBox="0 0 960 720" role="img" aria-label="Verkabelung Lenkstockschalter an Nucleo-F446RE: vier ADC-Eingänge mit Pull-ups und Kalibrier-Taster" xmlns="http://www.w3.org/2000/svg"><rect x="520" y="90" width="240" height="590" rx="10" class="board nucleo"/><rect x="610" y="78" width="60" height="26" rx="3" class="port"/><text x="640" y="96" class="porttxt" text-anchor="middle">USB</text><rect x="534" y="114" width="212" height="100" rx="4" class="stlink"/><text x="640.0" y="170" class="hdr" text-anchor="middle">ST-LINK</text><rect x="610" y="420" width="60" height="60" rx="3" class="mcu"/><text x="640" y="454" class="porttxt" text-anchor="middle">F446RE</text><text x="640.0" y="240" class="boardname big" text-anchor="middle">Nucleo-F446RE</text><text x="640.0" y="258" class="chipsub" text-anchor="middle">USB vom PC</text><text x="552" y="278" class="hdr">CN6</text><text x="728" y="278" class="hdr" text-anchor="end">CN5</text>
+<text x="552" y="464" class="hdr">CN8</text><text x="728" y="504" class="hdr" text-anchor="end">CN9</text>
+<rect x="40" y="400" width="150" height="300" rx="8" class="board stalk"/><text x="115.0" y="374" class="boardname" text-anchor="middle">Lenkstockschalter</text><text x="115.0" y="390" class="chipsub" text-anchor="middle">Corsa C · Stecker-Pins nachmessen</text>
+<text x="308" y="352" class="rail">3,3-V-Schiene</text><path d="M540,360 L300,360 L300,394 A6,6 0 0 1 300,406 L300,474 A6,6 0 0 1 300,486 L300,534 A6,6 0 0 1 300,546 L300,594 A6,6 0 0 1 300,606 L300,634" class="wc"/><path d="M540,360 L300,360 L300,394 A6,6 0 0 1 300,406 L300,474 A6,6 0 0 1 300,486 L300,534 A6,6 0 0 1 300,546 L300,594 A6,6 0 0 1 300,606 L300,634" class="w c33"/>
+<path d="M540,400 L230,400 L230,430 L190,430" class="wc"/><path d="M540,400 L230,400 L230,430 L190,430" class="w cg"/>
+<path d="M540,480 L190,480" class="wc"/><path d="M540,480 L190,480" class="w crx"/>
+<path d="M380,480 L380,454" class="wc"/><path d="M380,480 L380,454" class="w crx"/>
+<path d="M380,454 L300,454" class="wc"/><path d="M380,454 L300,454" class="w c33"/>
+<path d="M540,500 L495,500 L495,540 L190,540" class="wc"/><path d="M540,500 L495,500 L495,540 L190,540" class="w ctx"/>
+<path d="M380,540 L380,514" class="wc"/><path d="M380,540 L380,514" class="w ctx"/>
+<path d="M380,514 L300,514" class="wc"/><path d="M380,514 L300,514" class="w c33"/>
+<path d="M540,520 L505,520 L505,600 L190,600" class="wc"/><path d="M540,520 L505,520 L505,600 L190,600" class="w clin"/>
+<path d="M380,600 L380,574" class="wc"/><path d="M380,600 L380,574" class="w clin"/>
+<path d="M380,574 L300,574" class="wc"/><path d="M380,574 L300,574" class="w c33"/>
+<path d="M540,540 L515,540 L515,660 L190,660" class="wc"/><path d="M540,540 L515,540 L515,660 L190,660" class="w ccs"/>
+<path d="M380,660 L380,634" class="wc"/><path d="M380,660 L380,634" class="w ccs"/>
+<path d="M380,634 L300,634" class="wc"/><path d="M380,634 L300,634" class="w c33"/>
+<path d="M470,360 L470,40 L900,40 L900,520" class="wc"/><path d="M470,360 L470,40 L900,40 L900,520" class="w c33"/>
+<path d="M740,520 L900,520" class="wc"/><path d="M740,520 L900,520" class="w csig"/><rect x="535.5" y="295.5" width="9" height="9" class="pad"/>
+<text x="550" y="304" class="lbl" text-anchor="start">NC</text>
+<rect x="535.5" y="315.5" width="9" height="9" class="pad"/>
+<text x="550" y="324" class="lbl" text-anchor="start">IOREF</text>
+<rect x="535.5" y="335.5" width="9" height="9" class="pad"/>
+<text x="550" y="344" class="lbl" text-anchor="start">RESET</text>
+<rect x="535.5" y="355.5" width="9" height="9" class="pad used"/>
+<text x="550" y="364" class="lbl used" text-anchor="start">+3V3</text>
+<rect x="535.5" y="375.5" width="9" height="9" class="pad"/>
+<text x="550" y="384" class="lbl" text-anchor="start">+5V</text>
+<rect x="535.5" y="395.5" width="9" height="9" class="pad used"/>
+<text x="550" y="404" class="lbl used" text-anchor="start">GND</text>
+<rect x="535.5" y="415.5" width="9" height="9" class="pad"/>
+<text x="550" y="424" class="lbl" text-anchor="start">GND</text>
+<rect x="535.5" y="435.5" width="9" height="9" class="pad"/>
+<text x="550" y="444" class="lbl" text-anchor="start">VIN</text>
+<rect x="535.5" y="475.5" width="9" height="9" class="pad used"/>
+<text x="550" y="484" class="lbl used" text-anchor="start">A0</text>
+<rect x="535.5" y="495.5" width="9" height="9" class="pad used"/>
+<text x="550" y="504" class="lbl used" text-anchor="start">A1</text>
+<rect x="535.5" y="515.5" width="9" height="9" class="pad used"/>
+<text x="550" y="524" class="lbl used" text-anchor="start">A2</text>
+<rect x="535.5" y="535.5" width="9" height="9" class="pad used"/>
+<text x="550" y="544" class="lbl used" text-anchor="start">A3</text>
+<rect x="535.5" y="555.5" width="9" height="9" class="pad"/>
+<text x="550" y="564" class="lbl" text-anchor="start">A4</text>
+<rect x="535.5" y="575.5" width="9" height="9" class="pad"/>
+<text x="550" y="584" class="lbl" text-anchor="start">A5</text>
+<rect x="735.5" y="295.5" width="9" height="9" class="pad"/>
+<text x="730" y="304" class="lbl" text-anchor="end">D15</text>
+<rect x="735.5" y="315.5" width="9" height="9" class="pad"/>
+<text x="730" y="324" class="lbl" text-anchor="end">D14</text>
+<rect x="735.5" y="335.5" width="9" height="9" class="pad"/>
+<text x="730" y="344" class="lbl" text-anchor="end">AREF</text>
+<rect x="735.5" y="355.5" width="9" height="9" class="pad"/>
+<text x="730" y="364" class="lbl" text-anchor="end">GND</text>
+<rect x="735.5" y="375.5" width="9" height="9" class="pad"/>
+<text x="730" y="384" class="lbl" text-anchor="end">D13</text>
+<rect x="735.5" y="395.5" width="9" height="9" class="pad"/>
+<text x="730" y="404" class="lbl" text-anchor="end">D12</text>
+<rect x="735.5" y="415.5" width="9" height="9" class="pad"/>
+<text x="730" y="424" class="lbl" text-anchor="end">D11</text>
+<rect x="735.5" y="435.5" width="9" height="9" class="pad"/>
+<text x="730" y="444" class="lbl" text-anchor="end">D10</text>
+<rect x="735.5" y="455.5" width="9" height="9" class="pad"/>
+<text x="730" y="464" class="lbl" text-anchor="end">D9</text>
+<rect x="735.5" y="475.5" width="9" height="9" class="pad"/>
+<text x="730" y="484" class="lbl" text-anchor="end">D8</text>
+<rect x="735.5" y="515.5" width="9" height="9" class="pad used"/>
+<text x="730" y="524" class="lbl used" text-anchor="end">D7</text>
+<rect x="735.5" y="535.5" width="9" height="9" class="pad"/>
+<text x="730" y="544" class="lbl" text-anchor="end">D6</text>
+<rect x="735.5" y="555.5" width="9" height="9" class="pad"/>
+<text x="730" y="564" class="lbl" text-anchor="end">D5</text>
+<rect x="735.5" y="575.5" width="9" height="9" class="pad"/>
+<text x="730" y="584" class="lbl" text-anchor="end">D4</text>
+<rect x="735.5" y="595.5" width="9" height="9" class="pad"/>
+<text x="730" y="604" class="lbl" text-anchor="end">D3</text>
+<rect x="735.5" y="615.5" width="9" height="9" class="pad"/>
+<text x="730" y="624" class="lbl" text-anchor="end">D2</text>
+<rect x="735.5" y="635.5" width="9" height="9" class="pad"/>
+<text x="730" y="644" class="lbl" text-anchor="end">D1</text>
+<rect x="735.5" y="655.5" width="9" height="9" class="pad"/>
+<text x="730" y="664" class="lbl" text-anchor="end">D0</text>
+<circle cx="190" cy="430" r="4" class="term"/><text x="180" y="434" class="val" text-anchor="end">Masse (beide)</text>
+<circle cx="190" cy="480" r="4" class="term"/><text x="180" y="484" class="val" text-anchor="end">Blinker SIG_A</text>
+<circle cx="190" cy="540" r="4" class="term"/><text x="180" y="544" class="val" text-anchor="end">Frontwischer</text>
+<circle cx="190" cy="600" r="4" class="term"/><text x="180" y="604" class="val" text-anchor="end">Fernlicht SIG_B</text>
+<circle cx="190" cy="660" r="4" class="term"/><text x="180" y="664" class="val" text-anchor="end">Heckwischer</text>
+<rect x="321.0" y="448.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="325.6" y="448.9" width="2.8" height="10.2" fill="#7a4a1f"/>
+<rect x="330.6" y="448.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="335.6" y="448.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="340.6" y="448.9" width="2.8" height="10.2" fill="#d42a1e"/>
+<rect x="349.6" y="448.9" width="2.8" height="10.2" fill="#7a4a1f"/>
+<text x="340.0" y="442" class="val" text-anchor="middle">10 kΩ</text>
+<rect x="321.0" y="508.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="325.6" y="508.9" width="2.8" height="10.2" fill="#7a4a1f"/>
+<rect x="330.6" y="508.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="335.6" y="508.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="340.6" y="508.9" width="2.8" height="10.2" fill="#d42a1e"/>
+<rect x="349.6" y="508.9" width="2.8" height="10.2" fill="#7a4a1f"/>
+<text x="340.0" y="502" class="val" text-anchor="middle">10 kΩ</text>
+<rect x="321.0" y="568.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="325.6" y="568.9" width="2.8" height="10.2" fill="#7a4a1f"/>
+<rect x="330.6" y="568.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="335.6" y="568.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="340.6" y="568.9" width="2.8" height="10.2" fill="#d42a1e"/>
+<rect x="349.6" y="568.9" width="2.8" height="10.2" fill="#7a4a1f"/>
+<text x="340.0" y="562" class="val" text-anchor="middle">10 kΩ</text>
+<rect x="321.0" y="628.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="325.6" y="628.9" width="2.8" height="10.2" fill="#7a4a1f"/>
+<rect x="330.6" y="628.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="335.6" y="628.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="340.6" y="628.9" width="2.8" height="10.2" fill="#d42a1e"/>
+<rect x="349.6" y="628.9" width="2.8" height="10.2" fill="#7a4a1f"/>
+<text x="340.0" y="622" class="val" text-anchor="middle">10 kΩ</text>
+<rect x="834" y="506" width="32" height="20" class="cut"/>
+<circle cx="836" cy="520" r="2.5" class="term"/><circle cx="864" cy="520" r="2.5" class="term"/><line x1="836" y1="512" x2="864" y2="512" class="plate"/><line x1="850" y1="512" x2="850" y2="505" class="plate"/><line x1="845" y1="505" x2="855" y2="505" class="plate"/>
+<text x="850" y="540" class="val" text-anchor="middle">Kalibrier-Taster</text><circle cx="380" cy="480" r="4" class="dot crx"/>
+<circle cx="300" cy="454" r="4" class="dot c33"/>
+<circle cx="380" cy="540" r="4" class="dot ctx"/>
+<circle cx="300" cy="514" r="4" class="dot c33"/>
+<circle cx="380" cy="600" r="4" class="dot clin"/>
+<circle cx="300" cy="574" r="4" class="dot c33"/>
+<circle cx="380" cy="660" r="4" class="dot ccs"/>
+<circle cx="300" cy="634" r="4" class="dot c33"/>
+<circle cx="470" cy="360" r="4" class="dot c33"/><g class="badge c33"><circle cx="440" cy="360" r="10"/><text x="440" y="364" text-anchor="middle">1</text></g>
+<g class="badge cg"><circle cx="440" cy="400" r="10"/><text x="440" y="404" text-anchor="middle">2</text></g>
+<g class="badge crx"><circle cx="440" cy="480" r="10"/><text x="440" y="484" text-anchor="middle">3</text></g>
+<g class="badge c33"><circle cx="398" cy="454" r="10"/><text x="398" y="458" text-anchor="middle">7</text></g>
+<g class="badge ctx"><circle cx="440" cy="540" r="10"/><text x="440" y="544" text-anchor="middle">4</text></g>
+<g class="badge c33"><circle cx="398" cy="514" r="10"/><text x="398" y="518" text-anchor="middle">8</text></g>
+<g class="badge clin"><circle cx="440" cy="600" r="10"/><text x="440" y="604" text-anchor="middle">5</text></g>
+<g class="badge c33"><circle cx="398" cy="574" r="10"/><text x="398" y="578" text-anchor="middle">9</text></g>
+<g class="badge ccs"><circle cx="440" cy="660" r="10"/><text x="440" y="664" text-anchor="middle">6</text></g>
+<g class="badge c33"><circle cx="398" cy="634" r="10"/><text x="398" y="638" text-anchor="middle">10</text></g>
+<g class="badge c33"><circle cx="900" cy="200" r="10"/><text x="900" y="204" text-anchor="middle">11</text></g>
+<g class="badge csig"><circle cx="790" cy="520" r="10"/><text x="790" y="524" text-anchor="middle">12</text></g></svg>
+    </figure>
+    <figcaption>Der Nucleo ist hochkant gezeichnet (ST-LINK-USB oben), so wie er vor dir liegt. Die Pins sind die inneren Arduino-Buchsenleisten:
+      links CN6 (Versorgung) und CN8 (A0–A5), rechts CN5 und CN9 (D15–D0). Welche Pins am Schalterstecker Signal und Masse sind, musst du am Schalter nachmessen.</figcaption>
+  </section>
+
+  <section class="sheet">
+    <h2>Kabelliste</h2>
+    <div class="scroll">
+    <table>
+      <thead><tr><th></th><th>Nr.</th><th>Von</th><th>Nach</th><th>Hinweis</th></tr></thead>
+      <tbody>
+        <tr class="group"><td colspan="5">Versorgung</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w1" aria-label="Kabel 1 gesteckt"></td><td class="n"><span class="num c33">1</span></td><td>Nucleo <b>+3V3</b> (CN6, linke Leiste, 4. Pin)</td><td>3,3-V-Schiene</td><td><b>nicht 5 V</b>: die ADC-Pins vertragen im Analogbetrieb nur 3,3 V</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w2" aria-label="Kabel 2 gesteckt"></td><td class="n"><span class="num cg">2</span></td><td>Nucleo <b>GND</b> (CN6, 6. Pin)</td><td>Masse der Lenkstockschalter</td><td>der Nucleo selbst hängt per USB (ST-LINK) am PC</td></tr>
+        <tr class="group"><td colspan="5">Schaltersignale → ADC</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w3" aria-label="Kabel 3 gesteckt"></td><td class="n"><span class="num crx">3</span></td><td>Blinker <b>SIG_A</b></td><td>Nucleo <b>A0</b> (PA0)</td><td></td></tr>
+        <tr><td class="check"><input type="checkbox" id="w4" aria-label="Kabel 4 gesteckt"></td><td class="n"><span class="num ctx">4</span></td><td>Frontwischer</td><td>Nucleo <b>A1</b> (PA1)</td><td></td></tr>
+        <tr><td class="check"><input type="checkbox" id="w5" aria-label="Kabel 5 gesteckt"></td><td class="n"><span class="num clin">5</span></td><td>Fernlicht <b>SIG_B</b></td><td>Nucleo <b>A2</b> (PA4)</td><td>die Firmware liest den Pin noch nicht aus (Stub)</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w6" aria-label="Kabel 6 gesteckt"></td><td class="n"><span class="num ccs">6</span></td><td>Heckwischer</td><td>Nucleo <b>A3</b> (PB0)</td><td></td></tr>
+        <tr class="group"><td colspan="5">Pull-ups (je einer pro ADC-Pin)</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w7" aria-label="Kabel 7 gesteckt"></td><td class="n"><span class="num c33">7</span></td><td>3,3-V-Schiene</td><td>10 kΩ<span class="rc metal" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-braun tol"></i></span> → <b>A0</b></td><td>Richtung egal</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w8" aria-label="Kabel 8 gesteckt"></td><td class="n"><span class="num c33">8</span></td><td>3,3-V-Schiene</td><td>10 kΩ<span class="rc metal" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-braun tol"></i></span> → <b>A1</b></td><td>Richtung egal</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w9" aria-label="Kabel 9 gesteckt"></td><td class="n"><span class="num c33">9</span></td><td>3,3-V-Schiene</td><td>10 kΩ<span class="rc metal" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-braun tol"></i></span> → <b>A2</b></td><td>Richtung egal</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w10" aria-label="Kabel 10 gesteckt"></td><td class="n"><span class="num c33">10</span></td><td>3,3-V-Schiene</td><td>10 kΩ<span class="rc metal" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-braun tol"></i></span> → <b>A3</b></td><td>Richtung egal</td></tr>
+        <tr class="group"><td colspan="5">Kalibrier-Taster</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w11" aria-label="Kabel 11 gesteckt"></td><td class="n"><span class="num c33">11</span></td><td>Nucleo <b>+3V3</b></td><td>Taster</td><td></td></tr>
+        <tr><td class="check"><input type="checkbox" id="w12" aria-label="Kabel 12 gesteckt"></td><td class="n"><span class="num csig">12</span></td><td>Taster</td><td>Nucleo <b>D7</b> (PA8, CN9, rechte Leiste)</td><td>Pull-down ist intern (<code>INPUT_PULLDOWN</code>), kein Widerstand nötig</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="hint">Die Häkchen merkt sich dein Browser auf diesem Gerät.</p>
+  </section>
+
+  <section class="sheet">
+    <h2>Widerstand · Farbcode</h2>
+    <div class="scroll">
+    <table>
+      <thead><tr><th>Wert</th><th>Anzahl</th><th>5 Ringe (Metall, blau, ±1 %)</th><th>Wo</th></tr></thead>
+      <tbody>
+        <tr><td><b>10 kΩ</b></td><td>4×</td><td><span class="rc metal" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-braun tol"></i></span><br><span class="bands">braun – schwarz – schwarz – rot – braun</span></td><td>Nr. 7–10, Pull-ups an A0–A3</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="hint">Achtung: Von der anderen Seite gelesen ergibt derselbe Widerstand braun – rot – schwarz – schwarz – braun = <b>120 Ω</b>. Beide Enden sind braun, deshalb mit dem Multimeter prüfen.
+      Der genaue Wert ist unkritisch, weil die Kalibrier-Firmware die Schwellen neu lernt. Er muss nur bei allen vier gleich sein, und nach einem Tausch neu kalibrieren.</p>
+  </section>
+
+  <div class="notes">
+    <div class="note warn">
+      <h3>Nicht anschließen</h3>
+      <ul>
+        <li>Pull-ups <b>nie an 5 V</b>: A0–A3 vertragen im Analogbetrieb nur 3,3 V.</li>
+        <li>Keine Fahrzeug-12-V an den Schalterstecker, solange er am Nucleo hängt.</li>
+        <li>Das Relaisboard entfällt, D3–D6 und D8–D10 bleiben frei.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h3>Danach</h3>
+      <p>Kalibrieren: <code>pio run -e calibrate -t upload</code>, im Monitor je Schalter <code>b</code>/<code>w</code>/<code>r</code> wählen, die Stellungen mit <code>0</code>–<code>4</code> erfassen, mit <code>s</code> speichern.
+        Die Rohwerte zeigt auch die Debug-Ausgabe der Hauptfirmware (115200 Baud).</p>
+    </div>
+    <div class="note">
+      <h3>Quellen</h3>
+      <ul>
+        <li><a href="https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf">ST UM1724</a> (Nucleo-64, Arduino-Leisten CN5/CN6/CN8/CN9)</li>
+        <li>Pinbelegung: <code>STM32Wiper/include/config.h</code></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const KEY = "wiper-steckplan-checks";
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { saved = {}; }
+  document.querySelectorAll('input[type="checkbox"]').forEach((box) => {
+    box.checked = !!saved[box.id];
+    box.addEventListener("change", () => {
+      saved[box.id] = box.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {}
+    });
+  });
+})();
+</script>
+</body></html>
