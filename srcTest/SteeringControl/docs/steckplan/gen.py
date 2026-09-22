@@ -55,11 +55,11 @@ class Fig:
 
 # ─── symbols (drawn over wires, bg-filled) ─────────────────────────────────────
 BAND = {"schwarz": "#111111", "braun": "#7a4a1f", "rot": "#d42a1e", "gelb": "#f2c200",
-        "violett": "#7d3cc4", "gold": "#c9a227"}
+        "grün": "#1f9d3a", "gold": "#c9a227"}
 # 5-band metal film (blue body), the parts actually in the kit
 CODE5 = {"220 Ω": ("rot", "rot", "schwarz", "schwarz", "braun"),
          "1 kΩ": ("braun", "schwarz", "schwarz", "braun", "braun"),
-         "4,7 kΩ": ("gelb", "violett", "schwarz", "braun", "braun")}
+         "5,1 kΩ": ("grün", "braun", "schwarz", "braun", "braun")}
 
 
 def resistor(f, x, y, vertical, value, label_side=1):
@@ -260,9 +260,9 @@ f1.wire("d0", "crx", [(top_hdr["0"], TH), (top_hdr["0"], 186), (620, 186), (620,
 f1.wire("d2", "ccs", [(top_hdr["2"], TH), (top_hdr["2"], 196), (605, 196), (605, p2), (C2, p2)]); f1.badge(540, 196, 6, "ccs")
 # 4  D1 (TX) -> TXD
 f1.wire("d1", "ctx", [(top_hdr["1"], TH), (top_hdr["1"], 206), (590, 206), (590, p4), (C2, p4)]); f1.badge(560, 206, 4, "ctx")
-# 7  pull-up 4.7k: RXD #2 -> Uno 5V
+# 7  pull-up 5.1k: RXD #2 -> Uno 5V
 f1.wire("d0", "c5", [(628, p1), (628, 582), (bot_hdr["5V"], 582), (bot_hdr["5V"], BH)]); f1.dot(628, p1, "crx")
-resistor(f1, 470, 582, False, "4,7 kΩ", 1); f1.badge(400, 582, 7, "c5")
+resistor(f1, 470, 582, False, "5,1 kΩ", 1); f1.badge(400, 582, 7, "c5")
 # 3  Uno GND -> rail
 f1.wire("gnd", "cg", [(bot_hdr["GND"], BH), (bot_hdr["GND"], RG)]); f1.dot(bot_hdr["GND"], RG, "cg"); f1.badge(bot_hdr["GND"], 680, 3, "cg")
 nc(f1, C2, p3, -1, False)
@@ -314,7 +314,7 @@ f1.wire("gp1", "crx", [(TR, tiny_r["GP1"]), (C1, p1)]); f1.badge(1172, p1 - 12, 
 f1.wire("gp2", "ccs", [(TR, tiny_r["GP2"]), (1150, tiny_r["GP2"]), (1150, p2), (C1, p2)]); f1.badge(1178, p2 + 12, 20, "ccs")
 f1.wire("gp0", "ctx", [(TR, tiny_r["GP0"]), (1162, tiny_r["GP0"]), (1162, p4), (C1, p4)]); f1.badge(1182, p4 - 12, 18, "ctx")
 f1.wire("gp1", "c33", [(TX0, tiny_l["3V3"]), (945, tiny_l["3V3"]), (945, 196), (1188, 196), (1188, p1)]); f1.dot(1188, p1, "crx")
-resistor(f1, 1130, 196, False, "4,7 kΩ", 1); f1.badge(975, 196, 21, "c33")
+resistor(f1, 1130, 196, False, "5,1 kΩ", 1); f1.badge(975, 196, 21, "c33")
 f1.wire("gnd", "cg", [(TX0, tiny_l["GND"]), (958, tiny_l["GND"]), (958, RG)]); f1.dot(958, RG, "cg"); f1.badge(958, 600, 22, "cg")
 
 FIG1 = f1.svg("0 0 1500 780", "Verkabelung der LIN-Strecke: Uno, zwei MCP2003, RP2040-Tiny, 12-V-Netzteil")
