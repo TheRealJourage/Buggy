@@ -171,14 +171,16 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
     <span class="eyebrow">Buggy · STM32Wiper · Eingänge</span>
     <h1>Lenkstockschalter: Steckplan</h1>
     <p class="lede">Die originalen <b>Corsa-C-Lenkstockschalter</b> (Blinker/Fernlicht und Wischer) am <b>Nucleo-F446RE</b>.
-      Jeder Schalter ist eine Widerstandskaskade: Je nach Stellung ändert sich der Widerstand nach Masse, der Pull-up macht daraus eine Spannung am ADC.
+      Jeder Hebel hat <b>drei Adern</b>: eine gemeinsame Masse und <b>zwei Signaladern</b> mit je eigener Widerstandskaskade.
+      Jede Signalader bekommt einen eigenen ADC-Pin mit Pull-up. So überlagern sich Kombinationen (z. B. Blinker + Lichthupe) nicht mehr.
       Relais werden hier <b>nicht</b> verbaut, die Schalterstellungen gehen später per CAN an die Relaisbox.</p>
   </header>
 
   <div class="facts" aria-label="Eckdaten">
     <span class="fact">Pull-ups an <b>3,3 V</b> (nie 5 V)</span>
-    <span class="fact">Pull-up <b>10 kΩ</b> (Wert prüfen)</span>
+    <span class="fact">Pull-up <b>220 Ω</b> je Signalader</span>
     <span class="fact">ADC <b>12 bit</b> (0–4095)</span>
+    <span class="fact">weiß = Masse <b>(Annahme)</b></span>
     <span class="fact">Nucleo über <b>USB</b></span>
   </div>
 
@@ -187,10 +189,10 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
     <div class="legend" aria-label="Farblegende">
       <span class="c33"><i></i>3,3 V · orange</span>
       <span class="cg"><i></i>GND · schwarz</span>
-      <span class="crx"><i></i>A0 Blinker · blau</span>
-      <span class="ctx"><i></i>A1 Frontwischer · grün</span>
-      <span class="clin"><i></i>A2 Fernlicht · gelb</span>
-      <span class="ccs"><i></i>A3 Heckwischer · weiß</span>
+      <span class="crx"><i></i>A0 Licht weiß-schwarz · blau</span>
+      <span class="ctx"><i></i>A1 Wischer weiß-schwarz · grün</span>
+      <span class="clin"><i></i>A2 Licht gelb-schwarz · gelb</span>
+      <span class="ccs"><i></i>A3 Wischer gelb-schwarz · weiß</span>
       <span class="csig"><i></i>D7 Taster · weiß</span>
       <span><i class="sym">●</i>verbunden</span>
       <span><i class="sym">⌒</i>Kreuzung, nicht verbunden</span>
@@ -199,7 +201,8 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
       {{FIG1}}
     </figure>
     <figcaption>Der Nucleo ist hochkant gezeichnet (ST-LINK-USB oben), so wie er vor dir liegt. Die Pins sind die inneren Arduino-Buchsenleisten:
-      links CN6 (Versorgung) und CN8 (A0–A5), rechts CN5 und CN9 (D15–D0). Welche Pins am Schalterstecker Signal und Masse sind, musst du am Schalter nachmessen.</figcaption>
+      links CN6 (Versorgung) und CN8 (A0–A5), rechts CN5 und CN9 (D15–D0). An den Hebeln stehen die Aderfarben der Schalter.
+      Die ADC-Pins entsprechen der aktuellen Firmware (<code>config.h</code>), deshalb liegen die beiden Hebel nicht auf nebeneinanderliegenden Pins.</figcaption>
   </section>
 
   <section class="sheet">
@@ -210,20 +213,22 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
       <tbody>
         <tr class="group"><td colspan="5">Versorgung</td></tr>
         <tr><td class="check"><input type="checkbox" id="w1" aria-label="Kabel 1 gesteckt"></td><td class="n"><span class="num c33">1</span></td><td>Nucleo <b>+3V3</b> (CN6, linke Leiste, 4. Pin)</td><td>3,3-V-Schiene</td><td><b>nicht 5 V</b>: die ADC-Pins vertragen im Analogbetrieb nur 3,3 V</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w2" aria-label="Kabel 2 gesteckt"></td><td class="n"><span class="num cg">2</span></td><td>Nucleo <b>GND</b> (CN6, 6. Pin)</td><td>Masse der Lenkstockschalter</td><td>der Nucleo selbst hängt per USB (ST-LINK) am PC</td></tr>
-        <tr class="group"><td colspan="5">Schaltersignale → ADC</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w3" aria-label="Kabel 3 gesteckt"></td><td class="n"><span class="num crx">3</span></td><td>Blinker <b>SIG_A</b></td><td>Nucleo <b>A0</b> (PA0)</td><td></td></tr>
-        <tr><td class="check"><input type="checkbox" id="w4" aria-label="Kabel 4 gesteckt"></td><td class="n"><span class="num ctx">4</span></td><td>Frontwischer</td><td>Nucleo <b>A1</b> (PA1)</td><td></td></tr>
-        <tr><td class="check"><input type="checkbox" id="w5" aria-label="Kabel 5 gesteckt"></td><td class="n"><span class="num clin">5</span></td><td>Fernlicht <b>SIG_B</b></td><td>Nucleo <b>A2</b> (PA4)</td><td>die Firmware liest den Pin noch nicht aus (Stub)</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w6" aria-label="Kabel 6 gesteckt"></td><td class="n"><span class="num ccs">6</span></td><td>Heckwischer</td><td>Nucleo <b>A3</b> (PB0)</td><td></td></tr>
-        <tr class="group"><td colspan="5">Pull-ups (je einer pro ADC-Pin)</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w7" aria-label="Kabel 7 gesteckt"></td><td class="n"><span class="num c33">7</span></td><td>3,3-V-Schiene</td><td>10 kΩ<span class="rc metal" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-braun tol"></i></span> → <b>A0</b></td><td>Richtung egal</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w8" aria-label="Kabel 8 gesteckt"></td><td class="n"><span class="num c33">8</span></td><td>3,3-V-Schiene</td><td>10 kΩ<span class="rc metal" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-braun tol"></i></span> → <b>A1</b></td><td>Richtung egal</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w9" aria-label="Kabel 9 gesteckt"></td><td class="n"><span class="num c33">9</span></td><td>3,3-V-Schiene</td><td>10 kΩ<span class="rc metal" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-braun tol"></i></span> → <b>A2</b></td><td>Richtung egal</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w10" aria-label="Kabel 10 gesteckt"></td><td class="n"><span class="num c33">10</span></td><td>3,3-V-Schiene</td><td>10 kΩ<span class="rc metal" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-braun tol"></i></span> → <b>A3</b></td><td>Richtung egal</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w2" aria-label="Kabel 2 gesteckt"></td><td class="n"><span class="num cg">2</span></td><td>Nucleo <b>GND</b> (CN6, 6. Pin)</td><td>Lichthebel <b>weiß</b></td><td>Annahme: weiß = gemeinsame Masse, siehe Test unten</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w3" aria-label="Kabel 3 gesteckt"></td><td class="n"><span class="num cg">3</span></td><td>GND (von Nr. 2 abzweigen)</td><td>Wischerhebel <b>weiß</b></td><td></td></tr>
+        <tr class="group"><td colspan="5">Lichthebel → ADC</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w4" aria-label="Kabel 4 gesteckt"></td><td class="n"><span class="num crx">4</span></td><td>Lichthebel <b>weiß-schwarz</b></td><td>Nucleo <b>A0</b> (PA0)</td><td>vermutlich Blinker</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w5" aria-label="Kabel 5 gesteckt"></td><td class="n"><span class="num clin">5</span></td><td>Lichthebel <b>gelb-schwarz</b></td><td>Nucleo <b>A2</b> (PA4)</td><td>vermutlich Fernlicht/Lichthupe</td></tr>
+        <tr class="group"><td colspan="5">Wischerhebel → ADC</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w6" aria-label="Kabel 6 gesteckt"></td><td class="n"><span class="num ctx">6</span></td><td>Wischerhebel <b>weiß-schwarz</b></td><td>Nucleo <b>A1</b> (PA1)</td><td></td></tr>
+        <tr><td class="check"><input type="checkbox" id="w7" aria-label="Kabel 7 gesteckt"></td><td class="n"><span class="num ccs">7</span></td><td>Wischerhebel <b>gelb-schwarz</b></td><td>Nucleo <b>A3</b> (PB0)</td><td></td></tr>
+        <tr class="group"><td colspan="5">Pull-ups (je einer pro Signalader)</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w8" aria-label="Kabel 8 gesteckt"></td><td class="n"><span class="num c33">8</span></td><td>3,3-V-Schiene</td><td>220 Ω<span class="rc metal" aria-hidden="true"><i class="b-rot"></i><i class="b-rot"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-braun tol"></i></span> → <b>A0</b></td><td>Richtung egal</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w9" aria-label="Kabel 9 gesteckt"></td><td class="n"><span class="num c33">9</span></td><td>3,3-V-Schiene</td><td>220 Ω<span class="rc metal" aria-hidden="true"><i class="b-rot"></i><i class="b-rot"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-braun tol"></i></span> → <b>A2</b></td><td>Richtung egal</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w10" aria-label="Kabel 10 gesteckt"></td><td class="n"><span class="num c33">10</span></td><td>3,3-V-Schiene</td><td>220 Ω<span class="rc metal" aria-hidden="true"><i class="b-rot"></i><i class="b-rot"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-braun tol"></i></span> → <b>A1</b></td><td>Richtung egal</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w11" aria-label="Kabel 11 gesteckt"></td><td class="n"><span class="num c33">11</span></td><td>3,3-V-Schiene</td><td>220 Ω<span class="rc metal" aria-hidden="true"><i class="b-rot"></i><i class="b-rot"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-braun tol"></i></span> → <b>A3</b></td><td>Richtung egal</td></tr>
         <tr class="group"><td colspan="5">Kalibrier-Taster</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w11" aria-label="Kabel 11 gesteckt"></td><td class="n"><span class="num c33">11</span></td><td>Nucleo <b>+3V3</b></td><td>Taster</td><td></td></tr>
-        <tr><td class="check"><input type="checkbox" id="w12" aria-label="Kabel 12 gesteckt"></td><td class="n"><span class="num csig">12</span></td><td>Taster</td><td>Nucleo <b>D7</b> (PA8, CN9, rechte Leiste)</td><td>Pull-down ist intern (<code>INPUT_PULLDOWN</code>), kein Widerstand nötig</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w12" aria-label="Kabel 12 gesteckt"></td><td class="n"><span class="num c33">12</span></td><td>Nucleo <b>+3V3</b></td><td>Taster</td><td></td></tr>
+        <tr><td class="check"><input type="checkbox" id="w13" aria-label="Kabel 13 gesteckt"></td><td class="n"><span class="num csig">13</span></td><td>Taster</td><td>Nucleo <b>D7</b> (PA8, CN9, rechte Leiste)</td><td>Pull-down ist intern (<code>INPUT_PULLDOWN</code>), kein Widerstand nötig</td></tr>
       </tbody>
     </table>
     </div>
@@ -236,12 +241,12 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
     <table>
       <thead><tr><th>Wert</th><th>Anzahl</th><th>5 Ringe (Metall, blau, ±1 %)</th><th>Wo</th></tr></thead>
       <tbody>
-        <tr><td><b>10 kΩ</b></td><td>4×</td><td><span class="rc metal" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-braun tol"></i></span><br><span class="bands">braun – schwarz – schwarz – rot – braun</span></td><td>Nr. 7–10, Pull-ups an A0–A3</td></tr>
+        <tr><td><b>220 Ω</b></td><td>4×</td><td><span class="rc metal" aria-hidden="true"><i class="b-rot"></i><i class="b-rot"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-braun tol"></i></span><br><span class="bands">rot – rot – schwarz – schwarz – braun</span></td><td>Nr. 8–11, Pull-ups an A0–A3</td></tr>
       </tbody>
     </table>
     </div>
-    <p class="hint">Achtung: Von der anderen Seite gelesen ergibt derselbe Widerstand braun – rot – schwarz – schwarz – braun = <b>120 Ω</b>. Beide Enden sind braun, deshalb mit dem Multimeter prüfen.
-      Der genaue Wert ist unkritisch, weil die Kalibrier-Firmware die Schwellen neu lernt. Er muss nur bei allen vier gleich sein, und nach einem Tausch neu kalibrieren.</p>
+    <p class="hint">Warum 220 Ω statt der alten 10 kΩ: Die Kaskaden liegen zwischen etwa 80 Ω und 1,5 kΩ. Mit 220 Ω verteilen sich die Stellungen über 0,9–2,9 V
+      (kleinster Abstand ≈ 0,6 V), mit 10 kΩ lägen alle zwischen 0 und 0,4 V (kleinster Abstand ≈ 0,1 V). Strom: höchstens ≈ 11 mA pro Ader.</p>
   </section>
 
   <div class="notes">
@@ -250,8 +255,16 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
       <ul>
         <li>Pull-ups <b>nie an 5 V</b>: A0–A3 vertragen im Analogbetrieb nur 3,3 V.</li>
         <li>Keine Fahrzeug-12-V an den Schalterstecker, solange er am Nucleo hängt.</li>
+        <li>Die alten 10-kΩ-Pull-ups raus, sonst liegen sie parallel.</li>
         <li>Das Relaisboard entfällt, D3–D6 und D8–D10 bleiben frei.</li>
       </ul>
+    </div>
+    <div class="note warn">
+      <h3>Stimmt „weiß = Masse“? Test ohne Multimeter</h3>
+      <p>Falsch gesteckt ist ungefährlich: Die 220 Ω begrenzen den Strom, an den Pins liegen nie mehr als 3,3 V.
+        <b>Richtig:</b> In Ruhe zeigen beide Kanäle eines Hebels einen hohen Wert (≈ 3500 von 4095). Jeder Kanal reagiert nur auf seine eigenen Funktionen,
+        z. B. A0 nur auf Blinker, A2 nur auf Lichthupe/Fernlicht.
+        <b>Falsch:</b> Ein Kanal reagiert auf <b>alle</b> Funktionen des Hebels. Dann ist eine Signalader an GND: die Ader an GND mit der Ader tauschen, deren Kanal auf alles reagiert.</p>
     </div>
     <div class="note">
       <h3>Danach</h3>
@@ -263,6 +276,7 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
       <ul>
         <li><a href="https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf">ST UM1724</a> (Nucleo-64, Arduino-Leisten CN5/CN6/CN8/CN9)</li>
         <li>Pinbelegung: <code>STM32Wiper/include/config.h</code></li>
+        <li><a href="https://www.locostbuilders.co.uk/forum/5/viewthread.php?fid=5&amp;tid=201578&amp;action=printable">locostbuilders.co.uk</a>: Corsa-C-Hebel mit gemeinsamer Ader + zwei Signaladern, Messwerte eines Bastlers (80 Ω – 1,5 kΩ)</li>
       </ul>
     </div>
   </div>

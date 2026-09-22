@@ -60,7 +60,7 @@ class Fig:
 
 BAND = {"schwarz": "#111111", "braun": "#7a4a1f", "rot": "#d42a1e"}
 # 5-band metal film (blue body)
-CODE5 = {"10 kΩ": ("braun", "schwarz", "schwarz", "rot", "braun")}
+CODE5 = {"220 Ω": ("rot", "rot", "schwarz", "schwarz", "braun")}
 
 
 def resistor(f, x, y, vertical, value, label_side=1):
@@ -136,56 +136,58 @@ for n, y in left.items():
 for n, y in right.items():
     pad(f, RX, y, n, "end", dx=-10, dy=4, used=n == "D7")
 
-# ── stalk switch unit ──
-SX, SY, SW, SH = 40, 400, 150, 300
+# ── two stalks, 3 wires each: common + two resistor-coded signal lines ──
+SX, SW = 40, 150
 TX = SX + SW
-f.under.append(f'<rect x="{SX}" y="{SY}" width="{SW}" height="{SH}" rx="8" class="board stalk"/>'
-               f'<text x="{SX + SW / 2}" y="{SY - 26}" class="boardname" text-anchor="middle">Lenkstockschalter</text>'
-               f'<text x="{SX + SW / 2}" y="{SY - 10}" class="chipsub" text-anchor="middle">Corsa C · Stecker-Pins nachmessen</text>')
-term = {"GND": 430, "A0": 480, "A1": 540, "A2": 600, "A3": 660}
-tlabel = {"GND": "Masse (beide)", "A0": "Blinker SIG_A", "A1": "Frontwischer", "A2": "Fernlicht SIG_B", "A3": "Heckwischer"}
-for k, y in term.items():
-    f.overlays.append(f'<circle cx="{TX}" cy="{y}" r="4" class="term"/>'
-                      f'<text x="{TX - 10}" y="{y + 4}" class="val" text-anchor="end">{tlabel[k]}</text>')
+stalks = [("Lichthebel", "Blinker · Fernlicht · Lichthupe", 370, {"GND": 400, "A0": 450, "A2": 500}),
+          ("Wischerhebel", "Front · Heck · Waschen", 560, {"GND": 590, "A1": 640, "A3": 690})]
+wire_col = {"GND": "weiß (Masse?)", "A0": "weiß-schwarz", "A2": "gelb-schwarz", "A1": "weiß-schwarz", "A3": "gelb-schwarz"}
+term = {}
+for name, sub, sy, t in stalks:
+    f.under.append(f'<rect x="{SX}" y="{sy}" width="{SW}" height="150" rx="8" class="board stalk"/>'
+                   f'<text x="{SX}" y="{sy - 24}" class="boardname">{name}</text>'
+                   f'<text x="{SX}" y="{sy - 8}" class="chipsub">{sub}</text>')
+    for k, y in t.items():
+        f.overlays.append(f'<circle cx="{TX}" cy="{y}" r="4" class="term"/>'
+                          f'<text x="{TX - 10}" y="{y + 4}" class="val" text-anchor="end">{wire_col[k]}</text>')
+    term[name] = t
 
 # ── 1: +3V3 -> 3.3 V rail (vertical, x = RAIL) ──
 RAIL = 300
 JX = 380                      # pull-up junction x on each signal line
-f.wire("3v3", "c33", [(LX, left["+3V3"]), (RAIL, left["+3V3"]), (RAIL, term["A3"] - 26)])
+f.wire("3v3", "c33", [(LX, left["+3V3"]), (RAIL, left["+3V3"]), (RAIL, 665)])
 f.badge(440, left["+3V3"], 1, "c33")
 f.under.append(f'<text x="{RAIL + 8}" y="{left["+3V3"] - 8}" class="rail">3,3-V-Schiene</text>')
 
-# ── 2: GND -> stalk ground ──
-f.wire("gnd", "cg", [(LX, left["GND"]), (230, left["GND"]), (230, term["GND"]), (TX, term["GND"])])
-f.badge(440, left["GND"], 2, "cg")
+# ── 2/3: GND -> common wire of each stalk ──
+f.wire("gnd", "cg", [(LX, left["GND"]), (TX, 400)])
+f.badge(440, 400, 2, "cg")
+f.wire("gnd", "cg", [(230, 400), (230, 590), (TX, 590)]); f.dot(230, 400, "cg")
+f.badge(230, 560, 3, "cg")
 
-# ── 3-6: signals, fanned out to 60 px spacing; 7-10: pull-ups ──
-sig = [("A0", "crx", 3, 7), ("A1", "ctx", 4, 8), ("A2", "clin", 5, 9), ("A3", "ccs", 6, 10)]
-fan_x = {"A0": None, "A1": 495, "A2": 505, "A3": 515}
-for a, cls, n, rn in sig:
-    py, ty = left[a], term[a]
-    if fan_x[a] is None:
-        pts = [(LX, py), (TX, ty)] if py == ty else [(LX, py), (470, py), (470, ty), (TX, ty)]
-    else:
-        pts = [(LX, py), (fan_x[a], py), (fan_x[a], ty), (TX, ty)]
-    f.wire(a, cls, pts)
-    f.badge(440, ty, n, cls)
-    # pull-up: junction on the signal line, up 26 px, left to the rail
-    f.wire(a, cls, [(JX, ty), (JX, ty - 26)])
-    f.wire("3v3", "c33", [(JX, ty - 26), (RAIL, ty - 26)])
-    f.dot(JX, ty, cls); f.dot(RAIL, ty - 26, "c33")
-    resistor(f, (JX + RAIL) / 2, ty - 26, False, "10 kΩ", 1)
-    f.badge(JX + 18, ty - 26, rn, "c33")
+# ── 4-7: signals; 8-11: 220 R pull-ups ──
+sig = [("A0", "crx", 4, 8, [(470, 480), (470, 450)], 450),
+       ("A2", "clin", 5, 9, [(450, 520), (450, 500)], 500),
+       ("A1", "ctx", 6, 10, [(505, 500), (505, 640)], 640),
+       ("A3", "ccs", 7, 11, [(515, 540), (515, 690)], 690)]
+for a, cls, n, rn, fan, ty in sig:
+    f.wire(a, cls, [(LX, left[a])] + fan + [(TX, ty)])
+    f.badge(420, ty, n, cls)
+    f.wire(a, cls, [(JX, ty), (JX, ty - 25)])
+    f.wire("3v3", "c33", [(JX, ty - 25), (RAIL, ty - 25)])
+    f.dot(JX, ty, cls); f.dot(RAIL, ty - 25, "c33")
+    resistor(f, (JX + RAIL) / 2, ty - 25, False, "220 Ω", 1)
+    f.badge(JX + 18, ty - 25, rn, "c33")
 
-# ── 11/12: calibration button 3V3 -> button -> D7 ──
+# ── 12/13: calibration button 3V3 -> button -> D7 ──
 f.wire("3v3", "c33", [(470, left["+3V3"]), (470, 40), (900, 40), (900, right["D7"])])
 f.dot(470, left["+3V3"], "c33")
-f.badge(900, 200, 11, "c33")
+f.badge(900, 200, 12, "c33")
 f.wire("d7", "csig", [(RX, right["D7"]), (900, right["D7"])])
 button(f, 850, right["D7"], "Kalibrier-Taster")
-f.badge(790, right["D7"], 12, "csig")
+f.badge(790, right["D7"], 13, "csig")
 
-FIG = f.svg("0 0 960 720", "Verkabelung Lenkstockschalter an Nucleo-F446RE: vier ADC-Eingänge mit Pull-ups und Kalibrier-Taster")
+FIG = f.svg("0 0 960 740", "Verkabelung Lenkstockschalter an Nucleo-F446RE: zwei Hebel mit je drei Adern, vier ADC-Eingänge mit 220-Ohm-Pull-ups, Kalibrier-Taster")
 
 tpl = open(os.path.join(HERE, "template.html"), encoding="utf-8").read()
 html = tpl.replace("{{FIG1}}", FIG)

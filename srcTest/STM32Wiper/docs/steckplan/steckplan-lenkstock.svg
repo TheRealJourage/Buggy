@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="960" height="720" viewBox="0 0 960 720" role="img" aria-label="Verkabelung Lenkstockschalter an Nucleo-F446RE: vier ADC-Eingänge mit Pull-ups und Kalibrier-Taster" xmlns="http://www.w3.org/2000/svg"><style>svg{  --bg: #e9eeec;  --panel: #fbfcfc;  --ink: #16201c;  --muted: #5d6c66;  --faint: #d5ddda;  --accent: #0f6b62;  --board-uno: #d8ebee;  --board-uno-s: #2f7d8c;  --board-tiny: #dde4f4; --board-tiny-s: #3b5aa3;  --board-psu: #f1e3e1;  --board-psu-s: #9b4a3f;  --board-nucleo: #e4e9f2; --board-nucleo-s: #56627a;  --chip: #262b2a; --chip-ink: #eef2f1;  --w12: #d42a1e; --wg: #161616; --w5: #f07c00; --w33: #f07c00;  --wrx: #1f5fd1; --wtx: #1f9d3a; --wcs: #ffffff; --wlin: #f2c200;  --wsig: #ffffff; --wbtn: #f2c200; --wpot: #1f9d3a;  --casing: #7d8a85;  --led-g: #36b24a; --led-r: #e0413a;  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;  --sans: "Segoe UI", system-ui, sans-serif;}.c12 { --c: var(--w12); } .cg { --c: var(--wg); } .c5 { --c: var(--w5); } .c33 { --c: var(--w33); }
+<svg width="960" height="740" viewBox="0 0 960 740" role="img" aria-label="Verkabelung Lenkstockschalter an Nucleo-F446RE: zwei Hebel mit je drei Adern, vier ADC-Eingänge mit 220-Ohm-Pull-ups, Kalibrier-Taster" xmlns="http://www.w3.org/2000/svg"><style>svg{  --bg: #e9eeec;  --panel: #fbfcfc;  --ink: #16201c;  --muted: #5d6c66;  --faint: #d5ddda;  --accent: #0f6b62;  --board-uno: #d8ebee;  --board-uno-s: #2f7d8c;  --board-tiny: #dde4f4; --board-tiny-s: #3b5aa3;  --board-psu: #f1e3e1;  --board-psu-s: #9b4a3f;  --board-nucleo: #e4e9f2; --board-nucleo-s: #56627a;  --chip: #262b2a; --chip-ink: #eef2f1;  --w12: #d42a1e; --wg: #161616; --w5: #f07c00; --w33: #f07c00;  --wrx: #1f5fd1; --wtx: #1f9d3a; --wcs: #ffffff; --wlin: #f2c200;  --wsig: #ffffff; --wbtn: #f2c200; --wpot: #1f9d3a;  --casing: #7d8a85;  --led-g: #36b24a; --led-r: #e0413a;  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;  --sans: "Segoe UI", system-ui, sans-serif;}.c12 { --c: var(--w12); } .cg { --c: var(--wg); } .c5 { --c: var(--w5); } .c33 { --c: var(--w33); }
 .crx { --c: var(--wrx); } .ctx { --c: var(--wtx); } .ccs { --c: var(--wcs); } .clin { --c: var(--wlin); }
 .csig { --c: var(--wsig); } .cbtn { --c: var(--wbtn); } .cpot { --c: var(--wpot); }
 .clin.num, .cbtn.num, .c5.num, .c33.num, .ccs.num, .csig.num { color: #161616; }
@@ -55,23 +55,25 @@ svg .term.minus { stroke: var(--wg); stroke-width: 2.5; }
 svg .termtxt { font-size: 11px; font-weight: 600; }
 svg .arrowhead { fill: var(--ink); }
 svg .ncx { stroke: var(--w12); stroke-width: 2.4; }
-svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect width="960" height="720" fill="#fbfcfc"/><rect x="520" y="90" width="240" height="590" rx="10" class="board nucleo"/><rect x="610" y="78" width="60" height="26" rx="3" class="port"/><text x="640" y="96" class="porttxt" text-anchor="middle">USB</text><rect x="534" y="114" width="212" height="100" rx="4" class="stlink"/><text x="640.0" y="170" class="hdr" text-anchor="middle">ST-LINK</text><rect x="610" y="420" width="60" height="60" rx="3" class="mcu"/><text x="640" y="454" class="porttxt" text-anchor="middle">F446RE</text><text x="640.0" y="240" class="boardname big" text-anchor="middle">Nucleo-F446RE</text><text x="640.0" y="258" class="chipsub" text-anchor="middle">USB vom PC</text><text x="552" y="278" class="hdr">CN6</text><text x="728" y="278" class="hdr" text-anchor="end">CN5</text>
+svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect width="960" height="740" fill="#fbfcfc"/><rect x="520" y="90" width="240" height="590" rx="10" class="board nucleo"/><rect x="610" y="78" width="60" height="26" rx="3" class="port"/><text x="640" y="96" class="porttxt" text-anchor="middle">USB</text><rect x="534" y="114" width="212" height="100" rx="4" class="stlink"/><text x="640.0" y="170" class="hdr" text-anchor="middle">ST-LINK</text><rect x="610" y="420" width="60" height="60" rx="3" class="mcu"/><text x="640" y="454" class="porttxt" text-anchor="middle">F446RE</text><text x="640.0" y="240" class="boardname big" text-anchor="middle">Nucleo-F446RE</text><text x="640.0" y="258" class="chipsub" text-anchor="middle">USB vom PC</text><text x="552" y="278" class="hdr">CN6</text><text x="728" y="278" class="hdr" text-anchor="end">CN5</text>
 <text x="552" y="464" class="hdr">CN8</text><text x="728" y="504" class="hdr" text-anchor="end">CN9</text>
-<rect x="40" y="400" width="150" height="300" rx="8" class="board stalk"/><text x="115.0" y="374" class="boardname" text-anchor="middle">Lenkstockschalter</text><text x="115.0" y="390" class="chipsub" text-anchor="middle">Corsa C · Stecker-Pins nachmessen</text>
-<text x="308" y="352" class="rail">3,3-V-Schiene</text><path d="M540,360 L300,360 L300,394 A6,6 0 0 1 300,406 L300,474 A6,6 0 0 1 300,486 L300,534 A6,6 0 0 1 300,546 L300,594 A6,6 0 0 1 300,606 L300,634" class="wc"/><path d="M540,360 L300,360 L300,394 A6,6 0 0 1 300,406 L300,474 A6,6 0 0 1 300,486 L300,534 A6,6 0 0 1 300,546 L300,594 A6,6 0 0 1 300,606 L300,634" class="w c33"/>
-<path d="M540,400 L230,400 L230,430 L190,430" class="wc"/><path d="M540,400 L230,400 L230,430 L190,430" class="w cg"/>
-<path d="M540,480 L190,480" class="wc"/><path d="M540,480 L190,480" class="w crx"/>
-<path d="M380,480 L380,454" class="wc"/><path d="M380,480 L380,454" class="w crx"/>
-<path d="M380,454 L300,454" class="wc"/><path d="M380,454 L300,454" class="w c33"/>
-<path d="M540,500 L495,500 L495,540 L190,540" class="wc"/><path d="M540,500 L495,500 L495,540 L190,540" class="w ctx"/>
-<path d="M380,540 L380,514" class="wc"/><path d="M380,540 L380,514" class="w ctx"/>
-<path d="M380,514 L300,514" class="wc"/><path d="M380,514 L300,514" class="w c33"/>
-<path d="M540,520 L505,520 L505,600 L190,600" class="wc"/><path d="M540,520 L505,520 L505,600 L190,600" class="w clin"/>
-<path d="M380,600 L380,574" class="wc"/><path d="M380,600 L380,574" class="w clin"/>
-<path d="M380,574 L300,574" class="wc"/><path d="M380,574 L300,574" class="w c33"/>
-<path d="M540,540 L515,540 L515,660 L190,660" class="wc"/><path d="M540,540 L515,540 L515,660 L190,660" class="w ccs"/>
-<path d="M380,660 L380,634" class="wc"/><path d="M380,660 L380,634" class="w ccs"/>
-<path d="M380,634 L300,634" class="wc"/><path d="M380,634 L300,634" class="w c33"/>
+<rect x="40" y="370" width="150" height="150" rx="8" class="board stalk"/><text x="40" y="346" class="boardname">Lichthebel</text><text x="40" y="362" class="chipsub">Blinker · Fernlicht · Lichthupe</text>
+<rect x="40" y="560" width="150" height="150" rx="8" class="board stalk"/><text x="40" y="536" class="boardname">Wischerhebel</text><text x="40" y="552" class="chipsub">Front · Heck · Waschen</text>
+<text x="308" y="352" class="rail">3,3-V-Schiene</text><path d="M540,360 L300,360 L300,394 A6,6 0 0 1 300,406 L300,444 A6,6 0 0 1 300,456 L300,494 A6,6 0 0 1 300,506 L300,634 A6,6 0 0 1 300,646 L300,665" class="wc"/><path d="M540,360 L300,360 L300,394 A6,6 0 0 1 300,406 L300,444 A6,6 0 0 1 300,456 L300,494 A6,6 0 0 1 300,506 L300,634 A6,6 0 0 1 300,646 L300,665" class="w c33"/>
+<path d="M540,400 L190,400" class="wc"/><path d="M540,400 L190,400" class="w cg"/>
+<path d="M230,400 L230,444 A6,6 0 0 1 230,456 L230,494 A6,6 0 0 1 230,506 L230,590 L190,590" class="wc"/><path d="M230,400 L230,444 A6,6 0 0 1 230,456 L230,494 A6,6 0 0 1 230,506 L230,590 L190,590" class="w cg"/>
+<path d="M540,480 L470,480 L470,450 L190,450" class="wc"/><path d="M540,480 L470,480 L470,450 L190,450" class="w crx"/>
+<path d="M380,450 L380,425" class="wc"/><path d="M380,450 L380,425" class="w crx"/>
+<path d="M380,425 L300,425" class="wc"/><path d="M380,425 L300,425" class="w c33"/>
+<path d="M540,520 L450,520 L450,500 L190,500" class="wc"/><path d="M540,520 L450,520 L450,500 L190,500" class="w clin"/>
+<path d="M380,500 L380,475" class="wc"/><path d="M380,500 L380,475" class="w clin"/>
+<path d="M380,475 L300,475" class="wc"/><path d="M380,475 L300,475" class="w c33"/>
+<path d="M540,500 L505,500 L505,514 A6,6 0 0 1 505,526 L505,640 L190,640" class="wc"/><path d="M540,500 L505,500 L505,514 A6,6 0 0 1 505,526 L505,640 L190,640" class="w ctx"/>
+<path d="M380,640 L380,615" class="wc"/><path d="M380,640 L380,615" class="w ctx"/>
+<path d="M380,615 L300,615" class="wc"/><path d="M380,615 L300,615" class="w c33"/>
+<path d="M540,540 L515,540 L515,690 L190,690" class="wc"/><path d="M540,540 L515,540 L515,690 L190,690" class="w ccs"/>
+<path d="M380,690 L380,665" class="wc"/><path d="M380,690 L380,665" class="w ccs"/>
+<path d="M380,665 L300,665" class="wc"/><path d="M380,665 L300,665" class="w c33"/>
 <path d="M470,360 L470,40 L900,40 L900,520" class="wc"/><path d="M470,360 L470,40 L900,40 L900,520" class="w c33"/>
 <path d="M740,520 L900,520" class="wc"/><path d="M740,520 L900,520" class="w csig"/><rect x="535.5" y="295.5" width="9" height="9" class="pad"/>
 <text x="550" y="304" class="lbl" text-anchor="start">NC</text>
@@ -137,58 +139,61 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <text x="730" y="644" class="lbl" text-anchor="end">D1</text>
 <rect x="735.5" y="655.5" width="9" height="9" class="pad"/>
 <text x="730" y="664" class="lbl" text-anchor="end">D0</text>
-<circle cx="190" cy="430" r="4" class="term"/><text x="180" y="434" class="val" text-anchor="end">Masse (beide)</text>
-<circle cx="190" cy="480" r="4" class="term"/><text x="180" y="484" class="val" text-anchor="end">Blinker SIG_A</text>
-<circle cx="190" cy="540" r="4" class="term"/><text x="180" y="544" class="val" text-anchor="end">Frontwischer</text>
-<circle cx="190" cy="600" r="4" class="term"/><text x="180" y="604" class="val" text-anchor="end">Fernlicht SIG_B</text>
-<circle cx="190" cy="660" r="4" class="term"/><text x="180" y="664" class="val" text-anchor="end">Heckwischer</text>
-<rect x="321.0" y="448.0" width="38" height="12" rx="3" class="part rbody"/>
-<rect x="325.6" y="448.9" width="2.8" height="10.2" fill="#7a4a1f"/>
-<rect x="330.6" y="448.9" width="2.8" height="10.2" fill="#111111"/>
-<rect x="335.6" y="448.9" width="2.8" height="10.2" fill="#111111"/>
-<rect x="340.6" y="448.9" width="2.8" height="10.2" fill="#d42a1e"/>
-<rect x="349.6" y="448.9" width="2.8" height="10.2" fill="#7a4a1f"/>
-<text x="340.0" y="442" class="val" text-anchor="middle">10 kΩ</text>
-<rect x="321.0" y="508.0" width="38" height="12" rx="3" class="part rbody"/>
-<rect x="325.6" y="508.9" width="2.8" height="10.2" fill="#7a4a1f"/>
-<rect x="330.6" y="508.9" width="2.8" height="10.2" fill="#111111"/>
-<rect x="335.6" y="508.9" width="2.8" height="10.2" fill="#111111"/>
-<rect x="340.6" y="508.9" width="2.8" height="10.2" fill="#d42a1e"/>
-<rect x="349.6" y="508.9" width="2.8" height="10.2" fill="#7a4a1f"/>
-<text x="340.0" y="502" class="val" text-anchor="middle">10 kΩ</text>
-<rect x="321.0" y="568.0" width="38" height="12" rx="3" class="part rbody"/>
-<rect x="325.6" y="568.9" width="2.8" height="10.2" fill="#7a4a1f"/>
-<rect x="330.6" y="568.9" width="2.8" height="10.2" fill="#111111"/>
-<rect x="335.6" y="568.9" width="2.8" height="10.2" fill="#111111"/>
-<rect x="340.6" y="568.9" width="2.8" height="10.2" fill="#d42a1e"/>
-<rect x="349.6" y="568.9" width="2.8" height="10.2" fill="#7a4a1f"/>
-<text x="340.0" y="562" class="val" text-anchor="middle">10 kΩ</text>
-<rect x="321.0" y="628.0" width="38" height="12" rx="3" class="part rbody"/>
-<rect x="325.6" y="628.9" width="2.8" height="10.2" fill="#7a4a1f"/>
-<rect x="330.6" y="628.9" width="2.8" height="10.2" fill="#111111"/>
-<rect x="335.6" y="628.9" width="2.8" height="10.2" fill="#111111"/>
-<rect x="340.6" y="628.9" width="2.8" height="10.2" fill="#d42a1e"/>
-<rect x="349.6" y="628.9" width="2.8" height="10.2" fill="#7a4a1f"/>
-<text x="340.0" y="622" class="val" text-anchor="middle">10 kΩ</text>
+<circle cx="190" cy="400" r="4" class="term"/><text x="180" y="404" class="val" text-anchor="end">weiß (Masse?)</text>
+<circle cx="190" cy="450" r="4" class="term"/><text x="180" y="454" class="val" text-anchor="end">weiß-schwarz</text>
+<circle cx="190" cy="500" r="4" class="term"/><text x="180" y="504" class="val" text-anchor="end">gelb-schwarz</text>
+<circle cx="190" cy="590" r="4" class="term"/><text x="180" y="594" class="val" text-anchor="end">weiß (Masse?)</text>
+<circle cx="190" cy="640" r="4" class="term"/><text x="180" y="644" class="val" text-anchor="end">weiß-schwarz</text>
+<circle cx="190" cy="690" r="4" class="term"/><text x="180" y="694" class="val" text-anchor="end">gelb-schwarz</text>
+<rect x="321.0" y="419.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="325.6" y="419.9" width="2.8" height="10.2" fill="#d42a1e"/>
+<rect x="330.6" y="419.9" width="2.8" height="10.2" fill="#d42a1e"/>
+<rect x="335.6" y="419.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="340.6" y="419.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="349.6" y="419.9" width="2.8" height="10.2" fill="#7a4a1f"/>
+<text x="340.0" y="413" class="val" text-anchor="middle">220 Ω</text>
+<rect x="321.0" y="469.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="325.6" y="469.9" width="2.8" height="10.2" fill="#d42a1e"/>
+<rect x="330.6" y="469.9" width="2.8" height="10.2" fill="#d42a1e"/>
+<rect x="335.6" y="469.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="340.6" y="469.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="349.6" y="469.9" width="2.8" height="10.2" fill="#7a4a1f"/>
+<text x="340.0" y="463" class="val" text-anchor="middle">220 Ω</text>
+<rect x="321.0" y="609.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="325.6" y="609.9" width="2.8" height="10.2" fill="#d42a1e"/>
+<rect x="330.6" y="609.9" width="2.8" height="10.2" fill="#d42a1e"/>
+<rect x="335.6" y="609.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="340.6" y="609.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="349.6" y="609.9" width="2.8" height="10.2" fill="#7a4a1f"/>
+<text x="340.0" y="603" class="val" text-anchor="middle">220 Ω</text>
+<rect x="321.0" y="659.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="325.6" y="659.9" width="2.8" height="10.2" fill="#d42a1e"/>
+<rect x="330.6" y="659.9" width="2.8" height="10.2" fill="#d42a1e"/>
+<rect x="335.6" y="659.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="340.6" y="659.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="349.6" y="659.9" width="2.8" height="10.2" fill="#7a4a1f"/>
+<text x="340.0" y="653" class="val" text-anchor="middle">220 Ω</text>
 <rect x="834" y="506" width="32" height="20" class="cut"/>
 <circle cx="836" cy="520" r="2.5" class="term"/><circle cx="864" cy="520" r="2.5" class="term"/><line x1="836" y1="512" x2="864" y2="512" class="plate"/><line x1="850" y1="512" x2="850" y2="505" class="plate"/><line x1="845" y1="505" x2="855" y2="505" class="plate"/>
-<text x="850" y="540" class="val" text-anchor="middle">Kalibrier-Taster</text><circle cx="380" cy="480" r="4" class="dot crx"/>
-<circle cx="300" cy="454" r="4" class="dot c33"/>
-<circle cx="380" cy="540" r="4" class="dot ctx"/>
-<circle cx="300" cy="514" r="4" class="dot c33"/>
-<circle cx="380" cy="600" r="4" class="dot clin"/>
-<circle cx="300" cy="574" r="4" class="dot c33"/>
-<circle cx="380" cy="660" r="4" class="dot ccs"/>
-<circle cx="300" cy="634" r="4" class="dot c33"/>
+<text x="850" y="540" class="val" text-anchor="middle">Kalibrier-Taster</text><circle cx="230" cy="400" r="4" class="dot cg"/>
+<circle cx="380" cy="450" r="4" class="dot crx"/>
+<circle cx="300" cy="425" r="4" class="dot c33"/>
+<circle cx="380" cy="500" r="4" class="dot clin"/>
+<circle cx="300" cy="475" r="4" class="dot c33"/>
+<circle cx="380" cy="640" r="4" class="dot ctx"/>
+<circle cx="300" cy="615" r="4" class="dot c33"/>
+<circle cx="380" cy="690" r="4" class="dot ccs"/>
+<circle cx="300" cy="665" r="4" class="dot c33"/>
 <circle cx="470" cy="360" r="4" class="dot c33"/><g class="badge c33"><circle cx="440" cy="360" r="10"/><text x="440" y="364" text-anchor="middle">1</text></g>
 <g class="badge cg"><circle cx="440" cy="400" r="10"/><text x="440" y="404" text-anchor="middle">2</text></g>
-<g class="badge crx"><circle cx="440" cy="480" r="10"/><text x="440" y="484" text-anchor="middle">3</text></g>
-<g class="badge c33"><circle cx="398" cy="454" r="10"/><text x="398" y="458" text-anchor="middle">7</text></g>
-<g class="badge ctx"><circle cx="440" cy="540" r="10"/><text x="440" y="544" text-anchor="middle">4</text></g>
-<g class="badge c33"><circle cx="398" cy="514" r="10"/><text x="398" y="518" text-anchor="middle">8</text></g>
-<g class="badge clin"><circle cx="440" cy="600" r="10"/><text x="440" y="604" text-anchor="middle">5</text></g>
-<g class="badge c33"><circle cx="398" cy="574" r="10"/><text x="398" y="578" text-anchor="middle">9</text></g>
-<g class="badge ccs"><circle cx="440" cy="660" r="10"/><text x="440" y="664" text-anchor="middle">6</text></g>
-<g class="badge c33"><circle cx="398" cy="634" r="10"/><text x="398" y="638" text-anchor="middle">10</text></g>
-<g class="badge c33"><circle cx="900" cy="200" r="10"/><text x="900" y="204" text-anchor="middle">11</text></g>
-<g class="badge csig"><circle cx="790" cy="520" r="10"/><text x="790" y="524" text-anchor="middle">12</text></g></svg>
+<g class="badge cg"><circle cx="230" cy="560" r="10"/><text x="230" y="564" text-anchor="middle">3</text></g>
+<g class="badge crx"><circle cx="420" cy="450" r="10"/><text x="420" y="454" text-anchor="middle">4</text></g>
+<g class="badge c33"><circle cx="398" cy="425" r="10"/><text x="398" y="429" text-anchor="middle">8</text></g>
+<g class="badge clin"><circle cx="420" cy="500" r="10"/><text x="420" y="504" text-anchor="middle">5</text></g>
+<g class="badge c33"><circle cx="398" cy="475" r="10"/><text x="398" y="479" text-anchor="middle">9</text></g>
+<g class="badge ctx"><circle cx="420" cy="640" r="10"/><text x="420" y="644" text-anchor="middle">6</text></g>
+<g class="badge c33"><circle cx="398" cy="615" r="10"/><text x="398" y="619" text-anchor="middle">10</text></g>
+<g class="badge ccs"><circle cx="420" cy="690" r="10"/><text x="420" y="694" text-anchor="middle">7</text></g>
+<g class="badge c33"><circle cx="398" cy="665" r="10"/><text x="398" y="669" text-anchor="middle">11</text></g>
+<g class="badge c33"><circle cx="900" cy="200" r="10"/><text x="900" y="204" text-anchor="middle">12</text></g>
+<g class="badge csig"><circle cx="790" cy="520" r="10"/><text x="790" y="524" text-anchor="middle">13</text></g></svg>

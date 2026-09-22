@@ -173,14 +173,16 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
     <span class="eyebrow">Buggy · STM32Wiper · Eingänge</span>
     <h1>Lenkstockschalter: Steckplan</h1>
     <p class="lede">Die originalen <b>Corsa-C-Lenkstockschalter</b> (Blinker/Fernlicht und Wischer) am <b>Nucleo-F446RE</b>.
-      Jeder Schalter ist eine Widerstandskaskade: Je nach Stellung ändert sich der Widerstand nach Masse, der Pull-up macht daraus eine Spannung am ADC.
+      Jeder Hebel hat <b>drei Adern</b>: eine gemeinsame Masse und <b>zwei Signaladern</b> mit je eigener Widerstandskaskade.
+      Jede Signalader bekommt einen eigenen ADC-Pin mit Pull-up. So überlagern sich Kombinationen (z. B. Blinker + Lichthupe) nicht mehr.
       Relais werden hier <b>nicht</b> verbaut, die Schalterstellungen gehen später per CAN an die Relaisbox.</p>
   </header>
 
   <div class="facts" aria-label="Eckdaten">
     <span class="fact">Pull-ups an <b>3,3 V</b> (nie 5 V)</span>
-    <span class="fact">Pull-up <b>10 kΩ</b> (Wert prüfen)</span>
+    <span class="fact">Pull-up <b>220 Ω</b> je Signalader</span>
     <span class="fact">ADC <b>12 bit</b> (0–4095)</span>
+    <span class="fact">weiß = Masse <b>(Annahme)</b></span>
     <span class="fact">Nucleo über <b>USB</b></span>
   </div>
 
@@ -189,32 +191,34 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
     <div class="legend" aria-label="Farblegende">
       <span class="c33"><i></i>3,3 V · orange</span>
       <span class="cg"><i></i>GND · schwarz</span>
-      <span class="crx"><i></i>A0 Blinker · blau</span>
-      <span class="ctx"><i></i>A1 Frontwischer · grün</span>
-      <span class="clin"><i></i>A2 Fernlicht · gelb</span>
-      <span class="ccs"><i></i>A3 Heckwischer · weiß</span>
+      <span class="crx"><i></i>A0 Licht weiß-schwarz · blau</span>
+      <span class="ctx"><i></i>A1 Wischer weiß-schwarz · grün</span>
+      <span class="clin"><i></i>A2 Licht gelb-schwarz · gelb</span>
+      <span class="ccs"><i></i>A3 Wischer gelb-schwarz · weiß</span>
       <span class="csig"><i></i>D7 Taster · weiß</span>
       <span><i class="sym">●</i>verbunden</span>
       <span><i class="sym">⌒</i>Kreuzung, nicht verbunden</span>
     </div>
     <figure class="scroll" style="margin:0">
-      <svg viewBox="0 0 960 720" role="img" aria-label="Verkabelung Lenkstockschalter an Nucleo-F446RE: vier ADC-Eingänge mit Pull-ups und Kalibrier-Taster" xmlns="http://www.w3.org/2000/svg"><rect x="520" y="90" width="240" height="590" rx="10" class="board nucleo"/><rect x="610" y="78" width="60" height="26" rx="3" class="port"/><text x="640" y="96" class="porttxt" text-anchor="middle">USB</text><rect x="534" y="114" width="212" height="100" rx="4" class="stlink"/><text x="640.0" y="170" class="hdr" text-anchor="middle">ST-LINK</text><rect x="610" y="420" width="60" height="60" rx="3" class="mcu"/><text x="640" y="454" class="porttxt" text-anchor="middle">F446RE</text><text x="640.0" y="240" class="boardname big" text-anchor="middle">Nucleo-F446RE</text><text x="640.0" y="258" class="chipsub" text-anchor="middle">USB vom PC</text><text x="552" y="278" class="hdr">CN6</text><text x="728" y="278" class="hdr" text-anchor="end">CN5</text>
+      <svg viewBox="0 0 960 740" role="img" aria-label="Verkabelung Lenkstockschalter an Nucleo-F446RE: zwei Hebel mit je drei Adern, vier ADC-Eingänge mit 220-Ohm-Pull-ups, Kalibrier-Taster" xmlns="http://www.w3.org/2000/svg"><rect x="520" y="90" width="240" height="590" rx="10" class="board nucleo"/><rect x="610" y="78" width="60" height="26" rx="3" class="port"/><text x="640" y="96" class="porttxt" text-anchor="middle">USB</text><rect x="534" y="114" width="212" height="100" rx="4" class="stlink"/><text x="640.0" y="170" class="hdr" text-anchor="middle">ST-LINK</text><rect x="610" y="420" width="60" height="60" rx="3" class="mcu"/><text x="640" y="454" class="porttxt" text-anchor="middle">F446RE</text><text x="640.0" y="240" class="boardname big" text-anchor="middle">Nucleo-F446RE</text><text x="640.0" y="258" class="chipsub" text-anchor="middle">USB vom PC</text><text x="552" y="278" class="hdr">CN6</text><text x="728" y="278" class="hdr" text-anchor="end">CN5</text>
 <text x="552" y="464" class="hdr">CN8</text><text x="728" y="504" class="hdr" text-anchor="end">CN9</text>
-<rect x="40" y="400" width="150" height="300" rx="8" class="board stalk"/><text x="115.0" y="374" class="boardname" text-anchor="middle">Lenkstockschalter</text><text x="115.0" y="390" class="chipsub" text-anchor="middle">Corsa C · Stecker-Pins nachmessen</text>
-<text x="308" y="352" class="rail">3,3-V-Schiene</text><path d="M540,360 L300,360 L300,394 A6,6 0 0 1 300,406 L300,474 A6,6 0 0 1 300,486 L300,534 A6,6 0 0 1 300,546 L300,594 A6,6 0 0 1 300,606 L300,634" class="wc"/><path d="M540,360 L300,360 L300,394 A6,6 0 0 1 300,406 L300,474 A6,6 0 0 1 300,486 L300,534 A6,6 0 0 1 300,546 L300,594 A6,6 0 0 1 300,606 L300,634" class="w c33"/>
-<path d="M540,400 L230,400 L230,430 L190,430" class="wc"/><path d="M540,400 L230,400 L230,430 L190,430" class="w cg"/>
-<path d="M540,480 L190,480" class="wc"/><path d="M540,480 L190,480" class="w crx"/>
-<path d="M380,480 L380,454" class="wc"/><path d="M380,480 L380,454" class="w crx"/>
-<path d="M380,454 L300,454" class="wc"/><path d="M380,454 L300,454" class="w c33"/>
-<path d="M540,500 L495,500 L495,540 L190,540" class="wc"/><path d="M540,500 L495,500 L495,540 L190,540" class="w ctx"/>
-<path d="M380,540 L380,514" class="wc"/><path d="M380,540 L380,514" class="w ctx"/>
-<path d="M380,514 L300,514" class="wc"/><path d="M380,514 L300,514" class="w c33"/>
-<path d="M540,520 L505,520 L505,600 L190,600" class="wc"/><path d="M540,520 L505,520 L505,600 L190,600" class="w clin"/>
-<path d="M380,600 L380,574" class="wc"/><path d="M380,600 L380,574" class="w clin"/>
-<path d="M380,574 L300,574" class="wc"/><path d="M380,574 L300,574" class="w c33"/>
-<path d="M540,540 L515,540 L515,660 L190,660" class="wc"/><path d="M540,540 L515,540 L515,660 L190,660" class="w ccs"/>
-<path d="M380,660 L380,634" class="wc"/><path d="M380,660 L380,634" class="w ccs"/>
-<path d="M380,634 L300,634" class="wc"/><path d="M380,634 L300,634" class="w c33"/>
+<rect x="40" y="370" width="150" height="150" rx="8" class="board stalk"/><text x="40" y="346" class="boardname">Lichthebel</text><text x="40" y="362" class="chipsub">Blinker · Fernlicht · Lichthupe</text>
+<rect x="40" y="560" width="150" height="150" rx="8" class="board stalk"/><text x="40" y="536" class="boardname">Wischerhebel</text><text x="40" y="552" class="chipsub">Front · Heck · Waschen</text>
+<text x="308" y="352" class="rail">3,3-V-Schiene</text><path d="M540,360 L300,360 L300,394 A6,6 0 0 1 300,406 L300,444 A6,6 0 0 1 300,456 L300,494 A6,6 0 0 1 300,506 L300,634 A6,6 0 0 1 300,646 L300,665" class="wc"/><path d="M540,360 L300,360 L300,394 A6,6 0 0 1 300,406 L300,444 A6,6 0 0 1 300,456 L300,494 A6,6 0 0 1 300,506 L300,634 A6,6 0 0 1 300,646 L300,665" class="w c33"/>
+<path d="M540,400 L190,400" class="wc"/><path d="M540,400 L190,400" class="w cg"/>
+<path d="M230,400 L230,444 A6,6 0 0 1 230,456 L230,494 A6,6 0 0 1 230,506 L230,590 L190,590" class="wc"/><path d="M230,400 L230,444 A6,6 0 0 1 230,456 L230,494 A6,6 0 0 1 230,506 L230,590 L190,590" class="w cg"/>
+<path d="M540,480 L470,480 L470,450 L190,450" class="wc"/><path d="M540,480 L470,480 L470,450 L190,450" class="w crx"/>
+<path d="M380,450 L380,425" class="wc"/><path d="M380,450 L380,425" class="w crx"/>
+<path d="M380,425 L300,425" class="wc"/><path d="M380,425 L300,425" class="w c33"/>
+<path d="M540,520 L450,520 L450,500 L190,500" class="wc"/><path d="M540,520 L450,520 L450,500 L190,500" class="w clin"/>
+<path d="M380,500 L380,475" class="wc"/><path d="M380,500 L380,475" class="w clin"/>
+<path d="M380,475 L300,475" class="wc"/><path d="M380,475 L300,475" class="w c33"/>
+<path d="M540,500 L505,500 L505,514 A6,6 0 0 1 505,526 L505,640 L190,640" class="wc"/><path d="M540,500 L505,500 L505,514 A6,6 0 0 1 505,526 L505,640 L190,640" class="w ctx"/>
+<path d="M380,640 L380,615" class="wc"/><path d="M380,640 L380,615" class="w ctx"/>
+<path d="M380,615 L300,615" class="wc"/><path d="M380,615 L300,615" class="w c33"/>
+<path d="M540,540 L515,540 L515,690 L190,690" class="wc"/><path d="M540,540 L515,540 L515,690 L190,690" class="w ccs"/>
+<path d="M380,690 L380,665" class="wc"/><path d="M380,690 L380,665" class="w ccs"/>
+<path d="M380,665 L300,665" class="wc"/><path d="M380,665 L300,665" class="w c33"/>
 <path d="M470,360 L470,40 L900,40 L900,520" class="wc"/><path d="M470,360 L470,40 L900,40 L900,520" class="w c33"/>
 <path d="M740,520 L900,520" class="wc"/><path d="M740,520 L900,520" class="w csig"/><rect x="535.5" y="295.5" width="9" height="9" class="pad"/>
 <text x="550" y="304" class="lbl" text-anchor="start">NC</text>
@@ -280,64 +284,68 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
 <text x="730" y="644" class="lbl" text-anchor="end">D1</text>
 <rect x="735.5" y="655.5" width="9" height="9" class="pad"/>
 <text x="730" y="664" class="lbl" text-anchor="end">D0</text>
-<circle cx="190" cy="430" r="4" class="term"/><text x="180" y="434" class="val" text-anchor="end">Masse (beide)</text>
-<circle cx="190" cy="480" r="4" class="term"/><text x="180" y="484" class="val" text-anchor="end">Blinker SIG_A</text>
-<circle cx="190" cy="540" r="4" class="term"/><text x="180" y="544" class="val" text-anchor="end">Frontwischer</text>
-<circle cx="190" cy="600" r="4" class="term"/><text x="180" y="604" class="val" text-anchor="end">Fernlicht SIG_B</text>
-<circle cx="190" cy="660" r="4" class="term"/><text x="180" y="664" class="val" text-anchor="end">Heckwischer</text>
-<rect x="321.0" y="448.0" width="38" height="12" rx="3" class="part rbody"/>
-<rect x="325.6" y="448.9" width="2.8" height="10.2" fill="#7a4a1f"/>
-<rect x="330.6" y="448.9" width="2.8" height="10.2" fill="#111111"/>
-<rect x="335.6" y="448.9" width="2.8" height="10.2" fill="#111111"/>
-<rect x="340.6" y="448.9" width="2.8" height="10.2" fill="#d42a1e"/>
-<rect x="349.6" y="448.9" width="2.8" height="10.2" fill="#7a4a1f"/>
-<text x="340.0" y="442" class="val" text-anchor="middle">10 kΩ</text>
-<rect x="321.0" y="508.0" width="38" height="12" rx="3" class="part rbody"/>
-<rect x="325.6" y="508.9" width="2.8" height="10.2" fill="#7a4a1f"/>
-<rect x="330.6" y="508.9" width="2.8" height="10.2" fill="#111111"/>
-<rect x="335.6" y="508.9" width="2.8" height="10.2" fill="#111111"/>
-<rect x="340.6" y="508.9" width="2.8" height="10.2" fill="#d42a1e"/>
-<rect x="349.6" y="508.9" width="2.8" height="10.2" fill="#7a4a1f"/>
-<text x="340.0" y="502" class="val" text-anchor="middle">10 kΩ</text>
-<rect x="321.0" y="568.0" width="38" height="12" rx="3" class="part rbody"/>
-<rect x="325.6" y="568.9" width="2.8" height="10.2" fill="#7a4a1f"/>
-<rect x="330.6" y="568.9" width="2.8" height="10.2" fill="#111111"/>
-<rect x="335.6" y="568.9" width="2.8" height="10.2" fill="#111111"/>
-<rect x="340.6" y="568.9" width="2.8" height="10.2" fill="#d42a1e"/>
-<rect x="349.6" y="568.9" width="2.8" height="10.2" fill="#7a4a1f"/>
-<text x="340.0" y="562" class="val" text-anchor="middle">10 kΩ</text>
-<rect x="321.0" y="628.0" width="38" height="12" rx="3" class="part rbody"/>
-<rect x="325.6" y="628.9" width="2.8" height="10.2" fill="#7a4a1f"/>
-<rect x="330.6" y="628.9" width="2.8" height="10.2" fill="#111111"/>
-<rect x="335.6" y="628.9" width="2.8" height="10.2" fill="#111111"/>
-<rect x="340.6" y="628.9" width="2.8" height="10.2" fill="#d42a1e"/>
-<rect x="349.6" y="628.9" width="2.8" height="10.2" fill="#7a4a1f"/>
-<text x="340.0" y="622" class="val" text-anchor="middle">10 kΩ</text>
+<circle cx="190" cy="400" r="4" class="term"/><text x="180" y="404" class="val" text-anchor="end">weiß (Masse?)</text>
+<circle cx="190" cy="450" r="4" class="term"/><text x="180" y="454" class="val" text-anchor="end">weiß-schwarz</text>
+<circle cx="190" cy="500" r="4" class="term"/><text x="180" y="504" class="val" text-anchor="end">gelb-schwarz</text>
+<circle cx="190" cy="590" r="4" class="term"/><text x="180" y="594" class="val" text-anchor="end">weiß (Masse?)</text>
+<circle cx="190" cy="640" r="4" class="term"/><text x="180" y="644" class="val" text-anchor="end">weiß-schwarz</text>
+<circle cx="190" cy="690" r="4" class="term"/><text x="180" y="694" class="val" text-anchor="end">gelb-schwarz</text>
+<rect x="321.0" y="419.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="325.6" y="419.9" width="2.8" height="10.2" fill="#d42a1e"/>
+<rect x="330.6" y="419.9" width="2.8" height="10.2" fill="#d42a1e"/>
+<rect x="335.6" y="419.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="340.6" y="419.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="349.6" y="419.9" width="2.8" height="10.2" fill="#7a4a1f"/>
+<text x="340.0" y="413" class="val" text-anchor="middle">220 Ω</text>
+<rect x="321.0" y="469.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="325.6" y="469.9" width="2.8" height="10.2" fill="#d42a1e"/>
+<rect x="330.6" y="469.9" width="2.8" height="10.2" fill="#d42a1e"/>
+<rect x="335.6" y="469.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="340.6" y="469.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="349.6" y="469.9" width="2.8" height="10.2" fill="#7a4a1f"/>
+<text x="340.0" y="463" class="val" text-anchor="middle">220 Ω</text>
+<rect x="321.0" y="609.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="325.6" y="609.9" width="2.8" height="10.2" fill="#d42a1e"/>
+<rect x="330.6" y="609.9" width="2.8" height="10.2" fill="#d42a1e"/>
+<rect x="335.6" y="609.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="340.6" y="609.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="349.6" y="609.9" width="2.8" height="10.2" fill="#7a4a1f"/>
+<text x="340.0" y="603" class="val" text-anchor="middle">220 Ω</text>
+<rect x="321.0" y="659.0" width="38" height="12" rx="3" class="part rbody"/>
+<rect x="325.6" y="659.9" width="2.8" height="10.2" fill="#d42a1e"/>
+<rect x="330.6" y="659.9" width="2.8" height="10.2" fill="#d42a1e"/>
+<rect x="335.6" y="659.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="340.6" y="659.9" width="2.8" height="10.2" fill="#111111"/>
+<rect x="349.6" y="659.9" width="2.8" height="10.2" fill="#7a4a1f"/>
+<text x="340.0" y="653" class="val" text-anchor="middle">220 Ω</text>
 <rect x="834" y="506" width="32" height="20" class="cut"/>
 <circle cx="836" cy="520" r="2.5" class="term"/><circle cx="864" cy="520" r="2.5" class="term"/><line x1="836" y1="512" x2="864" y2="512" class="plate"/><line x1="850" y1="512" x2="850" y2="505" class="plate"/><line x1="845" y1="505" x2="855" y2="505" class="plate"/>
-<text x="850" y="540" class="val" text-anchor="middle">Kalibrier-Taster</text><circle cx="380" cy="480" r="4" class="dot crx"/>
-<circle cx="300" cy="454" r="4" class="dot c33"/>
-<circle cx="380" cy="540" r="4" class="dot ctx"/>
-<circle cx="300" cy="514" r="4" class="dot c33"/>
-<circle cx="380" cy="600" r="4" class="dot clin"/>
-<circle cx="300" cy="574" r="4" class="dot c33"/>
-<circle cx="380" cy="660" r="4" class="dot ccs"/>
-<circle cx="300" cy="634" r="4" class="dot c33"/>
+<text x="850" y="540" class="val" text-anchor="middle">Kalibrier-Taster</text><circle cx="230" cy="400" r="4" class="dot cg"/>
+<circle cx="380" cy="450" r="4" class="dot crx"/>
+<circle cx="300" cy="425" r="4" class="dot c33"/>
+<circle cx="380" cy="500" r="4" class="dot clin"/>
+<circle cx="300" cy="475" r="4" class="dot c33"/>
+<circle cx="380" cy="640" r="4" class="dot ctx"/>
+<circle cx="300" cy="615" r="4" class="dot c33"/>
+<circle cx="380" cy="690" r="4" class="dot ccs"/>
+<circle cx="300" cy="665" r="4" class="dot c33"/>
 <circle cx="470" cy="360" r="4" class="dot c33"/><g class="badge c33"><circle cx="440" cy="360" r="10"/><text x="440" y="364" text-anchor="middle">1</text></g>
 <g class="badge cg"><circle cx="440" cy="400" r="10"/><text x="440" y="404" text-anchor="middle">2</text></g>
-<g class="badge crx"><circle cx="440" cy="480" r="10"/><text x="440" y="484" text-anchor="middle">3</text></g>
-<g class="badge c33"><circle cx="398" cy="454" r="10"/><text x="398" y="458" text-anchor="middle">7</text></g>
-<g class="badge ctx"><circle cx="440" cy="540" r="10"/><text x="440" y="544" text-anchor="middle">4</text></g>
-<g class="badge c33"><circle cx="398" cy="514" r="10"/><text x="398" y="518" text-anchor="middle">8</text></g>
-<g class="badge clin"><circle cx="440" cy="600" r="10"/><text x="440" y="604" text-anchor="middle">5</text></g>
-<g class="badge c33"><circle cx="398" cy="574" r="10"/><text x="398" y="578" text-anchor="middle">9</text></g>
-<g class="badge ccs"><circle cx="440" cy="660" r="10"/><text x="440" y="664" text-anchor="middle">6</text></g>
-<g class="badge c33"><circle cx="398" cy="634" r="10"/><text x="398" y="638" text-anchor="middle">10</text></g>
-<g class="badge c33"><circle cx="900" cy="200" r="10"/><text x="900" y="204" text-anchor="middle">11</text></g>
-<g class="badge csig"><circle cx="790" cy="520" r="10"/><text x="790" y="524" text-anchor="middle">12</text></g></svg>
+<g class="badge cg"><circle cx="230" cy="560" r="10"/><text x="230" y="564" text-anchor="middle">3</text></g>
+<g class="badge crx"><circle cx="420" cy="450" r="10"/><text x="420" y="454" text-anchor="middle">4</text></g>
+<g class="badge c33"><circle cx="398" cy="425" r="10"/><text x="398" y="429" text-anchor="middle">8</text></g>
+<g class="badge clin"><circle cx="420" cy="500" r="10"/><text x="420" y="504" text-anchor="middle">5</text></g>
+<g class="badge c33"><circle cx="398" cy="475" r="10"/><text x="398" y="479" text-anchor="middle">9</text></g>
+<g class="badge ctx"><circle cx="420" cy="640" r="10"/><text x="420" y="644" text-anchor="middle">6</text></g>
+<g class="badge c33"><circle cx="398" cy="615" r="10"/><text x="398" y="619" text-anchor="middle">10</text></g>
+<g class="badge ccs"><circle cx="420" cy="690" r="10"/><text x="420" y="694" text-anchor="middle">7</text></g>
+<g class="badge c33"><circle cx="398" cy="665" r="10"/><text x="398" y="669" text-anchor="middle">11</text></g>
+<g class="badge c33"><circle cx="900" cy="200" r="10"/><text x="900" y="204" text-anchor="middle">12</text></g>
+<g class="badge csig"><circle cx="790" cy="520" r="10"/><text x="790" y="524" text-anchor="middle">13</text></g></svg>
     </figure>
     <figcaption>Der Nucleo ist hochkant gezeichnet (ST-LINK-USB oben), so wie er vor dir liegt. Die Pins sind die inneren Arduino-Buchsenleisten:
-      links CN6 (Versorgung) und CN8 (A0–A5), rechts CN5 und CN9 (D15–D0). Welche Pins am Schalterstecker Signal und Masse sind, musst du am Schalter nachmessen.</figcaption>
+      links CN6 (Versorgung) und CN8 (A0–A5), rechts CN5 und CN9 (D15–D0). An den Hebeln stehen die Aderfarben der Schalter.
+      Die ADC-Pins entsprechen der aktuellen Firmware (<code>config.h</code>), deshalb liegen die beiden Hebel nicht auf nebeneinanderliegenden Pins.</figcaption>
   </section>
 
   <section class="sheet">
@@ -348,20 +356,22 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
       <tbody>
         <tr class="group"><td colspan="5">Versorgung</td></tr>
         <tr><td class="check"><input type="checkbox" id="w1" aria-label="Kabel 1 gesteckt"></td><td class="n"><span class="num c33">1</span></td><td>Nucleo <b>+3V3</b> (CN6, linke Leiste, 4. Pin)</td><td>3,3-V-Schiene</td><td><b>nicht 5 V</b>: die ADC-Pins vertragen im Analogbetrieb nur 3,3 V</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w2" aria-label="Kabel 2 gesteckt"></td><td class="n"><span class="num cg">2</span></td><td>Nucleo <b>GND</b> (CN6, 6. Pin)</td><td>Masse der Lenkstockschalter</td><td>der Nucleo selbst hängt per USB (ST-LINK) am PC</td></tr>
-        <tr class="group"><td colspan="5">Schaltersignale → ADC</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w3" aria-label="Kabel 3 gesteckt"></td><td class="n"><span class="num crx">3</span></td><td>Blinker <b>SIG_A</b></td><td>Nucleo <b>A0</b> (PA0)</td><td></td></tr>
-        <tr><td class="check"><input type="checkbox" id="w4" aria-label="Kabel 4 gesteckt"></td><td class="n"><span class="num ctx">4</span></td><td>Frontwischer</td><td>Nucleo <b>A1</b> (PA1)</td><td></td></tr>
-        <tr><td class="check"><input type="checkbox" id="w5" aria-label="Kabel 5 gesteckt"></td><td class="n"><span class="num clin">5</span></td><td>Fernlicht <b>SIG_B</b></td><td>Nucleo <b>A2</b> (PA4)</td><td>die Firmware liest den Pin noch nicht aus (Stub)</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w6" aria-label="Kabel 6 gesteckt"></td><td class="n"><span class="num ccs">6</span></td><td>Heckwischer</td><td>Nucleo <b>A3</b> (PB0)</td><td></td></tr>
-        <tr class="group"><td colspan="5">Pull-ups (je einer pro ADC-Pin)</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w7" aria-label="Kabel 7 gesteckt"></td><td class="n"><span class="num c33">7</span></td><td>3,3-V-Schiene</td><td>10 kΩ<span class="rc metal" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-braun tol"></i></span> → <b>A0</b></td><td>Richtung egal</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w8" aria-label="Kabel 8 gesteckt"></td><td class="n"><span class="num c33">8</span></td><td>3,3-V-Schiene</td><td>10 kΩ<span class="rc metal" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-braun tol"></i></span> → <b>A1</b></td><td>Richtung egal</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w9" aria-label="Kabel 9 gesteckt"></td><td class="n"><span class="num c33">9</span></td><td>3,3-V-Schiene</td><td>10 kΩ<span class="rc metal" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-braun tol"></i></span> → <b>A2</b></td><td>Richtung egal</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w10" aria-label="Kabel 10 gesteckt"></td><td class="n"><span class="num c33">10</span></td><td>3,3-V-Schiene</td><td>10 kΩ<span class="rc metal" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-braun tol"></i></span> → <b>A3</b></td><td>Richtung egal</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w2" aria-label="Kabel 2 gesteckt"></td><td class="n"><span class="num cg">2</span></td><td>Nucleo <b>GND</b> (CN6, 6. Pin)</td><td>Lichthebel <b>weiß</b></td><td>Annahme: weiß = gemeinsame Masse, siehe Test unten</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w3" aria-label="Kabel 3 gesteckt"></td><td class="n"><span class="num cg">3</span></td><td>GND (von Nr. 2 abzweigen)</td><td>Wischerhebel <b>weiß</b></td><td></td></tr>
+        <tr class="group"><td colspan="5">Lichthebel → ADC</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w4" aria-label="Kabel 4 gesteckt"></td><td class="n"><span class="num crx">4</span></td><td>Lichthebel <b>weiß-schwarz</b></td><td>Nucleo <b>A0</b> (PA0)</td><td>vermutlich Blinker</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w5" aria-label="Kabel 5 gesteckt"></td><td class="n"><span class="num clin">5</span></td><td>Lichthebel <b>gelb-schwarz</b></td><td>Nucleo <b>A2</b> (PA4)</td><td>vermutlich Fernlicht/Lichthupe</td></tr>
+        <tr class="group"><td colspan="5">Wischerhebel → ADC</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w6" aria-label="Kabel 6 gesteckt"></td><td class="n"><span class="num ctx">6</span></td><td>Wischerhebel <b>weiß-schwarz</b></td><td>Nucleo <b>A1</b> (PA1)</td><td></td></tr>
+        <tr><td class="check"><input type="checkbox" id="w7" aria-label="Kabel 7 gesteckt"></td><td class="n"><span class="num ccs">7</span></td><td>Wischerhebel <b>gelb-schwarz</b></td><td>Nucleo <b>A3</b> (PB0)</td><td></td></tr>
+        <tr class="group"><td colspan="5">Pull-ups (je einer pro Signalader)</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w8" aria-label="Kabel 8 gesteckt"></td><td class="n"><span class="num c33">8</span></td><td>3,3-V-Schiene</td><td>220 Ω<span class="rc metal" aria-hidden="true"><i class="b-rot"></i><i class="b-rot"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-braun tol"></i></span> → <b>A0</b></td><td>Richtung egal</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w9" aria-label="Kabel 9 gesteckt"></td><td class="n"><span class="num c33">9</span></td><td>3,3-V-Schiene</td><td>220 Ω<span class="rc metal" aria-hidden="true"><i class="b-rot"></i><i class="b-rot"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-braun tol"></i></span> → <b>A2</b></td><td>Richtung egal</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w10" aria-label="Kabel 10 gesteckt"></td><td class="n"><span class="num c33">10</span></td><td>3,3-V-Schiene</td><td>220 Ω<span class="rc metal" aria-hidden="true"><i class="b-rot"></i><i class="b-rot"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-braun tol"></i></span> → <b>A1</b></td><td>Richtung egal</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w11" aria-label="Kabel 11 gesteckt"></td><td class="n"><span class="num c33">11</span></td><td>3,3-V-Schiene</td><td>220 Ω<span class="rc metal" aria-hidden="true"><i class="b-rot"></i><i class="b-rot"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-braun tol"></i></span> → <b>A3</b></td><td>Richtung egal</td></tr>
         <tr class="group"><td colspan="5">Kalibrier-Taster</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w11" aria-label="Kabel 11 gesteckt"></td><td class="n"><span class="num c33">11</span></td><td>Nucleo <b>+3V3</b></td><td>Taster</td><td></td></tr>
-        <tr><td class="check"><input type="checkbox" id="w12" aria-label="Kabel 12 gesteckt"></td><td class="n"><span class="num csig">12</span></td><td>Taster</td><td>Nucleo <b>D7</b> (PA8, CN9, rechte Leiste)</td><td>Pull-down ist intern (<code>INPUT_PULLDOWN</code>), kein Widerstand nötig</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w12" aria-label="Kabel 12 gesteckt"></td><td class="n"><span class="num c33">12</span></td><td>Nucleo <b>+3V3</b></td><td>Taster</td><td></td></tr>
+        <tr><td class="check"><input type="checkbox" id="w13" aria-label="Kabel 13 gesteckt"></td><td class="n"><span class="num csig">13</span></td><td>Taster</td><td>Nucleo <b>D7</b> (PA8, CN9, rechte Leiste)</td><td>Pull-down ist intern (<code>INPUT_PULLDOWN</code>), kein Widerstand nötig</td></tr>
       </tbody>
     </table>
     </div>
@@ -374,12 +384,12 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
     <table>
       <thead><tr><th>Wert</th><th>Anzahl</th><th>5 Ringe (Metall, blau, ±1 %)</th><th>Wo</th></tr></thead>
       <tbody>
-        <tr><td><b>10 kΩ</b></td><td>4×</td><td><span class="rc metal" aria-hidden="true"><i class="b-braun"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-rot"></i><i class="b-braun tol"></i></span><br><span class="bands">braun – schwarz – schwarz – rot – braun</span></td><td>Nr. 7–10, Pull-ups an A0–A3</td></tr>
+        <tr><td><b>220 Ω</b></td><td>4×</td><td><span class="rc metal" aria-hidden="true"><i class="b-rot"></i><i class="b-rot"></i><i class="b-schwarz"></i><i class="b-schwarz"></i><i class="b-braun tol"></i></span><br><span class="bands">rot – rot – schwarz – schwarz – braun</span></td><td>Nr. 8–11, Pull-ups an A0–A3</td></tr>
       </tbody>
     </table>
     </div>
-    <p class="hint">Achtung: Von der anderen Seite gelesen ergibt derselbe Widerstand braun – rot – schwarz – schwarz – braun = <b>120 Ω</b>. Beide Enden sind braun, deshalb mit dem Multimeter prüfen.
-      Der genaue Wert ist unkritisch, weil die Kalibrier-Firmware die Schwellen neu lernt. Er muss nur bei allen vier gleich sein, und nach einem Tausch neu kalibrieren.</p>
+    <p class="hint">Warum 220 Ω statt der alten 10 kΩ: Die Kaskaden liegen zwischen etwa 80 Ω und 1,5 kΩ. Mit 220 Ω verteilen sich die Stellungen über 0,9–2,9 V
+      (kleinster Abstand ≈ 0,6 V), mit 10 kΩ lägen alle zwischen 0 und 0,4 V (kleinster Abstand ≈ 0,1 V). Strom: höchstens ≈ 11 mA pro Ader.</p>
   </section>
 
   <div class="notes">
@@ -388,8 +398,16 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
       <ul>
         <li>Pull-ups <b>nie an 5 V</b>: A0–A3 vertragen im Analogbetrieb nur 3,3 V.</li>
         <li>Keine Fahrzeug-12-V an den Schalterstecker, solange er am Nucleo hängt.</li>
+        <li>Die alten 10-kΩ-Pull-ups raus, sonst liegen sie parallel.</li>
         <li>Das Relaisboard entfällt, D3–D6 und D8–D10 bleiben frei.</li>
       </ul>
+    </div>
+    <div class="note warn">
+      <h3>Stimmt „weiß = Masse“? Test ohne Multimeter</h3>
+      <p>Falsch gesteckt ist ungefährlich: Die 220 Ω begrenzen den Strom, an den Pins liegen nie mehr als 3,3 V.
+        <b>Richtig:</b> In Ruhe zeigen beide Kanäle eines Hebels einen hohen Wert (≈ 3500 von 4095). Jeder Kanal reagiert nur auf seine eigenen Funktionen,
+        z. B. A0 nur auf Blinker, A2 nur auf Lichthupe/Fernlicht.
+        <b>Falsch:</b> Ein Kanal reagiert auf <b>alle</b> Funktionen des Hebels. Dann ist eine Signalader an GND: die Ader an GND mit der Ader tauschen, deren Kanal auf alles reagiert.</p>
     </div>
     <div class="note">
       <h3>Danach</h3>
@@ -401,6 +419,7 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
       <ul>
         <li><a href="https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf">ST UM1724</a> (Nucleo-64, Arduino-Leisten CN5/CN6/CN8/CN9)</li>
         <li>Pinbelegung: <code>STM32Wiper/include/config.h</code></li>
+        <li><a href="https://www.locostbuilders.co.uk/forum/5/viewthread.php?fid=5&amp;tid=201578&amp;action=printable">locostbuilders.co.uk</a>: Corsa-C-Hebel mit gemeinsamer Ader + zwei Signaladern, Messwerte eines Bastlers (80 Ω – 1,5 kΩ)</li>
       </ul>
     </div>
   </div>
