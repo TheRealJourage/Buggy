@@ -139,11 +139,11 @@ for n, y in right.items():
 # ── two stalks, 3 wires each: common + two resistor-coded signal lines ──
 SX, SW = 40, 150
 TX = SX + SW
-# light stalk connector pins measured 2026-09-23; wiper stalk pins not yet checked
+# connector pins of both stalks measured 2026-09-23
 stalks = [("Lichthebel", "Blinker · Fernlicht · Lichthupe", 370, {"GND": 400, "A0": 450, "A2": 500},
-           {"GND": "Pin 3 gelb-schwarz", "A0": "Pin 2 weiß-schwarz", "A2": "Pin 1 weiß"}),
+           {"GND": "Pin 3 gelb-braun", "A0": "Pin 2 weiß-schwarz", "A2": "Pin 1 weiß"}),
           ("Wischerhebel", "Front · Heck · Waschen", 560, {"GND": 590, "A1": 640, "A3": 690},
-           {"GND": "gelb-schwarz (Masse)", "A1": "weiß-schwarz", "A3": "weiß"})]
+           {"GND": "Pin 3 gelb-braun", "A1": "Pin 1 blau-schwarz", "A3": "Pin 2 lila-schwarz"})]
 term = {}
 for name, sub, sy, t, wire_col in stalks:
     f.under.append(f'<rect x="{SX}" y="{sy}" width="{SW}" height="150" rx="8" class="board stalk"/>'
