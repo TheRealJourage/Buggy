@@ -181,6 +181,7 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
     <span class="fact">Pull-up <b>220 Ω</b> je Signalader</span>
     <span class="fact">ADC <b>12 bit</b> (0–4095)</span>
     <span class="fact">gelb-schwarz = <b>Masse</b></span>
+    <span class="fact">Stecker Licht: <b>1 weiß · 2 weiß-schwarz · 3 gelb-schwarz</b></span>
     <span class="fact">Nucleo über <b>USB</b></span>
   </div>
 
@@ -213,11 +214,11 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
       <tbody>
         <tr class="group"><td colspan="5">Versorgung</td></tr>
         <tr><td class="check"><input type="checkbox" id="w1" aria-label="Kabel 1 gesteckt"></td><td class="n"><span class="num c33">1</span></td><td>Nucleo <b>+3V3</b> (CN6, linke Leiste, 4. Pin)</td><td>3,3-V-Schiene</td><td><b>nicht 5 V</b>: die ADC-Pins vertragen im Analogbetrieb nur 3,3 V</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w2" aria-label="Kabel 2 gesteckt"></td><td class="n"><span class="num cg">2</span></td><td>Nucleo <b>GND</b> (CN6, 6. Pin)</td><td>Lichthebel <b>gelb-schwarz</b></td><td>gemeinsame Masse, gemessen 2026-09-22</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w2" aria-label="Kabel 2 gesteckt"></td><td class="n"><span class="num cg">2</span></td><td>Nucleo <b>GND</b> (CN6, 6. Pin)</td><td>Lichthebel <b>Pin 3 gelb-schwarz</b></td><td>gemeinsame Masse, gemessen 2026-09-22</td></tr>
         <tr><td class="check"><input type="checkbox" id="w3" aria-label="Kabel 3 gesteckt"></td><td class="n"><span class="num cg">3</span></td><td>GND (von Nr. 2 abzweigen)</td><td>Wischerhebel <b>gelb-schwarz</b></td><td>vermutlich wie beim Lichthebel, noch nicht gemessen</td></tr>
         <tr class="group"><td colspan="5">Lichthebel → ADC</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w4" aria-label="Kabel 4 gesteckt"></td><td class="n"><span class="num crx">4</span></td><td>Lichthebel <b>weiß-schwarz</b></td><td>Nucleo <b>A0</b> (PA0)</td><td>vermutlich Blinker</td></tr>
-        <tr><td class="check"><input type="checkbox" id="w5" aria-label="Kabel 5 gesteckt"></td><td class="n"><span class="num clin">5</span></td><td>Lichthebel <b>weiß</b></td><td>Nucleo <b>A2</b> (PA4)</td><td>vermutlich Fernlicht/Lichthupe</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w4" aria-label="Kabel 4 gesteckt"></td><td class="n"><span class="num crx">4</span></td><td>Lichthebel <b>Pin 2 weiß-schwarz</b></td><td>Nucleo <b>A0</b> (PA0)</td><td>vermutlich Blinker</td></tr>
+        <tr><td class="check"><input type="checkbox" id="w5" aria-label="Kabel 5 gesteckt"></td><td class="n"><span class="num clin">5</span></td><td>Lichthebel <b>Pin 1 weiß</b></td><td>Nucleo <b>A2</b> (PA4)</td><td>vermutlich Fernlicht/Lichthupe</td></tr>
         <tr class="group"><td colspan="5">Wischerhebel → ADC</td></tr>
         <tr><td class="check"><input type="checkbox" id="w6" aria-label="Kabel 6 gesteckt"></td><td class="n"><span class="num ctx">6</span></td><td>Wischerhebel <b>weiß-schwarz</b></td><td>Nucleo <b>A1</b> (PA1)</td><td></td></tr>
         <tr><td class="check"><input type="checkbox" id="w7" aria-label="Kabel 7 gesteckt"></td><td class="n"><span class="num ccs">7</span></td><td>Wischerhebel <b>weiß</b></td><td>Nucleo <b>A3</b> (PB0)</td><td></td></tr>
@@ -259,11 +260,11 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
         <li>Das Relaisboard entfällt, D3–D6 und D8–D10 bleiben frei.</li>
       </ul>
     </div>
-    <div class="note warn">
-      <h3>Offen: weiß ↔ weiß-schwarz verbunden (≈ 3 Ω)</h3>
-      <p>Am Lichthebel sind die beiden Signaladern direkt verbunden (gemessen 2026-09-22 mit <code>adc_test</code>). Dann sehen A0 und A2 dasselbe:
-        beide Kaskaden parallel, Blinker rechts und Fernlicht sind nicht unterscheidbar (beide ≈ 140 Ω). Laut Recherche müssten zwischen weiß und weiß-schwarz in Ruhe ≈ 3 kΩ liegen.
-        <b>Nächster Test:</b> Durchgang weiß ↔ weiß-schwarz mit dem Multimeter direkt an den Hebelkontakten, um Kabel/Stecker vom Hebel zu trennen.</p>
+    <div class="note">
+      <h3>Behoben: weiß ↔ weiß-schwarz waren verbunden</h3>
+      <p>Die Brücke (≈ 3 Ω, 2026-09-22) saß im Kabelstecker, der Hebel selbst war in Ordnung. Nach der Reparatur (2026-09-23) gilt am Lichthebel-Stecker:
+        <b>Pin 1 weiß → A2</b>, <b>Pin 2 weiß-schwarz → A0</b>, <b>Pin 3 gelb-schwarz → GND</b>.
+        <b>Nächster Test:</b> <code>adc_test</code>, Hebel durchschalten: Blinker nur auf A0, Lichthupe/Fernlicht nur auf A2?</p>
     </div>
     <div class="note">
       <h3>Danach</h3>
