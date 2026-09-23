@@ -304,13 +304,11 @@ uint8_t calculateChecksum(uint8_t* data, uint8_t length) {
 /*******************************************************************************
  * PRINT STEERING DATA - Output decoded values to Serial Monitor
  *
- * NOTE: This function uses Serial which conflicts with LIN on pins 0/1!
- * - Comment out this function for production (LIN-only operation)
- * - Uncomment for initial testing with USB connected
+ * Only built with -DLIN_DEBUG_PRINT (env uno_master_debug). The text also goes
+ * onto the LIN bus via D1; it contains no 0x55/0x3C, so the slave ignores it.
  ******************************************************************************/
 void printSteeringData() {
-  // Uncomment the following lines for Serial debugging:
-  /*
+#ifdef LIN_DEBUG_PRINT
   // Print button states
   Serial.print(F("BTN: "));
   for (int i = 0; i < 7; i++) {
@@ -336,7 +334,7 @@ void printSteeringData() {
   Serial.print(F(" ("));
   Serial.print(map(currentData.pot2, 0, 4095, 0, 100));
   Serial.println(F("%)"));
-  */
+#endif
 }
 
 /*******************************************************************************
