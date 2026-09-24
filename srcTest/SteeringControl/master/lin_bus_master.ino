@@ -6,13 +6,13 @@
  *
  * DESCRIPTION:
  * LIN bus master/commander that polls the RP2040 slave every 100ms for
- * steering wheel button and potentiometer data. Validates received data
+ * steering wheel buttons, potentiometers and Hall paddles. Validates received data
  * and displays decoded values via Serial Monitor and status LEDs.
  *
  * LIN PROTOCOL BASICS:
  * ┌─────────────────────────────────────────────────────────────────────┐
  * │ Break Field  │ Sync │ PID  │ Data Bytes (1-8)        │ Checksum    │
- * │ 13+ bits LOW │ 0x55 │ 0x3C │ Button + ADC0 + ADC1    │ Modular Sum │
+ * │ 13+ bits LOW │ 0x55 │ 0x3C │ Button + ADC0..ADC3     │ Modular Sum │
  * └─────────────────────────────────────────────────────────────────────┘
  *
  * TIMING DIAGRAM:
@@ -20,7 +20,7 @@
  *          |_________________|0x55|0x3C|
  *          └─ 13 bits = 676µs min @ 19200 baud
  *
- * Slave:                              |BTN|ADC0_H|ADC0_L|ADC1_H|ADC1_L|CHK|
+ * Slave:                              |BTN| ADC0+ADC1 (3) | ADC2+ADC3 (3) |CHK|
  *
  * MCP2003 LIN TRANSCEIVER CONNECTIONS (see README, rev. 3.0):
  * ┌─────────────────────────────────────────────────────────────────────┐
@@ -40,7 +40,7 @@
  *
  * ECHO: the transceiver mirrors the bus on RXD, so the master receives its
  * own SYNC and PID before the slave response. They are read and checked
- * before the 6 response bytes.
+ * before the 8 response bytes.
  *
  * STATUS INDICATORS:
  * - Pin 12 (Status LED): Toggles on each valid frame received
@@ -50,6 +50,7 @@
  * - Button states: "BTN: [1][2][3][4][5][6][7]"
  * - ADC0: Raw value (0-4095) and percentage (0-100%)
  * - ADC1: Raw value (0-4095) and percentage (0-100%)
+ * - HALL1/HALL2: Raw value and percentage of the calibrated travel
  *
  * NOTE: Serial debugging conflicts with LIN on pins 0/1!
  * - For initial testing WITH USB: Serial output works but LIN may be unreliable
@@ -57,7 +58,7 @@
  *
  * Author: Claude Code
  * Date: 2026-09-19
- * Version: 3.0 (echo handling, non-blocking error LED, 12V wiring)
+ * Version: 3.1 (4 ADC channels incl. Hall paddles, 8-byte response)
  ******************************************************************************/
 
 // ============================================================================
@@ -87,6 +88,13 @@
 #define ECHO_TIMEOUT      5               // Own SYNC+PID echo must be back within 5ms
 #define ERROR_BLINK_MS    50              // Error LED: 3 blinks of 50ms on / 50ms off
 #define BREAK_DURATION    700             // Break field: 700µs (13 bits @ 19200 = 677µs)
+#define RESPONSE_LEN      8               // Buttons + 4x 12 bit packed (6) + checksum
+
+// Hall clutch paddles (Simube, measured 2026-09-24 on 3.3V): released ~876,
+// fully pulled ~3310. The deadband makes both end positions read exactly 0/100%.
+#define HALL_RELEASED     876
+#define HALL_FULL         3310
+#define HALL_DEADBAND     30
 
 // ============================================================================
 // DATA STRUCTURE
@@ -95,10 +103,12 @@ struct SteeringData {
   uint8_t buttons;                        // 7 button states (bits 0-6)
   uint16_t pot1;                          // 12-bit ADC value (0-4095)
   uint16_t pot2;                          // 12-bit ADC value (0-4095)
+  uint16_t hall1;                         // 12-bit ADC value (0-4095)
+  uint16_t hall2;                         // 12-bit ADC value (0-4095)
   bool valid;                             // Data validity flag
 };
 
-SteeringData currentData = {0, 0, 0, false};
+SteeringData currentData = {0, 0, 0, 0, 0, false};
 
 // ============================================================================
 // GLOBAL VARIABLES
@@ -178,7 +188,7 @@ void loop() {
  * 1. Send BREAK field (13 bits LOW = 676µs minimum)
  * 2. Send SYNC byte (0x55)
  * 3. Send PID (0x3C)
- * 4. Wait for slave response (6 bytes)
+ * 4. Wait for slave response (8 bytes)
  * 5. Validate checksum
  * 6. Parse data
  *
@@ -204,16 +214,16 @@ bool requestSlaveData() {
     return false;  // Own header not seen on the bus: transceiver/wiring or bus collision
   }
 
-  // Step 4: Wait for slave response (6 bytes expected)
-  uint8_t response[6];
-  if (!readBytes(response, 6, RESPONSE_TIMEOUT)) {
+  // Step 4: Wait for slave response
+  uint8_t response[RESPONSE_LEN];
+  if (!readBytes(response, RESPONSE_LEN, RESPONSE_TIMEOUT)) {
     currentData.valid = false;
     return false;  // Timeout error
   }
 
   // Step 5: Validate checksum
-  uint8_t calculatedChecksum = calculateChecksum(response, 5);
-  if (response[5] != calculatedChecksum) {
+  uint8_t calculatedChecksum = calculateChecksum(response, RESPONSE_LEN - 1);
+  if (response[RESPONSE_LEN - 1] != calculatedChecksum) {
     currentData.valid = false;
     return false;  // Checksum error
   }
@@ -267,24 +277,25 @@ void sendBreakField() {
 /*******************************************************************************
  * PARSE RESPONSE - Extract button states and ADC values
  *
- * Frame format (6 bytes):
- * ┌─────────┬──────────┬──────────┬──────────┬──────────┬──────────┐
- * │ Byte 0  │ Byte 1   │ Byte 2   │ Byte 3   │ Byte 4   │ Byte 5   │
- * │ Buttons │ ADC0_MSB │ ADC0_LSB │ ADC1_MSB │ ADC1_LSB │ Checksum │
- * └─────────┴──────────┴──────────┴──────────┴──────────┴──────────┘
+ * Frame format (8 bytes):
+ * ┌─────────┬───────────────────────┬───────────────────────┬──────────┐
+ * │ Byte 0  │ Byte 1-3              │ Byte 4-6              │ Byte 7   │
+ * │ Buttons │ POT1 + POT2 (2x12 bit)│ HALL1 + HALL2         │ Checksum │
+ * └─────────┴───────────────────────┴───────────────────────┴──────────┘
  *
  * Button byte: Bits 0-6 = Buttons 1-7 (1=pressed, 0=released)
- * ADC values: 12-bit (0-4095) split into MSB (8 bits) + LSB (4 bits)
+ * Two 12-bit values A, B packed into 3 bytes:
+ *   b0 = A[11:4], b1 = A[3:0] << 4 | B[11:8], b2 = B[7:0]
  ******************************************************************************/
+void unpackPair(uint8_t* in, uint16_t* a, uint16_t* b) {
+  *a = ((uint16_t)in[0] << 4) | (in[1] >> 4);
+  *b = ((uint16_t)(in[1] & 0x0F) << 8) | in[2];
+}
+
 void parseResponse(uint8_t* data) {
-  // Extract button states (7 bits)
   currentData.buttons = data[0] & 0x7F;
-
-  // Reconstruct ADC0 (12-bit: MSB + LSB)
-  currentData.pot1 = ((uint16_t)data[1] << 4) | ((data[2] >> 4) & 0x0F);
-
-  // Reconstruct ADC1 (12-bit: MSB + LSB)
-  currentData.pot2 = ((uint16_t)data[3] << 4) | ((data[4] >> 4) & 0x0F);
+  unpackPair(&data[1], &currentData.pot1, &currentData.pot2);
+  unpackPair(&data[4], &currentData.hall1, &currentData.hall2);
 }
 
 /*******************************************************************************
@@ -305,7 +316,8 @@ uint8_t calculateChecksum(uint8_t* data, uint8_t length) {
  * PRINT STEERING DATA - Output decoded values to Serial Monitor
  *
  * Only built with -DLIN_DEBUG_PRINT (env uno_master_debug). The text also goes
- * onto the LIN bus via D1; it contains no 0x55/0x3C, so the slave ignores it.
+ * onto the LIN bus via D1; it contains no 0x55/0x3C ('U' / '<'), so the slave
+ * ignores it. Keep it that way when changing the labels.
  ******************************************************************************/
 void printSteeringData() {
 #ifdef LIN_DEBUG_PRINT
@@ -333,6 +345,16 @@ void printSteeringData() {
   Serial.print(currentData.pot2);
   Serial.print(F(" ("));
   Serial.print(map(currentData.pot2, 0, 4095, 0, 100));
+  Serial.print(F("%)"));
+
+  Serial.print(F(" | H1: "));
+  Serial.print(currentData.hall1);
+  Serial.print(F(" ("));
+  Serial.print(getHallPercent(1));
+  Serial.print(F("%) | H2: "));
+  Serial.print(currentData.hall2);
+  Serial.print(F(" ("));
+  Serial.print(getHallPercent(2));
   Serial.println(F("%)"));
 #endif
 }
@@ -384,6 +406,14 @@ uint16_t getPotValue(uint8_t potNum) {
 uint8_t getPotPercent(uint8_t potNum) {
   uint16_t value = getPotValue(potNum);
   return map(value, 0, 4095, 0, 100);
+}
+
+// Get Hall paddle travel (0-100%), clamped with a deadband at both ends
+uint8_t getHallPercent(uint8_t hallNum) {
+  uint16_t value = (hallNum == 1) ? currentData.hall1 : currentData.hall2;
+  if (value <= HALL_RELEASED + HALL_DEADBAND) return 0;
+  if (value >= HALL_FULL - HALL_DEADBAND) return 100;
+  return map(value, HALL_RELEASED + HALL_DEADBAND, HALL_FULL - HALL_DEADBAND, 0, 100);
 }
 
 // Check if data is valid
