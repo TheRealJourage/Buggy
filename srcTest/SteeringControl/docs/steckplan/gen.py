@@ -440,11 +440,6 @@ FIG3 = f3.svg("0 0 920 480", "12-V-Versorgung des RP2040-Tiny über P78BT3R3C10 
 f4 = Fig()
 
 
-def gnd(f, x, y):
-    """Ground symbol, wire ends at (x, y). All of them go to one star point."""
-    f.overlays.append(f'<path d="M{x - 10},{y} h20 M{x - 6},{y + 5} h12 M{x - 2},{y + 10} h4" class="plate"/>')
-
-
 def diode_right(f, x, y, label):
     """Diode, current flows left -> right (cathode bar right)."""
     f.overlays.append(f'<rect x="{x - 9}" y="{y - 9}" width="18" height="18" class="cut"/>')
@@ -471,21 +466,22 @@ f4.overlays.append('<text x="100" y="250" class="chipsub" text-anchor="middle">+
 f4.wire("lin", "clin", [(170, 122), (190, 122), (190, 40), (1340, 40), (1340, 610)])
 f4.wire("12v", "c12", [(170, 160), (300, 160)])
 diode_right(f4, 240, 160, "D1 1N5819")
-f4.wire("gnd", "cg", [(170, 198), (200, 198), (200, 250)]); gnd(f4, 200, 250)
+G_TOP, G_RIGHT, G_BOT = 270, 1380, 800
+f4.wire("gnd", "cg", [(170, 198), (200, 198), (200, G_TOP), (G_RIGHT, G_TOP), (G_RIGHT, G_BOT), (1200, G_BOT)])
+f4.under.append(f'<text x="1250" y="{G_TOP - 8}" class="rail" text-anchor="end">GND-Kabel innen (alles hier dran)</text>')
 
 # supply: VIN -> TVS, C1, P78BT3R3C10 -> 3V3 -> C2
 f4.wire("vin", "c12", [(300, 160), (560, 160)])
-f4.wire("vin", "c12", [(340, 160), (340, 250)]); f4.dot(340, 160, "c12"); tvs_up(f4, 340, 205, "TVS P6KE33A"); gnd(f4, 340, 250)
-f4.wire("vin", "c12", [(440, 160), (440, 250)]); f4.dot(440, 160, "c12"); cap(f4, 440, 205, True, "C1 10 µF/50 V"); gnd(f4, 440, 250)
+f4.wire("vin", "c12", [(340, 160), (340, 205)]); f4.wire("gnd", "cg", [(340, 205), (340, G_TOP)]); f4.dot(340, 160, "c12"); f4.dot(340, G_TOP, "cg"); tvs_up(f4, 340, 205, "TVS P6KE33A")
+f4.wire("vin", "c12", [(440, 160), (440, 205)]); f4.wire("gnd", "cg", [(440, 205), (440, G_TOP)]); f4.dot(440, 160, "c12"); f4.dot(440, G_TOP, "cg"); cap(f4, 440, 205, True, "C1 10 µF/50 V")
 f4.overlays.append('<text x="428" y="196" class="pol" text-anchor="end">+</text>')
 f4.under.append('<rect x="560" y="128" width="120" height="64" rx="4" class="chip"/>'
                 '<text x="620" y="150" class="pinname" text-anchor="middle">P78BT3R3C10</text>'
                 '<text x="566" y="176" class="pinname">1</text><text x="674" y="176" class="pinname" text-anchor="end">3</text>'
                 '<text x="620" y="186" class="pinname" text-anchor="middle">2</text>')
-f4.wire("gnd", "cg", [(620, 192), (620, 250)]); gnd(f4, 620, 250)
-f4.overlays.append('<text x="632" y="236" class="val strong">Sternpunkt</text>')
+f4.wire("gnd", "cg", [(620, 192), (620, G_TOP)]); f4.dot(620, G_TOP, "cg")
 f4.wire("3v3", "c33", [(680, 160), (840, 160), (840, 450), (860, 450)])
-f4.wire("3v3", "c33", [(760, 160), (760, 250)]); f4.dot(760, 160, "c33"); cap(f4, 760, 205, True, "C2 100 µF/16 V"); gnd(f4, 760, 250)
+f4.wire("3v3", "c33", [(760, 160), (760, 205)]); f4.wire("gnd", "cg", [(760, 205), (760, G_TOP)]); f4.dot(760, 160, "c33"); f4.dot(760, G_TOP, "cg"); cap(f4, 760, 205, True, "C2 100 µF/16 V")
 f4.overlays.append('<text x="748" y="196" class="pol" text-anchor="end">+</text>')
 # VBB for the MCP2003 from VIN (behind D1)
 f4.wire("vin", "c12", [(500, 160), (500, 100), (1300, 100), (1300, 466), (1260, 466)]); f4.dot(500, 160, "c12")
@@ -506,7 +502,7 @@ for n, y in tl4.items():
 for n, x in tb4.items():
     pad(f4, x, TY4 + 250, n.replace("GP", ""), "middle", dy=-10, used=n in ("GP10", "GP11"))
 nc(f4, TX4 - 8, tl4["5V"], -1)
-f4.wire("gnd", "cg", [(TX4, tl4["GND"]), (790, tl4["GND"]), (790, 440)]); gnd(f4, 790, 440)
+f4.wire("gnd", "cg", [(TX4, tl4["GND"]), (800, tl4["GND"]), (800, G_TOP)]); f4.dot(800, G_TOP, "cg")
 
 # MCP2003 (slave side only)
 dip(f4, 1100, 430, "MCP2003", "LIN-Transceiver", ["RXD", "CS", "WAKE", "TXD"], ["VREN", "VBB", "LBUS", "VSS"], 36)
@@ -518,19 +514,20 @@ f4.wire("3v3", "c33", [(840, 340), (1095, 340), (1095, 430)]); f4.dot(840, 340, 
 resistor(f4, 960, 340, False, "5,1 kΩ", 1)
 f4.wire("vin", "c12", [(1280, 466), (1280, 484)]); f4.wire("gnd", "cg", [(1280, 484), (1280, 538)])
 f4.dot(1280, 466, "c12"); cap(f4, 1280, 484, True, "100 nF", 1)
-f4.wire("gnd", "cg", [(1260, 538), (1280, 538), (1280, 590)]); f4.dot(1280, 538, "cg"); gnd(f4, 1280, 590)
+f4.wire("gnd", "cg", [(1260, 538), (1280, 538), (1280, G_BOT)]); f4.dot(1280, 538, "cg"); f4.dot(1280, G_BOT, "cg")
 f4.wire("lin", "clin", [(1260, 502), (1340, 502)]); f4.dot(1340, 502, "clin")
-f4.wire("gnd", "cg", [(1340, 610), (1340, 660)]); cap(f4, 1340, 632, True, "220 pF", -1); gnd(f4, 1340, 660)
+f4.wire("gnd", "cg", [(1340, 632), (1340, G_BOT)]); f4.wire("lin", "clin", [(1340, 610), (1340, 632)]); cap(f4, 1340, 632, True, "220 pF", -1); f4.dot(1340, G_BOT, "cg")
 
 # horn, wired inside the hub
-f4.wire("horn", "cbtn", [(1020, tr4["GP5"]), (1034, tr4["GP5"]), (1034, 760), (1200, 760), (1200, 780)])
-button(f4, 1130, 760, "Hupe (innen)"); gnd(f4, 1200, 780)
+f4.wire("horn", "cbtn", [(1020, tr4["GP5"]), (1034, tr4["GP5"]), (1034, 760), (1200, 760)])
+f4.wire("gnd", "cg", [(1200, 760), (1200, G_BOT)])
+button(f4, 1130, 760, "Hupe (innen)"); f4.dot(1200, G_BOT, "cg")
 
-# analog connectors (left side of the Tiny): 1 3V3 · 2 pot · 3 Hall · 4 GND
+# analog connectors (left side of the Tiny): 1 3V3 · 2 pot · 3 Hall, ground runs outside
 def analog_conn(f, y0, side, pot_gp, hall_gp):
-    f.under.append(f'<rect x="330" y="{y0}" width="140" height="140" rx="6" class="board psu"/>'
+    f.under.append(f'<rect x="330" y="{y0}" width="140" height="110" rx="6" class="board psu"/>'
                    f'<text x="400" y="{y0 - 10}" class="boardname" text-anchor="middle">Stecker {side}-Analog</text>')
-    for i, txt in enumerate(["1 · 3,3 V", f"2 · Poti ({pot_gp})", f"3 · Hall ({hall_gp})", "4 · GND"]):
+    for i, txt in enumerate(["1 · 3,3 V", f"2 · Poti ({pot_gp})", f"3 · Hall ({hall_gp})"]):
         pad(f, 470, y0 + 20 + i * 30, txt, "end", dx=-10, dy=4, used=True)
 
 
@@ -542,18 +539,16 @@ f4.wire("hallL", "cpot", [(TX4, tl4["GP28"]), (700, tl4["GP28"]), (700, 480), (4
 f4.wire("potL", "cpot", [(TX4, tl4["GP26"]), (680, tl4["GP26"]), (680, 450), (470, 450)])
 f4.wire("hallR", "cpot", [(TX4, tl4["GP29"]), (720, tl4["GP29"]), (720, 680), (470, 680)])
 f4.wire("potR", "cpot", [(TX4, tl4["GP27"]), (740, tl4["GP27"]), (740, 650), (470, 650)])
-for yy in (510, 710):
-    f4.wire("gnd", "cg", [(470, yy), (500, yy), (500, yy + 20)]); gnd(f4, 500, yy + 20)
-f4.overlays.append('<text x="400" y="770" class="chipsub" text-anchor="middle">Pin 4: eigene Analog-Masse (empfohlen)</text>')
+f4.overlays.append('<text x="400" y="750" class="chipsub" text-anchor="middle">Masse der Stecker läuft außen separat</text>')
 
-# button connectors (bottom): 1 paddle · 2 button · 3 button · 4 free
+# button connectors (bottom): 1 paddle · 2 button · 3 button
 def button_conn(f, x0, side, gps):
-    f.under.append(f'<rect x="{x0 - 20}" y="900" width="150" height="70" rx="6" class="board psu"/>'
-                   f'<text x="{x0 + 55}" y="992" class="boardname" text-anchor="middle">Stecker {side}-Tasten</text>')
-    for i, txt in enumerate(["1", "2", "3", "4"]):
-        pad(f, x0 + i * 30, 900, txt, "middle", dy=22, used=i < 3)
-    f.overlays.append(f'<text x="{x0 + 55}" y="958" class="chipsub" text-anchor="middle">Paddel · Knopf · Knopf · frei</text>')
-    f.overlays.append(f'<text x="{x0 + 55}" y="1010" class="val" text-anchor="middle">{" · ".join(gps)}</text>')
+    f.under.append(f'<rect x="{x0 - 35}" y="900" width="130" height="70" rx="6" class="board psu"/>'
+                   f'<text x="{x0 + 30}" y="992" class="boardname" text-anchor="middle">Stecker {side}-Tasten</text>')
+    for i, txt in enumerate(["1", "2", "3"]):
+        pad(f, x0 + i * 30, 900, txt, "middle", dy=22, used=True)
+    f.overlays.append(f'<text x="{x0 + 30}" y="958" class="chipsub" text-anchor="middle">Paddel · Knopf · Knopf</text>')
+    f.overlays.append(f'<text x="{x0 + 30}" y="1010" class="val" text-anchor="middle">{" · ".join(gps)}</text>')
 
 
 button_conn(f4, 890, "R", ["GP9", "GP10", "GP11"])
@@ -565,7 +560,7 @@ f4.wire("btnL1", "cbtn", [(1020, tr4["GP6"]), (1046, tr4["GP6"]), (1046, 880), (
 f4.wire("btnL2", "cbtn", [(1020, tr4["GP7"]), (1058, tr4["GP7"]), (1058, 870), (1130, 870), (1130, 900)])
 f4.wire("btnL3", "cbtn", [(1020, tr4["GP8"]), (1070, tr4["GP8"]), (1070, 860), (1160, 860), (1160, 900)])
 
-FIG4 = f4.svg("0 0 1440 1030", "Lenkrad-Verdrahtung: RP2040-Tiny, MCP2003, 3,3-V-Wandler und die vier Stecker nach außen")
+FIG4 = f4.svg("0 0 1440 1030", "Lenkrad-Verdrahtung: RP2040-Tiny, MCP2003, 3,3-V-Wandler, GND-Kabel innen und die vier Stecker nach außen")
 
 html = open(os.path.join(os.path.dirname(OUT), "template.html"), encoding="utf-8").read()
 html = html.replace("{{FIG1}}", FIG1).replace("{{FIG2}}", FIG2).replace("{{FIG3}}", FIG3)
