@@ -389,7 +389,7 @@ f3.badge(170, SV, "S1", "c12")
 # S2  C1 on the input
 f3.wire("vin", "c12", [(230, SV), (230, 330)]); f3.wire("gnd", "cg", [(230, 330), (230, SG)])
 f3.dot(230, SV, "c12"); f3.dot(230, SG, "cg")
-cap(f3, 230, 330, True, "C1 10 µF · ≥ 25 V", -1)
+cap(f3, 230, 330, True, "C1 10 µF · 50 V", -1)
 f3.overlays.append('<text x="244" y="322" class="pol">+</text>')
 f3.badge(230, 390, "S2", "cg")
 # converter
@@ -406,7 +406,7 @@ f3.wire("gnd", "cg", [(365, SV + 40), (365, SG)]); f3.dot(365, SG, "cg"); f3.bad
 f3.wire("3v3", "c33", [(430, SV), (720, SV)])
 f3.wire("3v3", "c33", [(500, SV), (500, 330)]); f3.wire("gnd", "cg", [(500, 330), (500, SG)])
 f3.dot(500, SV, "c33"); f3.dot(500, SG, "cg")
-cap(f3, 500, 330, True, "C2 22 µF · ≥ 6,3 V", 1)
+cap(f3, 500, 330, True, "C2 100 µF · 16 V", 1)
 f3.overlays.append('<text x="486" y="322" class="pol" text-anchor="end">+</text>')
 f3.badge(500, 390, "S5", "cg")
 # measuring point before S4 goes on

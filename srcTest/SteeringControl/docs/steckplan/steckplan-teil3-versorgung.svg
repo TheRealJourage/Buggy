@@ -68,12 +68,12 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <text x="134" y="164" class="val">D1 1N5819, Ring unten</text>
 <rect x="221" y="327" width="18" height="6" class="cut"/>
 <line x1="221" y1="327" x2="239" y2="327" class="plate"/><line x1="221" y1="333" x2="239" y2="333" class="plate"/>
-<text x="217" y="334" class="val" text-anchor="end">C1 10 µF · ≥ 25 V</text>
+<text x="217" y="334" class="val" text-anchor="end">C1 10 µF · 50 V</text>
 <text x="244" y="322" class="pol">+</text>
 <text x="365" y="462" class="val" text-anchor="middle">Schrift zu dir, Beine unten: links = 1</text>
 <rect x="491" y="327" width="18" height="6" class="cut"/>
 <line x1="491" y1="327" x2="509" y2="327" class="plate"/><line x1="491" y1="333" x2="509" y2="333" class="plate"/>
-<text x="513" y="334" class="val" text-anchor="start">C2 22 µF · ≥ 6,3 V</text>
+<text x="513" y="334" class="val" text-anchor="start">C2 100 µF · 16 V</text>
 <text x="486" y="322" class="pol" text-anchor="end">+</text>
 <text x="476" y="212" class="val strong">erst messen: 3,2–3,4 V</text>
 <rect x="715.5" y="185.5" width="9" height="9" class="pad"/>

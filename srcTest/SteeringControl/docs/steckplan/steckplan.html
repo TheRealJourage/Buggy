@@ -706,12 +706,12 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
 <text x="134" y="164" class="val">D1 1N5819, Ring unten</text>
 <rect x="221" y="327" width="18" height="6" class="cut"/>
 <line x1="221" y1="327" x2="239" y2="327" class="plate"/><line x1="221" y1="333" x2="239" y2="333" class="plate"/>
-<text x="217" y="334" class="val" text-anchor="end">C1 10 µF · ≥ 25 V</text>
+<text x="217" y="334" class="val" text-anchor="end">C1 10 µF · 50 V</text>
 <text x="244" y="322" class="pol">+</text>
 <text x="365" y="462" class="val" text-anchor="middle">Schrift zu dir, Beine unten: links = 1</text>
 <rect x="491" y="327" width="18" height="6" class="cut"/>
 <line x1="491" y1="327" x2="509" y2="327" class="plate"/><line x1="491" y1="333" x2="509" y2="333" class="plate"/>
-<text x="513" y="334" class="val" text-anchor="start">C2 22 µF · ≥ 6,3 V</text>
+<text x="513" y="334" class="val" text-anchor="start">C2 100 µF · 16 V</text>
 <text x="486" y="322" class="pol" text-anchor="end">+</text>
 <text x="476" y="212" class="val strong">erst messen: 3,2–3,4 V</text>
 <rect x="715.5" y="185.5" width="9" height="9" class="pad"/>
@@ -755,9 +755,9 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
       <thead><tr><th></th><th>Nr.</th><th>Von</th><th>Nach</th><th>Hinweis</th></tr></thead>
       <tbody>
         <tr><td class="check"><input type="checkbox" id="s1" aria-label="S1 gesteckt"></td><td class="n"><span class="num c12">S1</span></td><td>+12-V-Schiene</td><td>1N5819 → Wandler <b>Pin 1</b></td><td>Ring der Diode zeigt zum Wandler</td></tr>
-        <tr><td class="check"><input type="checkbox" id="s2" aria-label="S2 gesteckt"></td><td class="n"><span class="num cg">S2</span></td><td>C1 10 µF (+)</td><td>Pin 1 ↔ GND</td><td>≥ 25 V, im Fahrzeug 50 V</td></tr>
+        <tr><td class="check"><input type="checkbox" id="s2" aria-label="S2 gesteckt"></td><td class="n"><span class="num cg">S2</span></td><td>C1 <b>10 µF / 50 V</b> (+)</td><td>Pin 1 ↔ GND</td><td>Minus-Streifen an GND</td></tr>
         <tr><td class="check"><input type="checkbox" id="s3" aria-label="S3 gesteckt"></td><td class="n"><span class="num cg">S3</span></td><td>Wandler <b>Pin 2</b></td><td>GND-Schiene</td><td></td></tr>
-        <tr><td class="check"><input type="checkbox" id="s5" aria-label="S5 gesteckt"></td><td class="n"><span class="num cg">S5</span></td><td>C2 22 µF (+)</td><td>Pin 3 ↔ GND</td><td>≥ 6,3 V</td></tr>
+        <tr><td class="check"><input type="checkbox" id="s5" aria-label="S5 gesteckt"></td><td class="n"><span class="num cg">S5</span></td><td>C2 <b>100 µF / 16 V</b> (+)</td><td>Pin 3 ↔ GND</td><td>Minus-Streifen an GND (Datenblatt: 22 µF, bis 680 µF erlaubt)</td></tr>
         <tr><td class="check"><input type="checkbox" id="m" aria-label="M gemessen"></td><td class="n"><span class="num c33">M</span></td><td>Pin 3 gegen GND messen</td><td>—</td><td><b>Soll 3,17–3,43 V</b>, noch ohne Tiny. Über 3,5 V: S4 nicht stecken</td></tr>
         <tr><td class="check"><input type="checkbox" id="s4" aria-label="S4 gesteckt"></td><td class="n"><span class="num c33">S4</span></td><td>Wandler <b>Pin 3</b></td><td>Tiny <b>3V3</b> (linke Kante, 3. Pin)</td><td>Netzteil dabei aus. Tiny-<b>5V</b> bleibt frei</td></tr>
       </tbody>
