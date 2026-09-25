@@ -519,7 +519,7 @@ f4.wire("lin", "clin", [(1260, 502), (1340, 502)]); f4.dot(1340, 502, "clin")
 f4.wire("gnd", "cg", [(1340, 632), (1340, G_BOT)]); f4.wire("lin", "clin", [(1340, 610), (1340, 632)]); cap(f4, 1340, 632, True, "220 pF", -1); f4.dot(1340, G_BOT, "cg")
 
 # horn, wired inside the hub
-f4.wire("horn", "cbtn", [(1020, tr4["GP5"]), (1034, tr4["GP5"]), (1034, 760), (1200, 760)])
+f4.wire("horn", "cpurple", [(1020, tr4["GP5"]), (1034, tr4["GP5"]), (1034, 760), (1200, 760)])
 f4.wire("gnd", "cg", [(1200, 760), (1200, G_BOT)])
 button(f4, 1130, 760, "Hupe (innen)"); f4.dot(1200, G_BOT, "cg")
 
@@ -535,10 +535,10 @@ analog_conn(f4, 400, "L", "GP26", "GP28")
 analog_conn(f4, 600, "R", "GP27", "GP29")
 f4.wire("3v3", "c33", [(840, 360), (560, 360), (560, 620), (470, 620)]); f4.dot(840, 360, "c33")
 f4.wire("3v3", "c33", [(560, 420), (470, 420)]); f4.dot(560, 420, "c33")
-f4.wire("hallL", "cpot", [(TX4, tl4["GP28"]), (700, tl4["GP28"]), (700, 480), (470, 480)])
-f4.wire("potL", "cpot", [(TX4, tl4["GP26"]), (680, tl4["GP26"]), (680, 450), (470, 450)])
-f4.wire("hallR", "cpot", [(TX4, tl4["GP29"]), (720, tl4["GP29"]), (720, 680), (470, 680)])
-f4.wire("potR", "cpot", [(TX4, tl4["GP27"]), (740, tl4["GP27"]), (740, 650), (470, 650)])
+f4.wire("hallL", "cpurple", [(TX4, tl4["GP28"]), (700, tl4["GP28"]), (700, 480), (470, 480)])
+f4.wire("potL", "cbrown", [(TX4, tl4["GP26"]), (680, tl4["GP26"]), (680, 450), (470, 450)])
+f4.wire("hallR", "cpurple", [(TX4, tl4["GP29"]), (720, tl4["GP29"]), (720, 680), (470, 680)])
+f4.wire("potR", "cbrown", [(TX4, tl4["GP27"]), (740, tl4["GP27"]), (740, 650), (470, 650)])
 f4.overlays.append('<text x="400" y="750" class="chipsub" text-anchor="middle">Masse der Stecker läuft außen separat</text>')
 
 # button connectors (bottom): 1 paddle · 2 button · 3 button
@@ -553,12 +553,12 @@ def button_conn(f, x0, side, gps):
 
 button_conn(f4, 890, "R", ["GP9", "GP10", "GP11"])
 button_conn(f4, 1100, "L", ["GP6", "GP7", "GP8"])
-f4.wire("btnR1", "cbtn", [(1020, tr4["GP9"]), (1082, tr4["GP9"]), (1082, 850), (890, 850), (890, 900)])
-f4.wire("btnR2", "cbtn", [(tb4["GP10"], TY4 + 250), (tb4["GP10"], 820), (920, 820), (920, 900)])
-f4.wire("btnR3", "cbtn", [(tb4["GP11"], TY4 + 250), (tb4["GP11"], 900)])
-f4.wire("btnL1", "cbtn", [(1020, tr4["GP6"]), (1046, tr4["GP6"]), (1046, 880), (1100, 880), (1100, 900)])
-f4.wire("btnL2", "cbtn", [(1020, tr4["GP7"]), (1058, tr4["GP7"]), (1058, 870), (1130, 870), (1130, 900)])
-f4.wire("btnL3", "cbtn", [(1020, tr4["GP8"]), (1070, tr4["GP8"]), (1070, 860), (1160, 860), (1160, 900)])
+f4.wire("btnR1", "cblue", [(1020, tr4["GP9"]), (1082, tr4["GP9"]), (1082, 850), (890, 850), (890, 900)])
+f4.wire("btnR2", "cwhite", [(tb4["GP10"], TY4 + 250), (tb4["GP10"], 820), (920, 820), (920, 900)])
+f4.wire("btnR3", "cgrey", [(tb4["GP11"], TY4 + 250), (tb4["GP11"], 900)])
+f4.wire("btnL1", "cblue", [(1020, tr4["GP6"]), (1046, tr4["GP6"]), (1046, 880), (1100, 880), (1100, 900)])
+f4.wire("btnL2", "cwhite", [(1020, tr4["GP7"]), (1058, tr4["GP7"]), (1058, 870), (1130, 870), (1130, 900)])
+f4.wire("btnL3", "cgrey", [(1020, tr4["GP8"]), (1070, tr4["GP8"]), (1070, 860), (1160, 860), (1160, 900)])
 
 FIG4 = f4.svg("0 0 1440 1030", "Lenkrad-Verdrahtung: RP2040-Tiny, MCP2003, 3,3-V-Wandler, GND-Kabel innen und die vier Stecker nach außen")
 
