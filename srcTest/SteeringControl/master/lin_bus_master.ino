@@ -42,6 +42,18 @@
  * own SYNC and PID before the slave response. They are read and checked
  * before the 8 response bytes.
  *
+ * KEY (challenge-response, lib/steering_key):
+ *   While locked, every KEY_RETRY_INTERVAL one poll slot is used for:
+ *   PID 0x50: we send 8 random bytes + checksum (challenge)
+ *   PID 0x11: the wheel answers HMAC-SHA256(secret, challenge)[0..7] + checksum
+ *   Match -> unlocked, ECU_ENABLE_PIN high. No valid input frame for
+ *   KEY_LOST_TIMEOUT (wheel pulled off) -> locked again.
+ *   Test master only: random() is seeded from floating analog pins, the STM32
+ *   hub uses its hardware RNG. Relocking while driving is still an open decision.
+ *
+ * HALL HOLD: a pull beyond HALL_ACTIVE_PERCENT starts a new setpoint, the
+ *   highest travel of that pull is kept after the paddle is released.
+ *
  * STATUS INDICATORS:
  * - Pin 12 (Status LED): Toggles on each valid frame received
  * - Pin 13 (Error LED): Blinks on LIN errors (timeout, checksum fail)
@@ -58,8 +70,10 @@
  *
  * Author: Claude Code
  * Date: 2026-09-19
- * Version: 3.1 (4 ADC channels incl. Hall paddles, 8-byte response)
+ * Version: 3.2 (key challenge-response, Hall hold)
  ******************************************************************************/
+
+#include <steering_key.h>
 
 // ============================================================================
 // PIN DEFINITIONS
@@ -67,6 +81,7 @@
 #define LIN_CS_PIN        2     // Chip Select → MCP2003 Pin 2 (CS)
 #define STATUS_LED_PIN    12    // Status LED (toggles on valid frames)
 #define ERROR_LED_PIN     13    // Error LED (blinks on errors)
+#define ECU_ENABLE_PIN    3     // HIGH while unlocked (placeholder for the ECU supply)
 
 // Note: Pins 0 and 1 are used by hardware Serial for LIN communication
 // Pin 0 (RX) ← MCP2003 Pin 1 (RXD)
@@ -78,6 +93,8 @@
 #define LIN_BAUD_RATE     19200           // Standard LIN baud rate
 #define LIN_FRAME_ID      0x3C            // Protected ID for input request
 #define LIN_SYNC_BYTE     0x55            // Standard LIN sync byte
+#define LIN_PID_KEY_CHALLENGE 0x50        // ID 0x10, master -> wheel
+#define LIN_PID_KEY_RESPONSE  0x11        // ID 0x11, wheel -> master
 #define LIN_BREAK_BITS    13              // Break field duration (bits)
 
 // ============================================================================
@@ -89,12 +106,16 @@
 #define ERROR_BLINK_MS    50              // Error LED: 3 blinks of 50ms on / 50ms off
 #define BREAK_DURATION    700             // Break field: 700µs (13 bits @ 19200 = 677µs)
 #define RESPONSE_LEN      8               // Buttons + 4x 12 bit packed (6) + checksum
+#define CHALLENGE_ECHO_TIMEOUT 15         // SYNC+PID+9 bytes echo (~5.7ms at 19200)
+#define KEY_RETRY_INTERVAL 500            // While locked: new challenge every 500ms
+#define KEY_LOST_TIMEOUT  1000            // No valid input frame this long -> locked
 
 // Hall clutch paddles (Simube, measured 2026-09-24 on 3.3V): released ~876,
 // fully pulled ~3310. The deadband makes both end positions read exactly 0/100%.
 #define HALL_RELEASED     876
 #define HALL_FULL         3310
 #define HALL_DEADBAND     30
+#define HALL_ACTIVE_PERCENT 5             // Above this a pull starts a new setpoint
 
 // ============================================================================
 // DATA STRUCTURE
@@ -118,6 +139,13 @@ bool statusLedState = false;
 unsigned long errorBlinkStart = 0;
 bool errorBlinkActive = false;
 
+bool unlocked = false;
+unsigned long lastKeyTry = 0;
+unsigned long lastValidFrame = 0;
+
+uint8_t hallHold[2] = {0, 0};             // Held setpoint per paddle (0-100%)
+bool hallPulling[2] = {false, false};
+
 /*******************************************************************************
  * SETUP - Initialize hardware and peripherals
  ******************************************************************************/
@@ -134,6 +162,10 @@ void setup() {
   pinMode(ERROR_LED_PIN, OUTPUT);
   digitalWrite(STATUS_LED_PIN, LOW);
   digitalWrite(ERROR_LED_PIN, LOW);
+  pinMode(ECU_ENABLE_PIN, OUTPUT);
+  digitalWrite(ECU_ENABLE_PIN, LOW);
+
+  seedRandom();
 
   // Startup sequence: Blink both LEDs 3 times
   for (int i = 0; i < 3; i++) {
@@ -154,6 +186,10 @@ void setup() {
   // Serial.println(F("=== LIN BUS MASTER ==="));
   // Serial.println(F("Arduino Uno @ 5V Lab Supply"));
   // Serial.println(F("Polling RP2040 slave every 100ms..."));
+
+#ifdef LIN_DEBUG_PRINT
+  Serial.println(steeringKeySelfTest() ? F("SELFTEST OK") : F("SELFTEST FAIL"));
+#endif
 }
 
 /*******************************************************************************
@@ -164,8 +200,16 @@ void loop() {
   if (millis() - lastPollTime >= POLL_INTERVAL) {
     lastPollTime = millis();
 
-    // Request data from slave
-    if (requestSlaveData()) {
+    if (!unlocked && millis() - lastKeyTry >= KEY_RETRY_INTERVAL) {
+      lastKeyTry = millis();
+      unlocked = checkKey();
+      digitalWrite(ECU_ENABLE_PIN, unlocked);
+      printKeyResult();
+      if (unlocked) lastValidFrame = millis();
+    } else if (requestSlaveData()) {
+      lastValidFrame = millis();
+      updateHallHold();
+
       // Data received successfully - toggle status LED
       statusLedState = !statusLedState;
       digitalWrite(STATUS_LED_PIN, statusLedState);
@@ -176,6 +220,11 @@ void loop() {
       // Error occurred - blink error LED
       startErrorBlink();
     }
+  }
+
+  if (unlocked && millis() - lastValidFrame > KEY_LOST_TIMEOUT) {
+    unlocked = false;
+    digitalWrite(ECU_ENABLE_PIN, LOW);
   }
 
   updateErrorLED();
@@ -195,21 +244,8 @@ void loop() {
  * Returns: true if valid data received, false on error
  ******************************************************************************/
 bool requestSlaveData() {
-  // Step 1: Send LIN BREAK field (its echo is discarded by Serial.end())
-  sendBreakField();
-
-  // Clear anything that arrived around the baud rate switch
-  while (Serial.available()) {
-    Serial.read();
-  }
-
-  // Step 2+3: Send SYNC byte and PID
-  Serial.write(LIN_SYNC_BYTE);
-  Serial.write(LIN_FRAME_ID);
-
-  // Our own header comes back through the transceiver first
-  uint8_t echo[2];
-  if (!readBytes(echo, 2, ECHO_TIMEOUT) || echo[0] != LIN_SYNC_BYTE || echo[1] != LIN_FRAME_ID) {
+  // Steps 1-3: BREAK, SYNC, PID
+  if (!sendHeader(LIN_FRAME_ID)) {
     currentData.valid = false;
     return false;  // Own header not seen on the bus: transceiver/wiring or bus collision
   }
@@ -233,6 +269,77 @@ bool requestSlaveData() {
   currentData.valid = true;
 
   return true;
+}
+
+/*******************************************************************************
+ * SEND HEADER - BREAK + SYNC + PID, true if our own header echoed back
+ ******************************************************************************/
+bool sendHeader(uint8_t pid) {
+  sendBreakField();  // its echo is discarded by Serial.end()
+
+  // Clear anything that arrived around the baud rate switch
+  while (Serial.available()) {
+    Serial.read();
+  }
+
+  Serial.write(LIN_SYNC_BYTE);
+  Serial.write(pid);
+
+  uint8_t echo[2];
+  return readBytes(echo, 2, ECHO_TIMEOUT) && echo[0] == LIN_SYNC_BYTE && echo[1] == pid;
+}
+
+/*******************************************************************************
+ * CHECK KEY - Challenge the wheel, true if its answer matches our own HMAC
+ ******************************************************************************/
+bool checkKey() {
+  uint8_t frame[STEERING_KEY_LEN + 1];
+  for (uint8_t i = 0; i < STEERING_KEY_LEN; i++) {
+    frame[i] = random(256);
+  }
+  frame[STEERING_KEY_LEN] = calculateChecksum(frame, STEERING_KEY_LEN);
+
+  // Challenge frame: we publish the data ourselves
+  if (!sendHeader(LIN_PID_KEY_CHALLENGE)) return false;
+  Serial.write(frame, sizeof frame);
+  uint8_t echo[sizeof frame];
+  if (!readBytes(echo, sizeof echo, CHALLENGE_ECHO_TIMEOUT) || memcmp(echo, frame, sizeof frame) != 0) {
+    return false;  // Collision or wiring fault
+  }
+
+  // Computed before the response header, the wheel has its answer ready by then
+  uint8_t expected[STEERING_KEY_LEN];
+  steeringKeyResponse(frame, expected);
+
+  if (!sendHeader(LIN_PID_KEY_RESPONSE)) return false;
+  uint8_t answer[STEERING_KEY_LEN + 1];
+  if (!readBytes(answer, sizeof answer, RESPONSE_TIMEOUT)) return false;
+  if (answer[STEERING_KEY_LEN] != calculateChecksum(answer, STEERING_KEY_LEN)) return false;
+  return memcmp(answer, expected, STEERING_KEY_LEN) == 0;
+}
+
+// Test-grade entropy: LSBs of the floating analog inputs A0-A5
+void seedRandom() {
+  uint32_t seed = 0;
+  for (uint8_t i = 0; i < 32; i++) {
+    seed = (seed << 1) ^ analogRead(A0 + i % 6) ^ micros();
+  }
+  randomSeed(seed);
+}
+
+/*******************************************************************************
+ * HALL HOLD - Keep the highest travel of the last pull as setpoint
+ ******************************************************************************/
+void updateHallHold() {
+  for (uint8_t i = 0; i < 2; i++) {
+    uint8_t percent = getHallPercent(i + 1);
+    if (percent > HALL_ACTIVE_PERCENT) {
+      hallHold[i] = hallPulling[i] ? max(hallHold[i], percent) : percent;
+      hallPulling[i] = true;
+    } else {
+      hallPulling[i] = false;
+    }
+  }
 }
 
 /*******************************************************************************
@@ -316,8 +423,8 @@ uint8_t calculateChecksum(uint8_t* data, uint8_t length) {
  * PRINT STEERING DATA - Output decoded values to Serial Monitor
  *
  * Only built with -DLIN_DEBUG_PRINT (env uno_master_debug). The text also goes
- * onto the LIN bus via D1; it contains no 0x55/0x3C ('U' / '<'), so the slave
- * ignores it. Keep it that way when changing the labels.
+ * onto the LIN bus via D1; it contains no 'U' (0x55 = SYNC), so the slave
+ * never sees a header in it. Keep it that way when changing the labels.
  ******************************************************************************/
 void printSteeringData() {
 #ifdef LIN_DEBUG_PRINT
@@ -355,7 +462,17 @@ void printSteeringData() {
   Serial.print(currentData.hall2);
   Serial.print(F(" ("));
   Serial.print(getHallPercent(2));
-  Serial.println(F("%)"));
+  Serial.print(F("%) | HOLD: "));
+  Serial.print(hallHold[0]);
+  Serial.print(F("% "));
+  Serial.print(hallHold[1]);
+  Serial.println(unlocked ? F("% | KEY OK") : F("% | KEY --"));
+#endif
+}
+
+void printKeyResult() {
+#ifdef LIN_DEBUG_PRINT
+  Serial.println(unlocked ? F("KEY: OK, ECU on") : F("KEY: no valid answer"));
 #endif
 }
 

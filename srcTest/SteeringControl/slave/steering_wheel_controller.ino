@@ -59,14 +59,23 @@
  * - MCP2003 VBB = 12V lab supply (the MCP2003 stays in POR below 5.5V)
  *
  * FRAME DETECTION:
- * The bus only carries master headers and our own responses. The response
- * echo is read back right after sending, so a SYNC (0x55) directly followed
- * by PID 0x3C is always a request. The break byte (0x00) is ignored.
+ * The bus only carries master headers, the master's challenge data and our own
+ * responses. The response echo is read back right after sending, and challenge
+ * data is consumed by the RX state machine, so a SYNC (0x55) directly followed
+ * by one of our PIDs is always a header. The break byte (0x00) is ignored.
+ *
+ * KEY (challenge-response, lib/steering_key):
+ *   PID 0x50 (ID 0x10): master publishes 8 random bytes + checksum
+ *   PID 0x11 (ID 0x11): we answer HMAC-SHA256(secret, challenge)[0..7] + checksum,
+ *                       only once per challenge, silent without a valid one
+ * The master decides everything else (when to ask, what unlocking means).
  *
  * Author: Claude Code
  * Date: 2026-09-19
- * Version: 3.1 (4 ADC channels incl. Hall paddles, 8-byte response)
+ * Version: 3.2 (key challenge-response)
  ******************************************************************************/
+
+#include <steering_key.h>
 
 // ============================================================================
 // PIN DEFINITIONS
@@ -97,6 +106,9 @@
 #define LIN_BAUD_RATE     19200           // Standard LIN baud rate
 #define LIN_FRAME_ID      0x3C            // Protected ID for input request
 #define LIN_SYNC_BYTE     0x55            // Standard LIN sync byte
+#define LIN_PID_KEY_CHALLENGE 0x50        // ID 0x10, master -> wheel
+#define LIN_PID_KEY_RESPONSE  0x11        // ID 0x11, wheel -> master
+#define CHALLENGE_TIMEOUT 20              // Give up on a half-received challenge after 20ms
 #define ECHO_TIMEOUT_US   2000            // Own response echo must be back within 2ms after flush
 
 // ============================================================================
@@ -125,8 +137,16 @@ unsigned long lastDebounceTime[7] = {0, 0, 0, 0, 0, 0, 0};
 uint16_t adcValues[ADC_CHANNELS] = {0, 0, 0, 0};
 
 // LIN frame detection
-bool gotSync = false;
+enum RxState { RX_IDLE, RX_SYNC, RX_CHALLENGE };
+RxState rxState = RX_IDLE;
 unsigned long lastFrameTime = 0;
+
+// Key challenge-response
+uint8_t challengeBuf[STEERING_KEY_LEN + 1];   // challenge + checksum
+uint8_t challengeCount = 0;
+unsigned long challengeStart = 0;
+uint8_t keyResponse[STEERING_KEY_LEN];
+bool keyResponseReady = false;
 
 /*******************************************************************************
  * SETUP - Initialize hardware and peripherals
@@ -257,15 +277,41 @@ void updateADC() {
  * new bytes had already arrived, which could throw away the SYNC byte.
  ******************************************************************************/
 void handleLINRequest() {
+  if (rxState == RX_CHALLENGE && millis() - challengeStart > CHALLENGE_TIMEOUT) {
+    rxState = RX_IDLE;
+  }
+
   while (Serial1.available()) {
     uint8_t receivedByte = Serial1.read();
 
-    if (gotSync && receivedByte == LIN_FRAME_ID) {
-      gotSync = false;
+    if (rxState == RX_CHALLENGE) {
+      challengeBuf[challengeCount++] = receivedByte;
+      if (challengeCount == STEERING_KEY_LEN + 1) {
+        rxState = RX_IDLE;
+        if (calculateChecksum(challengeBuf, STEERING_KEY_LEN) == challengeBuf[STEERING_KEY_LEN]) {
+          steeringKeyResponse(challengeBuf, keyResponse);
+          keyResponseReady = true;
+        }
+      }
+    } else if (rxState == RX_SYNC && receivedByte == LIN_FRAME_ID) {
+      rxState = RX_IDLE;
       sendLINResponse();
       lastFrameTime = millis();
+    } else if (rxState == RX_SYNC && receivedByte == LIN_PID_KEY_CHALLENGE) {
+      rxState = RX_CHALLENGE;
+      challengeCount = 0;
+      challengeStart = millis();
+      keyResponseReady = false;
+      lastFrameTime = millis();
+    } else if (rxState == RX_SYNC && receivedByte == LIN_PID_KEY_RESPONSE) {
+      rxState = RX_IDLE;
+      if (keyResponseReady) {
+        sendKeyResponse();
+        keyResponseReady = false;   // one answer per challenge
+      }
+      lastFrameTime = millis();
     } else {
-      gotSync = (receivedByte == LIN_SYNC_BYTE);
+      rxState = (receivedByte == LIN_SYNC_BYTE) ? RX_SYNC : RX_IDLE;
     }
   }
 }
@@ -298,14 +344,25 @@ void sendLINResponse() {
   packPair(&dataFrame[4], adcValues[2], adcValues[3]);
   dataFrame[7] = calculateChecksum(dataFrame, RESPONSE_LEN - 1);
 
-  Serial1.write(dataFrame, RESPONSE_LEN);
+  sendFrame(dataFrame, RESPONSE_LEN);
+}
+
+void sendKeyResponse() {
+  uint8_t frame[STEERING_KEY_LEN + 1];
+  memcpy(frame, keyResponse, STEERING_KEY_LEN);
+  frame[STEERING_KEY_LEN] = calculateChecksum(frame, STEERING_KEY_LEN);
+  sendFrame(frame, sizeof frame);
+}
+
+void sendFrame(const uint8_t* frame, uint8_t len) {
+  Serial1.write(frame, len);
   Serial1.flush();  // Wait for transmission complete
 
   // The transceiver mirrors the bus on RXD: read our own bytes back so they
   // are never mistaken for a new request (e.g. buttons 0x55 + next byte 0x3C).
   uint8_t echoed = 0;
   unsigned long start = micros();
-  while (echoed < RESPONSE_LEN && micros() - start < ECHO_TIMEOUT_US) {
+  while (echoed < len && micros() - start < ECHO_TIMEOUT_US) {
     if (Serial1.available()) {
       Serial1.read();
       echoed++;
