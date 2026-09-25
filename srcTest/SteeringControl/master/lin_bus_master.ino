@@ -70,7 +70,7 @@
  *
  * Author: Claude Code
  * Date: 2026-09-19
- * Version: 3.2 (key challenge-response, Hall hold)
+ * Version: 3.3 (horn button, key challenge-response, Hall hold)
  ******************************************************************************/
 
 #include <steering_key.h>
@@ -121,7 +121,7 @@
 // DATA STRUCTURE
 // ============================================================================
 struct SteeringData {
-  uint8_t buttons;                        // 7 button states (bits 0-6)
+  uint8_t buttons;                        // Buttons 1-7 (bits 0-6), horn (bit 7)
   uint16_t pot1;                          // 12-bit ADC value (0-4095)
   uint16_t pot2;                          // 12-bit ADC value (0-4095)
   uint16_t hall1;                         // 12-bit ADC value (0-4095)
@@ -390,7 +390,7 @@ void sendBreakField() {
  * │ Buttons │ POT1 + POT2 (2x12 bit)│ HALL1 + HALL2         │ Checksum │
  * └─────────┴───────────────────────┴───────────────────────┴──────────┘
  *
- * Button byte: Bits 0-6 = Buttons 1-7 (1=pressed, 0=released)
+ * Button byte: Bits 0-6 = Buttons 1-7, bit 7 = horn (1=pressed, 0=released)
  * Two 12-bit values A, B packed into 3 bytes:
  *   b0 = A[11:4], b1 = A[3:0] << 4 | B[11:8], b2 = B[7:0]
  ******************************************************************************/
@@ -400,7 +400,7 @@ void unpackPair(uint8_t* in, uint16_t* a, uint16_t* b) {
 }
 
 void parseResponse(uint8_t* data) {
-  currentData.buttons = data[0] & 0x7F;
+  currentData.buttons = data[0];
   unpackPair(&data[1], &currentData.pot1, &currentData.pot2);
   unpackPair(&data[4], &currentData.hall1, &currentData.hall2);
 }
@@ -439,6 +439,7 @@ void printSteeringData() {
       Serial.print(F("[ ]"));
     }
   }
+  Serial.print(isHornPressed() ? F(" HORN") : F(" ----"));
 
   // Print ADC0 (raw value and percentage)
   Serial.print(F(" | POT1: "));
@@ -510,6 +511,10 @@ void updateErrorLED() {
 bool isButtonPressed(uint8_t buttonNum) {
   if (buttonNum < 1 || buttonNum > 7) return false;
   return (currentData.buttons & (1 << (buttonNum - 1))) != 0;
+}
+
+bool isHornPressed() {
+  return (currentData.buttons & 0x80) != 0;
 }
 
 // Get potentiometer value (0-4095)

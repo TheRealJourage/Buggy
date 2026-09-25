@@ -543,13 +543,14 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
       <span class="csig"><i></i>Status-LED · weiß</span>
     </div>
     <figure class="scroll small" style="margin:0">
-      <svg viewBox="0 0 960 540" role="img" aria-label="Eingaben am RP2040-Tiny: 7 Taster, 2 Potis, Status-LED" xmlns="http://www.w3.org/2000/svg"><rect x="400" y="120" width="160" height="250" rx="10" class="board tiny"/><rect x="448" y="114" width="64" height="18" rx="2" class="port"/><text x="480" y="127" class="porttxt" text-anchor="middle">FPC</text><rect x="452" y="200" width="56" height="56" rx="3" class="mcu"/><text x="480" y="232" class="porttxt" text-anchor="middle">RP2040</text><text x="480" y="106" class="boardname" text-anchor="middle">RP2040-Tiny</text>
+      <svg viewBox="0 0 960 540" role="img" aria-label="Eingaben am RP2040-Tiny: 7 Taster, Hupe, 2 Potis, Status-LED" xmlns="http://www.w3.org/2000/svg"><rect x="400" y="120" width="160" height="250" rx="10" class="board tiny"/><rect x="448" y="114" width="64" height="18" rx="2" class="port"/><text x="480" y="127" class="porttxt" text-anchor="middle">FPC</text><rect x="452" y="200" width="56" height="56" rx="3" class="mcu"/><text x="480" y="232" class="porttxt" text-anchor="middle">RP2040</text><text x="480" y="106" class="boardname" text-anchor="middle">RP2040-Tiny</text>
 <text x="630" y="72" class="rail" text-anchor="middle">GND (vom GND-Pin des Tiny)</text><path d="M400,170 L380,170 L380,80 L100,80 L100,470" class="wc"/><path d="M400,170 L380,170 L380,80 L100,80 L100,470" class="w cg"/>
 <path d="M380,80 L880,80 L880,494" class="wc"/><path d="M380,80 L880,80 L880,494" class="w cg"/>
 <path d="M560,270 L620,270 L620,150 L880,150" class="wc"/><path d="M560,270 L620,270 L620,150 L880,150" class="w cbtn"/>
 <path d="M560,290 L640,290 L640,200 L880,200" class="wc"/><path d="M560,290 L640,290 L640,200 L880,200" class="w cbtn"/>
 <path d="M560,310 L660,310 L660,250 L880,250" class="wc"/><path d="M560,310 L660,310 L660,250 L880,250" class="w cbtn"/>
 <path d="M560,330 L680,330 L680,300 L880,300" class="wc"/><path d="M560,330 L680,330 L680,300 L880,300" class="w cbtn"/>
+<path d="M560,250 L600,250 L600,110 L880,110" class="wc"/><path d="M560,250 L600,250 L600,110 L880,110" class="w cbtn"/>
 <path d="M515,370 L515,410 L880,410" class="wc later"/><path d="M515,370 L515,410 L880,410" class="w cbtn later"/>
 <path d="M490,370 L490,452 L880,452" class="wc later"/><path d="M490,370 L490,452 L880,452" class="w cbtn later"/>
 <path d="M465,370 L465,494 L880,494" class="wc later"/><path d="M465,370 L465,494 L880,494" class="w cbtn later"/>
@@ -570,8 +571,8 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
 <text x="551" y="214" class="lbl" text-anchor="end">GP3</text>
 <rect x="555.5" y="225.5" width="9" height="9" class="pad"/>
 <text x="551" y="234" class="lbl" text-anchor="end">GP4</text>
-<rect x="555.5" y="245.5" width="9" height="9" class="pad"/>
-<text x="551" y="254" class="lbl" text-anchor="end">GP5</text>
+<rect x="555.5" y="245.5" width="9" height="9" class="pad used"/>
+<text x="551" y="254" class="lbl used" text-anchor="end">GP5</text>
 <rect x="555.5" y="265.5" width="9" height="9" class="pad used"/>
 <text x="551" y="274" class="lbl used" text-anchor="end">GP6</text>
 <rect x="555.5" y="285.5" width="9" height="9" class="pad used"/>
@@ -618,6 +619,10 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
 <rect x="744" y="286" width="32" height="20" class="cut"/>
 <circle cx="746" cy="300" r="2.5" class="term"/><circle cx="774" cy="300" r="2.5" class="term"/><line x1="746" y1="292" x2="774" y2="292" class="plate"/><line x1="760" y1="292" x2="760" y2="285" class="plate"/><line x1="755" y1="285" x2="765" y2="285" class="plate"/>
 <text x="760" y="320" class="val" text-anchor="middle">Taster 4</text>
+<rect x="744" y="96" width="32" height="20" class="cut"/>
+<circle cx="746" cy="110" r="2.5" class="term"/><circle cx="774" cy="110" r="2.5" class="term"/><line x1="746" y1="102" x2="774" y2="102" class="plate"/><line x1="760" y1="102" x2="760" y2="95" class="plate"/><line x1="755" y1="95" x2="765" y2="95" class="plate"/>
+<text x="760" y="130" class="val" text-anchor="middle"></text>
+<text x="736" y="102" class="val strong" text-anchor="end">Hupe</text>
 <rect x="744" y="396" width="32" height="20" class="cut"/>
 <circle cx="746" cy="410" r="2.5" class="term"/><circle cx="774" cy="410" r="2.5" class="term"/><line x1="746" y1="402" x2="774" y2="402" class="plate"/><line x1="760" y1="402" x2="760" y2="395" class="plate"/><line x1="755" y1="395" x2="765" y2="395" class="plate"/>
 <text x="760" y="430" class="val" text-anchor="middle">Taster 5</text>
@@ -647,6 +652,7 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
 <circle cx="880" cy="200" r="4" class="dot cg"/>
 <circle cx="880" cy="250" r="4" class="dot cg"/>
 <circle cx="880" cy="300" r="4" class="dot cg"/>
+<circle cx="880" cy="110" r="4" class="dot cg"/>
 <circle cx="880" cy="410" r="4" class="dot cg"/>
 <circle cx="880" cy="452" r="4" class="dot cg"/>
 <circle cx="230" cy="210" r="4" class="dot c33"/>
@@ -656,6 +662,7 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
 <g class="badge cbtn"><circle cx="640" cy="245.0" r="10"/><text x="640" y="249.0" text-anchor="middle">T2</text></g>
 <g class="badge cbtn"><circle cx="660" cy="280.0" r="10"/><text x="660" y="284.0" text-anchor="middle">T3</text></g>
 <g class="badge cbtn"><circle cx="680" cy="315.0" r="10"/><text x="680" y="319.0" text-anchor="middle">T4</text></g>
+<g class="badge cbtn"><circle cx="600" cy="180" r="10"/><text x="600" y="184" text-anchor="middle">H</text></g>
 <g class="badge cbtn later"><circle cx="640" cy="410" r="10"/><text x="640" y="414" text-anchor="middle">T5</text></g>
 <g class="badge cbtn later"><circle cx="640" cy="452" r="10"/><text x="640" y="456" text-anchor="middle">T6</text></g>
 <g class="badge cbtn later"><circle cx="640" cy="494" r="10"/><text x="640" y="498" text-anchor="middle">T7</text></g>
@@ -671,6 +678,7 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
       <thead><tr><th></th><th>Nr.</th><th>Von</th><th>Nach</th><th>Hinweis</th></tr></thead>
       <tbody>
         <tr><td class="check"><input type="checkbox" id="t1" aria-label="Taster 1 gesteckt"></td><td class="n"><span class="num cbtn">T1–T4</span></td><td>Tiny <b>GP6 · GP7 · GP8 · GP9</b> (rechte Kante, Pin 7–10)</td><td>Taster 1–4 → GND</td><td></td></tr>
+        <tr><td class="check"><input type="checkbox" id="h" aria-label="Hupe gesteckt"></td><td class="n"><span class="num cbtn">H</span></td><td>Tiny <b>GP5</b> (rechte Kante, 6. Pin)</td><td>Hupentaster → GND</td><td>wie die anderen Taster, interner Pull-up</td></tr>
         <tr><td class="check"><input type="checkbox" id="t5" aria-label="Taster 5 bis 7 gesteckt"></td><td class="n"><span class="num cbtn">T5–T7</span></td><td>Tiny <b>GP10 · GP11 · GP12</b> (Unterkante)</td><td>Taster 5–7 → GND</td><td><b>Erst mal weglassen</b>, GP10–12 offen lassen (nicht auf GND, sonst „dauernd gedrückt“). Unterkante von rechts nach links: 10, 11, 12, 13</td></tr>
         <tr><td class="check"><input type="checkbox" id="p1" aria-label="Poti 1 gesteckt"></td><td class="n"><span class="num cpot">P1</span></td><td>POT 1 Schleifer (Mitte)</td><td>Tiny <b>GP26</b></td><td>Poti-Enden: 3,3 V und GND</td></tr>
         <tr><td class="check"><input type="checkbox" id="p2" aria-label="Poti 2 gesteckt"></td><td class="n"><span class="num cpot">P2</span></td><td>POT 2 Schleifer (Mitte)</td><td>Tiny <b>GP27</b></td><td>Poti-Enden: 3,3 V und GND</td></tr>

@@ -6,7 +6,7 @@
  * Power: RP2040 via USB, MCP2003 VBB = 12V lab supply
  *
  * DESCRIPTION:
- * LIN bus slave/responder that reads 7 buttons, 2 potentiometers and 2 Hall
+ * LIN bus slave/responder that reads 7 buttons, the horn button, 2 potentiometers and 2 Hall
  * clutch paddles, then responds to master requests with current input states
  * via LIN protocol.
  *
@@ -39,7 +39,7 @@
  * └─────────────┴──────────┴────────────────────────────────────────────┘
  *
  * INPUT HARDWARE:
- * - 7 buttons (GPIO6-12): Active LOW, internal pull-ups enabled in code
+ * - 7 buttons (GPIO6-12) + horn button (GPIO5): Active LOW, internal pull-ups enabled in code
  * - 2x 10kΩ potentiometers:
  *   * POT1: Left→GND, Center→GPIO26 (ADC0), Right→3.3V, 100nF filter cap
  *   * POT2: Left→GND, Center→GPIO27 (ADC1), Right→3.3V, 100nF filter cap
@@ -72,7 +72,7 @@
  *
  * Author: Claude Code
  * Date: 2026-09-19
- * Version: 3.2 (key challenge-response)
+ * Version: 3.3 (horn button on GP5)
  ******************************************************************************/
 
 #include <steering_key.h>
@@ -93,6 +93,7 @@
 #define BUTTON_5_PIN      10
 #define BUTTON_6_PIN      11
 #define BUTTON_7_PIN      12
+#define HORN_PIN          5     // Horn button, bit 7 of the button byte
 
 // Potentiometer pins (10kΩ, ideal for RP2040 ADC)
 #define POT_1_PIN         26    // ADC0 (GPIO26)
@@ -123,15 +124,16 @@
 // GLOBAL VARIABLES
 // ============================================================================
 const uint8_t buttonPins[] = {BUTTON_1_PIN, BUTTON_2_PIN, BUTTON_3_PIN,
-                               BUTTON_4_PIN, BUTTON_5_PIN, BUTTON_6_PIN, BUTTON_7_PIN};
+                               BUTTON_4_PIN, BUTTON_5_PIN, BUTTON_6_PIN, BUTTON_7_PIN, HORN_PIN};
+#define BUTTON_COUNT      8
 const uint8_t adcPins[] = {POT_1_PIN, POT_2_PIN, HALL_1_PIN, HALL_2_PIN};
 #define ADC_CHANNELS      4
 #define RESPONSE_LEN      8               // Buttons + 4x 12 bit packed (6) + checksum
 
 // Button state tracking
-uint8_t buttonStates = 0;                 // Packed button states (bit 0-6 = buttons 1-7)
-uint8_t lastButtonReading[7] = {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH};
-unsigned long lastDebounceTime[7] = {0, 0, 0, 0, 0, 0, 0};
+uint8_t buttonStates = 0;                 // Packed button states (bit 0-6 = buttons 1-7, bit 7 = horn)
+uint8_t lastButtonReading[BUTTON_COUNT] = {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH};
+unsigned long lastDebounceTime[BUTTON_COUNT] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 // ADC values (12-bit: 0-4095): POT1, POT2, HALL1, HALL2
 uint16_t adcValues[ADC_CHANNELS] = {0, 0, 0, 0};
@@ -166,7 +168,7 @@ void setup() {
   digitalWrite(STATUS_LED_PIN, LOW);
 
   // Configure button pins with internal pull-ups (active LOW)
-  for (int i = 0; i < 7; i++) {
+  for (int i = 0; i < BUTTON_COUNT; i++) {
     pinMode(buttonPins[i], INPUT_PULLUP);
   }
 
@@ -214,14 +216,14 @@ void updateStatusLED() {
 }
 
 /*******************************************************************************
- * UPDATE BUTTONS - Read all 7 buttons with debouncing
+ * UPDATE BUTTONS - Read all 7 buttons and the horn with debouncing
  *
  * Button byte format:
- * Bit 7: Reserved (0)
+ * Bit 7: Horn (1=pressed)
  * Bit 6-0: Buttons 7-1 (1=pressed, 0=released)
  ******************************************************************************/
 void updateButtons() {
-  for (int i = 0; i < 7; i++) {
+  for (int i = 0; i < BUTTON_COUNT; i++) {
     uint8_t reading = digitalRead(buttonPins[i]);
 
     // Detect button state change
@@ -325,7 +327,7 @@ void handleLINRequest() {
  * │ Buttons │ POT1 + POT2 (2x12 bit)│ HALL1 + HALL2         │ Checksum │
  * └─────────┴───────────────────────┴───────────────────────┴──────────┘
  *
- * Button byte: Bits 0-6 = Buttons 1-7 (1=pressed)
+ * Button byte: Bits 0-6 = Buttons 1-7, bit 7 = horn (1=pressed)
  * Two 12-bit values A, B packed into 3 bytes:
  *   b0 = A[11:4], b1 = A[3:0] << 4 | B[11:8], b2 = B[7:0]
  * Checksum: Simple modular sum of all data bytes % 256
@@ -339,7 +341,7 @@ void packPair(uint8_t* out, uint16_t a, uint16_t b) {
 void sendLINResponse() {
   uint8_t dataFrame[RESPONSE_LEN];
 
-  dataFrame[0] = buttonStates & 0x7F;
+  dataFrame[0] = buttonStates;
   packPair(&dataFrame[1], adcValues[0], adcValues[1]);
   packPair(&dataFrame[4], adcValues[2], adcValues[3]);
   dataFrame[7] = calculateChecksum(dataFrame, RESPONSE_LEN - 1);

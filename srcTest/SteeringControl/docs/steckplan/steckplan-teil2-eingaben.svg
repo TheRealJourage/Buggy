@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Eingaben am RP2040-Tiny: 7 Taster, 2 Potis, Status-LED" xmlns="http://www.w3.org/2000/svg"><style>svg{  --bg: #e9eeec;  --panel: #fbfcfc;  --ink: #16201c;  --muted: #5d6c66;  --faint: #d5ddda;  --accent: #0f6b62;  --board-uno: #d8ebee;  --board-uno-s: #2f7d8c;  --board-tiny: #dde4f4; --board-tiny-s: #3b5aa3;  --board-psu: #f1e3e1;  --board-psu-s: #9b4a3f;  --chip: #262b2a; --chip-ink: #eef2f1;  --w12: #d42a1e; --wg: #161616; --w5: #f07c00; --w33: #f07c00;  --wrx: #1f5fd1; --wtx: #1f9d3a; --wcs: #ffffff; --wlin: #f2c200;  --wsig: #ffffff; --wbtn: #f2c200; --wpot: #1f9d3a;  --casing: #7d8a85;  --led-g: #36b24a; --led-r: #e0413a;  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;  --sans: "Segoe UI", system-ui, sans-serif;}.c12 { --c: var(--w12); } .cg { --c: var(--wg); } .c5 { --c: var(--w5); } .c33 { --c: var(--w33); }
+<svg width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Eingaben am RP2040-Tiny: 7 Taster, Hupe, 2 Potis, Status-LED" xmlns="http://www.w3.org/2000/svg"><style>svg{  --bg: #e9eeec;  --panel: #fbfcfc;  --ink: #16201c;  --muted: #5d6c66;  --faint: #d5ddda;  --accent: #0f6b62;  --board-uno: #d8ebee;  --board-uno-s: #2f7d8c;  --board-tiny: #dde4f4; --board-tiny-s: #3b5aa3;  --board-psu: #f1e3e1;  --board-psu-s: #9b4a3f;  --chip: #262b2a; --chip-ink: #eef2f1;  --w12: #d42a1e; --wg: #161616; --w5: #f07c00; --w33: #f07c00;  --wrx: #1f5fd1; --wtx: #1f9d3a; --wcs: #ffffff; --wlin: #f2c200;  --wsig: #ffffff; --wbtn: #f2c200; --wpot: #1f9d3a;  --casing: #7d8a85;  --led-g: #36b24a; --led-r: #e0413a;  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;  --sans: "Segoe UI", system-ui, sans-serif;}.c12 { --c: var(--w12); } .cg { --c: var(--wg); } .c5 { --c: var(--w5); } .c33 { --c: var(--w33); }
 .crx { --c: var(--wrx); } .ctx { --c: var(--wtx); } .ccs { --c: var(--wcs); } .clin { --c: var(--wlin); }
 .csig { --c: var(--wsig); } .cbtn { --c: var(--wbtn); } .cpot { --c: var(--wpot); }
 .clin.num, .cbtn.num, .c5.num, .c33.num, .ccs.num, .csig.num { color: #161616; }
@@ -59,6 +59,7 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <path d="M560,290 L640,290 L640,200 L880,200" class="wc"/><path d="M560,290 L640,290 L640,200 L880,200" class="w cbtn"/>
 <path d="M560,310 L660,310 L660,250 L880,250" class="wc"/><path d="M560,310 L660,310 L660,250 L880,250" class="w cbtn"/>
 <path d="M560,330 L680,330 L680,300 L880,300" class="wc"/><path d="M560,330 L680,330 L680,300 L880,300" class="w cbtn"/>
+<path d="M560,250 L600,250 L600,110 L880,110" class="wc"/><path d="M560,250 L600,250 L600,110 L880,110" class="w cbtn"/>
 <path d="M515,370 L515,410 L880,410" class="wc later"/><path d="M515,370 L515,410 L880,410" class="w cbtn later"/>
 <path d="M490,370 L490,452 L880,452" class="wc later"/><path d="M490,370 L490,452 L880,452" class="w cbtn later"/>
 <path d="M465,370 L465,494 L880,494" class="wc later"/><path d="M465,370 L465,494 L880,494" class="w cbtn later"/>
@@ -79,8 +80,8 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <text x="551" y="214" class="lbl" text-anchor="end">GP3</text>
 <rect x="555.5" y="225.5" width="9" height="9" class="pad"/>
 <text x="551" y="234" class="lbl" text-anchor="end">GP4</text>
-<rect x="555.5" y="245.5" width="9" height="9" class="pad"/>
-<text x="551" y="254" class="lbl" text-anchor="end">GP5</text>
+<rect x="555.5" y="245.5" width="9" height="9" class="pad used"/>
+<text x="551" y="254" class="lbl used" text-anchor="end">GP5</text>
 <rect x="555.5" y="265.5" width="9" height="9" class="pad used"/>
 <text x="551" y="274" class="lbl used" text-anchor="end">GP6</text>
 <rect x="555.5" y="285.5" width="9" height="9" class="pad used"/>
@@ -127,6 +128,10 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <rect x="744" y="286" width="32" height="20" class="cut"/>
 <circle cx="746" cy="300" r="2.5" class="term"/><circle cx="774" cy="300" r="2.5" class="term"/><line x1="746" y1="292" x2="774" y2="292" class="plate"/><line x1="760" y1="292" x2="760" y2="285" class="plate"/><line x1="755" y1="285" x2="765" y2="285" class="plate"/>
 <text x="760" y="320" class="val" text-anchor="middle">Taster 4</text>
+<rect x="744" y="96" width="32" height="20" class="cut"/>
+<circle cx="746" cy="110" r="2.5" class="term"/><circle cx="774" cy="110" r="2.5" class="term"/><line x1="746" y1="102" x2="774" y2="102" class="plate"/><line x1="760" y1="102" x2="760" y2="95" class="plate"/><line x1="755" y1="95" x2="765" y2="95" class="plate"/>
+<text x="760" y="130" class="val" text-anchor="middle"></text>
+<text x="736" y="102" class="val strong" text-anchor="end">Hupe</text>
 <rect x="744" y="396" width="32" height="20" class="cut"/>
 <circle cx="746" cy="410" r="2.5" class="term"/><circle cx="774" cy="410" r="2.5" class="term"/><line x1="746" y1="402" x2="774" y2="402" class="plate"/><line x1="760" y1="402" x2="760" y2="395" class="plate"/><line x1="755" y1="395" x2="765" y2="395" class="plate"/>
 <text x="760" y="430" class="val" text-anchor="middle">Taster 5</text>
@@ -156,6 +161,7 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <circle cx="880" cy="200" r="4" class="dot cg"/>
 <circle cx="880" cy="250" r="4" class="dot cg"/>
 <circle cx="880" cy="300" r="4" class="dot cg"/>
+<circle cx="880" cy="110" r="4" class="dot cg"/>
 <circle cx="880" cy="410" r="4" class="dot cg"/>
 <circle cx="880" cy="452" r="4" class="dot cg"/>
 <circle cx="230" cy="210" r="4" class="dot c33"/>
@@ -165,6 +171,7 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <g class="badge cbtn"><circle cx="640" cy="245.0" r="10"/><text x="640" y="249.0" text-anchor="middle">T2</text></g>
 <g class="badge cbtn"><circle cx="660" cy="280.0" r="10"/><text x="660" y="284.0" text-anchor="middle">T3</text></g>
 <g class="badge cbtn"><circle cx="680" cy="315.0" r="10"/><text x="680" y="319.0" text-anchor="middle">T4</text></g>
+<g class="badge cbtn"><circle cx="600" cy="180" r="10"/><text x="600" y="184" text-anchor="middle">H</text></g>
 <g class="badge cbtn later"><circle cx="640" cy="410" r="10"/><text x="640" y="414" text-anchor="middle">T5</text></g>
 <g class="badge cbtn later"><circle cx="640" cy="452" r="10"/><text x="640" y="456" text-anchor="middle">T6</text></g>
 <g class="badge cbtn later"><circle cx="640" cy="494" r="10"/><text x="640" y="498" text-anchor="middle">T7</text></g>

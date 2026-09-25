@@ -333,7 +333,7 @@ r = {f"GP{i}": Y0 + 30 + i * 20 for i in range(10)}
 l = {n: Y0 + 30 + i * 20 for i, n in enumerate(["5V", "GND", "3V3", "GP29", "GP28", "GP27", "GP26", "GP15", "GP14"])}
 b = {n: X0 + 40 + i * 25 for i, n in enumerate(["GP13", "GP12", "GP11", "GP10"])}
 for n, y in r.items():
-    pad(f2, X0 + W, y, n, "end", dx=-9, dy=4, used=n in ("GP6", "GP7", "GP8", "GP9"))
+    pad(f2, X0 + W, y, n, "end", dx=-9, dy=4, used=n in ("GP5", "GP6", "GP7", "GP8", "GP9"))
 for n, y in l.items():
     pad(f2, X0, y, n, "start", dx=9, dy=4, used=n in ("GND", "3V3", "GP27", "GP26", "GP14"))
 for n, x in b.items():
@@ -350,6 +350,10 @@ for i, (gp, by) in enumerate((("GP6", 150), ("GP7", 200), ("GP8", 250), ("GP9", 
     xv = 620 + i * 20
     f2.wire(f"b{i}", "cbtn", [(X0 + W, r[gp]), (xv, r[gp]), (xv, by), (GX, by)])
     button(f2, 760, by, f"Taster {i + 1}"); f2.dot(GX, by, "cg"); f2.badge(xv, by + (r[gp] - by) / 2, f"T{i + 1}", "cbtn")
+# horn button on GP5
+f2.wire("horn", "cbtn", [(X0 + W, r["GP5"]), (600, r["GP5"]), (600, 110), (GX, 110)])
+button(f2, 760, 110, ""); f2.dot(GX, 110, "cg")
+f2.overlays.append('<text x="736" y="102" class="val strong" text-anchor="end">Hupe</text>'); f2.badge(600, 180, "H", "cbtn")
 # buttons B5..B7 on GP10..GP12 (bottom edge) - left out for the first test
 for i, (gp, by) in enumerate((("GP10", 410), ("GP11", 452), ("GP12", 494))):
     f2.wire(f"b{i + 4}", "cbtn later", [(b[gp], Y0 + H), (b[gp], by), (GX, by)])
@@ -373,7 +377,7 @@ f2.wire("gnd", "cg", [(200, 470), (100, 470)])
 resistor(f2, 290, 470, False, "220 Ω", 1); diode_left(f2, 200, 470, "Status-LED", "led-g")
 f2.badge(340, 420, "L", "csig")
 
-FIG2 = f2.svg("0 0 960 540", "Eingaben am RP2040-Tiny: 7 Taster, 2 Potis, Status-LED")
+FIG2 = f2.svg("0 0 960 540", "Eingaben am RP2040-Tiny: 7 Taster, Hupe, 2 Potis, Status-LED")
 
 # ═══ FIGURE 3: steering-wheel supply test (12 V -> P78BT3R3C10 -> Tiny 3V3) ═══
 f3 = Fig()
