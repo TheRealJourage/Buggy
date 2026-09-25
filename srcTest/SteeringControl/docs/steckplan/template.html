@@ -288,6 +288,33 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
     </div>
   </section>
 
+  <section class="sheet">
+    <h2>Teil 3 · Lenkrad-Versorgung testen (12 V → 3,3 V)</h2>
+    <div class="legend" aria-label="Farblegende Teil 3">
+      <span class="c12"><i></i>+12 V · rot</span>
+      <span class="c33"><i></i>3,3 V · orange</span>
+      <span class="cg"><i></i>GND · schwarz</span>
+    </div>
+    <figure class="scroll small" style="margin:0">
+      {{FIG3}}
+    </figure>
+    <figcaption>Teil 1 bleibt komplett stehen. Der Tiny bekommt seinen Strom jetzt nur noch aus dem Wandler, das USB-Kabel am Adapter ist ab.
+      Elkos: Minus-Streifen nach GND. Sicherung und TVS kommen erst im Fahrzeug dazu, am Labornetzteil übernimmt das Strom-Limit.</figcaption>
+    <div class="scroll">
+    <table>
+      <thead><tr><th></th><th>Nr.</th><th>Von</th><th>Nach</th><th>Hinweis</th></tr></thead>
+      <tbody>
+        <tr><td class="check"><input type="checkbox" id="s1" aria-label="S1 gesteckt"></td><td class="n"><span class="num c12">S1</span></td><td>+12-V-Schiene</td><td>1N5819 → Wandler <b>Pin 1</b></td><td>Ring der Diode zeigt zum Wandler</td></tr>
+        <tr><td class="check"><input type="checkbox" id="s2" aria-label="S2 gesteckt"></td><td class="n"><span class="num cg">S2</span></td><td>C1 10 µF (+)</td><td>Pin 1 ↔ GND</td><td>≥ 25 V, im Fahrzeug 50 V</td></tr>
+        <tr><td class="check"><input type="checkbox" id="s3" aria-label="S3 gesteckt"></td><td class="n"><span class="num cg">S3</span></td><td>Wandler <b>Pin 2</b></td><td>GND-Schiene</td><td></td></tr>
+        <tr><td class="check"><input type="checkbox" id="s5" aria-label="S5 gesteckt"></td><td class="n"><span class="num cg">S5</span></td><td>C2 22 µF (+)</td><td>Pin 3 ↔ GND</td><td>≥ 6,3 V</td></tr>
+        <tr><td class="check"><input type="checkbox" id="m" aria-label="M gemessen"></td><td class="n"><span class="num c33">M</span></td><td>Pin 3 gegen GND messen</td><td>—</td><td><b>Soll 3,17–3,43 V</b>, noch ohne Tiny. Über 3,5 V: S4 nicht stecken</td></tr>
+        <tr><td class="check"><input type="checkbox" id="s4" aria-label="S4 gesteckt"></td><td class="n"><span class="num c33">S4</span></td><td>Wandler <b>Pin 3</b></td><td>Tiny <b>3V3</b> (linke Kante, 3. Pin)</td><td>Netzteil dabei aus. Tiny-<b>5V</b> bleibt frei</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
   <div class="notes">
     <div class="note warn">
       <h3>Nicht anschließen</h3>
@@ -295,7 +322,7 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
         <li><b>Pin 8 VREN</b> ist ein Ausgang, der auf VBB-Pegel (12 V) geht. Er darf nirgends dran.</li>
         <li><b>Pin 3 WAKE</b> bleibt frei (interner Pull-up).</li>
         <li>Kein Pull-up an <b>CS</b>, kein Widerstand von LBUS nach GND.</li>
-        <li>Tiny-<b>5V</b> bleibt frei, der Tiny wird über USB am Adapter versorgt.</li>
+        <li>Tiny-<b>5V</b> bleibt immer frei. Teil 1/2: Tiny über USB am Adapter, Teil 3: über den Wandler an 3V3 (dann USB ab).</li>
       </ul>
     </div>
     <div class="note">

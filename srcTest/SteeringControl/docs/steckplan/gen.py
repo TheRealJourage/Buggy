@@ -375,8 +375,65 @@ f2.badge(340, 420, "L", "csig")
 
 FIG2 = f2.svg("0 0 960 540", "Eingaben am RP2040-Tiny: 7 Taster, 2 Potis, Status-LED")
 
+# ═══ FIGURE 3: steering-wheel supply test (12 V -> P78BT3R3C10 -> Tiny 3V3) ═══
+f3 = Fig()
+S12, SG, SV = 90, 440, 230   # 12 V rail, GND rail, converter pin row
+f3.wire("12v", "c12", [(40, S12), (300, S12)])
+f3.wire("gnd", "cg", [(40, SG), (720, SG)])
+f3.under.append(f'<text x="40" y="{S12 - 10}" class="rail">+12-V-Schiene aus Teil 1 · Netzteil-Limit ~200 mA</text>'
+                f'<text x="40" y="{SG + 22}" class="rail">GND-Schiene aus Teil 1</text>')
+# S1  12 V -> D1 1N5819 -> converter pin 1
+f3.wire("12v", "c12", [(120, S12), (120, SV), (300, SV)]); f3.dot(120, S12, "c12")
+diode_down(f3, 120, 160, "D1 1N5819, Ring unten")
+f3.badge(170, SV, "S1", "c12")
+# S2  C1 on the input
+f3.wire("vin", "c12", [(230, SV), (230, 330)]); f3.wire("gnd", "cg", [(230, 330), (230, SG)])
+f3.dot(230, SV, "c12"); f3.dot(230, SG, "cg")
+cap(f3, 230, 330, True, "C1 10 µF · ≥ 25 V", -1)
+f3.overlays.append('<text x="244" y="322" class="pol">+</text>')
+f3.badge(230, 390, "S2", "cg")
+# converter
+f3.under.append(f'<rect x="300" y="{SV - 50}" width="130" height="90" rx="4" class="chip"/>'
+                f'<text x="365" y="{SV - 62}" class="chipname" text-anchor="middle">P78BT3R3C10</text>'
+                f'<text x="365" y="{SV - 18}" class="pinname" text-anchor="middle">12 V → 3,3 V</text>'
+                f'<text x="308" y="{SV + 4}" class="pinname">1 +Vin</text>'
+                f'<text x="422" y="{SV + 4}" class="pinname" text-anchor="end">+Vout 3</text>'
+                f'<text x="365" y="{SV + 34}" class="pinname" text-anchor="middle">2 GND</text>')
+f3.overlays.append(f'<text x="365" y="{SG + 22}" class="val" text-anchor="middle">Schrift zu dir, Beine unten: links = 1</text>')
+# S3  pin 2 -> GND
+f3.wire("gnd", "cg", [(365, SV + 40), (365, SG)]); f3.dot(365, SG, "cg"); f3.badge(365, 390, "S3", "cg")
+# S5  C2 on the output
+f3.wire("3v3", "c33", [(430, SV), (720, SV)])
+f3.wire("3v3", "c33", [(500, SV), (500, 330)]); f3.wire("gnd", "cg", [(500, 330), (500, SG)])
+f3.dot(500, SV, "c33"); f3.dot(500, SG, "cg")
+cap(f3, 500, 330, True, "C2 22 µF · ≥ 6,3 V", 1)
+f3.overlays.append('<text x="486" y="322" class="pol" text-anchor="end">+</text>')
+f3.badge(500, 390, "S5", "cg")
+# measuring point before S4 goes on
+f3.badge(460, SV - 22, "M", "c33")
+f3.overlays.append(f'<text x="476" y="{SV - 18}" class="val strong">erst messen: 3,2–3,4 V</text>')
+# S4  -> Tiny 3V3
+f3.badge(600, SV, "S4", "c33")
+# RP2040-Tiny
+TX3, TY3 = 720, 170
+f3.under.append(f'<rect x="{TX3}" y="{TY3}" width="160" height="250" rx="10" class="board tiny"/>'
+                f'<rect x="{TX3 + 52}" y="{TY3 + 80}" width="56" height="56" rx="3" class="mcu"/>'
+                f'<text x="{TX3 + 80}" y="{TY3 + 112}" class="porttxt" text-anchor="middle">RP2040</text>'
+                f'<text x="{TX3 + 80}" y="{TY3 - 30}" class="boardname" text-anchor="middle">RP2040-Tiny</text>'
+                f'<text x="{TX3 + 80}" y="{TY3 - 14}" class="nc" text-anchor="middle">USB am Adapter abziehen!</text>')
+tl3 = {n: TY3 + 20 + i * 20 for i, n in enumerate(["5V", "GND", "3V3", "GP29", "GP28", "GP27", "GP26", "GP15", "GP14"])}
+for n, y in tl3.items():
+    pad(f3, TX3, y, n, "start", dx=9, dy=4, used=n in ("GND", "3V3"))
+assert tl3["3V3"] == SV
+nc(f3, TX3 - 8, tl3["5V"], -1)
+f3.wire("gnd", "cg", [(TX3, tl3["GND"]), (660, tl3["GND"]), (660, SG)]); f3.dot(660, SG, "cg")
+f3.badge(660, 330, 22, "cg")
+f3.overlays.append(f'<text x="652" y="300" class="val" text-anchor="end">steckt schon</text>')
+
+FIG3 = f3.svg("0 0 920 480", "12-V-Versorgung des RP2040-Tiny über P78BT3R3C10 auf den 3V3-Pin (Testaufbau)")
+
 html = open(os.path.join(os.path.dirname(OUT), "template.html"), encoding="utf-8").read()
-html = html.replace("{{FIG1}}", FIG1).replace("{{FIG2}}", FIG2)
+html = html.replace("{{FIG1}}", FIG1).replace("{{FIG2}}", FIG2).replace("{{FIG3}}", FIG3)
 html = ('<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">\n'
         + html.replace("</style>\n", "</style>\n</head><body>\n", 1) + "</body></html>\n")
 open(OUT, "w", encoding="utf-8").write(html)
@@ -404,4 +461,5 @@ def standalone(svg_markup, path):
 
 standalone(FIG1, os.path.join(os.path.dirname(OUT), "steckplan-teil1-lin.svg"))
 standalone(FIG2, os.path.join(os.path.dirname(OUT), "steckplan-teil2-eingaben.svg"))
+standalone(FIG3, os.path.join(os.path.dirname(OUT), "steckplan-teil3-versorgung.svg"))
 print("svgs written")
