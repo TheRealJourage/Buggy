@@ -436,6 +436,137 @@ f3.overlays.append(f'<text x="652" y="300" class="val" text-anchor="end">steckt 
 
 FIG3 = f3.svg("0 0 920 480", "12-V-Versorgung des RP2040-Tiny über P78BT3R3C10 auf den 3V3-Pin (Testaufbau)")
 
+# ═══ FIGURE 4: steering wheel, final wiring (no Uno, no debug parts) ═══════════
+f4 = Fig()
+
+
+def gnd(f, x, y):
+    """Ground symbol, wire ends at (x, y). All of them go to one star point."""
+    f.overlays.append(f'<path d="M{x - 10},{y} h20 M{x - 6},{y + 5} h12 M{x - 2},{y + 10} h4" class="plate"/>')
+
+
+def diode_right(f, x, y, label):
+    """Diode, current flows left -> right (cathode bar right)."""
+    f.overlays.append(f'<rect x="{x - 9}" y="{y - 9}" width="18" height="18" class="cut"/>')
+    f.overlays.append(f'<polygon points="{x - 7},{y - 8} {x - 7},{y + 8} {x + 6},{y}" class="dio"/>'
+                      f'<line x1="{x + 7}" y1="{y - 8}" x2="{x + 7}" y2="{y + 8}" class="plate"/>')
+    f.overlays.append(f'<text x="{x}" y="{y - 14}" class="val" text-anchor="middle">{label}</text>')
+
+
+def tvs_up(f, x, y, label):
+    """Unidirectional TVS, cathode (bar) at the top towards +."""
+    f.overlays.append(f'<rect x="{x - 9}" y="{y - 9}" width="18" height="18" class="cut"/>')
+    f.overlays.append(f'<polygon points="{x - 8},{y + 7} {x + 8},{y + 7} {x},{y - 6}" class="dio"/>'
+                      f'<path d="M{x - 11},{y - 10} l3,3 h16 l3,3" class="plate" fill="none"/>')
+    f.overlays.append(f'<text x="{x + 14}" y="{y + 4}" class="val">{label}</text>')
+
+
+# vehicle side: quick disconnect, 3 contacts + hub body
+f4.under.append('<rect x="30" y="60" width="140" height="170" rx="6" class="board psu"/>'
+                '<text x="100" y="84" class="boardname" text-anchor="middle">Quick-Disconnect</text>'
+                '<text x="100" y="100" class="chipsub" text-anchor="middle">zum Fahrzeug</text>')
+for yy, txt in ((122, "LIN · gelb"), (160, "+12 V · rot"), (198, "GND · schwarz")):
+    f4.overlays.append(f'<text x="160" y="{yy + 4}" class="lbl used" text-anchor="end">{txt}</text>')
+f4.overlays.append('<text x="100" y="250" class="chipsub" text-anchor="middle">+ Hülle = GND</text>')
+f4.wire("lin", "clin", [(170, 122), (190, 122), (190, 40), (1340, 40), (1340, 610)])
+f4.wire("12v", "c12", [(170, 160), (300, 160)])
+diode_right(f4, 240, 160, "D1 1N5819")
+f4.wire("gnd", "cg", [(170, 198), (200, 198), (200, 250)]); gnd(f4, 200, 250)
+
+# supply: VIN -> TVS, C1, P78BT3R3C10 -> 3V3 -> C2
+f4.wire("vin", "c12", [(300, 160), (560, 160)])
+f4.wire("vin", "c12", [(340, 160), (340, 250)]); f4.dot(340, 160, "c12"); tvs_up(f4, 340, 205, "TVS P6KE33A"); gnd(f4, 340, 250)
+f4.wire("vin", "c12", [(440, 160), (440, 250)]); f4.dot(440, 160, "c12"); cap(f4, 440, 205, True, "C1 10 µF/50 V"); gnd(f4, 440, 250)
+f4.overlays.append('<text x="428" y="196" class="pol" text-anchor="end">+</text>')
+f4.under.append('<rect x="560" y="128" width="120" height="64" rx="4" class="chip"/>'
+                '<text x="620" y="150" class="pinname" text-anchor="middle">P78BT3R3C10</text>'
+                '<text x="566" y="176" class="pinname">1</text><text x="674" y="176" class="pinname" text-anchor="end">3</text>'
+                '<text x="620" y="186" class="pinname" text-anchor="middle">2</text>')
+f4.wire("gnd", "cg", [(620, 192), (620, 250)]); gnd(f4, 620, 250)
+f4.overlays.append('<text x="632" y="236" class="val strong">Sternpunkt</text>')
+f4.wire("3v3", "c33", [(680, 160), (840, 160), (840, 450), (860, 450)])
+f4.wire("3v3", "c33", [(760, 160), (760, 250)]); f4.dot(760, 160, "c33"); cap(f4, 760, 205, True, "C2 100 µF/16 V"); gnd(f4, 760, 250)
+f4.overlays.append('<text x="748" y="196" class="pol" text-anchor="end">+</text>')
+# VBB for the MCP2003 from VIN (behind D1)
+f4.wire("vin", "c12", [(500, 160), (500, 100), (1300, 100), (1300, 466), (1260, 466)]); f4.dot(500, 160, "c12")
+
+# RP2040-Tiny
+TX4, TY4 = 860, 380
+f4.under.append(f'<rect x="{TX4}" y="{TY4}" width="160" height="250" rx="10" class="board tiny"/>'
+                f'<rect x="{TX4 + 52}" y="{TY4 + 80}" width="56" height="56" rx="3" class="mcu"/>'
+                f'<text x="{TX4 + 80}" y="{TY4 + 112}" class="porttxt" text-anchor="middle">RP2040</text>'
+                f'<text x="{TX4 + 80}" y="{TY4 + 180}" class="boardname" text-anchor="middle">RP2040-Tiny</text>')
+tr4 = {f"GP{i}": TY4 + 30 + i * 20 for i in range(10)}
+tl4 = {n: TY4 + 30 + i * 20 for i, n in enumerate(["5V", "GND", "3V3", "GP29", "GP28", "GP27", "GP26", "GP15", "GP14"])}
+tb4 = {n: TX4 + 40 + i * 25 for i, n in enumerate(["GP13", "GP12", "GP11", "GP10"])}
+for n, y in tr4.items():
+    pad(f4, TX4 + 160, y, n, "end", dx=-9, dy=4, used=n not in ("GP3", "GP4"))
+for n, y in tl4.items():
+    pad(f4, TX4, y, n, "start", dx=9, dy=4, used=n not in ("5V", "GP15", "GP14"))
+for n, x in tb4.items():
+    pad(f4, x, TY4 + 250, n.replace("GP", ""), "middle", dy=-10, used=n in ("GP10", "GP11"))
+nc(f4, TX4 - 8, tl4["5V"], -1)
+f4.wire("gnd", "cg", [(TX4, tl4["GND"]), (790, tl4["GND"]), (790, 440)]); gnd(f4, 790, 440)
+
+# MCP2003 (slave side only)
+dip(f4, 1100, 430, "MCP2003", "LIN-Transceiver", ["RXD", "CS", "WAKE", "TXD"], ["VREN", "VBB", "LBUS", "VSS"], 36)
+nc(f4, 1260, 430, 1); nc(f4, 1100, 502, -1, False)
+f4.wire("gp1", "crx", [(1020, tr4["GP1"]), (1100, 430)])
+f4.wire("gp2", "ccs", [(1020, tr4["GP2"]), (1070, tr4["GP2"]), (1070, 466), (1100, 466)])
+f4.wire("gp0", "ctx", [(1020, tr4["GP0"]), (1085, tr4["GP0"]), (1085, 538), (1100, 538)])
+f4.wire("3v3", "c33", [(840, 340), (1095, 340), (1095, 430)]); f4.dot(840, 340, "c33"); f4.dot(1095, 430, "crx")
+resistor(f4, 960, 340, False, "5,1 kΩ", 1)
+f4.wire("vin", "c12", [(1280, 466), (1280, 484)]); f4.wire("gnd", "cg", [(1280, 484), (1280, 538)])
+f4.dot(1280, 466, "c12"); cap(f4, 1280, 484, True, "100 nF", 1)
+f4.wire("gnd", "cg", [(1260, 538), (1280, 538), (1280, 590)]); f4.dot(1280, 538, "cg"); gnd(f4, 1280, 590)
+f4.wire("lin", "clin", [(1260, 502), (1340, 502)]); f4.dot(1340, 502, "clin")
+f4.wire("gnd", "cg", [(1340, 610), (1340, 660)]); cap(f4, 1340, 632, True, "220 pF", -1); gnd(f4, 1340, 660)
+
+# horn, wired inside the hub
+f4.wire("horn", "cbtn", [(1020, tr4["GP5"]), (1034, tr4["GP5"]), (1034, 760), (1200, 760), (1200, 780)])
+button(f4, 1130, 760, "Hupe (innen)"); gnd(f4, 1200, 780)
+
+# analog connectors (left side of the Tiny): 1 3V3 · 2 pot · 3 Hall · 4 GND
+def analog_conn(f, y0, side, pot_gp, hall_gp):
+    f.under.append(f'<rect x="330" y="{y0}" width="140" height="140" rx="6" class="board psu"/>'
+                   f'<text x="400" y="{y0 - 10}" class="boardname" text-anchor="middle">Stecker {side}-Analog</text>')
+    for i, txt in enumerate(["1 · 3,3 V", f"2 · Poti ({pot_gp})", f"3 · Hall ({hall_gp})", "4 · GND"]):
+        pad(f, 470, y0 + 20 + i * 30, txt, "end", dx=-10, dy=4, used=True)
+
+
+analog_conn(f4, 400, "L", "GP26", "GP28")
+analog_conn(f4, 600, "R", "GP27", "GP29")
+f4.wire("3v3", "c33", [(840, 360), (560, 360), (560, 620), (470, 620)]); f4.dot(840, 360, "c33")
+f4.wire("3v3", "c33", [(560, 420), (470, 420)]); f4.dot(560, 420, "c33")
+f4.wire("hallL", "cpot", [(TX4, tl4["GP28"]), (700, tl4["GP28"]), (700, 480), (470, 480)])
+f4.wire("potL", "cpot", [(TX4, tl4["GP26"]), (680, tl4["GP26"]), (680, 450), (470, 450)])
+f4.wire("hallR", "cpot", [(TX4, tl4["GP29"]), (720, tl4["GP29"]), (720, 680), (470, 680)])
+f4.wire("potR", "cpot", [(TX4, tl4["GP27"]), (740, tl4["GP27"]), (740, 650), (470, 650)])
+for yy in (510, 710):
+    f4.wire("gnd", "cg", [(470, yy), (500, yy), (500, yy + 20)]); gnd(f4, 500, yy + 20)
+f4.overlays.append('<text x="400" y="770" class="chipsub" text-anchor="middle">Pin 4: eigene Analog-Masse (empfohlen)</text>')
+
+# button connectors (bottom): 1 paddle · 2 button · 3 button · 4 free
+def button_conn(f, x0, side, gps):
+    f.under.append(f'<rect x="{x0 - 20}" y="900" width="150" height="70" rx="6" class="board psu"/>'
+                   f'<text x="{x0 + 55}" y="992" class="boardname" text-anchor="middle">Stecker {side}-Tasten</text>')
+    for i, txt in enumerate(["1", "2", "3", "4"]):
+        pad(f, x0 + i * 30, 900, txt, "middle", dy=22, used=i < 3)
+    f.overlays.append(f'<text x="{x0 + 55}" y="958" class="chipsub" text-anchor="middle">Paddel · Knopf · Knopf · frei</text>')
+    f.overlays.append(f'<text x="{x0 + 55}" y="1010" class="val" text-anchor="middle">{" · ".join(gps)}</text>')
+
+
+button_conn(f4, 890, "R", ["GP9", "GP10", "GP11"])
+button_conn(f4, 1100, "L", ["GP6", "GP7", "GP8"])
+f4.wire("btnR1", "cbtn", [(1020, tr4["GP9"]), (1082, tr4["GP9"]), (1082, 850), (890, 850), (890, 900)])
+f4.wire("btnR2", "cbtn", [(tb4["GP10"], TY4 + 250), (tb4["GP10"], 820), (920, 820), (920, 900)])
+f4.wire("btnR3", "cbtn", [(tb4["GP11"], TY4 + 250), (tb4["GP11"], 900)])
+f4.wire("btnL1", "cbtn", [(1020, tr4["GP6"]), (1046, tr4["GP6"]), (1046, 880), (1100, 880), (1100, 900)])
+f4.wire("btnL2", "cbtn", [(1020, tr4["GP7"]), (1058, tr4["GP7"]), (1058, 870), (1130, 870), (1130, 900)])
+f4.wire("btnL3", "cbtn", [(1020, tr4["GP8"]), (1070, tr4["GP8"]), (1070, 860), (1160, 860), (1160, 900)])
+
+FIG4 = f4.svg("0 0 1440 1030", "Lenkrad-Verdrahtung: RP2040-Tiny, MCP2003, 3,3-V-Wandler und die vier Stecker nach außen")
+
 html = open(os.path.join(os.path.dirname(OUT), "template.html"), encoding="utf-8").read()
 html = html.replace("{{FIG1}}", FIG1).replace("{{FIG2}}", FIG2).replace("{{FIG3}}", FIG3)
 html = ('<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">\n'
@@ -467,3 +598,4 @@ standalone(FIG1, os.path.join(os.path.dirname(OUT), "steckplan-teil1-lin.svg"))
 standalone(FIG2, os.path.join(os.path.dirname(OUT), "steckplan-teil2-eingaben.svg"))
 standalone(FIG3, os.path.join(os.path.dirname(OUT), "steckplan-teil3-versorgung.svg"))
 print("svgs written")
+standalone(FIG4, os.path.join(os.path.dirname(OUT), "lenkrad-verdrahtung.svg"))
