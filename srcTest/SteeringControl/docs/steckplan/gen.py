@@ -552,16 +552,16 @@ def button_conn(f, x0, side, gps, labels="Paddel · Knopf · Knopf"):
     f.overlays.append(f'<text x="{x0 + (n - 1) * 15}" y="1010" class="val" text-anchor="middle">{" · ".join(gps)}</text>')
 
 
-button_conn(f4, 850, "R", ["GP9", "GP10", "GP11", "GP12"], "Paddel · 3 × Knopf")
-button_conn(f4, 1100, "L", ["GP6", "GP7", "GP8"])
-f4.wire("btnR1", "cblue", [(1020, tr4["GP9"]), (1082, tr4["GP9"]), (1082, 850), (850, 850), (850, 900)])
-f4.wire("btnR2", "cwhite", [(tb4["GP10"], TY4 + 250), (tb4["GP10"], 830), (880, 830), (880, 900)])
-f4.wire("btnR3", "cgrey", [(tb4["GP11"], TY4 + 250), (tb4["GP11"], 810), (910, 810), (910, 900)])
-f4.wire("btnR4", "cpink", [(tb4["GP12"], TY4 + 250), (tb4["GP12"], 875), (940, 875), (940, 900)])
+button_conn(f4, 890, "R", ["GP9", "GP10", "GP11"])
+button_conn(f4, 1100, "L", ["GP6", "GP7", "GP8", "GP12"], "Paddel · 3 × Knopf")
+f4.wire("btnR1", "cblue", [(1020, tr4["GP9"]), (1082, tr4["GP9"]), (1082, 850), (890, 850), (890, 900)])
+f4.wire("btnR2", "cwhite", [(tb4["GP10"], TY4 + 250), (tb4["GP10"], 820), (920, 820), (920, 900)])
+f4.wire("btnR3", "cgrey", [(tb4["GP11"], TY4 + 250), (tb4["GP11"], 900)])
+f4.wire("btnL4", "cpink", [(tb4["GP12"], TY4 + 250), (tb4["GP12"], 805), (1190, 805), (1190, 900)])
 f4.wire("btnL1", "cblue", [(1020, tr4["GP6"]), (1046, tr4["GP6"]), (1046, 880), (1100, 880), (1100, 900)])
 f4.wire("btnL2", "cwhite", [(1020, tr4["GP7"]), (1058, tr4["GP7"]), (1058, 870), (1130, 870), (1130, 900)])
 f4.wire("btnL3", "cgrey", [(1020, tr4["GP8"]), (1070, tr4["GP8"]), (1070, 860), (1160, 860), (1160, 900)])
-f4.overlays.append('<text x="895" y="1024" class="chipsub" text-anchor="middle">Pin 4 neu: Knopf 3 (Bit 6)</text>')
+f4.overlays.append('<text x="1145" y="1024" class="chipsub" text-anchor="middle">Pin 4 neu: Knopf 3 (Bit 6)</text>')
 
 FIG4 = f4.svg("0 0 1440 1040", "Lenkrad-Verdrahtung: RP2040-Tiny, MCP2003, 3,3-V-Wandler, GND-Kabel innen und die vier Stecker nach außen")
 

@@ -69,8 +69,8 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <line x1="1240" y1="538" x2="1260" y2="538" class="lead"/><text x="1234" y="542" class="pinname" text-anchor="end">VSS 5</text>
 <rect x="330" y="400" width="140" height="110" rx="6" class="board psu"/><text x="400" y="390" class="boardname" text-anchor="middle">Stecker L-Analog</text>
 <rect x="330" y="600" width="140" height="110" rx="6" class="board psu"/><text x="400" y="590" class="boardname" text-anchor="middle">Stecker R-Analog</text>
-<rect x="815" y="900" width="190" height="70" rx="6" class="board psu"/><text x="895" y="992" class="boardname" text-anchor="middle">Stecker R-Tasten</text>
-<rect x="1065" y="900" width="160" height="70" rx="6" class="board psu"/><text x="1130" y="992" class="boardname" text-anchor="middle">Stecker L-Tasten</text><path d="M170,122 L190,122 L190,40 L1340,40 L1340,264 A6,6 0 0 1 1340,276 L1340,610" class="wc"/><path d="M170,122 L190,122 L190,40 L1340,40 L1340,264 A6,6 0 0 1 1340,276 L1340,610" class="w clin"/>
+<rect x="855" y="900" width="160" height="70" rx="6" class="board psu"/><text x="920" y="992" class="boardname" text-anchor="middle">Stecker R-Tasten</text>
+<rect x="1065" y="900" width="190" height="70" rx="6" class="board psu"/><text x="1145" y="992" class="boardname" text-anchor="middle">Stecker L-Tasten</text><path d="M170,122 L190,122 L190,40 L1340,40 L1340,264 A6,6 0 0 1 1340,276 L1340,610" class="wc"/><path d="M170,122 L190,122 L190,40 L1340,40 L1340,264 A6,6 0 0 1 1340,276 L1340,610" class="w clin"/>
 <path d="M170,160 L300,160" class="wc"/><path d="M170,160 L300,160" class="w c12"/>
 <path d="M170,198 L200,198 L200,270 L1380,270 L1380,800 L1200,800" class="wc"/><path d="M170,198 L200,198 L200,270 L1380,270 L1380,800 L1200,800" class="w cg"/>
 <path d="M300,160 L560,160" class="wc"/><path d="M300,160 L560,160" class="w c12"/>
@@ -102,13 +102,13 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <path d="M860,530 L680,530 L680,486 A6,6 0 0 0 680,474 L680,450 L470,450" class="wc"/><path d="M860,530 L680,530 L680,486 A6,6 0 0 0 680,474 L680,450 L470,450" class="w cbrown"/>
 <path d="M860,470 L720,470 L720,484 A6,6 0 0 1 720,496 L720,524 A6,6 0 0 1 720,536 L720,644 A6,6 0 0 1 720,656 L720,680 L470,680" class="wc"/><path d="M860,470 L720,470 L720,484 A6,6 0 0 1 720,496 L720,524 A6,6 0 0 1 720,536 L720,644 A6,6 0 0 1 720,656 L720,680 L470,680" class="w cpurple"/>
 <path d="M860,510 L740,510 L740,524 A6,6 0 0 1 740,536 L740,650 L470,650" class="wc"/><path d="M860,510 L740,510 L740,524 A6,6 0 0 1 740,536 L740,650 L470,650" class="w cbrown"/>
-<path d="M1020,590 L1082,590 L1082,754 A6,6 0 0 1 1082,766 L1082,850 L850,850 L850,900" class="wc"/><path d="M1020,590 L1082,590 L1082,754 A6,6 0 0 1 1082,766 L1082,850 L850,850 L850,900" class="w cblue"/>
-<path d="M975,630 L975,830 L880,830 L880,844 A6,6 0 0 1 880,856 L880,900" class="wc"/><path d="M975,630 L975,830 L880,830 L880,844 A6,6 0 0 1 880,856 L880,900" class="w cwhite"/>
-<path d="M950,630 L950,810 L910,810 L910,824 A6,6 0 0 1 910,836 L910,844 A6,6 0 0 1 910,856 L910,900" class="wc"/><path d="M950,630 L950,810 L910,810 L910,824 A6,6 0 0 1 910,836 L910,844 A6,6 0 0 1 910,856 L910,900" class="w cgrey"/>
-<path d="M925,630 L925,804 A6,6 0 0 1 925,816 L925,824 A6,6 0 0 1 925,836 L925,844 A6,6 0 0 1 925,856 L925,875 L940,875 L940,900" class="wc"/><path d="M925,630 L925,804 A6,6 0 0 1 925,816 L925,824 A6,6 0 0 1 925,836 L925,844 A6,6 0 0 1 925,856 L925,875 L940,875 L940,900" class="w cpink"/>
-<path d="M1020,530 L1046,530 L1046,544 A6,6 0 0 1 1046,556 L1046,564 A6,6 0 0 1 1046,576 L1046,584 A6,6 0 0 1 1046,596 L1046,754 A6,6 0 0 1 1046,766 L1046,844 A6,6 0 0 1 1046,856 L1046,880 L1100,880 L1100,900" class="wc"/><path d="M1020,530 L1046,530 L1046,544 A6,6 0 0 1 1046,556 L1046,564 A6,6 0 0 1 1046,576 L1046,584 A6,6 0 0 1 1046,596 L1046,754 A6,6 0 0 1 1046,766 L1046,844 A6,6 0 0 1 1046,856 L1046,880 L1100,880 L1100,900" class="w cblue"/>
-<path d="M1020,550 L1058,550 L1058,564 A6,6 0 0 1 1058,576 L1058,584 A6,6 0 0 1 1058,596 L1058,754 A6,6 0 0 1 1058,766 L1058,844 A6,6 0 0 1 1058,856 L1058,870 L1130,870 L1130,900" class="wc"/><path d="M1020,550 L1058,550 L1058,564 A6,6 0 0 1 1058,576 L1058,584 A6,6 0 0 1 1058,596 L1058,754 A6,6 0 0 1 1058,766 L1058,844 A6,6 0 0 1 1058,856 L1058,870 L1130,870 L1130,900" class="w cwhite"/>
-<path d="M1020,570 L1070,570 L1070,584 A6,6 0 0 1 1070,596 L1070,754 A6,6 0 0 1 1070,766 L1070,844 A6,6 0 0 1 1070,856 L1070,860 L1160,860 L1160,900" class="wc"/><path d="M1020,570 L1070,570 L1070,584 A6,6 0 0 1 1070,596 L1070,754 A6,6 0 0 1 1070,766 L1070,844 A6,6 0 0 1 1070,856 L1070,860 L1160,860 L1160,900" class="w cgrey"/><text x="160" y="126" class="lbl used" text-anchor="end">LIN · gelb</text>
+<path d="M1020,590 L1082,590 L1082,754 A6,6 0 0 1 1082,766 L1082,799 A6,6 0 0 1 1082,811 L1082,850 L890,850 L890,900" class="wc"/><path d="M1020,590 L1082,590 L1082,754 A6,6 0 0 1 1082,766 L1082,799 A6,6 0 0 1 1082,811 L1082,850 L890,850 L890,900" class="w cblue"/>
+<path d="M975,630 L975,799 A6,6 0 0 1 975,811 L975,820 L920,820 L920,844 A6,6 0 0 1 920,856 L920,900" class="wc"/><path d="M975,630 L975,799 A6,6 0 0 1 975,811 L975,820 L920,820 L920,844 A6,6 0 0 1 920,856 L920,900" class="w cwhite"/>
+<path d="M950,630 L950,799 A6,6 0 0 1 950,811 L950,814 A6,6 0 0 1 950,826 L950,844 A6,6 0 0 1 950,856 L950,900" class="wc"/><path d="M950,630 L950,799 A6,6 0 0 1 950,811 L950,814 A6,6 0 0 1 950,826 L950,844 A6,6 0 0 1 950,856 L950,900" class="w cgrey"/>
+<path d="M925,630 L925,805 L1190,805 L1190,900" class="wc"/><path d="M925,630 L925,805 L1190,805 L1190,900" class="w cpink"/>
+<path d="M1020,530 L1046,530 L1046,544 A6,6 0 0 1 1046,556 L1046,564 A6,6 0 0 1 1046,576 L1046,584 A6,6 0 0 1 1046,596 L1046,754 A6,6 0 0 1 1046,766 L1046,799 A6,6 0 0 1 1046,811 L1046,844 A6,6 0 0 1 1046,856 L1046,880 L1100,880 L1100,900" class="wc"/><path d="M1020,530 L1046,530 L1046,544 A6,6 0 0 1 1046,556 L1046,564 A6,6 0 0 1 1046,576 L1046,584 A6,6 0 0 1 1046,596 L1046,754 A6,6 0 0 1 1046,766 L1046,799 A6,6 0 0 1 1046,811 L1046,844 A6,6 0 0 1 1046,856 L1046,880 L1100,880 L1100,900" class="w cblue"/>
+<path d="M1020,550 L1058,550 L1058,564 A6,6 0 0 1 1058,576 L1058,584 A6,6 0 0 1 1058,596 L1058,754 A6,6 0 0 1 1058,766 L1058,799 A6,6 0 0 1 1058,811 L1058,844 A6,6 0 0 1 1058,856 L1058,870 L1130,870 L1130,900" class="wc"/><path d="M1020,550 L1058,550 L1058,564 A6,6 0 0 1 1058,576 L1058,584 A6,6 0 0 1 1058,596 L1058,754 A6,6 0 0 1 1058,766 L1058,799 A6,6 0 0 1 1058,811 L1058,844 A6,6 0 0 1 1058,856 L1058,870 L1130,870 L1130,900" class="w cwhite"/>
+<path d="M1020,570 L1070,570 L1070,584 A6,6 0 0 1 1070,596 L1070,754 A6,6 0 0 1 1070,766 L1070,799 A6,6 0 0 1 1070,811 L1070,844 A6,6 0 0 1 1070,856 L1070,860 L1160,860 L1160,900" class="wc"/><path d="M1020,570 L1070,570 L1070,584 A6,6 0 0 1 1070,596 L1070,754 A6,6 0 0 1 1070,766 L1070,799 A6,6 0 0 1 1070,811 L1070,844 A6,6 0 0 1 1070,856 L1070,860 L1160,860 L1160,900" class="w cgrey"/><text x="160" y="126" class="lbl used" text-anchor="end">LIN · gelb</text>
 <text x="160" y="164" class="lbl used" text-anchor="end">+12 V · rot</text>
 <text x="160" y="202" class="lbl used" text-anchor="end">GND · schwarz</text>
 <text x="100" y="250" class="chipsub" text-anchor="middle">+ Hülle = GND</text>
@@ -206,25 +206,25 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <rect x="465.5" y="675.5" width="9" height="9" class="pad used"/>
 <text x="460" y="684" class="lbl used" text-anchor="end">3 · Hall (GP29)</text>
 <text x="400" y="750" class="chipsub" text-anchor="middle">Masse der Stecker läuft außen separat</text>
-<rect x="845.5" y="895.5" width="9" height="9" class="pad used"/>
-<text x="850" y="922" class="lbl used" text-anchor="middle">1</text>
-<rect x="875.5" y="895.5" width="9" height="9" class="pad used"/>
-<text x="880" y="922" class="lbl used" text-anchor="middle">2</text>
-<rect x="905.5" y="895.5" width="9" height="9" class="pad used"/>
-<text x="910" y="922" class="lbl used" text-anchor="middle">3</text>
-<rect x="935.5" y="895.5" width="9" height="9" class="pad used"/>
-<text x="940" y="922" class="lbl used" text-anchor="middle">4</text>
-<text x="895" y="958" class="chipsub" text-anchor="middle">Paddel · 3 × Knopf</text>
-<text x="895" y="1010" class="val" text-anchor="middle">GP9 · GP10 · GP11 · GP12</text>
+<rect x="885.5" y="895.5" width="9" height="9" class="pad used"/>
+<text x="890" y="922" class="lbl used" text-anchor="middle">1</text>
+<rect x="915.5" y="895.5" width="9" height="9" class="pad used"/>
+<text x="920" y="922" class="lbl used" text-anchor="middle">2</text>
+<rect x="945.5" y="895.5" width="9" height="9" class="pad used"/>
+<text x="950" y="922" class="lbl used" text-anchor="middle">3</text>
+<text x="920" y="958" class="chipsub" text-anchor="middle">Paddel · Knopf · Knopf</text>
+<text x="920" y="1010" class="val" text-anchor="middle">GP9 · GP10 · GP11</text>
 <rect x="1095.5" y="895.5" width="9" height="9" class="pad used"/>
 <text x="1100" y="922" class="lbl used" text-anchor="middle">1</text>
 <rect x="1125.5" y="895.5" width="9" height="9" class="pad used"/>
 <text x="1130" y="922" class="lbl used" text-anchor="middle">2</text>
 <rect x="1155.5" y="895.5" width="9" height="9" class="pad used"/>
 <text x="1160" y="922" class="lbl used" text-anchor="middle">3</text>
-<text x="1130" y="958" class="chipsub" text-anchor="middle">Paddel · Knopf · Knopf</text>
-<text x="1130" y="1010" class="val" text-anchor="middle">GP6 · GP7 · GP8</text>
-<text x="895" y="1024" class="chipsub" text-anchor="middle">Pin 4 neu: Knopf 3 (Bit 6)</text><circle cx="340" cy="160" r="4" class="dot c12"/>
+<rect x="1185.5" y="895.5" width="9" height="9" class="pad used"/>
+<text x="1190" y="922" class="lbl used" text-anchor="middle">4</text>
+<text x="1145" y="958" class="chipsub" text-anchor="middle">Paddel · 3 × Knopf</text>
+<text x="1145" y="1010" class="val" text-anchor="middle">GP6 · GP7 · GP8 · GP12</text>
+<text x="1145" y="1024" class="chipsub" text-anchor="middle">Pin 4 neu: Knopf 3 (Bit 6)</text><circle cx="340" cy="160" r="4" class="dot c12"/>
 <circle cx="340" cy="270" r="4" class="dot cg"/>
 <circle cx="440" cy="160" r="4" class="dot c12"/>
 <circle cx="440" cy="270" r="4" class="dot cg"/>
