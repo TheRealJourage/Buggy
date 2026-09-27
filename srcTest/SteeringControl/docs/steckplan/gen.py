@@ -500,7 +500,7 @@ for n, y in tr4.items():
 for n, y in tl4.items():
     pad(f4, TX4, y, n, "start", dx=9, dy=4, used=n not in ("5V", "GP15", "GP14"))
 for n, x in tb4.items():
-    pad(f4, x, TY4 + 250, n.replace("GP", ""), "middle", dy=-10, used=n in ("GP10", "GP11"))
+    pad(f4, x, TY4 + 250, n.replace("GP", ""), "middle", dy=-10, used=n in ("GP10", "GP11", "GP12"))
 nc(f4, TX4 - 8, tl4["5V"], -1)
 f4.wire("gnd", "cg", [(TX4, tl4["GND"]), (800, tl4["GND"]), (800, G_TOP)]); f4.dot(800, G_TOP, "cg")
 
@@ -541,26 +541,29 @@ f4.wire("hallR", "cpurple", [(TX4, tl4["GP29"]), (720, tl4["GP29"]), (720, 680),
 f4.wire("potR", "cbrown", [(TX4, tl4["GP27"]), (740, tl4["GP27"]), (740, 650), (470, 650)])
 f4.overlays.append('<text x="400" y="750" class="chipsub" text-anchor="middle">Masse der Stecker läuft außen separat</text>')
 
-# button connectors (bottom): 1 paddle · 2 button · 3 button
-def button_conn(f, x0, side, gps):
-    f.under.append(f'<rect x="{x0 - 35}" y="900" width="130" height="70" rx="6" class="board psu"/>'
-                   f'<text x="{x0 + 30}" y="992" class="boardname" text-anchor="middle">Stecker {side}-Tasten</text>')
-    for i, txt in enumerate(["1", "2", "3"]):
-        pad(f, x0 + i * 30, 900, txt, "middle", dy=22, used=True)
-    f.overlays.append(f'<text x="{x0 + 30}" y="958" class="chipsub" text-anchor="middle">Paddel · Knopf · Knopf</text>')
-    f.overlays.append(f'<text x="{x0 + 30}" y="1010" class="val" text-anchor="middle">{" · ".join(gps)}</text>')
+# button connectors (bottom): 1 paddle · 2 button · 3 button (· 4 extra button)
+def button_conn(f, x0, side, gps, labels="Paddel · Knopf · Knopf"):
+    n = len(gps)
+    f.under.append(f'<rect x="{x0 - 35}" y="900" width="{70 + n * 30}" height="70" rx="6" class="board psu"/>'
+                   f'<text x="{x0 + (n - 1) * 15}" y="992" class="boardname" text-anchor="middle">Stecker {side}-Tasten</text>')
+    for i in range(n):
+        pad(f, x0 + i * 30, 900, str(i + 1), "middle", dy=22, used=True)
+    f.overlays.append(f'<text x="{x0 + (n - 1) * 15}" y="958" class="chipsub" text-anchor="middle">{labels}</text>')
+    f.overlays.append(f'<text x="{x0 + (n - 1) * 15}" y="1010" class="val" text-anchor="middle">{" · ".join(gps)}</text>')
 
 
-button_conn(f4, 890, "R", ["GP9", "GP10", "GP11"])
+button_conn(f4, 850, "R", ["GP9", "GP10", "GP11", "GP12"], "Paddel · 3 × Knopf")
 button_conn(f4, 1100, "L", ["GP6", "GP7", "GP8"])
-f4.wire("btnR1", "cblue", [(1020, tr4["GP9"]), (1082, tr4["GP9"]), (1082, 850), (890, 850), (890, 900)])
-f4.wire("btnR2", "cwhite", [(tb4["GP10"], TY4 + 250), (tb4["GP10"], 820), (920, 820), (920, 900)])
-f4.wire("btnR3", "cgrey", [(tb4["GP11"], TY4 + 250), (tb4["GP11"], 900)])
+f4.wire("btnR1", "cblue", [(1020, tr4["GP9"]), (1082, tr4["GP9"]), (1082, 850), (850, 850), (850, 900)])
+f4.wire("btnR2", "cwhite", [(tb4["GP10"], TY4 + 250), (tb4["GP10"], 830), (880, 830), (880, 900)])
+f4.wire("btnR3", "cgrey", [(tb4["GP11"], TY4 + 250), (tb4["GP11"], 810), (910, 810), (910, 900)])
+f4.wire("btnR4", "cpink", [(tb4["GP12"], TY4 + 250), (tb4["GP12"], 875), (940, 875), (940, 900)])
 f4.wire("btnL1", "cblue", [(1020, tr4["GP6"]), (1046, tr4["GP6"]), (1046, 880), (1100, 880), (1100, 900)])
 f4.wire("btnL2", "cwhite", [(1020, tr4["GP7"]), (1058, tr4["GP7"]), (1058, 870), (1130, 870), (1130, 900)])
 f4.wire("btnL3", "cgrey", [(1020, tr4["GP8"]), (1070, tr4["GP8"]), (1070, 860), (1160, 860), (1160, 900)])
+f4.overlays.append('<text x="895" y="1024" class="chipsub" text-anchor="middle">Pin 4 neu: Knopf 3 (Bit 6)</text>')
 
-FIG4 = f4.svg("0 0 1440 1030", "Lenkrad-Verdrahtung: RP2040-Tiny, MCP2003, 3,3-V-Wandler, GND-Kabel innen und die vier Stecker nach außen")
+FIG4 = f4.svg("0 0 1440 1040", "Lenkrad-Verdrahtung: RP2040-Tiny, MCP2003, 3,3-V-Wandler, GND-Kabel innen und die vier Stecker nach außen")
 
 html = open(os.path.join(os.path.dirname(OUT), "template.html"), encoding="utf-8").read()
 html = html.replace("{{FIG1}}", FIG1).replace("{{FIG2}}", FIG2).replace("{{FIG3}}", FIG3)
