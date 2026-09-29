@@ -188,8 +188,6 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <text x="1131" y="424" class="lbl" text-anchor="end">GP7</text>
 <rect x="1135.5" y="435.5" width="9" height="9" class="pad"/>
 <text x="1131" y="444" class="lbl" text-anchor="end">GP8</text>
-<rect x="1135.5" y="455.5" width="9" height="9" class="pad"/>
-<text x="1131" y="464" class="lbl" text-anchor="end">GP9</text>
 <rect x="975.5" y="275.5" width="9" height="9" class="pad"/>
 <text x="989" y="284" class="lbl" text-anchor="start">5V</text>
 <rect x="975.5" y="295.5" width="9" height="9" class="pad used"/>
@@ -208,14 +206,16 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <text x="989" y="424" class="lbl" text-anchor="start">GP15</text>
 <rect x="975.5" y="435.5" width="9" height="9" class="pad"/>
 <text x="989" y="444" class="lbl" text-anchor="start">GP14</text>
-<rect x="1015.5" y="495.5" width="9" height="9" class="pad"/>
-<text x="1020" y="490" class="lbl" text-anchor="middle">13</text>
-<rect x="1040.5" y="495.5" width="9" height="9" class="pad"/>
-<text x="1045" y="490" class="lbl" text-anchor="middle">12</text>
-<rect x="1065.5" y="495.5" width="9" height="9" class="pad"/>
-<text x="1070" y="490" class="lbl" text-anchor="middle">11</text>
-<rect x="1090.5" y="495.5" width="9" height="9" class="pad"/>
-<text x="1095" y="490" class="lbl" text-anchor="middle">10</text>
+<rect x="1005.5" y="495.5" width="9" height="9" class="pad"/>
+<text x="1010" y="490" class="lbl" text-anchor="middle">13</text>
+<rect x="1030.5" y="495.5" width="9" height="9" class="pad"/>
+<text x="1035" y="490" class="lbl" text-anchor="middle">12</text>
+<rect x="1055.5" y="495.5" width="9" height="9" class="pad"/>
+<text x="1060" y="490" class="lbl" text-anchor="middle">11</text>
+<rect x="1080.5" y="495.5" width="9" height="9" class="pad"/>
+<text x="1085" y="490" class="lbl" text-anchor="middle">10</text>
+<rect x="1105.5" y="495.5" width="9" height="9" class="pad"/>
+<text x="1110" y="490" class="lbl" text-anchor="middle">9</text>
 <rect x="451.0" y="576.0" width="38" height="12" rx="3" class="part rbody"/>
 <rect x="455.6" y="576.9" width="2.8" height="10.2" fill="#1f9d3a"/>
 <rect x="460.6" y="576.9" width="2.8" height="10.2" fill="#7a4a1f"/>

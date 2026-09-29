@@ -243,9 +243,9 @@ f1.under.append(f'<rect x="{TX0}" y="{TY0}" width="{TW}" height="{THt}" rx="10" 
                 f'<text x="{TX0 + 80}" y="{TY0 + 112}" class="porttxt" text-anchor="middle">RP2040</text>'
                 f'<text x="{TX0 + 80}" y="{TY0 - 28}" class="boardname" text-anchor="middle">RP2040-Tiny</text>'
                 f'<text x="{TX0 + 80}" y="{TY0 - 13}" class="chipsub" text-anchor="middle">Slave · USB über Adapter</text>')
-tiny_r = {f"GP{i}": TY0 + 30 + i * 20 for i in range(10)}
+tiny_r = {f"GP{i}": TY0 + 30 + i * 20 for i in range(9)}
 tiny_l = {n: TY0 + 30 + i * 20 for i, n in enumerate(["5V", "GND", "3V3", "GP29", "GP28", "GP27", "GP26", "GP15", "GP14"])}
-tiny_b = {n: TX0 + 40 + i * 25 for i, n in enumerate(["GP13", "GP12", "GP11", "GP10"])}
+tiny_b = {n: TX0 + 30 + i * 25 for i, n in enumerate(["GP13", "GP12", "GP11", "GP10", "GP9"])}
 for n, y in tiny_r.items():
     pad(f1, TX0 + TW, y, n, "end", dx=-9, dy=4, used=n in ("GP0", "GP1", "GP2"))
 for n, y in tiny_l.items():
@@ -329,15 +329,15 @@ f2.under.append(f'<rect x="{X0}" y="{Y0}" width="{W}" height="{H}" rx="10" class
                 f'<rect x="{X0 + 52}" y="{Y0 + 80}" width="56" height="56" rx="3" class="mcu"/>'
                 f'<text x="{X0 + 80}" y="{Y0 + 112}" class="porttxt" text-anchor="middle">RP2040</text>'
                 f'<text x="{X0 + 80}" y="{Y0 - 14}" class="boardname" text-anchor="middle">RP2040-Tiny</text>')
-r = {f"GP{i}": Y0 + 30 + i * 20 for i in range(10)}
+r = {f"GP{i}": Y0 + 30 + i * 20 for i in range(9)}
 l = {n: Y0 + 30 + i * 20 for i, n in enumerate(["5V", "GND", "3V3", "GP29", "GP28", "GP27", "GP26", "GP15", "GP14"])}
-b = {n: X0 + 40 + i * 25 for i, n in enumerate(["GP13", "GP12", "GP11", "GP10"])}
+b = {n: X0 + 30 + i * 25 for i, n in enumerate(["GP13", "GP12", "GP11", "GP10", "GP9"])}
 for n, y in r.items():
-    pad(f2, X0 + W, y, n, "end", dx=-9, dy=4, used=n in ("GP5", "GP6", "GP7", "GP8", "GP9"))
+    pad(f2, X0 + W, y, n, "end", dx=-9, dy=4, used=n in ("GP5", "GP6", "GP7", "GP8"))
 for n, y in l.items():
     pad(f2, X0, y, n, "start", dx=9, dy=4, used=n in ("GND", "3V3", "GP27", "GP26", "GP14"))
 for n, x in b.items():
-    pad(f2, x, Y0 + H, n.replace("GP", ""), "middle", dy=-10, used=n in ("GP10", "GP11", "GP12"))
+    pad(f2, x, Y0 + H, n.replace("GP", ""), "middle", dy=-10, used=n in ("GP9", "GP10", "GP11", "GP12"))
 
 GX = 880
 # GND: Tiny GND -> top bus -> buttons (right) and pots/LED (left)
@@ -345,11 +345,13 @@ f2.wire("gnd", "cg", [(X0, l["GND"]), (380, l["GND"]), (380, 80), (100, 80), (10
 f2.wire("gnd", "cg", [(380, 80), (GX, 80), (GX, 494)]); f2.dot(380, 80, "cg")
 f2.badge(240, 80, "G", "cg")
 f2.under.append('<text x="630" y="72" class="rail" text-anchor="middle">GND (vom GND-Pin des Tiny)</text>')
-# buttons B1..B4 on GP6..GP9 (right edge)
-for i, (gp, by) in enumerate((("GP6", 150), ("GP7", 200), ("GP8", 250), ("GP9", 300))):
+# buttons B1..B3 on GP6..GP8 (right edge), B4 on GP9 (bottom edge, rightmost pad)
+for i, (gp, by) in enumerate((("GP6", 150), ("GP7", 200), ("GP8", 250))):
     xv = 620 + i * 20
     f2.wire(f"b{i}", "cbtn", [(X0 + W, r[gp]), (xv, r[gp]), (xv, by), (GX, by)])
     button(f2, 760, by, f"Taster {i + 1}"); f2.dot(GX, by, "cg"); f2.badge(xv, by + (r[gp] - by) / 2, f"T{i + 1}", "cbtn")
+f2.wire("b3", "cbtn", [(b["GP9"], Y0 + H), (b["GP9"], 390), (680, 390), (680, 300), (GX, 300)])
+button(f2, 760, 300, "Taster 4"); f2.dot(GX, 300, "cg"); f2.badge(680, 345, "T4", "cbtn")
 # horn button on GP5
 f2.wire("horn", "cbtn", [(X0 + W, r["GP5"]), (600, r["GP5"]), (600, 110), (GX, 110)])
 button(f2, 760, 110, ""); f2.dot(GX, 110, "cg")
@@ -492,15 +494,15 @@ f4.under.append(f'<rect x="{TX4}" y="{TY4}" width="160" height="250" rx="10" cla
                 f'<rect x="{TX4 + 52}" y="{TY4 + 80}" width="56" height="56" rx="3" class="mcu"/>'
                 f'<text x="{TX4 + 80}" y="{TY4 + 112}" class="porttxt" text-anchor="middle">RP2040</text>'
                 f'<text x="{TX4 + 80}" y="{TY4 + 180}" class="boardname" text-anchor="middle">RP2040-Tiny</text>')
-tr4 = {f"GP{i}": TY4 + 30 + i * 20 for i in range(10)}
+tr4 = {f"GP{i}": TY4 + 30 + i * 20 for i in range(9)}
 tl4 = {n: TY4 + 30 + i * 20 for i, n in enumerate(["5V", "GND", "3V3", "GP29", "GP28", "GP27", "GP26", "GP15", "GP14"])}
-tb4 = {n: TX4 + 40 + i * 25 for i, n in enumerate(["GP13", "GP12", "GP11", "GP10"])}
+tb4 = {n: TX4 + 30 + i * 25 for i, n in enumerate(["GP13", "GP12", "GP11", "GP10", "GP9"])}
 for n, y in tr4.items():
     pad(f4, TX4 + 160, y, n, "end", dx=-9, dy=4, used=n not in ("GP3", "GP4"))
 for n, y in tl4.items():
     pad(f4, TX4, y, n, "start", dx=9, dy=4, used=n not in ("5V", "GP15", "GP14"))
 for n, x in tb4.items():
-    pad(f4, x, TY4 + 250, n.replace("GP", ""), "middle", dy=-10, used=n in ("GP10", "GP11", "GP12"))
+    pad(f4, x, TY4 + 250, n.replace("GP", ""), "middle", dy=-10, used=n in ("GP9", "GP10", "GP11", "GP12"))
 nc(f4, TX4 - 8, tl4["5V"], -1)
 f4.wire("gnd", "cg", [(TX4, tl4["GND"]), (800, tl4["GND"]), (800, G_TOP)]); f4.dot(800, G_TOP, "cg")
 
@@ -554,14 +556,14 @@ def button_conn(f, x0, side, gps, labels="Paddel · Knopf · Knopf"):
 
 button_conn(f4, 890, "R", ["GP9", "GP10", "GP11"])
 button_conn(f4, 1100, "L", ["GP6", "GP7", "GP8", "GP12"], "Paddel · 3 × Knopf")
-f4.wire("btnR1", "cblue", [(1020, tr4["GP9"]), (1082, tr4["GP9"]), (1082, 850), (890, 850), (890, 900)])
-f4.wire("btnR2", "cwhite", [(tb4["GP10"], TY4 + 250), (tb4["GP10"], 820), (920, 820), (920, 900)])
-f4.wire("btnR3", "cgrey", [(tb4["GP11"], TY4 + 250), (tb4["GP11"], 900)])
-f4.wire("btnL4", "cpink", [(tb4["GP12"], TY4 + 250), (tb4["GP12"], 805), (1190, 805), (1190, 900)])
+f4.wire("btnR1", "cblue", [(tb4["GP9"], TY4 + 250), (tb4["GP9"], 850), (890, 850), (890, 900)])
+f4.wire("btnR2", "cwhite", [(tb4["GP10"], TY4 + 250), (tb4["GP10"], 835), (920, 835), (920, 900)])
+f4.wire("btnR3", "cgrey", [(tb4["GP11"], TY4 + 250), (tb4["GP11"], 820), (950, 820), (950, 900)])
+f4.wire("btnL4", "cpurple", [(tb4["GP12"], TY4 + 250), (tb4["GP12"], 805), (1190, 805), (1190, 900)])
 f4.wire("btnL1", "cblue", [(1020, tr4["GP6"]), (1046, tr4["GP6"]), (1046, 880), (1100, 880), (1100, 900)])
-f4.wire("btnL2", "cwhite", [(1020, tr4["GP7"]), (1058, tr4["GP7"]), (1058, 870), (1130, 870), (1130, 900)])
-f4.wire("btnL3", "cgrey", [(1020, tr4["GP8"]), (1070, tr4["GP8"]), (1070, 860), (1160, 860), (1160, 900)])
-f4.overlays.append('<text x="1145" y="1024" class="chipsub" text-anchor="middle">Pin 4 neu: Knopf 3 (Bit 6)</text>')
+f4.wire("btnL2", "cgrey", [(1020, tr4["GP7"]), (1058, tr4["GP7"]), (1058, 870), (1130, 870), (1130, 900)])
+f4.wire("btnL3", "cwhite", [(1020, tr4["GP8"]), (1070, tr4["GP8"]), (1070, 860), (1160, 860), (1160, 900)])
+f4.overlays.append('<text x="1145" y="1024" class="chipsub" text-anchor="middle">Pin 4: Knopf 3 unten mittig (Bit 6)</text>')
 
 FIG4 = f4.svg("0 0 1440 1040", "Lenkrad-Verdrahtung: RP2040-Tiny, MCP2003, 3,3-V-Wandler, GND-Kabel innen und die vier Stecker nach außen")
 
