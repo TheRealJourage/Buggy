@@ -465,14 +465,14 @@ for yy, txt in ((122, "LIN · gelb"), (160, "+12 V · rot"), (198, "GND · schwa
 f4.overlays.append('<text x="100" y="250" class="chipsub" text-anchor="middle">+ Hülle = GND</text>')
 f4.wire("lin", "clin", [(170, 122), (190, 122), (190, 40), (1340, 40), (1340, 610)])
 f4.wire("12v", "c12", [(170, 160), (300, 160)])
-diode_right(f4, 240, 160, "D1 1N5819")
+diode_right(f4, 240, 160, "D1 1N4007")
 G_TOP, G_RIGHT, G_BOT = 270, 1380, 800
 f4.wire("gnd", "cg", [(170, 198), (200, 198), (200, G_TOP), (G_RIGHT, G_TOP), (G_RIGHT, G_BOT), (1200, G_BOT)])
 f4.under.append(f'<text x="1250" y="{G_TOP - 8}" class="rail" text-anchor="end">GND-Kabel innen (alles hier dran)</text>')
 
 # supply: VIN -> TVS, C1, P78BT3R3C10 -> 3V3 -> C2
 f4.wire("vin", "c12", [(300, 160), (560, 160)])
-f4.wire("vin", "c12", [(340, 160), (340, 205)]); f4.wire("gnd", "cg", [(340, 205), (340, G_TOP)]); f4.dot(340, 160, "c12"); f4.dot(340, G_TOP, "cg"); tvs_up(f4, 340, 205, "TVS P6KE33A")
+f4.wire("vin", "c12", [(340, 160), (340, 205)]); f4.wire("gnd", "cg", [(340, 205), (340, G_TOP)]); f4.dot(340, 160, "c12"); f4.dot(340, G_TOP, "cg"); tvs_up(f4, 340, 205, "TVS 1.5KE24A")
 f4.wire("vin", "c12", [(440, 160), (440, 205)]); f4.wire("gnd", "cg", [(440, 205), (440, G_TOP)]); f4.dot(440, 160, "c12"); f4.dot(440, G_TOP, "cg"); cap(f4, 440, 205, True, "C1 10 µF/50 V")
 f4.overlays.append('<text x="428" y="196" class="pol" text-anchor="end">+</text>')
 f4.under.append('<rect x="560" y="128" width="120" height="64" rx="4" class="chip"/>'

@@ -114,10 +114,10 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <text x="100" y="250" class="chipsub" text-anchor="middle">+ Hülle = GND</text>
 <rect x="231" y="151" width="18" height="18" class="cut"/>
 <polygon points="233,152 233,168 246,160" class="dio"/><line x1="247" y1="152" x2="247" y2="168" class="plate"/>
-<text x="240" y="146" class="val" text-anchor="middle">D1 1N5819</text>
+<text x="240" y="146" class="val" text-anchor="middle">D1 1N4007</text>
 <rect x="331" y="196" width="18" height="18" class="cut"/>
 <polygon points="332,212 348,212 340,199" class="dio"/><path d="M329,195 l3,3 h16 l3,3" class="plate" fill="none"/>
-<text x="354" y="209" class="val">TVS P6KE33A</text>
+<text x="354" y="209" class="val">TVS 1.5KE24A</text>
 <rect x="431" y="202" width="18" height="6" class="cut"/>
 <line x1="431" y1="202" x2="449" y2="202" class="plate"/><line x1="431" y1="208" x2="449" y2="208" class="plate"/>
 <text x="453" y="209" class="val" text-anchor="start">C1 10 µF/50 V</text>
