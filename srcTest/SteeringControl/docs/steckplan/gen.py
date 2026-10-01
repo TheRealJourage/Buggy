@@ -500,6 +500,8 @@ f4.under.append('<rect x="560" y="128" width="120" height="64" rx="4" class="chi
                 '<text x="566" y="176" class="pinname">1</text><text x="674" y="176" class="pinname" text-anchor="end">3</text>'
                 '<text x="620" y="186" class="pinname" text-anchor="middle">2</text>')
 f4.wire("gnd", "cg", [(620, 192), (620, G_TOP)]); f4.dot(620, G_TOP, "cg")
+f4.overlays.append('<circle cx="574" cy="139" r="3.5" fill="none" stroke="#eef2f1" stroke-width="1.5"/>'
+                   '<text x="560" y="120" class="val strong">○ Punkt = Pin 1 = VIN (12 V)</text>')
 f4.wire("3v3", "c33", [(680, 160), (840, 160), (840, 450), (860, 450)])
 f4.wire("3v3", "c33", [(760, 160), (760, 205)]); f4.wire("gnd", "cg", [(760, 205), (760, G_TOP)]); f4.dot(760, 160, "c33"); f4.dot(760, G_TOP, "cg"); cap(f4, 760, 205, True, "C2 100 µF/16 V")
 f4.overlays.append('<text x="748" y="196" class="pol" text-anchor="end">+</text>')
