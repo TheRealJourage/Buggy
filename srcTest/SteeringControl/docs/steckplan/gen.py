@@ -475,6 +475,24 @@ f4.under.append(f'<text x="1250" y="{G_TOP - 8}" class="rail" text-anchor="end">
 # supply: VIN -> TVS, C1, P78BT3R3C10 -> 3V3 -> C2
 f4.wire("vin", "c12", [(300, 160), (560, 160)])
 f4.wire("vin", "c12", [(340, 160), (340, 205)]); f4.wire("gnd", "cg", [(340, 205), (340, G_TOP)]); f4.dot(340, 160, "c12"); f4.dot(340, G_TOP, "cg"); tvs_up(f4, 340, 205, "TVS 1.5KE24A")
+
+
+def part_body(f, x, y, w, h, band):
+    """Physical axial part (black body, silver ring) as an orientation hint; band = 'right' or 'top'."""
+    f.overlays.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="3" fill="#262b2a"/>')
+    if band == "right":
+        f.overlays.append(f'<rect x="{x + w - 9}" y="{y}" width="5" height="{h}" fill="#d9dedc"/>')
+    else:
+        f.overlays.append(f'<rect x="{x}" y="{y + 4}" width="{w}" height="5" fill="#d9dedc"/>')
+
+
+# orientation hints: how the real parts look, ring = cathode
+f4.overlays.append('<line x1="210" y1="226" x2="292" y2="226" stroke="#7d8a85" stroke-width="2"/>')
+part_body(f4, 226, 219, 48, 14, "right")
+f4.overlays.append('<text x="250" y="250" class="val strong" text-anchor="middle">Ring → Wandler</text>')
+f4.overlays.append('<line x1="388" y1="232" x2="388" y2="268" stroke="#7d8a85" stroke-width="2"/>')
+part_body(f4, 381, 238, 14, 26, "top")
+f4.overlays.append('<text x="354" y="224" class="val strong">Ring oben</text>')
 f4.wire("vin", "c12", [(440, 160), (440, 205)]); f4.wire("gnd", "cg", [(440, 205), (440, G_TOP)]); f4.dot(440, 160, "c12"); f4.dot(440, G_TOP, "cg"); cap(f4, 440, 205, True, "C1 10 µF/50 V")
 f4.overlays.append('<text x="428" y="196" class="pol" text-anchor="end">+</text>')
 f4.under.append('<rect x="560" y="128" width="120" height="64" rx="4" class="chip"/>'

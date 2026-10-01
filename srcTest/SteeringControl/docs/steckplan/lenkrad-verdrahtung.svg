@@ -118,6 +118,14 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <rect x="331" y="196" width="18" height="18" class="cut"/>
 <polygon points="332,212 348,212 340,199" class="dio"/><path d="M329,195 l3,3 h16 l3,3" class="plate" fill="none"/>
 <text x="354" y="209" class="val">TVS 1.5KE24A</text>
+<line x1="210" y1="226" x2="292" y2="226" stroke="#7d8a85" stroke-width="2"/>
+<rect x="226" y="219" width="48" height="14" rx="3" fill="#262b2a"/>
+<rect x="265" y="219" width="5" height="14" fill="#d9dedc"/>
+<text x="250" y="250" class="val strong" text-anchor="middle">Ring → Wandler</text>
+<line x1="388" y1="232" x2="388" y2="268" stroke="#7d8a85" stroke-width="2"/>
+<rect x="381" y="238" width="14" height="26" rx="3" fill="#262b2a"/>
+<rect x="381" y="242" width="14" height="5" fill="#d9dedc"/>
+<text x="354" y="224" class="val strong">Ring oben</text>
 <rect x="431" y="202" width="18" height="6" class="cut"/>
 <line x1="431" y1="202" x2="449" y2="202" class="plate"/><line x1="431" y1="208" x2="449" y2="208" class="plate"/>
 <text x="453" y="209" class="val" text-anchor="start">C1 10 µF/50 V</text>
