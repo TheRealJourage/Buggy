@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Eingaben am RP2040-Tiny: 7 Taster, Hupe, 2 Potis, Status-LED" xmlns="http://www.w3.org/2000/svg"><style>svg{  --bg: #e9eeec;  --panel: #fbfcfc;  --ink: #16201c;  --muted: #5d6c66;  --faint: #d5ddda;  --accent: #0f6b62;  --board-uno: #d8ebee;  --board-uno-s: #2f7d8c;  --board-tiny: #dde4f4; --board-tiny-s: #3b5aa3;  --board-psu: #f1e3e1;  --board-psu-s: #9b4a3f;  --chip: #262b2a; --chip-ink: #eef2f1;  --w12: #d42a1e; --wg: #161616; --w5: #f07c00; --w33: #f07c00;  --wrx: #1f5fd1; --wtx: #1f9d3a; --wcs: #ffffff; --wlin: #f2c200;  --wsig: #ffffff; --wbtn: #f2c200; --wpot: #1f9d3a;  --wbrown: #8b5a2b; --wpurple: #8e44ad; --wgrey: #9aa0a6; --wpink: #e84393;  --casing: #7d8a85;  --led-g: #36b24a; --led-r: #e0413a;  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;  --sans: "Segoe UI", system-ui, sans-serif;}.c12 { --c: var(--w12); } .cg { --c: var(--wg); } .c5 { --c: var(--w5); } .c33 { --c: var(--w33); }
+<svg width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Eingaben am RP2040-Tiny: 8 Knöpfe wie gebaut, 2 Potis, Status-LED" xmlns="http://www.w3.org/2000/svg"><style>svg{  --bg: #e9eeec;  --panel: #fbfcfc;  --ink: #16201c;  --muted: #5d6c66;  --faint: #d5ddda;  --accent: #0f6b62;  --board-uno: #d8ebee;  --board-uno-s: #2f7d8c;  --board-tiny: #dde4f4; --board-tiny-s: #3b5aa3;  --board-psu: #f1e3e1;  --board-psu-s: #9b4a3f;  --chip: #262b2a; --chip-ink: #eef2f1;  --w12: #d42a1e; --wg: #161616; --w5: #f07c00; --w33: #f07c00;  --wrx: #1f5fd1; --wtx: #1f9d3a; --wcs: #ffffff; --wlin: #f2c200;  --wsig: #ffffff; --wbtn: #f2c200; --wpot: #1f9d3a;  --wbrown: #8b5a2b; --wpurple: #8e44ad; --wgrey: #9aa0a6; --wpink: #e84393;  --casing: #7d8a85;  --led-g: #36b24a; --led-r: #e0413a;  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;  --sans: "Segoe UI", system-ui, sans-serif;}.c12 { --c: var(--w12); } .cg { --c: var(--wg); } .c5 { --c: var(--w5); } .c33 { --c: var(--w33); }
 .crx { --c: var(--wrx); } .ctx { --c: var(--wtx); } .ccs { --c: var(--wcs); } .clin { --c: var(--wlin); }
 .csig { --c: var(--wsig); } .cbtn { --c: var(--wbtn); } .cpot { --c: var(--wpot); }
 .cbrown { --c: var(--wbrown); } .cpurple { --c: var(--wpurple); } .cgrey { --c: var(--wgrey); } .cblue { --c: var(--wrx); } .cwhite { --c: var(--wsig); } .cpink { --c: var(--wpink); }
@@ -61,9 +61,9 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <path d="M560,310 L660,310 L660,250 L880,250" class="wc"/><path d="M560,310 L660,310 L660,250 L880,250" class="w cbtn"/>
 <path d="M530,370 L530,390 L680,390 L680,300 L880,300" class="wc"/><path d="M530,370 L530,390 L680,390 L680,300 L880,300" class="w cbtn"/>
 <path d="M560,250 L600,250 L600,110 L880,110" class="wc"/><path d="M560,250 L600,250 L600,110 L880,110" class="w cbtn"/>
-<path d="M505,370 L505,410 L880,410" class="wc later"/><path d="M505,370 L505,410 L880,410" class="w cbtn later"/>
-<path d="M480,370 L480,452 L880,452" class="wc later"/><path d="M480,370 L480,452 L880,452" class="w cbtn later"/>
-<path d="M455,370 L455,494 L880,494" class="wc later"/><path d="M455,370 L455,494 L880,494" class="w cbtn later"/>
+<path d="M505,370 L505,410 L880,410" class="wc"/><path d="M505,370 L505,410 L880,410" class="w cbtn"/>
+<path d="M480,370 L480,452 L880,452" class="wc"/><path d="M480,370 L480,452 L880,452" class="w cbtn"/>
+<path d="M455,370 L455,494 L880,494" class="wc"/><path d="M455,370 L455,494 L880,494" class="w cbtn"/>
 <path d="M400,190 L300,190 L300,210 L150,210 L150,250" class="wc"/><path d="M400,190 L300,190 L300,210 L150,210 L150,250" class="w c33"/>
 <path d="M230,210 L230,250" class="wc"/><path d="M230,210 L230,250" class="w c33"/>
 <path d="M150,310 L150,400 L100,400" class="wc"/><path d="M150,310 L150,400 L100,400" class="w cg"/>
@@ -119,30 +119,30 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <text x="530" y="360" class="lbl used" text-anchor="middle">9</text>
 <rect x="744" y="136" width="32" height="20" class="cut"/>
 <circle cx="746" cy="150" r="2.5" class="term"/><circle cx="774" cy="150" r="2.5" class="term"/><line x1="746" y1="142" x2="774" y2="142" class="plate"/><line x1="760" y1="142" x2="760" y2="135" class="plate"/><line x1="755" y1="135" x2="765" y2="135" class="plate"/>
-<text x="760" y="170" class="val" text-anchor="middle">Taster 1</text>
+<text x="760" y="170" class="val" text-anchor="middle">Rot</text>
 <rect x="744" y="186" width="32" height="20" class="cut"/>
 <circle cx="746" cy="200" r="2.5" class="term"/><circle cx="774" cy="200" r="2.5" class="term"/><line x1="746" y1="192" x2="774" y2="192" class="plate"/><line x1="760" y1="192" x2="760" y2="185" class="plate"/><line x1="755" y1="185" x2="765" y2="185" class="plate"/>
-<text x="760" y="220" class="val" text-anchor="middle">Taster 2</text>
+<text x="760" y="220" class="val" text-anchor="middle">Plus</text>
 <rect x="744" y="236" width="32" height="20" class="cut"/>
 <circle cx="746" cy="250" r="2.5" class="term"/><circle cx="774" cy="250" r="2.5" class="term"/><line x1="746" y1="242" x2="774" y2="242" class="plate"/><line x1="760" y1="242" x2="760" y2="235" class="plate"/><line x1="755" y1="235" x2="765" y2="235" class="plate"/>
-<text x="760" y="270" class="val" text-anchor="middle">Taster 3</text>
+<text x="760" y="270" class="val" text-anchor="middle">Hupe</text>
 <rect x="744" y="286" width="32" height="20" class="cut"/>
 <circle cx="746" cy="300" r="2.5" class="term"/><circle cx="774" cy="300" r="2.5" class="term"/><line x1="746" y1="292" x2="774" y2="292" class="plate"/><line x1="760" y1="292" x2="760" y2="285" class="plate"/><line x1="755" y1="285" x2="765" y2="285" class="plate"/>
-<text x="760" y="320" class="val" text-anchor="middle">Taster 4</text>
+<text x="760" y="320" class="val" text-anchor="middle">Schwarz</text>
 <rect x="744" y="96" width="32" height="20" class="cut"/>
 <circle cx="746" cy="110" r="2.5" class="term"/><circle cx="774" cy="110" r="2.5" class="term"/><line x1="746" y1="102" x2="774" y2="102" class="plate"/><line x1="760" y1="102" x2="760" y2="95" class="plate"/><line x1="755" y1="95" x2="765" y2="95" class="plate"/>
 <text x="760" y="130" class="val" text-anchor="middle"></text>
-<text x="736" y="102" class="val strong" text-anchor="end">Hupe</text>
+<text x="736" y="102" class="val strong" text-anchor="end">Grün</text>
 <rect x="744" y="396" width="32" height="20" class="cut"/>
 <circle cx="746" cy="410" r="2.5" class="term"/><circle cx="774" cy="410" r="2.5" class="term"/><line x1="746" y1="402" x2="774" y2="402" class="plate"/><line x1="760" y1="402" x2="760" y2="395" class="plate"/><line x1="755" y1="395" x2="765" y2="395" class="plate"/>
-<text x="760" y="430" class="val" text-anchor="middle">Taster 5</text>
+<text x="760" y="430" class="val" text-anchor="middle">Blau</text>
 <rect x="744" y="438" width="32" height="20" class="cut"/>
 <circle cx="746" cy="452" r="2.5" class="term"/><circle cx="774" cy="452" r="2.5" class="term"/><line x1="746" y1="444" x2="774" y2="444" class="plate"/><line x1="760" y1="444" x2="760" y2="437" class="plate"/><line x1="755" y1="437" x2="765" y2="437" class="plate"/>
-<text x="760" y="472" class="val" text-anchor="middle">Taster 6</text>
+<text x="760" y="472" class="val" text-anchor="middle">Gelb</text>
 <rect x="744" y="480" width="32" height="20" class="cut"/>
 <circle cx="746" cy="494" r="2.5" class="term"/><circle cx="774" cy="494" r="2.5" class="term"/><line x1="746" y1="486" x2="774" y2="486" class="plate"/><line x1="760" y1="486" x2="760" y2="479" class="plate"/><line x1="755" y1="479" x2="765" y2="479" class="plate"/>
-<text x="760" y="514" class="val" text-anchor="middle">Taster 7</text>
-<text x="585" y="530" class="val strong" text-anchor="middle">T5–T7 später · GP10–12 offen lassen</text>
+<text x="760" y="514" class="val" text-anchor="middle">Minus</text>
+<text x="585" y="530" class="val strong" text-anchor="middle">Namen = Knöpfe wie gebaut (steering_buttons.h)</text>
 <rect x="143" y="250" width="14" height="60" class="part"/><polygon points="157,280.0 165,275.0 165,285.0" class="arrowhead"/>
 <text x="140" y="244" class="val" text-anchor="end">POT 1</text>
 <rect x="223" y="250" width="14" height="60" class="part"/><polygon points="237,280.0 245,275.0 245,285.0" class="arrowhead"/>
@@ -173,9 +173,9 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <g class="badge cbtn"><circle cx="660" cy="280.0" r="10"/><text x="660" y="284.0" text-anchor="middle">T3</text></g>
 <g class="badge cbtn"><circle cx="680" cy="345" r="10"/><text x="680" y="349" text-anchor="middle">T4</text></g>
 <g class="badge cbtn"><circle cx="600" cy="180" r="10"/><text x="600" y="184" text-anchor="middle">H</text></g>
-<g class="badge cbtn later"><circle cx="640" cy="410" r="10"/><text x="640" y="414" text-anchor="middle">T5</text></g>
-<g class="badge cbtn later"><circle cx="640" cy="452" r="10"/><text x="640" y="456" text-anchor="middle">T6</text></g>
-<g class="badge cbtn later"><circle cx="640" cy="494" r="10"/><text x="640" y="498" text-anchor="middle">T7</text></g>
+<g class="badge cbtn"><circle cx="640" cy="410" r="10"/><text x="640" y="414" text-anchor="middle">T5</text></g>
+<g class="badge cbtn"><circle cx="640" cy="452" r="10"/><text x="640" y="456" text-anchor="middle">T6</text></g>
+<g class="badge cbtn"><circle cx="640" cy="494" r="10"/><text x="640" y="498" text-anchor="middle">T7</text></g>
 <g class="badge c33"><circle cx="340" cy="190" r="10"/><text x="340" y="194" text-anchor="middle">V</text></g>
 <g class="badge cpot"><circle cx="330" cy="270" r="10"/><text x="330" y="274" text-anchor="middle">P1</text></g>
 <g class="badge cpot"><circle cx="330" cy="250" r="10"/><text x="330" y="254" text-anchor="middle">P2</text></g>

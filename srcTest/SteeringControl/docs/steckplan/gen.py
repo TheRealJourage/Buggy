@@ -349,21 +349,21 @@ f2.under.append('<text x="630" y="72" class="rail" text-anchor="middle">GND (vom
 for i, (gp, by) in enumerate((("GP6", 150), ("GP7", 200), ("GP8", 250))):
     xv = 620 + i * 20
     f2.wire(f"b{i}", "cbtn", [(X0 + W, r[gp]), (xv, r[gp]), (xv, by), (GX, by)])
-    button(f2, 760, by, f"Taster {i + 1}"); f2.dot(GX, by, "cg"); f2.badge(xv, by + (r[gp] - by) / 2, f"T{i + 1}", "cbtn")
+    button(f2, 760, by, ("Rot", "Plus", "Hupe")[i]); f2.dot(GX, by, "cg"); f2.badge(xv, by + (r[gp] - by) / 2, f"T{i + 1}", "cbtn")
 f2.wire("b3", "cbtn", [(b["GP9"], Y0 + H), (b["GP9"], 390), (680, 390), (680, 300), (GX, 300)])
-button(f2, 760, 300, "Taster 4"); f2.dot(GX, 300, "cg"); f2.badge(680, 345, "T4", "cbtn")
-# horn button on GP5
+button(f2, 760, 300, "Schwarz"); f2.dot(GX, 300, "cg"); f2.badge(680, 345, "T4", "cbtn")
+# GP5: green button as built (planned as horn)
 f2.wire("horn", "cbtn", [(X0 + W, r["GP5"]), (600, r["GP5"]), (600, 110), (GX, 110)])
 button(f2, 760, 110, ""); f2.dot(GX, 110, "cg")
-f2.overlays.append('<text x="736" y="102" class="val strong" text-anchor="end">Hupe</text>'); f2.badge(600, 180, "H", "cbtn")
+f2.overlays.append('<text x="736" y="102" class="val strong" text-anchor="end">Grün</text>'); f2.badge(600, 180, "H", "cbtn")
 # buttons B5..B7 on GP10..GP12 (bottom edge) - left out for the first test
 for i, (gp, by) in enumerate((("GP10", 410), ("GP11", 452), ("GP12", 494))):
-    f2.wire(f"b{i + 4}", "cbtn later", [(b[gp], Y0 + H), (b[gp], by), (GX, by)])
-    button(f2, 760, by, f"Taster {i + 5}")
+    f2.wire(f"b{i + 4}", "cbtn", [(b[gp], Y0 + H), (b[gp], by), (GX, by)])
+    button(f2, 760, by, ("Blau", "Gelb", "Minus")[i])
     if i < 2:
         f2.dot(GX, by, "cg")
-    f2.badge(640, by, f"T{i + 5}", "cbtn later")
-f2.overlays.append('<text x="585" y="530" class="val strong" text-anchor="middle">T5–T7 später · GP10–12 offen lassen</text>')
+    f2.badge(640, by, f"T{i + 5}", "cbtn")
+f2.overlays.append('<text x="585" y="530" class="val strong" text-anchor="middle">Namen = Knöpfe wie gebaut (steering_buttons.h)</text>')
 # pots: 3V3 bus, GND bus, wipers
 f2.wire("3v3", "c33", [(X0, l["3V3"]), (300, l["3V3"]), (300, 210), (150, 210), (150, 250)])
 f2.wire("3v3", "c33", [(230, 210), (230, 250)]); f2.dot(230, 210, "c33"); f2.badge(340, l["3V3"], "V", "c33")
@@ -379,7 +379,7 @@ f2.wire("gnd", "cg", [(200, 470), (100, 470)])
 resistor(f2, 290, 470, False, "220 Ω", 1); diode_left(f2, 200, 470, "Status-LED", "led-g")
 f2.badge(340, 420, "L", "csig")
 
-FIG2 = f2.svg("0 0 960 540", "Eingaben am RP2040-Tiny: 7 Taster, Hupe, 2 Potis, Status-LED")
+FIG2 = f2.svg("0 0 960 540", "Eingaben am RP2040-Tiny: 8 Knöpfe wie gebaut, 2 Potis, Status-LED")
 
 # ═══ FIGURE 3: steering-wheel supply test (12 V -> P78BT3R3C10 -> Tiny 3V3) ═══
 f3 = Fig()
@@ -469,7 +469,7 @@ f4.wire("lin", "clin", [(170, 122), (190, 122), (190, 40), (1340, 40), (1340, 61
 f4.wire("12v", "c12", [(170, 160), (300, 160)])
 diode_right(f4, 240, 160, "D1 1N4007")
 G_TOP, G_RIGHT, G_BOT = 270, 1380, 800
-f4.wire("gnd", "cg", [(170, 198), (200, 198), (200, G_TOP), (G_RIGHT, G_TOP), (G_RIGHT, G_BOT), (1200, G_BOT)])
+f4.wire("gnd", "cg", [(170, 198), (200, 198), (200, G_TOP), (G_RIGHT, G_TOP), (G_RIGHT, G_BOT), (1250, G_BOT)])
 f4.under.append(f'<text x="1250" y="{G_TOP - 8}" class="rail" text-anchor="end">GND-Kabel innen (alles hier dran)</text>')
 
 # supply: VIN -> TVS, C1, P78BT3R3C10 -> 3V3 -> C2
@@ -540,52 +540,135 @@ f4.wire("gnd", "cg", [(1260, 538), (1280, 538), (1280, G_BOT)]); f4.dot(1280, 53
 f4.wire("lin", "clin", [(1260, 502), (1340, 502)]); f4.dot(1340, 502, "clin")
 f4.wire("gnd", "cg", [(1340, 632), (1340, G_BOT)]); f4.wire("lin", "clin", [(1340, 610), (1340, 632)]); cap(f4, 1340, 632, True, "220 pF", -1); f4.dot(1340, G_BOT, "cg")
 
-# horn, wired inside the hub
-f4.wire("horn", "cpurple", [(1020, tr4["GP5"]), (1034, tr4["GP5"]), (1034, 760), (1200, 760)])
-f4.wire("gnd", "cg", [(1200, 760), (1200, G_BOT)])
-button(f4, 1130, 760, "Hupe (innen)"); f4.dot(1200, G_BOT, "cg")
+# ─── as built 2026-10-05: lib/steering_buttons/steering_buttons.h + Obsidian Lenkrad-Verdrahtung ───
+CAP = {"schwarz": "#111111", "gelb": "#f2c200", "blau": "#1f5fd1", "grün": "#1f9d3a",
+       "rot": "#d42a1e", "grau": "#9aa0a6"}
 
-# analog connectors (left side of the Tiny): 1 3V3 · 2 pot · 3 Hall, ground runs outside
+
+def gnd_sym(f, x, y, label="Hülle"):
+    """Ground symbol at the end of a wire coming from above."""
+    f.overlays.append(f'<path d="M{x - 9},{y} h18 M{x - 6},{y + 4} h12 M{x - 3},{y + 8} h6" class="plate"/>')
+    if label:
+        f.overlays.append(f'<text x="{x + 13}" y="{y + 8}" class="lbl" text-anchor="start">{label}</text>')
+
+
+def cap_btn(f, x, y, color, name, sym=""):
+    """Push button seen from the front: coloured cap on the wire."""
+    ink = "#161616" if color in ("gelb", "grau") else "#ffffff"
+    f.overlays.append(f'<circle cx="{x}" cy="{y}" r="19" fill="#d5ddda" stroke="#16201c" stroke-width="1.5"/>'
+                      f'<circle cx="{x}" cy="{y}" r="14" fill="{CAP[color]}" stroke="#16201c" stroke-width="1"/>')
+    if sym:
+        f.overlays.append(f'<text x="{x}" y="{y + 6}" font-size="17" font-weight="700" fill="{ink}" text-anchor="middle">{sym}</text>')
+    f.overlays.append(f'<rect x="{x - 24}" y="{y + 24}" width="48" height="15" class="cut"/>'
+                      f'<text x="{x}" y="{y + 35}" class="val strong" text-anchor="middle">{name}</text>')
+
+
+def pot_pic(f, x, y, label):
+    """Rotary pot from the front, three legs to the right at y-30 / y / y+30 (3,3 V · wiper · GND)."""
+    f.overlays.append(f'<rect x="{x - 28}" y="{y - 44}" width="56" height="88" rx="8" fill="#c9ced3" stroke="#16201c" stroke-width="1.5"/>'
+                      f'<circle cx="{x}" cy="{y}" r="17" fill="#3a3f45" stroke="#16201c" stroke-width="1"/>'
+                      f'<line x1="{x}" y1="{y}" x2="{x + 9}" y2="{y - 12}" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>')
+    for dy in (-30, 0, 30):
+        f.overlays.append(f'<rect x="{x + 28}" y="{y + dy - 2}" width="14" height="4" fill="#9aa0a6"/>')
+    f.overlays.append(f'<text x="{x}" y="{y - 52}" class="val strong" text-anchor="middle">{label}</text>'
+                      f'<text x="{x}" y="{y + 60}" class="lbl" text-anchor="middle">Mitte = Schleifer</text>')
+
+
+def hall_pic(f, x, y, label):
+    """Simube Hall paddle module, wires leave the top edge: red x+20 · blue x+50 · black x+80."""
+    f.overlays.append(f'<rect x="{x}" y="{y}" width="100" height="44" rx="6" fill="#c9a227" stroke="#16201c" stroke-width="1.5"/>'
+                      f'<text x="{x + 50}" y="{y + 20}" class="val strong" text-anchor="middle">Hall-Paddel</text>'
+                      f'<text x="{x + 50}" y="{y + 35}" class="lbl used" text-anchor="middle">{label}</text>')
+
+
+# horn, wired inside the hub (white, GP8); its other side goes onto the inner GND
+f4.wire("horn", "cwhite", [(1020, tr4["GP8"]), (1070, tr4["GP8"]), (1070, 760), (1250, 760)])
+f4.wire("gnd", "cg", [(1250, 760), (1250, G_BOT)]); f4.dot(1250, G_BOT, "cg")
+cap_btn(f4, 1160, 760, "grau", "Hupe ?", "H")
+f4.overlays.append('<text x="1160" y="730" class="lbl" text-anchor="middle">innen, weiß</text>')
+
+
+# analog connectors: inner pads right (to the Tiny), outer pads left (to pot + Hall)
 def analog_conn(f, y0, side, pot_gp, hall_gp):
     f.under.append(f'<rect x="330" y="{y0}" width="140" height="110" rx="6" class="board psu"/>'
-                   f'<text x="400" y="{y0 - 10}" class="boardname" text-anchor="middle">Stecker {side}-Analog</text>')
-    for i, txt in enumerate(["1 · 3,3 V", f"2 · Poti ({pot_gp})", f"3 · Hall ({hall_gp})"]):
+                   f'<text x="400" y="{y0 - 10}" class="boardname" text-anchor="middle">Stecker {side} · Analog</text>')
+    for i, txt in enumerate(["1 · 3,3 V", f"2 · Poti {pot_gp}", f"3 · Hall {hall_gp}"]):
         pad(f, 470, y0 + 20 + i * 30, txt, "end", dx=-10, dy=4, used=True)
+        pad(f, 330, y0 + 20 + i * 30, "", "start", used=True)
 
 
-analog_conn(f4, 400, "L", "GP26", "GP28")
-analog_conn(f4, 600, "R", "GP27", "GP29")
+for y0, side, pgp, hgp in ((400, "links", "GP26", "GP28"), (600, "rechts", "GP27", "GP29")):
+    analog_conn(f4, y0, side, pgp, hgp)
+    p1, p2, p3 = y0 + 20, y0 + 50, y0 + 80
+    pot_pic(f4, 100, p2, f"Poti {side}")
+    f4.wire(f"3v3{side}", "c33", [(330, p1), (142, p1)])
+    f4.wire(f"w{side}", "cbrown", [(330, p2), (142, p2)])
+    f4.wire(f"pg{side}", "cg", [(142, p3), (165, p3), (165, p3 + 18)]); gnd_sym(f4, 165, p3 + 18, "")
+    f4.overlays.append(f'<text x="152" y="{p3 + 27}" class="lbl" text-anchor="end">Hülle</text>')
+    hall_pic(f4, 170, y0 + 128, side)
+    f4.wire(f"hr{side}", "c12", [(300, p1), (300, y0 + 100), (190, y0 + 100), (190, y0 + 128)]); f4.dot(300, p1, "c33")
+    f4.wire(f"h{side}", "cblue", [(330, p3), (220, p3), (220, y0 + 128)])
+    f4.wire(f"hg{side}", "cg", [(250, y0 + 172), (250, y0 + 186)]); gnd_sym(f4, 250, y0 + 186)
+    f4.overlays.append(f'<text x="186" y="{y0 + 122}" class="lbl" text-anchor="end">rot</text>'
+                       f'<text x="224" y="{y0 + 122}" class="lbl" text-anchor="start">blau</text>'
+                       f'<text x="244" y="{y0 + 182}" class="lbl" text-anchor="end">schwarz</text>')
 f4.wire("3v3", "c33", [(840, 360), (560, 360), (560, 620), (470, 620)]); f4.dot(840, 360, "c33")
 f4.wire("3v3", "c33", [(560, 420), (470, 420)]); f4.dot(560, 420, "c33")
 f4.wire("hallL", "cpurple", [(TX4, tl4["GP28"]), (700, tl4["GP28"]), (700, 480), (470, 480)])
 f4.wire("potL", "cbrown", [(TX4, tl4["GP26"]), (680, tl4["GP26"]), (680, 450), (470, 450)])
 f4.wire("hallR", "cpurple", [(TX4, tl4["GP29"]), (720, tl4["GP29"]), (720, 680), (470, 680)])
 f4.wire("potR", "cbrown", [(TX4, tl4["GP27"]), (740, tl4["GP27"]), (740, 650), (470, 650)])
-f4.overlays.append('<text x="400" y="750" class="chipsub" text-anchor="middle">Masse der Stecker läuft außen separat</text>')
 
-# button connectors (bottom): 1 paddle · 2 button · 3 button (· 4 extra button)
-def button_conn(f, x0, side, gps, labels="Paddel · Knopf · Knopf"):
-    n = len(gps)
-    f.under.append(f'<rect x="{x0 - 35}" y="900" width="{70 + n * 30}" height="70" rx="6" class="board psu"/>'
-                   f'<text x="{x0 + (n - 1) * 15}" y="992" class="boardname" text-anchor="middle">Stecker {side}-Tasten</text>')
+# button connectors: inner pads on top, outer pads at the bottom, buttons below, hub body = GND
+BTN_Y, HULL_Y = 1062, 1150
+
+
+def button_conn(f, x0, title, pins):
+    """pins: (gpio, wire class, wire colour, cap colour, name, symbol, pin label)."""
+    n = len(pins)
+    f.under.append(f'<rect x="{x0 - 30}" y="900" width="{60 + (n - 1) * 50}" height="70" rx="6" class="board psu"/>')
+    f.overlays.append(f'<text x="{x0 - 38}" y="940" class="boardname" text-anchor="end">{title}</text>')
+    for i, (gp, cls, col, capc, name, sym, plab) in enumerate(pins):
+        x = x0 + i * 50
+        pad(f, x, 900, plab, "middle", dy=22, used=True)
+        pad(f, x, 970, "", "middle", used=True)
+        f.overlays.append(f'<text x="{x}" y="955" class="lbl" text-anchor="middle">{gp}</text>')
+        f.wire(f"o{gp}", cls, [(x, 970), (x, BTN_Y)])
+        f.wire("hull", "cg", [(x, BTN_Y), (x, HULL_Y)])
+        f.overlays.append(f'<text x="{x + 6}" y="1000" class="lbl" text-anchor="start">{col}</text>')
+        cap_btn(f, x, BTN_Y, capc, name, sym)
+
+
+LX, RX = 600, 1130
+button_conn(f4, LX, "Tasten links", [
+    ("GP9", "cblue", "blau", "schwarz", "Schwarz", "", "1?"),
+    ("GP11", "cgrey", "grau", "gelb", "Gelb", "", "2"),
+    ("GP10", "cwhite", "weiß", "blau", "Blau", "", "3?"),
+    ("GP12", "cpurple", "lila", "grau", "Minus", "−", "4")])
+button_conn(f4, RX, "Tasten rechts", [
+    ("GP5", "cpurple", "lila", "grün", "Grün", "", "1"),
+    ("GP6", "cblue", "blau", "rot", "Rot", "", "2"),
+    ("GP7", "cgrey", "grau", "grau", "Plus", "+", "3")])
+f4.overlays.append(f'<text x="{LX - 38}" y="956" class="chipsub" text-anchor="end">4-polig</text>'
+                   f'<text x="{RX - 38}" y="956" class="chipsub" text-anchor="end">3-polig</text>')
+f4.wire("hull", "cg", [(LX - 20, HULL_Y), (LX + 170, HULL_Y)])
+f4.wire("hull", "cg", [(RX - 20, HULL_Y), (RX + 120, HULL_Y)])
+for x0, n in ((LX, 4), (RX, 3)):
     for i in range(n):
-        pad(f, x0 + i * 30, 900, str(i + 1), "middle", dy=22, used=True)
-    f.overlays.append(f'<text x="{x0 + (n - 1) * 15}" y="958" class="chipsub" text-anchor="middle">{labels}</text>')
-    f.overlays.append(f'<text x="{x0 + (n - 1) * 15}" y="1010" class="val" text-anchor="middle">{" · ".join(gps)}</text>')
+        f4.dot(x0 + i * 50, HULL_Y, "cg")
+f4.overlays.append(f'<text x="{LX + 75}" y="{HULL_Y + 22}" class="chipsub" text-anchor="middle">Masse außen über die Lenkradhülle</text>'
+                   f'<text x="{RX + 50}" y="{HULL_Y + 22}" class="chipsub" text-anchor="middle">Masse außen über die Lenkradhülle</text>')
+# inner wires Tiny -> button connectors (colours as built)
+f4.wire("btnL1", "cblue", [(tb4["GP9"], TY4 + 250), (tb4["GP9"], 850), (LX, 850), (LX, 900)])
+f4.wire("btnL2", "cgrey", [(tb4["GP11"], TY4 + 250), (tb4["GP11"], 835), (LX + 50, 835), (LX + 50, 900)])
+f4.wire("btnL3", "cwhite", [(tb4["GP10"], TY4 + 250), (tb4["GP10"], 820), (LX + 100, 820), (LX + 100, 900)])
+f4.wire("btnL4", "cpurple", [(tb4["GP12"], TY4 + 250), (tb4["GP12"], 805), (LX + 150, 805), (LX + 150, 900)])
+f4.wire("btnR1", "cpurple", [(1020, tr4["GP5"]), (1034, tr4["GP5"]), (1034, 880), (RX, 880), (RX, 900)])
+f4.wire("btnR2", "cblue", [(1020, tr4["GP6"]), (1046, tr4["GP6"]), (1046, 870), (RX + 50, 870), (RX + 50, 900)])
+f4.wire("btnR3", "cgrey", [(1020, tr4["GP7"]), (1058, tr4["GP7"]), (1058, 860), (RX + 100, 860), (RX + 100, 900)])
+f4.overlays.append('<text x="40" y="1205" class="chipsub">? = noch nicht bestätigt: Stecker links Pin 1/3 (Schwarz/Blau) und ob die Hupe ohne Stecker innen sitzt. Tabelle: Obsidian Lenkrad-Verdrahtung</text>')
 
-
-button_conn(f4, 890, "R", ["GP9", "GP10", "GP11"])
-button_conn(f4, 1100, "L", ["GP6", "GP7", "GP8", "GP12"], "Paddel · 3 × Knopf")
-f4.wire("btnR1", "cblue", [(tb4["GP9"], TY4 + 250), (tb4["GP9"], 850), (890, 850), (890, 900)])
-f4.wire("btnR2", "cwhite", [(tb4["GP10"], TY4 + 250), (tb4["GP10"], 835), (920, 835), (920, 900)])
-f4.wire("btnR3", "cgrey", [(tb4["GP11"], TY4 + 250), (tb4["GP11"], 820), (950, 820), (950, 900)])
-f4.wire("btnL4", "cpurple", [(tb4["GP12"], TY4 + 250), (tb4["GP12"], 805), (1190, 805), (1190, 900)])
-f4.wire("btnL1", "cblue", [(1020, tr4["GP6"]), (1046, tr4["GP6"]), (1046, 880), (1100, 880), (1100, 900)])
-f4.wire("btnL2", "cgrey", [(1020, tr4["GP7"]), (1058, tr4["GP7"]), (1058, 870), (1130, 870), (1130, 900)])
-f4.wire("btnL3", "cwhite", [(1020, tr4["GP8"]), (1070, tr4["GP8"]), (1070, 860), (1160, 860), (1160, 900)])
-f4.overlays.append('<text x="1145" y="1024" class="chipsub" text-anchor="middle">Pin 4: Knopf 3 unten mittig (Bit 6)</text>')
-
-FIG4 = f4.svg("0 0 1440 1040", "Lenkrad-Verdrahtung: RP2040-Tiny, MCP2003, 3,3-V-Wandler, GND-Kabel innen und die vier Stecker nach außen")
+FIG4 = f4.svg("0 0 1440 1220", "Lenkrad-Verdrahtung wie gebaut: Wandler, RP2040-Tiny, MCP2003, vier Stecker, Potis, Hall-Paddel und alle Knöpfe")
 
 html = open(os.path.join(os.path.dirname(OUT), "template.html"), encoding="utf-8").read()
 html = html.replace("{{FIG1}}", FIG1).replace("{{FIG2}}", FIG2).replace("{{FIG3}}", FIG3)

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="1440" height="1040" viewBox="0 0 1440 1040" role="img" aria-label="Lenkrad-Verdrahtung: RP2040-Tiny, MCP2003, 3,3-V-Wandler, GND-Kabel innen und die vier Stecker nach außen" xmlns="http://www.w3.org/2000/svg"><style>svg{  --bg: #e9eeec;  --panel: #fbfcfc;  --ink: #16201c;  --muted: #5d6c66;  --faint: #d5ddda;  --accent: #0f6b62;  --board-uno: #d8ebee;  --board-uno-s: #2f7d8c;  --board-tiny: #dde4f4; --board-tiny-s: #3b5aa3;  --board-psu: #f1e3e1;  --board-psu-s: #9b4a3f;  --chip: #262b2a; --chip-ink: #eef2f1;  --w12: #d42a1e; --wg: #161616; --w5: #f07c00; --w33: #f07c00;  --wrx: #1f5fd1; --wtx: #1f9d3a; --wcs: #ffffff; --wlin: #f2c200;  --wsig: #ffffff; --wbtn: #f2c200; --wpot: #1f9d3a;  --wbrown: #8b5a2b; --wpurple: #8e44ad; --wgrey: #9aa0a6; --wpink: #e84393;  --casing: #7d8a85;  --led-g: #36b24a; --led-r: #e0413a;  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;  --sans: "Segoe UI", system-ui, sans-serif;}.c12 { --c: var(--w12); } .cg { --c: var(--wg); } .c5 { --c: var(--w5); } .c33 { --c: var(--w33); }
+<svg width="1440" height="1220" viewBox="0 0 1440 1220" role="img" aria-label="Lenkrad-Verdrahtung wie gebaut: Wandler, RP2040-Tiny, MCP2003, vier Stecker, Potis, Hall-Paddel und alle Knöpfe" xmlns="http://www.w3.org/2000/svg"><style>svg{  --bg: #e9eeec;  --panel: #fbfcfc;  --ink: #16201c;  --muted: #5d6c66;  --faint: #d5ddda;  --accent: #0f6b62;  --board-uno: #d8ebee;  --board-uno-s: #2f7d8c;  --board-tiny: #dde4f4; --board-tiny-s: #3b5aa3;  --board-psu: #f1e3e1;  --board-psu-s: #9b4a3f;  --chip: #262b2a; --chip-ink: #eef2f1;  --w12: #d42a1e; --wg: #161616; --w5: #f07c00; --w33: #f07c00;  --wrx: #1f5fd1; --wtx: #1f9d3a; --wcs: #ffffff; --wlin: #f2c200;  --wsig: #ffffff; --wbtn: #f2c200; --wpot: #1f9d3a;  --wbrown: #8b5a2b; --wpurple: #8e44ad; --wgrey: #9aa0a6; --wpink: #e84393;  --casing: #7d8a85;  --led-g: #36b24a; --led-r: #e0413a;  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;  --sans: "Segoe UI", system-ui, sans-serif;}.c12 { --c: var(--w12); } .cg { --c: var(--wg); } .c5 { --c: var(--w5); } .c33 { --c: var(--w33); }
 .crx { --c: var(--wrx); } .ctx { --c: var(--wtx); } .ccs { --c: var(--wcs); } .clin { --c: var(--wlin); }
 .csig { --c: var(--wsig); } .cbtn { --c: var(--wbtn); } .cpot { --c: var(--wpot); }
 .cbrown { --c: var(--wbrown); } .cpurple { --c: var(--wpurple); } .cgrey { --c: var(--wgrey); } .cblue { --c: var(--wrx); } .cwhite { --c: var(--wsig); } .cpink { --c: var(--wpink); }
@@ -53,7 +53,7 @@ svg .term.minus { stroke: var(--wg); stroke-width: 2.5; }
 svg .termtxt { font-size: 11px; font-weight: 600; }
 svg .arrowhead { fill: var(--ink); }
 svg .ncx { stroke: var(--w12); stroke-width: 2.4; }
-svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect width="1440" height="1040" fill="#fbfcfc"/><rect x="30" y="60" width="140" height="170" rx="6" class="board psu"/><text x="100" y="84" class="boardname" text-anchor="middle">Quick-Disconnect</text><text x="100" y="100" class="chipsub" text-anchor="middle">zum Fahrzeug</text>
+svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect width="1440" height="1220" fill="#fbfcfc"/><rect x="30" y="60" width="140" height="170" rx="6" class="board psu"/><text x="100" y="84" class="boardname" text-anchor="middle">Quick-Disconnect</text><text x="100" y="100" class="chipsub" text-anchor="middle">zum Fahrzeug</text>
 <text x="1250" y="262" class="rail" text-anchor="end">GND-Kabel innen (alles hier dran)</text>
 <rect x="560" y="128" width="120" height="64" rx="4" class="chip"/><text x="620" y="150" class="pinname" text-anchor="middle">P78BT3R3C10</text><text x="566" y="176" class="pinname">1</text><text x="674" y="176" class="pinname" text-anchor="end">3</text><text x="620" y="186" class="pinname" text-anchor="middle">2</text>
 <rect x="860" y="380" width="160" height="250" rx="10" class="board tiny"/><rect x="912" y="460" width="56" height="56" rx="3" class="mcu"/><text x="940" y="492" class="porttxt" text-anchor="middle">RP2040</text><text x="940" y="560" class="boardname" text-anchor="middle">RP2040-Tiny</text>
@@ -67,12 +67,12 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <line x1="1240" y1="466" x2="1260" y2="466" class="lead"/><text x="1234" y="470" class="pinname" text-anchor="end">VBB 7</text>
 <line x1="1240" y1="502" x2="1260" y2="502" class="lead"/><text x="1234" y="506" class="pinname" text-anchor="end">LBUS 6</text>
 <line x1="1240" y1="538" x2="1260" y2="538" class="lead"/><text x="1234" y="542" class="pinname" text-anchor="end">VSS 5</text>
-<rect x="330" y="400" width="140" height="110" rx="6" class="board psu"/><text x="400" y="390" class="boardname" text-anchor="middle">Stecker L-Analog</text>
-<rect x="330" y="600" width="140" height="110" rx="6" class="board psu"/><text x="400" y="590" class="boardname" text-anchor="middle">Stecker R-Analog</text>
-<rect x="855" y="900" width="160" height="70" rx="6" class="board psu"/><text x="920" y="992" class="boardname" text-anchor="middle">Stecker R-Tasten</text>
-<rect x="1065" y="900" width="190" height="70" rx="6" class="board psu"/><text x="1145" y="992" class="boardname" text-anchor="middle">Stecker L-Tasten</text><path d="M170,122 L190,122 L190,40 L1340,40 L1340,264 A6,6 0 0 1 1340,276 L1340,610" class="wc"/><path d="M170,122 L190,122 L190,40 L1340,40 L1340,264 A6,6 0 0 1 1340,276 L1340,610" class="w clin"/>
+<rect x="330" y="400" width="140" height="110" rx="6" class="board psu"/><text x="400" y="390" class="boardname" text-anchor="middle">Stecker links · Analog</text>
+<rect x="330" y="600" width="140" height="110" rx="6" class="board psu"/><text x="400" y="590" class="boardname" text-anchor="middle">Stecker rechts · Analog</text>
+<rect x="570" y="900" width="210" height="70" rx="6" class="board psu"/>
+<rect x="1100" y="900" width="160" height="70" rx="6" class="board psu"/><path d="M170,122 L190,122 L190,40 L1340,40 L1340,264 A6,6 0 0 1 1340,276 L1340,610" class="wc"/><path d="M170,122 L190,122 L190,40 L1340,40 L1340,264 A6,6 0 0 1 1340,276 L1340,610" class="w clin"/>
 <path d="M170,160 L300,160" class="wc"/><path d="M170,160 L300,160" class="w c12"/>
-<path d="M170,198 L200,198 L200,270 L1380,270 L1380,800 L1200,800" class="wc"/><path d="M170,198 L200,198 L200,270 L1380,270 L1380,800 L1200,800" class="w cg"/>
+<path d="M170,198 L200,198 L200,270 L1380,270 L1380,800 L1250,800" class="wc"/><path d="M170,198 L200,198 L200,270 L1380,270 L1380,800 L1250,800" class="w cg"/>
 <path d="M300,160 L560,160" class="wc"/><path d="M300,160 L560,160" class="w c12"/>
 <path d="M340,160 L340,205" class="wc"/><path d="M340,160 L340,205" class="w c12"/>
 <path d="M340,205 L340,270" class="wc"/><path d="M340,205 L340,270" class="w cg"/>
@@ -94,21 +94,49 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <path d="M1260,502 L1340,502" class="wc"/><path d="M1260,502 L1340,502" class="w clin"/>
 <path d="M1340,632 L1340,800" class="wc"/><path d="M1340,632 L1340,800" class="w cg"/>
 <path d="M1340,610 L1340,632" class="wc"/><path d="M1340,610 L1340,632" class="w clin"/>
-<path d="M1020,510 L1034,510 L1034,524 A6,6 0 0 1 1034,536 L1034,544 A6,6 0 0 1 1034,556 L1034,564 A6,6 0 0 1 1034,576 L1034,760 L1200,760" class="wc"/><path d="M1020,510 L1034,510 L1034,524 A6,6 0 0 1 1034,536 L1034,544 A6,6 0 0 1 1034,556 L1034,564 A6,6 0 0 1 1034,576 L1034,760 L1200,760" class="w cpurple"/>
-<path d="M1200,760 L1200,800" class="wc"/><path d="M1200,760 L1200,800" class="w cg"/>
+<path d="M1020,570 L1070,570 L1070,760 L1250,760" class="wc"/><path d="M1020,570 L1070,570 L1070,760 L1250,760" class="w cwhite"/>
+<path d="M1250,760 L1250,800" class="wc"/><path d="M1250,760 L1250,800" class="w cg"/>
+<path d="M330,420 L142,420" class="wc"/><path d="M330,420 L142,420" class="w c33"/>
+<path d="M330,450 L142,450" class="wc"/><path d="M330,450 L142,450" class="w cbrown"/>
+<path d="M142,480 L165,480 L165,498" class="wc"/><path d="M142,480 L165,480 L165,498" class="w cg"/>
+<path d="M300,420 L300,444 A6,6 0 0 1 300,456 L300,474 A6,6 0 0 1 300,486 L300,500 L190,500 L190,528" class="wc"/><path d="M300,420 L300,444 A6,6 0 0 1 300,456 L300,474 A6,6 0 0 1 300,486 L300,500 L190,500 L190,528" class="w c12"/>
+<path d="M330,480 L220,480 L220,494 A6,6 0 0 1 220,506 L220,528" class="wc"/><path d="M330,480 L220,480 L220,494 A6,6 0 0 1 220,506 L220,528" class="w cblue"/>
+<path d="M250,572 L250,586" class="wc"/><path d="M250,572 L250,586" class="w cg"/>
+<path d="M330,620 L142,620" class="wc"/><path d="M330,620 L142,620" class="w c33"/>
+<path d="M330,650 L142,650" class="wc"/><path d="M330,650 L142,650" class="w cbrown"/>
+<path d="M142,680 L165,680 L165,698" class="wc"/><path d="M142,680 L165,680 L165,698" class="w cg"/>
+<path d="M300,620 L300,644 A6,6 0 0 1 300,656 L300,674 A6,6 0 0 1 300,686 L300,700 L190,700 L190,728" class="wc"/><path d="M300,620 L300,644 A6,6 0 0 1 300,656 L300,674 A6,6 0 0 1 300,686 L300,700 L190,700 L190,728" class="w c12"/>
+<path d="M330,680 L220,680 L220,694 A6,6 0 0 1 220,706 L220,728" class="wc"/><path d="M330,680 L220,680 L220,694 A6,6 0 0 1 220,706 L220,728" class="w cblue"/>
+<path d="M250,772 L250,786" class="wc"/><path d="M250,772 L250,786" class="w cg"/>
 <path d="M840,360 L560,360 L560,444 A6,6 0 0 1 560,456 L560,474 A6,6 0 0 1 560,486 L560,620 L470,620" class="wc"/><path d="M840,360 L560,360 L560,444 A6,6 0 0 1 560,456 L560,474 A6,6 0 0 1 560,486 L560,620 L470,620" class="w c33"/>
 <path d="M560,420 L470,420" class="wc"/><path d="M560,420 L470,420" class="w c33"/>
 <path d="M860,490 L700,490 L700,480 L470,480" class="wc"/><path d="M860,490 L700,490 L700,480 L470,480" class="w cpurple"/>
 <path d="M860,530 L680,530 L680,486 A6,6 0 0 0 680,474 L680,450 L470,450" class="wc"/><path d="M860,530 L680,530 L680,486 A6,6 0 0 0 680,474 L680,450 L470,450" class="w cbrown"/>
 <path d="M860,470 L720,470 L720,484 A6,6 0 0 1 720,496 L720,524 A6,6 0 0 1 720,536 L720,644 A6,6 0 0 1 720,656 L720,680 L470,680" class="wc"/><path d="M860,470 L720,470 L720,484 A6,6 0 0 1 720,496 L720,524 A6,6 0 0 1 720,536 L720,644 A6,6 0 0 1 720,656 L720,680 L470,680" class="w cpurple"/>
 <path d="M860,510 L740,510 L740,524 A6,6 0 0 1 740,536 L740,650 L470,650" class="wc"/><path d="M860,510 L740,510 L740,524 A6,6 0 0 1 740,536 L740,650 L470,650" class="w cbrown"/>
-<path d="M990,630 L990,799 A6,6 0 0 1 990,811 L990,850 L890,850 L890,900" class="wc"/><path d="M990,630 L990,799 A6,6 0 0 1 990,811 L990,850 L890,850 L890,900" class="w cblue"/>
-<path d="M965,630 L965,799 A6,6 0 0 1 965,811 L965,835 L920,835 L920,844 A6,6 0 0 1 920,856 L920,900" class="wc"/><path d="M965,630 L965,799 A6,6 0 0 1 965,811 L965,835 L920,835 L920,844 A6,6 0 0 1 920,856 L920,900" class="w cwhite"/>
-<path d="M940,630 L940,799 A6,6 0 0 1 940,811 L940,820 L950,820 L950,829 A6,6 0 0 1 950,841 L950,844 A6,6 0 0 1 950,856 L950,900" class="wc"/><path d="M940,630 L940,799 A6,6 0 0 1 940,811 L940,820 L950,820 L950,829 A6,6 0 0 1 950,841 L950,844 A6,6 0 0 1 950,856 L950,900" class="w cgrey"/>
-<path d="M915,630 L915,805 L1190,805 L1190,900" class="wc"/><path d="M915,630 L915,805 L1190,805 L1190,900" class="w cpurple"/>
-<path d="M1020,530 L1046,530 L1046,544 A6,6 0 0 1 1046,556 L1046,564 A6,6 0 0 1 1046,576 L1046,754 A6,6 0 0 1 1046,766 L1046,799 A6,6 0 0 1 1046,811 L1046,880 L1100,880 L1100,900" class="wc"/><path d="M1020,530 L1046,530 L1046,544 A6,6 0 0 1 1046,556 L1046,564 A6,6 0 0 1 1046,576 L1046,754 A6,6 0 0 1 1046,766 L1046,799 A6,6 0 0 1 1046,811 L1046,880 L1100,880 L1100,900" class="w cblue"/>
-<path d="M1020,550 L1058,550 L1058,564 A6,6 0 0 1 1058,576 L1058,754 A6,6 0 0 1 1058,766 L1058,799 A6,6 0 0 1 1058,811 L1058,870 L1130,870 L1130,900" class="wc"/><path d="M1020,550 L1058,550 L1058,564 A6,6 0 0 1 1058,576 L1058,754 A6,6 0 0 1 1058,766 L1058,799 A6,6 0 0 1 1058,811 L1058,870 L1130,870 L1130,900" class="w cgrey"/>
-<path d="M1020,570 L1070,570 L1070,754 A6,6 0 0 1 1070,766 L1070,799 A6,6 0 0 1 1070,811 L1070,860 L1160,860 L1160,900" class="wc"/><path d="M1020,570 L1070,570 L1070,754 A6,6 0 0 1 1070,766 L1070,799 A6,6 0 0 1 1070,811 L1070,860 L1160,860 L1160,900" class="w cwhite"/><text x="160" y="126" class="lbl used" text-anchor="end">LIN · gelb</text>
+<path d="M600,970 L600,1062" class="wc"/><path d="M600,970 L600,1062" class="w cblue"/>
+<path d="M600,1062 L600,1150" class="wc"/><path d="M600,1062 L600,1150" class="w cg"/>
+<path d="M650,970 L650,1062" class="wc"/><path d="M650,970 L650,1062" class="w cgrey"/>
+<path d="M650,1062 L650,1150" class="wc"/><path d="M650,1062 L650,1150" class="w cg"/>
+<path d="M700,970 L700,1062" class="wc"/><path d="M700,970 L700,1062" class="w cwhite"/>
+<path d="M700,1062 L700,1150" class="wc"/><path d="M700,1062 L700,1150" class="w cg"/>
+<path d="M750,970 L750,1062" class="wc"/><path d="M750,970 L750,1062" class="w cpurple"/>
+<path d="M750,1062 L750,1150" class="wc"/><path d="M750,1062 L750,1150" class="w cg"/>
+<path d="M1130,970 L1130,1062" class="wc"/><path d="M1130,970 L1130,1062" class="w cpurple"/>
+<path d="M1130,1062 L1130,1150" class="wc"/><path d="M1130,1062 L1130,1150" class="w cg"/>
+<path d="M1180,970 L1180,1062" class="wc"/><path d="M1180,970 L1180,1062" class="w cblue"/>
+<path d="M1180,1062 L1180,1150" class="wc"/><path d="M1180,1062 L1180,1150" class="w cg"/>
+<path d="M1230,970 L1230,1062" class="wc"/><path d="M1230,970 L1230,1062" class="w cgrey"/>
+<path d="M1230,1062 L1230,1150" class="wc"/><path d="M1230,1062 L1230,1150" class="w cg"/>
+<path d="M580,1150 L770,1150" class="wc"/><path d="M580,1150 L770,1150" class="w cg"/>
+<path d="M1110,1150 L1250,1150" class="wc"/><path d="M1110,1150 L1250,1150" class="w cg"/>
+<path d="M990,630 L990,850 L600,850 L600,900" class="wc"/><path d="M990,630 L990,850 L600,850 L600,900" class="w cblue"/>
+<path d="M940,630 L940,814 A6,6 0 0 1 940,826 L940,835 L650,835 L650,844 A6,6 0 0 1 650,856 L650,900" class="wc"/><path d="M940,630 L940,814 A6,6 0 0 1 940,826 L940,835 L650,835 L650,844 A6,6 0 0 1 650,856 L650,900" class="w cgrey"/>
+<path d="M965,630 L965,820 L700,820 L700,829 A6,6 0 0 1 700,841 L700,844 A6,6 0 0 1 700,856 L700,900" class="wc"/><path d="M965,630 L965,820 L700,820 L700,829 A6,6 0 0 1 700,841 L700,844 A6,6 0 0 1 700,856 L700,900" class="w cwhite"/>
+<path d="M915,630 L915,805 L750,805 L750,814 A6,6 0 0 1 750,826 L750,829 A6,6 0 0 1 750,841 L750,844 A6,6 0 0 1 750,856 L750,900" class="wc"/><path d="M915,630 L915,805 L750,805 L750,814 A6,6 0 0 1 750,826 L750,829 A6,6 0 0 1 750,841 L750,844 A6,6 0 0 1 750,856 L750,900" class="w cpurple"/>
+<path d="M1020,510 L1034,510 L1034,524 A6,6 0 0 1 1034,536 L1034,544 A6,6 0 0 1 1034,556 L1034,564 A6,6 0 0 1 1034,576 L1034,880 L1130,880 L1130,900" class="wc"/><path d="M1020,510 L1034,510 L1034,524 A6,6 0 0 1 1034,536 L1034,544 A6,6 0 0 1 1034,556 L1034,564 A6,6 0 0 1 1034,576 L1034,880 L1130,880 L1130,900" class="w cpurple"/>
+<path d="M1020,530 L1046,530 L1046,544 A6,6 0 0 1 1046,556 L1046,564 A6,6 0 0 1 1046,576 L1046,870 L1180,870 L1180,900" class="wc"/><path d="M1020,530 L1046,530 L1046,544 A6,6 0 0 1 1046,556 L1046,564 A6,6 0 0 1 1046,576 L1046,870 L1180,870 L1180,900" class="w cblue"/>
+<path d="M1020,550 L1058,550 L1058,564 A6,6 0 0 1 1058,576 L1058,860 L1230,860 L1230,900" class="wc"/><path d="M1020,550 L1058,550 L1058,564 A6,6 0 0 1 1058,576 L1058,860 L1230,860 L1230,900" class="w cgrey"/><text x="160" y="126" class="lbl used" text-anchor="end">LIN · gelb</text>
 <text x="160" y="164" class="lbl used" text-anchor="end">+12 V · rot</text>
 <text x="160" y="202" class="lbl used" text-anchor="end">GND · schwarz</text>
 <text x="100" y="250" class="chipsub" text-anchor="middle">+ Hülle = GND</text>
@@ -199,41 +227,119 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <rect x="1331" y="629" width="18" height="6" class="cut"/>
 <line x1="1331" y1="629" x2="1349" y2="629" class="plate"/><line x1="1331" y1="635" x2="1349" y2="635" class="plate"/>
 <text x="1327" y="636" class="val" text-anchor="end">220 pF</text>
-<rect x="1114" y="746" width="32" height="20" class="cut"/>
-<circle cx="1116" cy="760" r="2.5" class="term"/><circle cx="1144" cy="760" r="2.5" class="term"/><line x1="1116" y1="752" x2="1144" y2="752" class="plate"/><line x1="1130" y1="752" x2="1130" y2="745" class="plate"/><line x1="1125" y1="745" x2="1135" y2="745" class="plate"/>
-<text x="1130" y="780" class="val" text-anchor="middle">Hupe (innen)</text>
+<circle cx="1160" cy="760" r="19" fill="#d5ddda" stroke="#16201c" stroke-width="1.5"/><circle cx="1160" cy="760" r="14" fill="#9aa0a6" stroke="#16201c" stroke-width="1"/>
+<text x="1160" y="766" font-size="17" font-weight="700" fill="#161616" text-anchor="middle">H</text>
+<rect x="1136" y="784" width="48" height="15" class="cut"/><text x="1160" y="795" class="val strong" text-anchor="middle">Hupe ?</text>
+<text x="1160" y="730" class="lbl" text-anchor="middle">innen, weiß</text>
 <rect x="465.5" y="415.5" width="9" height="9" class="pad used"/>
 <text x="460" y="424" class="lbl used" text-anchor="end">1 · 3,3 V</text>
+<rect x="325.5" y="415.5" width="9" height="9" class="pad used"/>
+<text x="330" y="420" class="lbl used" text-anchor="start"></text>
 <rect x="465.5" y="445.5" width="9" height="9" class="pad used"/>
-<text x="460" y="454" class="lbl used" text-anchor="end">2 · Poti (GP26)</text>
+<text x="460" y="454" class="lbl used" text-anchor="end">2 · Poti GP26</text>
+<rect x="325.5" y="445.5" width="9" height="9" class="pad used"/>
+<text x="330" y="450" class="lbl used" text-anchor="start"></text>
 <rect x="465.5" y="475.5" width="9" height="9" class="pad used"/>
-<text x="460" y="484" class="lbl used" text-anchor="end">3 · Hall (GP28)</text>
+<text x="460" y="484" class="lbl used" text-anchor="end">3 · Hall GP28</text>
+<rect x="325.5" y="475.5" width="9" height="9" class="pad used"/>
+<text x="330" y="480" class="lbl used" text-anchor="start"></text>
+<rect x="72" y="406" width="56" height="88" rx="8" fill="#c9ced3" stroke="#16201c" stroke-width="1.5"/><circle cx="100" cy="450" r="17" fill="#3a3f45" stroke="#16201c" stroke-width="1"/><line x1="100" y1="450" x2="109" y2="438" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+<rect x="128" y="418" width="14" height="4" fill="#9aa0a6"/>
+<rect x="128" y="448" width="14" height="4" fill="#9aa0a6"/>
+<rect x="128" y="478" width="14" height="4" fill="#9aa0a6"/>
+<text x="100" y="398" class="val strong" text-anchor="middle">Poti links</text><text x="100" y="510" class="lbl" text-anchor="middle">Mitte = Schleifer</text>
+<path d="M156,498 h18 M159,502 h12 M162,506 h6" class="plate"/>
+<text x="152" y="507" class="lbl" text-anchor="end">Hülle</text>
+<rect x="170" y="528" width="100" height="44" rx="6" fill="#c9a227" stroke="#16201c" stroke-width="1.5"/><text x="220" y="548" class="val strong" text-anchor="middle">Hall-Paddel</text><text x="220" y="563" class="lbl used" text-anchor="middle">links</text>
+<path d="M241,586 h18 M244,590 h12 M247,594 h6" class="plate"/>
+<text x="263" y="594" class="lbl" text-anchor="start">Hülle</text>
+<text x="186" y="522" class="lbl" text-anchor="end">rot</text><text x="224" y="522" class="lbl" text-anchor="start">blau</text><text x="244" y="582" class="lbl" text-anchor="end">schwarz</text>
 <rect x="465.5" y="615.5" width="9" height="9" class="pad used"/>
 <text x="460" y="624" class="lbl used" text-anchor="end">1 · 3,3 V</text>
+<rect x="325.5" y="615.5" width="9" height="9" class="pad used"/>
+<text x="330" y="620" class="lbl used" text-anchor="start"></text>
 <rect x="465.5" y="645.5" width="9" height="9" class="pad used"/>
-<text x="460" y="654" class="lbl used" text-anchor="end">2 · Poti (GP27)</text>
+<text x="460" y="654" class="lbl used" text-anchor="end">2 · Poti GP27</text>
+<rect x="325.5" y="645.5" width="9" height="9" class="pad used"/>
+<text x="330" y="650" class="lbl used" text-anchor="start"></text>
 <rect x="465.5" y="675.5" width="9" height="9" class="pad used"/>
-<text x="460" y="684" class="lbl used" text-anchor="end">3 · Hall (GP29)</text>
-<text x="400" y="750" class="chipsub" text-anchor="middle">Masse der Stecker läuft außen separat</text>
-<rect x="885.5" y="895.5" width="9" height="9" class="pad used"/>
-<text x="890" y="922" class="lbl used" text-anchor="middle">1</text>
-<rect x="915.5" y="895.5" width="9" height="9" class="pad used"/>
-<text x="920" y="922" class="lbl used" text-anchor="middle">2</text>
-<rect x="945.5" y="895.5" width="9" height="9" class="pad used"/>
-<text x="950" y="922" class="lbl used" text-anchor="middle">3</text>
-<text x="920" y="958" class="chipsub" text-anchor="middle">Paddel · Knopf · Knopf</text>
-<text x="920" y="1010" class="val" text-anchor="middle">GP9 · GP10 · GP11</text>
-<rect x="1095.5" y="895.5" width="9" height="9" class="pad used"/>
-<text x="1100" y="922" class="lbl used" text-anchor="middle">1</text>
+<text x="460" y="684" class="lbl used" text-anchor="end">3 · Hall GP29</text>
+<rect x="325.5" y="675.5" width="9" height="9" class="pad used"/>
+<text x="330" y="680" class="lbl used" text-anchor="start"></text>
+<rect x="72" y="606" width="56" height="88" rx="8" fill="#c9ced3" stroke="#16201c" stroke-width="1.5"/><circle cx="100" cy="650" r="17" fill="#3a3f45" stroke="#16201c" stroke-width="1"/><line x1="100" y1="650" x2="109" y2="638" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+<rect x="128" y="618" width="14" height="4" fill="#9aa0a6"/>
+<rect x="128" y="648" width="14" height="4" fill="#9aa0a6"/>
+<rect x="128" y="678" width="14" height="4" fill="#9aa0a6"/>
+<text x="100" y="598" class="val strong" text-anchor="middle">Poti rechts</text><text x="100" y="710" class="lbl" text-anchor="middle">Mitte = Schleifer</text>
+<path d="M156,698 h18 M159,702 h12 M162,706 h6" class="plate"/>
+<text x="152" y="707" class="lbl" text-anchor="end">Hülle</text>
+<rect x="170" y="728" width="100" height="44" rx="6" fill="#c9a227" stroke="#16201c" stroke-width="1.5"/><text x="220" y="748" class="val strong" text-anchor="middle">Hall-Paddel</text><text x="220" y="763" class="lbl used" text-anchor="middle">rechts</text>
+<path d="M241,786 h18 M244,790 h12 M247,794 h6" class="plate"/>
+<text x="263" y="794" class="lbl" text-anchor="start">Hülle</text>
+<text x="186" y="722" class="lbl" text-anchor="end">rot</text><text x="224" y="722" class="lbl" text-anchor="start">blau</text><text x="244" y="782" class="lbl" text-anchor="end">schwarz</text>
+<text x="562" y="940" class="boardname" text-anchor="end">Tasten links</text>
+<rect x="595.5" y="895.5" width="9" height="9" class="pad used"/>
+<text x="600" y="922" class="lbl used" text-anchor="middle">1?</text>
+<rect x="595.5" y="965.5" width="9" height="9" class="pad used"/>
+<text x="600" y="970" class="lbl used" text-anchor="middle"></text>
+<text x="600" y="955" class="lbl" text-anchor="middle">GP9</text>
+<text x="606" y="1000" class="lbl" text-anchor="start">blau</text>
+<circle cx="600" cy="1062" r="19" fill="#d5ddda" stroke="#16201c" stroke-width="1.5"/><circle cx="600" cy="1062" r="14" fill="#111111" stroke="#16201c" stroke-width="1"/>
+<rect x="576" y="1086" width="48" height="15" class="cut"/><text x="600" y="1097" class="val strong" text-anchor="middle">Schwarz</text>
+<rect x="645.5" y="895.5" width="9" height="9" class="pad used"/>
+<text x="650" y="922" class="lbl used" text-anchor="middle">2</text>
+<rect x="645.5" y="965.5" width="9" height="9" class="pad used"/>
+<text x="650" y="970" class="lbl used" text-anchor="middle"></text>
+<text x="650" y="955" class="lbl" text-anchor="middle">GP11</text>
+<text x="656" y="1000" class="lbl" text-anchor="start">grau</text>
+<circle cx="650" cy="1062" r="19" fill="#d5ddda" stroke="#16201c" stroke-width="1.5"/><circle cx="650" cy="1062" r="14" fill="#f2c200" stroke="#16201c" stroke-width="1"/>
+<rect x="626" y="1086" width="48" height="15" class="cut"/><text x="650" y="1097" class="val strong" text-anchor="middle">Gelb</text>
+<rect x="695.5" y="895.5" width="9" height="9" class="pad used"/>
+<text x="700" y="922" class="lbl used" text-anchor="middle">3?</text>
+<rect x="695.5" y="965.5" width="9" height="9" class="pad used"/>
+<text x="700" y="970" class="lbl used" text-anchor="middle"></text>
+<text x="700" y="955" class="lbl" text-anchor="middle">GP10</text>
+<text x="706" y="1000" class="lbl" text-anchor="start">weiß</text>
+<circle cx="700" cy="1062" r="19" fill="#d5ddda" stroke="#16201c" stroke-width="1.5"/><circle cx="700" cy="1062" r="14" fill="#1f5fd1" stroke="#16201c" stroke-width="1"/>
+<rect x="676" y="1086" width="48" height="15" class="cut"/><text x="700" y="1097" class="val strong" text-anchor="middle">Blau</text>
+<rect x="745.5" y="895.5" width="9" height="9" class="pad used"/>
+<text x="750" y="922" class="lbl used" text-anchor="middle">4</text>
+<rect x="745.5" y="965.5" width="9" height="9" class="pad used"/>
+<text x="750" y="970" class="lbl used" text-anchor="middle"></text>
+<text x="750" y="955" class="lbl" text-anchor="middle">GP12</text>
+<text x="756" y="1000" class="lbl" text-anchor="start">lila</text>
+<circle cx="750" cy="1062" r="19" fill="#d5ddda" stroke="#16201c" stroke-width="1.5"/><circle cx="750" cy="1062" r="14" fill="#9aa0a6" stroke="#16201c" stroke-width="1"/>
+<text x="750" y="1068" font-size="17" font-weight="700" fill="#161616" text-anchor="middle">−</text>
+<rect x="726" y="1086" width="48" height="15" class="cut"/><text x="750" y="1097" class="val strong" text-anchor="middle">Minus</text>
+<text x="1092" y="940" class="boardname" text-anchor="end">Tasten rechts</text>
 <rect x="1125.5" y="895.5" width="9" height="9" class="pad used"/>
-<text x="1130" y="922" class="lbl used" text-anchor="middle">2</text>
-<rect x="1155.5" y="895.5" width="9" height="9" class="pad used"/>
-<text x="1160" y="922" class="lbl used" text-anchor="middle">3</text>
-<rect x="1185.5" y="895.5" width="9" height="9" class="pad used"/>
-<text x="1190" y="922" class="lbl used" text-anchor="middle">4</text>
-<text x="1145" y="958" class="chipsub" text-anchor="middle">Paddel · 3 × Knopf</text>
-<text x="1145" y="1010" class="val" text-anchor="middle">GP6 · GP7 · GP8 · GP12</text>
-<text x="1145" y="1024" class="chipsub" text-anchor="middle">Pin 4: Knopf 3 unten mittig (Bit 6)</text><circle cx="340" cy="160" r="4" class="dot c12"/>
+<text x="1130" y="922" class="lbl used" text-anchor="middle">1</text>
+<rect x="1125.5" y="965.5" width="9" height="9" class="pad used"/>
+<text x="1130" y="970" class="lbl used" text-anchor="middle"></text>
+<text x="1130" y="955" class="lbl" text-anchor="middle">GP5</text>
+<text x="1136" y="1000" class="lbl" text-anchor="start">lila</text>
+<circle cx="1130" cy="1062" r="19" fill="#d5ddda" stroke="#16201c" stroke-width="1.5"/><circle cx="1130" cy="1062" r="14" fill="#1f9d3a" stroke="#16201c" stroke-width="1"/>
+<rect x="1106" y="1086" width="48" height="15" class="cut"/><text x="1130" y="1097" class="val strong" text-anchor="middle">Grün</text>
+<rect x="1175.5" y="895.5" width="9" height="9" class="pad used"/>
+<text x="1180" y="922" class="lbl used" text-anchor="middle">2</text>
+<rect x="1175.5" y="965.5" width="9" height="9" class="pad used"/>
+<text x="1180" y="970" class="lbl used" text-anchor="middle"></text>
+<text x="1180" y="955" class="lbl" text-anchor="middle">GP6</text>
+<text x="1186" y="1000" class="lbl" text-anchor="start">blau</text>
+<circle cx="1180" cy="1062" r="19" fill="#d5ddda" stroke="#16201c" stroke-width="1.5"/><circle cx="1180" cy="1062" r="14" fill="#d42a1e" stroke="#16201c" stroke-width="1"/>
+<rect x="1156" y="1086" width="48" height="15" class="cut"/><text x="1180" y="1097" class="val strong" text-anchor="middle">Rot</text>
+<rect x="1225.5" y="895.5" width="9" height="9" class="pad used"/>
+<text x="1230" y="922" class="lbl used" text-anchor="middle">3</text>
+<rect x="1225.5" y="965.5" width="9" height="9" class="pad used"/>
+<text x="1230" y="970" class="lbl used" text-anchor="middle"></text>
+<text x="1230" y="955" class="lbl" text-anchor="middle">GP7</text>
+<text x="1236" y="1000" class="lbl" text-anchor="start">grau</text>
+<circle cx="1230" cy="1062" r="19" fill="#d5ddda" stroke="#16201c" stroke-width="1.5"/><circle cx="1230" cy="1062" r="14" fill="#9aa0a6" stroke="#16201c" stroke-width="1"/>
+<text x="1230" y="1068" font-size="17" font-weight="700" fill="#161616" text-anchor="middle">+</text>
+<rect x="1206" y="1086" width="48" height="15" class="cut"/><text x="1230" y="1097" class="val strong" text-anchor="middle">Plus</text>
+<text x="562" y="956" class="chipsub" text-anchor="end">4-polig</text><text x="1092" y="956" class="chipsub" text-anchor="end">3-polig</text>
+<text x="675" y="1172" class="chipsub" text-anchor="middle">Masse außen über die Lenkradhülle</text><text x="1180" y="1172" class="chipsub" text-anchor="middle">Masse außen über die Lenkradhülle</text>
+<text x="40" y="1205" class="chipsub">? = noch nicht bestätigt: Stecker links Pin 1/3 (Schwarz/Blau) und ob die Hupe ohne Stecker innen sitzt. Tabelle: Obsidian Lenkrad-Verdrahtung</text><circle cx="340" cy="160" r="4" class="dot c12"/>
 <circle cx="340" cy="270" r="4" class="dot cg"/>
 <circle cx="440" cy="160" r="4" class="dot c12"/>
 <circle cx="440" cy="270" r="4" class="dot cg"/>
@@ -249,6 +355,15 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <circle cx="1280" cy="800" r="4" class="dot cg"/>
 <circle cx="1340" cy="502" r="4" class="dot clin"/>
 <circle cx="1340" cy="800" r="4" class="dot cg"/>
-<circle cx="1200" cy="800" r="4" class="dot cg"/>
+<circle cx="1250" cy="800" r="4" class="dot cg"/>
+<circle cx="300" cy="420" r="4" class="dot c33"/>
+<circle cx="300" cy="620" r="4" class="dot c33"/>
 <circle cx="840" cy="360" r="4" class="dot c33"/>
-<circle cx="560" cy="420" r="4" class="dot c33"/></svg>
+<circle cx="560" cy="420" r="4" class="dot c33"/>
+<circle cx="600" cy="1150" r="4" class="dot cg"/>
+<circle cx="650" cy="1150" r="4" class="dot cg"/>
+<circle cx="700" cy="1150" r="4" class="dot cg"/>
+<circle cx="750" cy="1150" r="4" class="dot cg"/>
+<circle cx="1130" cy="1150" r="4" class="dot cg"/>
+<circle cx="1180" cy="1150" r="4" class="dot cg"/>
+<circle cx="1230" cy="1150" r="4" class="dot cg"/></svg>
