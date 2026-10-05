@@ -584,7 +584,7 @@ def hall_pic(f, x, y, label):
 # horn, wired inside the hub (white, GP8); its other side goes onto the inner GND
 f4.wire("horn", "cwhite", [(1020, tr4["GP8"]), (1070, tr4["GP8"]), (1070, 760), (1250, 760)])
 f4.wire("gnd", "cg", [(1250, 760), (1250, G_BOT)]); f4.dot(1250, G_BOT, "cg")
-cap_btn(f4, 1160, 760, "grau", "Hupe ?", "H")
+cap_btn(f4, 1160, 760, "grau", "Hupe", "H")
 f4.overlays.append('<text x="1160" y="730" class="lbl" text-anchor="middle">innen, weiß</text>')
 
 
@@ -641,9 +641,9 @@ def button_conn(f, x0, title, pins):
 
 LX, RX = 600, 1130
 button_conn(f4, LX, "Tasten links", [
-    ("GP9", "cblue", "blau", "schwarz", "Schwarz", "", "1?"),
+    ("GP9", "cblue", "blau", "schwarz", "Schwarz", "", "1"),
     ("GP11", "cgrey", "grau", "gelb", "Gelb", "", "2"),
-    ("GP10", "cwhite", "weiß", "blau", "Blau", "", "3?"),
+    ("GP10", "cwhite", "weiß", "blau", "Blau", "", "3"),
     ("GP12", "cpurple", "lila", "grau", "Minus", "−", "4")])
 button_conn(f4, RX, "Tasten rechts", [
     ("GP5", "cpurple", "lila", "grün", "Grün", "", "1"),
@@ -666,7 +666,7 @@ f4.wire("btnL4", "cpurple", [(tb4["GP12"], TY4 + 250), (tb4["GP12"], 805), (LX +
 f4.wire("btnR1", "cpurple", [(1020, tr4["GP5"]), (1034, tr4["GP5"]), (1034, 880), (RX, 880), (RX, 900)])
 f4.wire("btnR2", "cblue", [(1020, tr4["GP6"]), (1046, tr4["GP6"]), (1046, 870), (RX + 50, 870), (RX + 50, 900)])
 f4.wire("btnR3", "cgrey", [(1020, tr4["GP7"]), (1058, tr4["GP7"]), (1058, 860), (RX + 100, 860), (RX + 100, 900)])
-f4.overlays.append('<text x="40" y="1205" class="chipsub">? = noch nicht bestätigt: Stecker links Pin 1/3 (Schwarz/Blau) und ob die Hupe ohne Stecker innen sitzt. Tabelle: Obsidian Lenkrad-Verdrahtung</text>')
+f4.overlays.append('<text x="40" y="1205" class="chipsub">Stand wie gebaut, am Lenkrad bestätigt 2026-10-05. Tabelle: Obsidian Lenkrad-Verdrahtung</text>')
 
 FIG4 = f4.svg("0 0 1440 1220", "Lenkrad-Verdrahtung wie gebaut: Wandler, RP2040-Tiny, MCP2003, vier Stecker, Potis, Hall-Paddel und alle Knöpfe")
 

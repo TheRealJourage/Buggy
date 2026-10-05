@@ -229,7 +229,7 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <text x="1327" y="636" class="val" text-anchor="end">220 pF</text>
 <circle cx="1160" cy="760" r="19" fill="#d5ddda" stroke="#16201c" stroke-width="1.5"/><circle cx="1160" cy="760" r="14" fill="#9aa0a6" stroke="#16201c" stroke-width="1"/>
 <text x="1160" y="766" font-size="17" font-weight="700" fill="#161616" text-anchor="middle">H</text>
-<rect x="1136" y="784" width="48" height="15" class="cut"/><text x="1160" y="795" class="val strong" text-anchor="middle">Hupe ?</text>
+<rect x="1136" y="784" width="48" height="15" class="cut"/><text x="1160" y="795" class="val strong" text-anchor="middle">Hupe</text>
 <text x="1160" y="730" class="lbl" text-anchor="middle">innen, weiß</text>
 <rect x="465.5" y="415.5" width="9" height="9" class="pad used"/>
 <text x="460" y="424" class="lbl used" text-anchor="end">1 · 3,3 V</text>
@@ -279,7 +279,7 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <text x="186" y="722" class="lbl" text-anchor="end">rot</text><text x="224" y="722" class="lbl" text-anchor="start">blau</text><text x="244" y="782" class="lbl" text-anchor="end">schwarz</text>
 <text x="562" y="940" class="boardname" text-anchor="end">Tasten links</text>
 <rect x="595.5" y="895.5" width="9" height="9" class="pad used"/>
-<text x="600" y="922" class="lbl used" text-anchor="middle">1?</text>
+<text x="600" y="922" class="lbl used" text-anchor="middle">1</text>
 <rect x="595.5" y="965.5" width="9" height="9" class="pad used"/>
 <text x="600" y="970" class="lbl used" text-anchor="middle"></text>
 <text x="600" y="955" class="lbl" text-anchor="middle">GP9</text>
@@ -295,7 +295,7 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <circle cx="650" cy="1062" r="19" fill="#d5ddda" stroke="#16201c" stroke-width="1.5"/><circle cx="650" cy="1062" r="14" fill="#f2c200" stroke="#16201c" stroke-width="1"/>
 <rect x="626" y="1086" width="48" height="15" class="cut"/><text x="650" y="1097" class="val strong" text-anchor="middle">Gelb</text>
 <rect x="695.5" y="895.5" width="9" height="9" class="pad used"/>
-<text x="700" y="922" class="lbl used" text-anchor="middle">3?</text>
+<text x="700" y="922" class="lbl used" text-anchor="middle">3</text>
 <rect x="695.5" y="965.5" width="9" height="9" class="pad used"/>
 <text x="700" y="970" class="lbl used" text-anchor="middle"></text>
 <text x="700" y="955" class="lbl" text-anchor="middle">GP10</text>
@@ -339,7 +339,7 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <rect x="1206" y="1086" width="48" height="15" class="cut"/><text x="1230" y="1097" class="val strong" text-anchor="middle">Plus</text>
 <text x="562" y="956" class="chipsub" text-anchor="end">4-polig</text><text x="1092" y="956" class="chipsub" text-anchor="end">3-polig</text>
 <text x="675" y="1172" class="chipsub" text-anchor="middle">Masse außen über die Lenkradhülle</text><text x="1180" y="1172" class="chipsub" text-anchor="middle">Masse außen über die Lenkradhülle</text>
-<text x="40" y="1205" class="chipsub">? = noch nicht bestätigt: Stecker links Pin 1/3 (Schwarz/Blau) und ob die Hupe ohne Stecker innen sitzt. Tabelle: Obsidian Lenkrad-Verdrahtung</text><circle cx="340" cy="160" r="4" class="dot c12"/>
+<text x="40" y="1205" class="chipsub">Stand wie gebaut, am Lenkrad bestätigt 2026-10-05. Tabelle: Obsidian Lenkrad-Verdrahtung</text><circle cx="340" cy="160" r="4" class="dot c12"/>
 <circle cx="340" cy="270" r="4" class="dot cg"/>
 <circle cx="440" cy="160" r="4" class="dot c12"/>
 <circle cx="440" cy="270" r="4" class="dot cg"/>
