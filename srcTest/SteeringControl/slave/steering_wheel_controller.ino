@@ -39,7 +39,7 @@
  * └─────────────┴──────────┴────────────────────────────────────────────┘
  *
  * INPUT HARDWARE:
- * - 7 buttons (GPIO6-12) + horn button (GPIO5): Active LOW, internal pull-ups enabled in code
+ * - 8 buttons (GPIO5-12, meaning in steering_buttons.h): Active LOW, internal pull-ups enabled in code
  * - 2x 10kΩ potentiometers:
  *   * POT1: Left→GND, Center→GPIO26 (ADC0), Right→3.3V, 100nF filter cap
  *   * POT2: Left→GND, Center→GPIO27 (ADC1), Right→3.3V, 100nF filter cap
@@ -72,10 +72,11 @@
  *
  * Author: Claude Code
  * Date: 2026-09-19
- * Version: 3.3 (horn button on GP5)
+ * Version: 3.4 (button bits as built, shared table in steering_buttons.h)
  ******************************************************************************/
 
 #include <steering_key.h>
+#include <steering_buttons.h>
 
 // ============================================================================
 // PIN DEFINITIONS
@@ -85,15 +86,7 @@
 #define LIN_CS_PIN        2     // Chip Select → MCP2003 Pin 2 (CS)
 #define STATUS_LED_PIN    14    // External status LED
 
-// Button pins (active LOW with internal pull-ups)
-#define BUTTON_1_PIN      6
-#define BUTTON_2_PIN      7
-#define BUTTON_3_PIN      8
-#define BUTTON_4_PIN      9
-#define BUTTON_5_PIN      10
-#define BUTTON_6_PIN      11
-#define BUTTON_7_PIN      12
-#define HORN_PIN          5     // Horn button, bit 7 of the button byte
+// Button pins and bit order: lib/steering_buttons/steering_buttons.h
 
 // Potentiometer pins (10kΩ, ideal for RP2040 ADC)
 #define POT_1_PIN         26    // ADC0 (GPIO26)
@@ -123,15 +116,13 @@
 // ============================================================================
 // GLOBAL VARIABLES
 // ============================================================================
-const uint8_t buttonPins[] = {BUTTON_1_PIN, BUTTON_2_PIN, BUTTON_3_PIN,
-                               BUTTON_4_PIN, BUTTON_5_PIN, BUTTON_6_PIN, BUTTON_7_PIN, HORN_PIN};
-#define BUTTON_COUNT      8
+#define BUTTON_COUNT      STEERING_BUTTON_COUNT
 const uint8_t adcPins[] = {POT_1_PIN, POT_2_PIN, HALL_1_PIN, HALL_2_PIN};
 #define ADC_CHANNELS      4
 #define RESPONSE_LEN      8               // Buttons + 4x 12 bit packed (6) + checksum
 
 // Button state tracking
-uint8_t buttonStates = 0;                 // Packed button states (bit 0-6 = buttons 1-7, bit 7 = horn)
+uint8_t buttonStates = 0;                 // Packed button states, bit = SteeringButton
 uint8_t lastButtonReading[BUTTON_COUNT] = {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH};
 unsigned long lastDebounceTime[BUTTON_COUNT] = {0, 0, 0, 0, 0, 0, 0, 0};
 
@@ -169,7 +160,7 @@ void setup() {
 
   // Configure button pins with internal pull-ups (active LOW)
   for (int i = 0; i < BUTTON_COUNT; i++) {
-    pinMode(buttonPins[i], INPUT_PULLUP);
+    pinMode(STEERING_BUTTON_GPIO[i], INPUT_PULLUP);
   }
 
   // Configure ADC for 12-bit resolution (0-4095)
@@ -216,15 +207,13 @@ void updateStatusLED() {
 }
 
 /*******************************************************************************
- * UPDATE BUTTONS - Read all 7 buttons and the horn with debouncing
+ * UPDATE BUTTONS - Read all 8 buttons with debouncing
  *
- * Button byte format:
- * Bit 7: Horn (1=pressed)
- * Bit 6-0: Buttons 7-1 (1=pressed, 0=released)
+ * Button byte: bit = SteeringButton (steering_buttons.h), 1 = pressed
  ******************************************************************************/
 void updateButtons() {
   for (int i = 0; i < BUTTON_COUNT; i++) {
-    uint8_t reading = digitalRead(buttonPins[i]);
+    uint8_t reading = digitalRead(STEERING_BUTTON_GPIO[i]);
 
     // Detect button state change
     if (reading != lastButtonReading[i]) {

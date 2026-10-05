@@ -59,7 +59,7 @@
  * - Pin 13 (Error LED): Blinks on LIN errors (timeout, checksum fail)
  *
  * SERIAL OUTPUT (115200 baud when USB connected):
- * - Button states: "BTN: [1][2][3][4][5][6][7]"
+ * - Button states: names of the pressed buttons, e.g. "BTN: hupe gelb"
  * - ADC0: Raw value (0-4095) and percentage (0-100%)
  * - ADC1: Raw value (0-4095) and percentage (0-100%)
  * - HALL1/HALL2: Raw value and percentage of the calibrated travel
@@ -70,10 +70,11 @@
  *
  * Author: Claude Code
  * Date: 2026-09-19
- * Version: 3.3 (horn button, key challenge-response, Hall hold)
+ * Version: 3.4 (button bits as built, shared table in steering_buttons.h)
  ******************************************************************************/
 
 #include <steering_key.h>
+#include <steering_buttons.h>
 
 // ============================================================================
 // PIN DEFINITIONS
@@ -121,7 +122,7 @@
 // DATA STRUCTURE
 // ============================================================================
 struct SteeringData {
-  uint8_t buttons;                        // Buttons 1-7 (bits 0-6), horn (bit 7)
+  uint8_t buttons;                        // Bit = SteeringButton (steering_buttons.h)
   uint16_t pot1;                          // 12-bit ADC value (0-4095)
   uint16_t pot2;                          // 12-bit ADC value (0-4095)
   uint16_t hall1;                         // 12-bit ADC value (0-4095)
@@ -390,7 +391,7 @@ void sendBreakField() {
  * │ Buttons │ POT1 + POT2 (2x12 bit)│ HALL1 + HALL2         │ Checksum │
  * └─────────┴───────────────────────┴───────────────────────┴──────────┘
  *
- * Button byte: Bits 0-6 = Buttons 1-7, bit 7 = horn (1=pressed, 0=released)
+ * Button byte: bit = SteeringButton (steering_buttons.h), 1 = pressed
  * Two 12-bit values A, B packed into 3 bytes:
  *   b0 = A[11:4], b1 = A[3:0] << 4 | B[11:8], b2 = B[7:0]
  ******************************************************************************/
@@ -429,17 +430,14 @@ uint8_t calculateChecksum(uint8_t* data, uint8_t length) {
 void printSteeringData() {
 #ifdef LIN_DEBUG_PRINT
   // Print button states
-  Serial.print(F("BTN: "));
-  for (int i = 0; i < 7; i++) {
-    if (currentData.buttons & (1 << i)) {
-      Serial.print(F("["));
-      Serial.print(i + 1);
-      Serial.print(F("]"));
-    } else {
-      Serial.print(F("[ ]"));
+  Serial.print(F("BTN:"));
+  if (currentData.buttons == 0) Serial.print(F(" -"));
+  for (uint8_t i = 0; i < STEERING_BUTTON_COUNT; i++) {
+    if (isButtonPressed((SteeringButton)i)) {
+      Serial.print(' ');
+      Serial.print(STEERING_BUTTON_NAME[i]);
     }
   }
-  Serial.print(isHornPressed() ? F(" HORN") : F(" ----"));
 
   // Print ADC0 (raw value and percentage)
   Serial.print(F(" | POT1: "));
@@ -507,14 +505,12 @@ void updateErrorLED() {
  * UTILITY FUNCTIONS - Access current data
  ******************************************************************************/
 
-// Check if specific button is pressed (1-7)
-bool isButtonPressed(uint8_t buttonNum) {
-  if (buttonNum < 1 || buttonNum > 7) return false;
-  return (currentData.buttons & (1 << (buttonNum - 1))) != 0;
+bool isButtonPressed(SteeringButton button) {
+  return (currentData.buttons & (1 << button)) != 0;
 }
 
 bool isHornPressed() {
-  return (currentData.buttons & 0x80) != 0;
+  return isButtonPressed(BTN_HORN);
 }
 
 // Get potentiometer value (0-4095)
