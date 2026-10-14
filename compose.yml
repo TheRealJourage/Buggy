@@ -1,0 +1,9 @@
+services:
+  viewer:
+    image: docker.io/library/nginx:alpine
+    volumes:
+      - ./viewer:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "8112:80"
+    restart: unless-stopped

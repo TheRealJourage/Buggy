@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <title>Buggy – pneumatische Gangschaltung 3D</title>
+  <style>
+    html, body { margin: 0; overflow: hidden; background: #202228; font: 13px system-ui, sans-serif; color: #ddd; }
+    .panel { position: fixed; padding: 10px 12px; background: rgba(0,0,0,0.65); border-radius: 6px; }
+    #left { top: 12px; left: 12px; width: 290px; }
+    #right { top: 12px; right: 12px; width: 300px; }
+    #hover { bottom: 12px; left: 12px; max-width: 420px; display: none; }
+    button { background: #333; color: #ddd; border: 1px solid #555; padding: 4px 9px; cursor: pointer; border-radius: 3px; }
+    button:hover { background: #444; }
+    button.active { background: #4f6b8a; color: #fff; }
+    #gears button { min-width: 30px; font-weight: 600; }
+    label { display: block; margin-top: 5px; }
+    input[type="range"] { width: 150px; vertical-align: middle; }
+    h3 { margin: 8px 0 4px; font-size: 12px; text-transform: uppercase; color: #8ab; letter-spacing: .05em; }
+    .states span { display: inline-block; margin: 2px; padding: 2px 5px; border-radius: 3px; background: #2a2d33; font-size: 11px; }
+    .states span.on { background: #c9822b; color: #000; font-weight: 700; }
+    table { border-collapse: collapse; width: 100%; }
+    td { padding: 1px 4px; }
+    .v-ext { color: #ff9a3c; } .v-ret { color: #3cc8ff; } .v-vent { color: #888; }
+    .s-on { color: #5f5; font-weight: 700; } .s-off { color: #555; }
+    #log { font: 11px ui-monospace, monospace; max-height: 150px; overflow-y: auto; white-space: pre; color: #aaa; }
+    #msg { color: #ff6b6b; font-weight: 700; min-height: 1em; }
+    .note { color: #999; font-size: 11px; margin-top: 6px; }
+    canvas.hud { display: block; margin-top: 4px; background: #15171b; border-radius: 4px; }
+  </style>
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three.module.js" } }
+  </script>
+</head>
+<body>
+  <div id="left" class="panel">
+    <b>Buggy – pneumatische Gangschaltung</b>
+    <h3>Gang wählen</h3>
+    <div id="gears"></div>
+    <div style="margin-top:6px">
+      <button id="minus">− runter</button>
+      <button id="plus">+ hoch</button>
+      <span class="note">Kupplung: manuell treten</span>
+    </div>
+    <h3>Simulation</h3>
+    <label>Zeitlupe <input id="timeScale" type="range" min="0.02" max="1" step="0.01" value="0.1" /> <span id="timeScaleV"></span></label>
+    <label>G-Geschwindigkeit (Drossel) <input id="gSpeed" type="range" min="100" max="700" step="10" /> <span id="gSpeedV"></span></label>
+    <label>G Auslaufen (Reibung) <input id="gDecel" type="range" min="1000" max="10000" step="100" /> <span id="gDecelV"></span></label>
+    <label>G drucklos ab Fenster + <input id="ventOffset" type="range" min="0" max="5" step="0.5" /> <span id="ventOffsetV"></span></label>
+    <label><input id="labels" type="checkbox" checked /> Beschriftungen</label>
+    <label><input id="supply" type="checkbox" checked /> Versorgung (Kompressor, Tank) zeigen</label>
+    <button id="reset" style="margin-top:6px">Zurücksetzen</button>
+    <div class="note">Schematisch: Teile nach Airtec-Katalog (HM-20, M-04-533, ZS-6701), Hübe aus alten Notizen (G 64, A 14, B 34 mm), Tank/Kompressor geschätzt. Gassenmodell 1/2 · 3/4 · 5/R – Lage von R noch nicht geprüft.</div>
+  </div>
+
+  <div id="right" class="panel">
+    <h3>Zustand</h3>
+    <div class="states" id="states"></div>
+    <div id="msg"></div>
+    <table>
+      <tr><td>Gang</td><td id="gear"></td></tr>
+      <tr><td>Poti G</td><td id="poti"></td></tr>
+      <tr><td>Fehlversuche</td><td id="fails"></td></tr>
+    </table>
+    <canvas id="potiBar" class="hud" width="276" height="44"></canvas>
+    <canvas id="hPattern" class="hud" width="276" height="120"></canvas>
+    <h3>Ventile (5/3, Mitte entlüftet)</h3>
+    <table id="valves"></table>
+    <h3>Endlagensensoren</h3>
+    <table id="sensors"></table>
+    <h3>Ablauf</h3>
+    <div id="log"></div>
+  </div>
+
+  <div id="hover" class="panel"></div>
+  <script type="module" src="./scene.js"></script>
+</body>
+</html>
