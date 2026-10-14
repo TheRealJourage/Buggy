@@ -6,21 +6,9 @@ import { createSim, GATE_X, GATE_TRAVEL, GATE_NAMES, A_STROKE, B_STROKE, SEQUENC
 const CYL_R = 13.5;
 const ROD_R = 4;
 const WF = 24;
-const G_STROKE = GATE_TRAVEL;
-const G_BODY = 95 + G_STROKE;
+const G_BODY = 95 + GATE_TRAVEL;
 const A_BODY = 95 + A_STROKE;
 const B_BODY = 95 + B_STROKE;
-const ROW_Y = 64;          // axis height of A/B on the carriage
-const G_Y = 20, G_Z = -60; // G axis
-const G_BODY_END = -59;    // rod end = G_BODY_END + WF + x - ... = x - 35
-const A_Z0 = -290;         // A cap end on carriage
-const A_ROD_END0 = A_Z0 + A_BODY + WF;     // -157 at a = 0
-const B_OFFSET = 6;       // B body starts 6 mm after the coupling
-const B_ROD_END0 = A_ROD_END0 + B_OFFSET + B_BODY + WF; // 2 at a = b = 0
-const PLATE_Y = 250;
-const NEUTRAL_PIN_Z = B_ROD_END0 + A_STROKE;
-const TOP_PIN_Z = B_ROD_END0 + A_STROKE + B_STROKE;
-const VALVE_Z = { G: -160, A: -60, B: 40 };
 
 // ---- renderer / scene
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -36,13 +24,13 @@ sun.position.set(400, 800, 500);
 scene.add(sun);
 
 const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 10000);
-camera.position.set(380, 480, 560);
+camera.position.set(250, 1050, 1450);
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(-90, 80, -80);
+controls.target.set(250, 60, -40);
 controls.update();
 
 const grid = new THREE.GridHelper(1600, 32, 0x3a3d44, 0x2c2f35);
-grid.position.set(-200, 0, -150);
+grid.position.set(100, 0, -100);
 scene.add(grid);
 
 // ---- materials
@@ -115,123 +103,188 @@ function label(text, x, y, z, size = 14, color = '#e8e8e8') {
   return s;
 }
 
-// ---- fixed frame: rails, G cylinder, poti, gate plate
+const V = (x, y, z) => new THREE.Vector3(x, y, z);
+function tube(points, material, r = 3) {
+  return new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), 32, r, 8), material);
+}
+
+// ---- box layout (mm): cylinders side by side along X, both cables leave the box at +X
+const BOX = { x0: -280, x1: 260, z0: -135, z1: 235, h: 120 };
+const AX_Y = 45;                 // cylinder axis height above box floor
+const POTI_Z = -105, G_Z = -55, ROW_Z = 15;
+const G_X0 = -250;               // cap ends
+const A_X0 = -250;
+const G_ROD_END0 = G_X0 + G_BODY + WF;                   // rod end at x = 0
+const A_ROD_END0 = A_X0 + A_BODY + WF;                   // A rod end at a = 0
+const B_OFFSET = 6;                                      // coupling A rod -> B body
+const B_ROD_END0 = A_ROD_END0 + B_OFFSET + B_BODY + WF;  // B rod end at a = b = 0
+const CLEVIS = 22;               // rod end -> cable eye pin (RD-20 + Ø8 pin)
+const ANCHOR_X = 222;            // cable sleeve abutment inside the box
+const VALVE_X = { G: -240, A: -205, B: -170 };
+const VALVE_ZC = 150;
+const GB = { x: 820, pivotY: 250, leverLen: 120 };       // gearbox shift tower (schematic)
+const topGears = ['R', '1', '3', '5'];
+const botGears = [null, '2', '4', null];
+
 const world = new THREE.Group();
 scene.add(world);
 
-world.add(box(520, 8, 420, mat.frame, -150, 4, -110));
-for (const z of [-250, 40]) {
-  world.add(info(cyl(6, -90, GATE_TRAVEL + 100, mat.steel, 'x', 30, z), 'Führungsschiene', '—', 'Schematisch: der Schlitten trägt die Kaskade A+B und wird von G seitlich (Gasse) bewegt. Im Fahrzeug wirken die Zylinder über die Schaltzüge.'));
+// box: solid floor, glass walls + edges, optional lid
+world.add(info(box(BOX.x1 - BOX.x0, 6, BOX.z1 - BOX.z0, mat.frame, (BOX.x0 + BOX.x1) / 2, 3, (BOX.z0 + BOX.z1) / 2), 'Schaltbox (Grundplatte)', 'Maße frei gewählt ~540 × 370 × 120 mm', 'Alle Zylinder, Ventile, Sensoren und das Steuergerät sitzen in einer Box. Raus gehen nur Wählseil, Schaltseil, Luft und Strom/CAN.'));
+const glass = new THREE.MeshStandardMaterial({ color: 0x8fb4d8, transparent: true, opacity: 0.1, depthWrite: false, side: THREE.DoubleSide });
+const edgeMat = new THREE.LineBasicMaterial({ color: 0x7f97b0 });
+const bw = BOX.x1 - BOX.x0, bd = BOX.z1 - BOX.z0, bcx = (BOX.x0 + BOX.x1) / 2, bcz = (BOX.z0 + BOX.z1) / 2;
+const shell = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(bw, BOX.h, bd)), edgeMat);
+shell.position.set(bcx, BOX.h / 2, bcz);
+world.add(shell);
+for (const [w, d, x, z] of [[bw, 2, bcx, BOX.z0], [bw, 2, bcx, BOX.z1], [2, bd, BOX.x0, bcz], [2, bd, BOX.x1, bcz]]) {
+  world.add(box(w, BOX.h, d, glass, x, BOX.h / 2, z));
 }
+const lid = box(bw, 3, bd, glass, bcx, BOX.h, bcz);
+lid.visible = false;
+world.add(lid);
+world.add(label('Schaltbox', bcx, BOX.h + 30, BOX.z0, 16));
 
-// G cylinder
-const gBodyStart = G_BODY_END - G_BODY;
-world.add(info(cyl(CYL_R, gBodyStart, G_BODY_END, mat.alu, 'x', G_Y, G_Z), 'Zylinder G (Gasse)', `Airtec HM-20 (vorläufig), Hub ~${GATE_TRAVEL} mm`, 'Wählt die Gasse R · 1/2 · 3/4 · 5. R und 5 = Endlagen. In 1/2 und 3/4 wird nicht angehalten: Reihe wird „fliegend“ eingelegt, G ab Fensteranfang drucklos.'));
-world.add(box(14, 36, 36, mat.dark, gBodyStart - 4, G_Y, G_Z));
-world.add(box(20, 24, 40, mat.frame, gBodyStart - 4, 8, G_Z));
-const gRod = cyl(ROD_R, 0, 120, mat.steel, 'x', G_Y, G_Z);
+// mounting blocks
+function foot(x, z) { world.add(box(20, AX_Y - CYL_R, 36, mat.dark, x, (AX_Y - CYL_R) / 2 + 6, z)); }
+
+// G cylinder (gate / Wählseil)
+world.add(info(cyl(CYL_R, G_X0, G_X0 + G_BODY, mat.alu, 'x', AX_Y, G_Z), 'Zylinder G (Gasse → Wählseil)', `Airtec HM-20 (vorläufig), Hub ~${GATE_TRAVEL} mm`, 'Wählt die Gasse R · 1/2 · 3/4 · 5. R und 5 = Endlagen, 1/2 und 3/4 werden „fliegend“ eingelegt. Position über Linear-Poti.'));
+foot(G_X0 + 10, G_Z); foot(G_X0 + G_BODY - 10, G_Z);
+const gRod = cyl(ROD_R, 0, 80, mat.steel, 'x', AX_Y, G_Z);
 world.add(gRod);
-const gPortCap = new THREE.Vector3(gBodyStart + 12, G_Y + CYL_R, G_Z);
-const gPortRod = new THREE.Vector3(G_BODY_END - 12, G_Y + CYL_R, G_Z);
+const gPortCap = V(G_X0 + 14, AX_Y + CYL_R, G_Z);
+const gPortRod = V(G_X0 + G_BODY - 14, AX_Y + CYL_R, G_Z);
 for (const p of [gPortCap, gPortRod]) {
   world.add(info(box(10, 12, 14, mat.blue, p.x, p.y + 6, p.z), 'Drosselrückschlagventil', 'Airtec 44-XSCF-60', 'Abluftdrosselung: stellt die Geschwindigkeit von G ein (Regler „G-Geschwindigkeit“).'));
 }
-world.add(label('G – Gasse', (gBodyStart + G_BODY_END) / 2, G_Y + 45, G_Z));
+world.add(label('G – Gasse', G_X0 + G_BODY / 2, AX_Y + 40, G_Z - 10));
 
-// Poti
-const POTI_Z = 10;
-world.add(info(box(GATE_TRAVEL + 110, 14, 14, mat.dark, GATE_TRAVEL / 2, 20, POTI_Z), 'Linear-Poti G', `noch auswählen (nicht Airtec), ≥ ${GATE_TRAVEL} mm`, 'Misst die Gassenposition 0–100 %: < 10 % = R, 1/2 und 3/4 je Mitte ± 5 %, > 90 % = 5.'));
-const potiWiper = box(6, 10, 18, mat.red, 0, 30, POTI_Z);
-world.add(potiWiper);
-world.add(label('Poti', GATE_TRAVEL / 2, 2, POTI_Z + 30, 11));
+// A cylinder (fixed) + B cylinder (on linear guide, pushed by A) → Schaltseil
+world.add(info(cyl(CYL_R, A_X0, A_X0 + A_BODY, mat.alu, 'x', AX_Y, ROW_Z), 'Zylinder A (Reihe, Kaskade hinten)', 'Airtec HM-20 (vorläufig), Hub ~14 mm', 'Unten → Neutral. A aus + B ein = Neutral. Fest auf der Grundplatte.'));
+foot(A_X0 + 10, ROW_Z); foot(A_X0 + A_BODY - 10, ROW_Z);
+const aRod = cyl(ROD_R, 0, 80, mat.steel, 'x', AX_Y, ROW_Z);
+world.add(aRod);
+world.add(label('A', A_X0 + A_BODY / 2, AX_Y + 26, ROW_Z + 32));
+const guideLen = B_BODY + A_STROKE + 40;
+world.add(info(box(guideLen, 8, 20, mat.steel, A_ROD_END0 + guideLen / 2 - 10, 10, ROW_Z), 'Linearführung für B', '— (z. B. Miniatur-Profilschiene)', 'B sitzt auf einem Schlitten und wird von der Kolbenstange A mitgeschoben (Kaskade).'));
 
-// Gate plate (H pattern)
-world.add(info(box(GATE_TRAVEL + 70, 4, 110, mat.plate, GATE_TRAVEL / 2, PLATE_Y, 20), 'Schaltkulisse (Darstellung)', '—', 'Zeigt den Weg des Schaltfingers. Oben R · 1 · 3 · 5, unten 2 · 4.'));
-const slotY = PLATE_Y + 2.2;
-// slot per gate: R and 5 only neutral -> top, 1/2 and 3/4 full
-const topGears = ['R', '1', '3', '5'];
-const botGears = [null, '2', '4', null];
-GATE_X.forEach((gx, i) => {
-  const z0 = botGears[i] ? B_ROD_END0 : NEUTRAL_PIN_Z;
-  world.add(box(8, 0.5, TOP_PIN_Z - z0 + 8, mat.slot, gx, slotY, (TOP_PIN_Z + z0) / 2));
-  world.add(label(topGears[i], gx, PLATE_Y + 12, TOP_PIN_Z + 18, 13, '#ffd27a'));
-  if (botGears[i]) world.add(label(botGears[i], gx, PLATE_Y + 12, B_ROD_END0 - 18, 13, '#ffd27a'));
-});
-world.add(box(GATE_TRAVEL + 8, 0.5, 8, mat.slot, GATE_TRAVEL / 2, slotY, NEUTRAL_PIN_Z));
-world.add(label('N', GATE_TRAVEL + 24, PLATE_Y + 12, NEUTRAL_PIN_Z, 11, '#9ad'));
-
-// ---- carriage with cascade A + B
-const carriage = new THREE.Group();
-scene.add(carriage);
-carriage.add(info(box(70, 10, 370, mat.carriage, 0, 41, -120), 'Schlitten', '—', 'Wird von G in Gassenrichtung verschoben, trägt die Kaskade A + B.'));
-for (const z of [-250, 40]) carriage.add(box(30, 14, 26, mat.dark, 0, 31, z));
-carriage.add(box(10, 30, 20, mat.dark, -35, 26, G_Z)); // G rod bracket
-carriage.add(box(6, 14, 6, mat.red, 0, 30, POTI_Z)); // poti wiper bracket
-
-// A
-carriage.add(info(cyl(CYL_R, A_Z0, A_Z0 + A_BODY, mat.alu, 'z', 0, ROW_Y), 'Zylinder A (Reihe, Kaskade hinten)', 'Airtec HM-20 (vorläufig), Hub ~14 mm', 'Unten → Neutral. A aus + B ein = Neutral.'));
-carriage.add(box(36, 22, 14, mat.dark, 0, 52, A_Z0 - 4));
-const aRod = cyl(ROD_R, 0, 60, mat.steel, 'z', 0, ROW_Y);
-carriage.add(aRod);
-carriage.add(label('A', 0, ROW_Y + 40, A_Z0 + A_BODY / 2));
-
-// B (moves with A rod)
 const bGroup = new THREE.Group();
-carriage.add(bGroup);
-const bZ0 = A_ROD_END0;
-bGroup.add(box(30, 30, 10, mat.dark, 0, ROW_Y, bZ0 + 2)); // coupling A rod -> B body
-bGroup.add(info(cyl(CYL_R, bZ0 + 6, bZ0 + 6 + B_BODY, mat.alu, 'z', 0, ROW_Y), 'Zylinder B (Reihe, Kaskade vorn)', 'Airtec HM-20 (vorläufig), Hub ~34 mm', 'Neutral → oben. Wird mit A-Kolbenstange mitgeschoben (Kaskade).'));
-bGroup.add(box(20, 6, B_BODY, mat.dark, 0, 47, bZ0 + 6 + B_BODY / 2)); // slide shoe
-const bRod = cyl(ROD_R, 0, 60, mat.steel, 'z', 0, ROW_Y);
+world.add(bGroup);
+bGroup.add(box(30, 30, 10, mat.dark, A_ROD_END0 + 2, AX_Y, ROW_Z).rotateY(Math.PI / 2));
+bGroup.add(info(cyl(CYL_R, A_ROD_END0 + B_OFFSET, A_ROD_END0 + B_OFFSET + B_BODY, mat.alu, 'x', AX_Y, ROW_Z), 'Zylinder B (Reihe, Kaskade vorn)', 'Airtec HM-20 (vorläufig), Hub ~34 mm', 'Neutral → oben. Wird mit der Kolbenstange A mitgeschoben.'));
+bGroup.add(box(B_BODY, AX_Y - CYL_R - 14, 30, mat.dark, A_ROD_END0 + B_OFFSET + B_BODY / 2, (AX_Y - CYL_R + 14) / 2, ROW_Z)); // carriage on guide
+const bRod = cyl(ROD_R, 0, 80, mat.steel, 'x', AX_Y, ROW_Z);
 bGroup.add(bRod);
-bGroup.add(label('B', 0, ROW_Y + 40, bZ0 + B_BODY / 2));
-const finger = new THREE.Group();
-bGroup.add(finger);
-finger.add(info(box(16, 16, 20, mat.dark, 0, ROW_Y, 0), 'Gabelkopf', 'Airtec RD-20 (M8)', 'Anlenkung Kolbenstange → Schaltzug / Schaltfinger (Ø 8 mm).'));
-finger.add(cyl(ROD_R, ROW_Y, PLATE_Y + 20, mat.steel, 'y', 0, 0));
-finger.add(info(new THREE.Mesh(new THREE.SphereGeometry(13, 24, 16), mat.knob), 'Schaltfinger / Knauf', '—', 'Position = eingelegter Gang.'));
-finger.children[2].position.set(0, PLATE_Y + 26, 0);
+bGroup.add(label('B', A_ROD_END0 + B_OFFSET + B_BODY / 2, AX_Y + 26, ROW_Z + 32));
 
-// sensors (ZS-6701 on NT-550 strap)
-const sensorMat = () => new THREE.MeshStandardMaterial({ color: 0x1a1a1a, emissive: 0x000000 });
-function sensor(parent, z, title) {
+// clevis + Ø8 pin + cable eye
+function cableEnd(parent, z, title) {
   const g = new THREE.Group();
-  const m = sensorMat();
-  const body = info(box(6, 5, 30, m, 0, ROW_Y + CYL_R + 3, z), title, 'Airtec ZS-6701 + NT-550 + KA-31-01', 'Reed/induktiv, PNP 12 V → Spannungsteiler zum Mikrocontroller. Leuchtet grün, wenn der Kolben in dieser Endlage ist.');
-  g.add(body);
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(CYL_R + 1, 1.2, 8, 24), mat.dark);
-  ring.position.set(0, ROW_Y, z);
-  g.add(ring);
+  g.add(info(box(CLEVIS, 18, 18, mat.dark, CLEVIS / 2, AX_Y, z), 'Gabelkopf', 'Airtec RD-20 (M8)', 'Kolbenstange → Seilende. Bolzen Ø 8 mm wie am originalen Schalthebel.'));
+  g.add(cyl(4, AX_Y - 14, AX_Y + 14, mat.steel, 'y', CLEVIS, z));
+  const eye = new THREE.Mesh(new THREE.TorusGeometry(7, 2.5, 8, 20), mat.knob);
+  eye.rotation.x = Math.PI / 2;
+  eye.position.set(CLEVIS, AX_Y, z);
+  g.add(info(eye, title, 'Seilauge des Originalseils', 'Steckt auf dem Ø 8-mm-Bolzen.'));
   parent.add(g);
+  return g;
+}
+const gEndGroup = cableEnd(world, G_Z, 'Wählseil-Auge');
+const bEndGroup = cableEnd(bGroup, ROW_Z, 'Schaltseil-Auge');
+
+// inner wires (scaled unit cylinders) + sleeve abutments
+const wireMat = new THREE.MeshStandardMaterial({ color: 0xd0d0d0, metalness: 0.9, roughness: 0.3 });
+function wire() {
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 1, 8), wireMat);
+  m.rotation.z = Math.PI / 2;
+  return m;
+}
+const gWire = wire(), rowWire = wire();
+world.add(gWire, rowWire);
+for (const [z, name] of [[G_Z, 'Wählseil'], [ROW_Z, 'Schaltseil']]) {
+  world.add(info(box(10, 70, 46, mat.frame, ANCHOR_X, 41, z), `Seil-Widerlager ${name}`, 'Halter aus Blech (selbst bauen)', 'Hält die Seilhülle fest, nur das Innenseil bewegt sich. Ersetzt den Halter am alten Schaltbock.'));
+  world.add(cyl(6, ANCHOR_X - 12, BOX.x1 + 4, mat.knob, 'x', AX_Y, z));
+}
+
+// poti on G rod end
+world.add(info(box(GATE_TRAVEL + 70, 16, 16, mat.dark, G_ROD_END0 + CLEVIS + GATE_TRAVEL / 2, AX_Y, POTI_Z), 'Linear-Poti G', `noch auswählen (nicht Airtec), ≥ ${GATE_TRAVEL} mm`, 'Misst die Gassenposition 0–100 %: < 10 % = R, 1/2 und 3/4 je Mitte ± 5 %, > 90 % = 5.'));
+const potiArm = box(6, 6, G_Z - POTI_Z, mat.red, 0, AX_Y + 12, (G_Z + POTI_Z) / 2);
+world.add(potiArm);
+world.add(label('Poti', G_ROD_END0 + CLEVIS + GATE_TRAVEL / 2, AX_Y + 35, POTI_Z, 11));
+
+// sensors (ZS-6701 on NT-550 strap), along X
+function sensor(parent, x, z, title) {
+  const m = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, emissive: 0x000000 });
+  parent.add(info(box(30, 5, 6, m, x, AX_Y + CYL_R + 3, z), title, 'Airtec ZS-6701 + NT-550 + KA-31-01', 'PNP 12 V → Spannungsteiler zum Mikrocontroller. Leuchtet grün, wenn der Kolben in dieser Endlage ist.'));
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(CYL_R + 1, 1.2, 8, 24), mat.dark);
+  ring.rotation.y = Math.PI / 2;
+  ring.position.set(x, AX_Y, z);
+  parent.add(ring);
   return m;
 }
 const sensorMats = {
-  Ain: sensor(carriage, A_Z0 + 18, 'Sensor A eingefahren'),
-  Aout: sensor(carriage, A_Z0 + A_BODY - 18, 'Sensor A ausgefahren'),
-  Bin: sensor(bGroup, bZ0 + B_OFFSET + 18, 'Sensor B eingefahren'),
-  Bout: sensor(bGroup, bZ0 + B_OFFSET + B_BODY - 18, 'Sensor B ausgefahren'),
+  Ain: sensor(world, A_X0 + 20, ROW_Z, 'Sensor A eingefahren'),
+  Aout: sensor(world, A_X0 + A_BODY - 20, ROW_Z, 'Sensor A ausgefahren'),
+  Bin: sensor(bGroup, A_ROD_END0 + B_OFFSET + 20, ROW_Z, 'Sensor B eingefahren'),
+  Bout: sensor(bGroup, A_ROD_END0 + B_OFFSET + B_BODY - 20, ROW_Z, 'Sensor B ausgefahren'),
 };
 
-// ---- valves on manifold
-world.add(info(box(150, 20, 290, mat.frame, -370, 10, -60), 'Ventilplatte / Verteiler', 'Airtec Reihenleiste (Option)', 'Gemeinsame Druckversorgung P (1), Abluft über Schalldämpfer 40-501-18.'));
+// valves on manifold (long axis along Z)
+world.add(info(box(115, 20, 170, mat.frame, VALVE_X.A, 16, VALVE_ZC), 'Ventilplatte / Verteiler', 'Airtec Reihenleiste (Option)', 'Gemeinsame Druckversorgung P (1), Abluft über Schalldämpfer 40-501-18.'));
 const coilMats = {};
 const valvePorts = {};
-for (const [k, z] of Object.entries(VALVE_Z)) {
-  world.add(info(box(100, 30, 22, mat.valve, -370, 35, z), `Ventil ${k}`, 'Airtec M-04-533-HN-441', '5/3-Wege, Mittelstellung entlüftet, 12 V DC / 4,2 W, G1/8. Spule 14 (orange) = ausfahren, Spule 12 (cyan) = einfahren, keine Spule = drucklos.'));
+for (const [k, x] of Object.entries(VALVE_X)) {
+  world.add(info(box(22, 30, 100, mat.valve, x, 41, VALVE_ZC), `Ventil ${k}`, 'Airtec M-04-533-HN-441', '5/3-Wege, Mittelstellung entlüftet, 12 V DC / 4,2 W, G1/8. Spule 14 (orange) = ausfahren, Spule 12 (cyan) = einfahren, keine Spule = drucklos.'));
   const c14 = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, emissive: 0x000000 });
   const c12 = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, emissive: 0x000000 });
-  world.add(info(box(26, 30, 26, c14, -433, 35, z), `Spule 14 Ventil ${k}`, 'Stecker 28-ST-01', 'Bestromt = Zylinder ausfahren.'));
-  world.add(info(box(26, 30, 26, c12, -307, 35, z), `Spule 12 Ventil ${k}`, 'Stecker 28-ST-01', 'Bestromt = Zylinder einfahren.'));
+  world.add(info(box(26, 30, 26, c14, x, 41, VALVE_ZC - 63), `Spule 14 Ventil ${k}`, 'Stecker 28-ST-01', 'Bestromt = Zylinder ausfahren.'));
+  world.add(info(box(26, 30, 26, c12, x, 41, VALVE_ZC + 63), `Spule 12 Ventil ${k}`, 'Stecker 28-ST-01', 'Bestromt = Zylinder einfahren.'));
   coilMats[k] = { ext: c14, ret: c12 };
-  for (const dx of [-15, 15]) world.add(cyl(4, 20, 8, mat.steel, 'y', -370 + dx, z + 8));
-  valvePorts[k] = { cap: new THREE.Vector3(-385, 50, z), rod: new THREE.Vector3(-355, 50, z) };
-  world.add(label(k, -370, 70, z, 14, '#ffd27a'));
+  valvePorts[k] = { cap: V(x, 56, VALVE_ZC - 15), rod: V(x, 56, VALVE_ZC + 15) };
+  world.add(label(k, x, 80, VALVE_ZC, 12, '#ffd27a'));
 }
+world.add(info(cyl(7, BOX.x0 - 15, BOX.x0 + 10, mat.blue, 'x', 30, VALVE_ZC), 'Druckluft-Eingang (Schottverschraubung)', 'blue C-line', 'Vom Filterregler, Schaltdruck max. 10 bar.'));
+world.add(tube([V(BOX.x0 + 10, 30, VALVE_ZC), V(BOX.x0 + 25, 25, VALVE_ZC), V(VALVE_X.G - 30, 18, VALVE_ZC)], mat.supplyHose, 3));
+
+// controller
+world.add(info(box(120, 40, 90, new THREE.MeshStandardMaterial({ color: 0x2b5d34, roughness: 0.6 }), -40, 26, 160), 'Steuergerät', 'offen (Mikrocontroller + 6 MOSFET-Treiber)', 'Liest Poti + 4 Endlagensensoren, schaltet 6 Spulen (je ~0,35 A bei 12 V), CAN SHIFT.SELECT 0x150.'));
+world.add(label('Steuergerät', -40, 75, 160, 11));
+world.add(info(cyl(8, BOX.x0 - 15, BOX.x0 + 10, mat.dark, 'x', 30, 200), 'Kabelverschraubung Strom/CAN', '—', '12 V, GND, CAN-H/L.'));
+
+// cables (outer sleeves, static) to the gearbox shift tower
+const sleeveMat = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.8 });
+const LEVER = { G: { pivotZ: -150, sign: 1, tipZ: -30 }, R: { pivotZ: 150, sign: -1, tipZ: 30 } };
+const sleeveEnd = { G: V(GB.x - 70, GB.pivotY, LEVER.G.tipZ), R: V(GB.x - 70, GB.pivotY, LEVER.R.tipZ) };
+for (const [z, k, name] of [[G_Z, 'G', 'Wählseil'], [ROW_Z, 'R', 'Schaltseil']]) {
+  const e = sleeveEnd[k];
+  world.add(info(tube([V(BOX.x1 + 4, AX_Y, z), V(BOX.x1 + 120, AX_Y, z), V(560, 120, (z + e.z) / 2), V(e.x - 80, e.y, e.z), e], sleeveMat, 6),
+    name, 'Original-Seilzug (wie VW-Set VGS2)', name === 'Wählseil' ? 'Überträgt die Gassenbewegung (Zylinder G) zum Wählhebel am Getriebe.' : 'Überträgt die Reihenbewegung (Kaskade A + B) zum Schalthebel am Getriebe.'));
+}
+world.add(label('Wählseil', 560, 150, -70, 12));
+world.add(label('Schaltseil', 560, 150, 70, 12));
+
+// gearbox with shift tower and two levers
+world.add(info(box(220, 230, 440, mat.comp, GB.x + 40, 115, 0), 'Getriebe (schematisch)', '—', 'Nur Platzhalter. Wählhebel und Schalthebel wie beim Original, die Seile werden direkt eingehängt.'));
+world.add(box(70, 20, 380, mat.dark, GB.x, GB.pivotY - 12, 0));
+const levers = {};
+const leverTips = {};
+for (const [k, L] of Object.entries(LEVER)) {
+  const g = new THREE.Group();
+  g.position.set(GB.x, GB.pivotY, L.pivotZ);
+  const len = Math.abs(L.tipZ - L.pivotZ);
+  g.add(info(box(14, 10, len, mat.steel, 0, 6, (L.sign * len) / 2), k === 'G' ? 'Wählhebel am Getriebe' : 'Schalthebel am Getriebe', 'Original', 'Dreht sich mit der Seilbewegung.'));
+  g.add(cyl(10, -8, 14, mat.dark, 'y', 0, 0));
+  world.add(g);
+  levers[k] = g;
+  leverTips[k] = wire();
+  world.add(leverTips[k]);
+}
+world.add(label('Getriebe', GB.x + 40, 300, 0, 16));
 
 // ---- supply: compressor, check valve, tank, regulator
-const SUPPLY_DZ = -260; // keep the tank out of the way of the shift unit
 const supply = new THREE.Group();
-supply.position.z = SUPPLY_DZ;
+supply.position.set(-150, 0, -100);
 scene.add(supply);
 supply.add(info(box(170, 120, 120, mat.comp, -760, 60, -420), 'Kompressor', 'T-Max, max. 10,3 bar', 'Maße geschätzt. Relais + Sicherung noch zu beschaffen.'));
 supply.add(cyl(45, -845, -905, mat.comp, 'x', 60, -420));
@@ -254,14 +307,9 @@ supply.add(label('Kompressor', -760, 150, -420));
 supply.add(label('Tank W166 10 L', -300, 190, -430));
 supply.add(label('Filterregler', -500, 150, -250));
 
-function tube(points, material, r = 3) {
-  const curve = new THREE.CatmullRomCurve3(points);
-  return new THREE.Mesh(new THREE.TubeGeometry(curve, 32, r, 8), material);
-}
-const V = (x, y, z) => new THREE.Vector3(x, y, z);
 supply.add(tube([V(-675, 40, -420), V(-650, 40, -420), V(-630, 40, -420), V(-605, 60, -430)], mat.supplyHose, 4));
 supply.add(tube([V(-20, 120, -430), V(0, 180, -400), V(-300, 200, -330), V(-500, 140, -260), V(-500, 125, -250)], mat.supplyHose, 4));
-const supplyLink = tube([V(-475, 95, -250 + SUPPLY_DZ), V(-440, 60, -300), V(-400, 20, -230), V(-370, 10, -205)], mat.supplyHose, 4);
+const supplyLink = tube([V(-625, 95, -350), V(-560, 60, -250), V(-420, 30, 60), V(BOX.x0 - 60, 30, VALVE_ZC), V(BOX.x0 - 15, 30, VALVE_ZC)], mat.supplyHose, 4);
 scene.add(supplyLink);
 
 // ---- dynamic hoses valve -> cylinder
@@ -272,8 +320,8 @@ for (const k of ['G', 'A', 'B']) for (const port of ['cap', 'rod']) {
   hoses[k + port] = m;
 }
 function routeHose(mesh, from, to) {
-  const top = Math.max(from.y, to.y) + 90;
-  const pts = [from.clone(), V(from.x, from.y + 40, from.z), V((from.x + to.x) / 2, top, (from.z + to.z) / 2), V(to.x, to.y + 40, to.z), to.clone()];
+  const top = Math.min(Math.max(from.y, to.y) + 30, BOX.h - 8);
+  const pts = [from.clone(), V(from.x, from.y + 15, from.z), V((from.x + to.x) / 2, top, (from.z + to.z) / 2), V(to.x, to.y + 15, to.z), to.clone()];
   mesh.geometry.dispose();
   mesh.geometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, 2.5, 6);
 }
@@ -326,6 +374,19 @@ $('reset').onclick = () => {
 };
 $('labels').onchange = (e) => labels.forEach((l) => (l.visible = e.target.checked));
 $('supply').onchange = (e) => (supply.visible = supplyLink.visible = e.target.checked);
+$('lid').onchange = (e) => (lid.visible = e.target.checked);
+const VIEWS = {
+  all: { pos: [250, 1050, 1450], target: [250, 60, -40] },
+  box: { pos: [-40, 520, 560], target: [-10, 40, 40] },
+  gearbox: { pos: [430, 620, 760], target: [760, 170, 0] },
+};
+for (const [k, v] of Object.entries(VIEWS)) {
+  $('view-' + k).onclick = () => {
+    camera.position.set(...v.pos);
+    controls.target.set(...v.target);
+    controls.update();
+  };
+}
 
 $('states').innerHTML = STATES.map((s) => `<span id="st-${s}">${s}</span>`).join('');
 
@@ -406,18 +467,31 @@ function updateHud() {
 
 function updateScene() {
   const s = sim.state;
-  carriage.position.x = s.x;
-  potiWiper.position.x = s.x;
-  // G rod end at carriage bracket (x - 35)
-  const gEnd = s.x - 35;
-  gRod.position.x = gEnd - 60;
-  // A rod
+  const gEnd = G_ROD_END0 + s.x;
+  gRod.position.x = gEnd - 40;
+  gEndGroup.position.x = gEnd;
+  potiArm.position.x = gEnd + CLEVIS;
   const aEnd = A_ROD_END0 + s.a;
-  aRod.position.z = aEnd - 30;
-  bGroup.position.z = s.a;
-  const bEnd = bZ0 + B_OFFSET + B_BODY + WF + s.b;
-  bRod.position.z = bEnd - 30;
-  finger.position.z = bEnd;
+  aRod.position.x = aEnd - 40;
+  bGroup.position.x = s.a;
+  const bEnd = B_ROD_END0 + s.b; // local to bGroup
+  bRod.position.x = bEnd - 40;
+  bEndGroup.position.x = bEnd;
+  const setWire = (m, x0, x1, z) => { m.scale.y = Math.max(1, x1 - x0); m.position.set((x0 + x1) / 2, AX_Y, z); };
+  setWire(gWire, gEnd + CLEVIS, ANCHOR_X, G_Z);
+  setWire(rowWire, B_ROD_END0 + s.a + s.b + CLEVIS, ANCHOR_X, ROW_Z);
+
+  // gearbox levers turn with the cable travel (centered on mid travel)
+  const ang = { G: (s.x - GATE_TRAVEL / 2) / GB.leverLen, R: (s.a + s.b - (A_STROKE + B_STROKE) / 2) / GB.leverLen };
+  for (const k of ['G', 'R']) {
+    const L = LEVER[k];
+    levers[k].rotation.y = L.sign * ang[k];
+    const len = Math.abs(L.tipZ - L.pivotZ);
+    const tipX = GB.x + L.sign * Math.sin(L.sign * ang[k]) * len;
+    const m = leverTips[k];
+    m.scale.y = Math.max(1, Math.abs(tipX - sleeveEnd[k].x));
+    m.position.set((tipX + sleeveEnd[k].x) / 2, GB.pivotY + 6, L.tipZ);
+  }
 
   const se = sim.sensors();
   for (const [k, m] of Object.entries(sensorMats)) m.emissive.setHex(se[k] ? 0x22ff44 : 0x000000);
@@ -426,11 +500,10 @@ function updateScene() {
     coilMats[k].ret.emissive.setHex(s.valve[k] === 'ret' ? 0x20c0ff : 0x000000);
   }
 
-  const cx = s.x;
   const ports = {
     G: { cap: gPortCap.clone().add(V(0, 12, 0)), rod: gPortRod.clone().add(V(0, 12, 0)) },
-    A: { cap: V(cx, ROW_Y + CYL_R, A_Z0 + 10), rod: V(cx, ROW_Y + CYL_R, A_Z0 + A_BODY - 10) },
-    B: { cap: V(cx, ROW_Y + CYL_R, bZ0 + B_OFFSET + 10 + s.a), rod: V(cx, ROW_Y + CYL_R, bZ0 + B_OFFSET + B_BODY - 10 + s.a) },
+    A: { cap: V(A_X0 + 14, AX_Y + CYL_R, ROW_Z), rod: V(A_X0 + A_BODY - 14, AX_Y + CYL_R, ROW_Z) },
+    B: { cap: V(A_ROD_END0 + B_OFFSET + 14 + s.a, AX_Y + CYL_R, ROW_Z), rod: V(A_ROD_END0 + B_OFFSET + B_BODY - 14 + s.a, AX_Y + CYL_R, ROW_Z) },
   };
   for (const k of ['G', 'A', 'B']) {
     routeHose(hoses[k + 'cap'], valvePorts[k].cap, ports[k].cap);
