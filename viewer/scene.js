@@ -109,7 +109,7 @@ function tube(points, material, r = 3) {
 }
 
 // ---- box layout (mm): cylinders side by side along X, both cables leave the box at +X
-const CB = { x0: -272, x1: 240, z0: -135, z1: 50, h: 95 };   // cylinder box
+const CB = { x0: -272, x1: 268, z0: -135, z1: 50, h: 95 };   // cylinder box
 const VB = { x0: -280, x1: 50, z0: 72, z1: 235, h: 110 };    // valve + electronics box
 const HOSE_Y = 72;
 const AX_Y = 45;                 // cylinder axis height above box floor
@@ -121,7 +121,14 @@ const A_ROD_END0 = A_X0 + A_BODY + WF;                   // A rod end at a = 0
 const B_OFFSET = 6;                                      // coupling A rod -> B body
 const B_ROD_END0 = A_ROD_END0 + B_OFFSET + B_BODY + WF;  // B rod end at a = b = 0
 const CLEVIS = 22;               // rod end -> cable eye pin (RD-20 + Ø8 pin)
-const ANCHOR_X = 222;            // cable sleeve abutment inside the box
+// user notes: rigid cable end inside the box 70 mm (Wählseil) / 130 mm (Schaltseil),
+// clip hole Ø 25 / Ø 15 mm in a 2 mm wall. Assumed: eye at full extension stays 10 mm clear of the rigid part.
+const RIGID = { G: 70, R: 130 };
+const HOLE_D = { G: 25, R: 15 };
+const ANCHOR = {
+  G: G_ROD_END0 + GATE_TRAVEL + CLEVIS + 10 + RIGID.G,
+  R: B_ROD_END0 + A_STROKE + B_STROKE + CLEVIS + 10 + RIGID.R,
+};
 const VALVE_X = { G: -240, A: -205, B: -170 };
 const VALVE_ZC = 150;
 const GB = { x: 820, pivotY: 250, leverLen: 120 };       // gearbox shift tower (schematic)
@@ -215,8 +222,12 @@ function wire() {
 const gWire = wire(), rowWire = wire();
 world.add(gWire, rowWire);
 for (const [z, name] of [[G_Z, 'Wählseil'], [ROW_Z, 'Schaltseil']]) {
-  world.add(info(box(10, 70, 46, mat.frame, ANCHOR_X, 41, z), `Seil-Widerlager ${name}`, 'Halter aus Blech (selbst bauen)', 'Hält die Seilhülle fest, nur das Innenseil bewegt sich. Ersetzt den Halter am alten Schaltbock.'));
-  world.add(cyl(6, ANCHOR_X - 12, CB.x1 + 4, mat.knob, 'x', AX_Y, z));
+  const k = name === 'Wählseil' ? 'G' : 'R';
+  const ax = ANCHOR[k];
+  world.add(info(box(4, 70, 50, mat.frame, ax, 41, z), `Seil-Widerlager ${name}`, `Blech 2 mm an der Bohrung, Ø ${HOLE_D[k]} mm (wie Original)`, 'Seilende clipst hier ein wie im originalen Schaltgehäuse. Blech muss an der Bohrung 2 mm dick sein, damit der Clip rastet; drumherum steif abstützen (Winkel/Rippe).'));
+  world.add(box(12, 70, 50, mat.dark, ax + 8, 41, z)); // stiffening rib behind the 2 mm plate
+  world.add(info(cyl(HOLE_D[k] / 2 - 2, ax - RIGID[k], ax + 2, mat.knob, 'x', AX_Y, z), `Festes Seilende ${name}`, `${RIGID[k]} mm in der Box (Notiz)`, 'Starres Endstück des Seilzugs, das Innenseil kommt vorne heraus zum Seilauge.'));
+  world.add(cyl(6, ax + 2, CB.x1 + 4, mat.knob, 'x', AX_Y, z));
 }
 
 // poti on G rod end
@@ -546,8 +557,8 @@ function updateScene() {
   bRod.position.x = bEnd - 40;
   bEndGroup.position.x = bEnd;
   const setWire = (m, x0, x1, z) => { m.scale.y = Math.max(1, x1 - x0); m.position.set((x0 + x1) / 2, AX_Y, z); };
-  setWire(gWire, gEnd + CLEVIS, ANCHOR_X, G_Z);
-  setWire(rowWire, B_ROD_END0 + s.a + s.b + CLEVIS, ANCHOR_X, ROW_Z);
+  setWire(gWire, gEnd + CLEVIS, ANCHOR.G - RIGID.G, G_Z);
+  setWire(rowWire, B_ROD_END0 + s.a + s.b + CLEVIS, ANCHOR.R - RIGID.R, ROW_Z);
 
   // gearbox levers turn with the cable travel (centered on mid travel)
   const ang = { G: (s.x - GATE_TRAVEL / 2) / GB.leverLen, R: (s.a + s.b - (A_STROKE + B_STROKE) / 2) / GB.leverLen };
