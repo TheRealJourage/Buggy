@@ -118,7 +118,7 @@ const RIGID = { G: 70, R: 130 };
 const HOLE_D = { G: 25, R: 15 };
 const EYE_CLEAR = 10;            // assumed gap eye -> rigid part at full extension
 const CLEVIS = 22;               // rod end -> cable eye pin (RD-20 + Ø8 pin)
-const RO20 = 48;                 // Airtec RO-20 coupling A -> B
+const RO20 = 57;                 // Airtec FK-20 compensating coupling A -> B
 const FOOT_W = 54;               // RA-25 foot width = lane pitch driver
 const GAP = 6;
 const AX_Y = FLOOR_T + 40;       // common axis height (B on MGN12 carriage, A/G on RA-25 + spacer)
@@ -197,7 +197,7 @@ world.add(info(box(guideLen, 8, 20, mat.steel, A_ROD_END0 + B_OFFSET + guideLen 
 
 const bGroup = new THREE.Group();
 world.add(bGroup);
-bGroup.add(info(cyl(9, A_ROD_END0, A_ROD_END0 + RO20, mat.dark, 'x', AX_Y, ROW_Z), 'Gelenkkupplung A → B', 'Airtec RO-20 (M8)', 'Verbindet Kolbenstange A mit dem Schlitten von B. Gleicht Fluchtfehler aus, damit nichts klemmt.'));
+bGroup.add(info(cyl(9, A_ROD_END0, A_ROD_END0 + RO20, mat.dark, 'x', AX_Y, ROW_Z), 'Ausgleichskupplung A → B', 'Airtec FK-20 (M8, 57 mm)', 'Verbindet Kolbenstange A mit dem Schlitten von B. Gleicht Winkel- und Parallelversatz aus, damit nichts klemmt.'));
 bGroup.add(info(cyl(CYL_R, A_ROD_END0 + B_OFFSET, A_ROD_END0 + B_OFFSET + B_BODY, mat.alu, 'x', AX_Y, ROW_Z), 'Zylinder B (Reihe, Kaskade vorn)', 'Airtec HM-20 (vorläufig), Hub ~34 mm', 'Neutral → oben. Wird mit der Kolbenstange A mitgeschoben.'));
 bGroup.add(box(B_BODY, AX_Y - CYL_R - 14, 30, mat.dark, A_ROD_END0 + B_OFFSET + B_BODY / 2, (AX_Y - CYL_R + 14) / 2, ROW_Z)); // carriage on guide
 const bRod = cyl(ROD_R, 0, 80, mat.steel, 'x', AX_Y, ROW_Z);
