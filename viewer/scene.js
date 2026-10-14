@@ -108,27 +108,35 @@ function tube(points, material, r = 3) {
   return new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), 32, r, 8), material);
 }
 
-// ---- box layout (mm): cylinders side by side along X, both cables leave the box at +X
-const CB = { x0: -272, x1: 268, z0: -135, z1: 50, h: 95 };   // cylinder box
-const VB = { x0: -280, x1: 50, z0: 72, z1: 235, h: 110 };    // valve + electronics box
-const HOSE_Y = 72;
-const AX_Y = 45;                 // cylinder axis height above box floor
-const POTI_Z = -105, G_Z = -55, ROW_Z = 15;
-const G_X0 = -250;               // cap ends
-const A_X0 = -250;
-const G_ROD_END0 = G_X0 + G_BODY + WF;                   // rod end at x = 0
-const A_ROD_END0 = A_X0 + A_BODY + WF;                   // A rod end at a = 0
-const B_OFFSET = 6;                                      // coupling A rod -> B body
-const B_ROD_END0 = A_ROD_END0 + B_OFFSET + B_BODY + WF;  // B rod end at a = b = 0
-const CLEVIS = 22;               // rod end -> cable eye pin (RD-20 + Ø8 pin)
-// user notes: rigid cable end inside the box 70 mm (Wählseil) / 130 mm (Schaltseil),
-// clip hole Ø 25 / Ø 15 mm in a 2 mm wall. Assumed: eye at full extension stays 10 mm clear of the rigid part.
+// ---- minimal cylinder box (mm): the 2 mm end wall IS the cable abutment (clip holes like the
+// original shift housing); every cylinder is placed backwards from that wall at full extension.
+const WALL_X = 262;              // inner face of the end wall with the clip holes
+const WALL_T = 2;
+const FLOOR_T = 8;
+// user notes: rigid cable end inside the box 70 mm (Wählseil) / 130 mm (Schaltseil), clip hole Ø 25 / Ø 15 mm
 const RIGID = { G: 70, R: 130 };
 const HOLE_D = { G: 25, R: 15 };
-const ANCHOR = {
-  G: G_ROD_END0 + GATE_TRAVEL + CLEVIS + 10 + RIGID.G,
-  R: B_ROD_END0 + A_STROKE + B_STROKE + CLEVIS + 10 + RIGID.R,
-};
+const EYE_CLEAR = 10;            // assumed gap eye -> rigid part at full extension
+const CLEVIS = 22;               // rod end -> cable eye pin (RD-20 + Ø8 pin)
+const RO20 = 48;                 // Airtec RO-20 coupling A -> B
+const FOOT_W = 54;               // RA-25 foot width = lane pitch driver
+const GAP = 6;
+const AX_Y = FLOOR_T + 40;       // common axis height (B on MGN12 carriage, A/G on RA-25 + spacer)
+const CB_Z1 = 50;
+const ROW_Z = CB_Z1 - WALL_T - GAP - FOOT_W / 2;
+const G_Z = ROW_Z - FOOT_W - GAP;
+const POTI_Z = G_Z - FOOT_W / 2 - GAP - 8;
+const G_ROD_END0 = WALL_X - RIGID.G - EYE_CLEAR - CLEVIS - GATE_TRAVEL;            // G rod end at x = 0
+const G_X0 = G_ROD_END0 - WF - G_BODY;
+const B_ROD_END0 = WALL_X - RIGID.R - EYE_CLEAR - CLEVIS - A_STROKE - B_STROKE;    // B rod end at a = b = 0
+const B_OFFSET = RO20;
+const A_ROD_END0 = B_ROD_END0 - WF - B_BODY - B_OFFSET;
+const A_X0 = A_ROD_END0 - WF - A_BODY;
+const CB = { x0: A_X0 - 5 - WALL_T, x1: WALL_X + WALL_T, z0: POTI_Z - 8 - GAP - WALL_T, z1: CB_Z1, h: Math.ceil(AX_Y + CYL_R + 20) };
+const VB = { x0: -280, x1: 50, z0: 72, z1: 235, h: 110 };    // valve + electronics box
+const HOSE_Y = 72;
+const BULK = { y: AX_Y + 8, z0: CB.z0 + 12, dz: 12 };       // rear-wall bulkheads behind G
+const ANCHOR = { G: WALL_X, R: WALL_X };
 const VALVE_X = { G: -240, A: -205, B: -170 };
 const VALVE_ZC = 150;
 const GB = { x: 820, pivotY: 250, leverLen: 120 };       // gearbox shift tower (schematic)
@@ -154,18 +162,17 @@ function enclosure(b, title, part, note, floorMat, floorT) {
   world.add(lid);
   lids.push(lid);
 }
-enclosure(CB, 'Zylinderbox – Grundplatte', `Alu 10 mm, innen ~${CB.x1 - CB.x0} × ${CB.z1 - CB.z0} × ${CB.h} mm`, 'Trägt G, A, B (Fußbefestigungen RA-25), Linearführung für B, Poti und die zwei Seil-Widerlager. Die Seilkräfte laufen nur über diese Platte – Deckel/Wände sind nur Spritzschutz.', mat.frame, 10);
+enclosure(CB, 'Zylinderbox (Minimalmaß) – Grundplatte', `Alu ${FLOOR_T} mm, außen ~${CB.x1 - CB.x0} × ${CB.z1 - CB.z0} × ${CB.h} mm`, 'Minimalbox: Stirnwand (2 mm) = Seil-Widerlager, Zylinder von der Wand aus rückwärts angeordnet. Kraftfluss Zylinderfüße → Grundplatte → Stirnwand, deshalb Stirnwand fest mit der Grundplatte verbinden und abstützen.', mat.frame, FLOOR_T);
 enclosure(VB, 'Ventilbox – Boden', `Kunststoff/Alu-Gehäuse IP65, ~${VB.x1 - VB.x0} × ${VB.z1 - VB.z0} × ${VB.h} mm`, 'Ventile auf Verteiler, Steuergerät, Lufteingang, Strom/CAN. Getrennt von der Zylinderbox, verbunden über Schlauchbündel + Sensorkabel. Kann woanders im Fahrzeug sitzen (Schläuche kurz halten).', mat.dark, 4);
 world.add(label('Zylinderbox', (CB.x0 + CB.x1) / 2, CB.h + 30, CB.z0, 16));
 world.add(label('Ventilbox', (VB.x0 + VB.x1) / 2, VB.h + 30, VB.z1, 16));
-// bulkhead strips where the hose bundle crosses
-for (const [z, t] of [[CB.z1, 'Schottleiste Zylinderbox'], [VB.z0, 'Schottleiste Ventilbox']]) {
-  world.add(info(box(110, 22, 8, mat.blue, -205, HOSE_Y, z), t, '6 × Schottverschraubung blue C-line (6 mm)', 'Schlauchbündel G/A/B (je 2 Schläuche) zwischen Ventilbox und Zylinderbox. Kurz halten: lange Schläuche machen G langsamer und das 3/4-Fenster knapper (Hypothese).'));
-}
-world.add(info(cyl(7, CB.z1 - 2, CB.z1 + 10, mat.dark, 'z', -60, HOSE_Y), 'Sensorstecker Zylinderbox', 'M12 8-polig (Vorschlag)', '4 Endlagensensoren + Poti (3 Adern) → Steuergerät in der Ventilbox.'));
+// bulkheads: rear wall of the cylinder box (free space behind the shorter G), long wall of the valve box
+world.add(info(box(8, 22, 6 * BULK.dz + 8, mat.blue, CB.x0, BULK.y, BULK.z0 + 2.5 * BULK.dz), 'Schottleiste Zylinderbox (Rückwand)', '6 × Schottverschraubung blue C-line (6 mm)', 'Sitzt hinter G – dort ist Platz, weil G kürzer baut als die Kaskade. Schläuche kurz halten (Hypothese: lange Schläuche machen G träger).'));
+world.add(info(box(110, 22, 8, mat.blue, -205, HOSE_Y, VB.z0), 'Schottleiste Ventilbox', '6 × Schottverschraubung blue C-line (6 mm)', 'Schlauchbündel G/A/B (je 2 Schläuche) zur Zylinderbox.'));
+world.add(info(cyl(7, CB.x0 - 10, CB.x0 + 2, mat.dark, 'x', BULK.y + 22, BULK.z0 + 2.5 * BULK.dz), 'Sensorstecker Zylinderbox', 'M12 8-polig (Vorschlag)', '4 Endlagensensoren + Poti (3 Adern) → Steuergerät in der Ventilbox.'));
 
 // mounting blocks
-function foot(x, z) { world.add(info(box(20, AX_Y - CYL_R, 54, mat.dark, x, (AX_Y - CYL_R) / 2 + 6, z), 'Fußbefestigung', 'Airtec RA-25 (für Ø 20/25)', 'Je Zylinder vorne + hinten, mit M6 auf die Grundplatte. Steif befestigt, weil die Seilkraft über den Zylinder läuft.')); }
+function foot(x, z) { world.add(info(box(20, AX_Y - CYL_R - FLOOR_T, FOOT_W, mat.dark, x, (AX_Y - CYL_R + FLOOR_T) / 2, z), 'Fußbefestigung + Distanzplatte', 'Airtec RA-25 (für Ø 20/25) + Distanz auf Achshöhe 40 mm', 'Je Zylinder vorne + hinten, mit M6 auf die Grundplatte. Steif befestigt, weil die Seilkraft über den Zylinder läuft.')); }
 
 // G cylinder (gate / Wählseil)
 world.add(info(cyl(CYL_R, G_X0, G_X0 + G_BODY, mat.alu, 'x', AX_Y, G_Z), 'Zylinder G (Gasse → Wählseil)', `Airtec HM-20 (vorläufig), Hub ~${GATE_TRAVEL} mm`, 'Wählt die Gasse R · 1/2 · 3/4 · 5. R und 5 = Endlagen, 1/2 und 3/4 werden „fliegend“ eingelegt. Position über Linear-Poti.'));
@@ -186,11 +193,11 @@ const aRod = cyl(ROD_R, 0, 80, mat.steel, 'x', AX_Y, ROW_Z);
 world.add(aRod);
 world.add(label('A', A_X0 + A_BODY / 2, AX_Y + 26, ROW_Z + 32));
 const guideLen = B_BODY + A_STROKE + 40;
-world.add(info(box(guideLen, 8, 20, mat.steel, A_ROD_END0 + guideLen / 2 - 10, 10, ROW_Z), 'Linearführung für B', 'Vorschlag: Profilschiene MGN12, ~250 mm + Wagen MGN12H', 'B sitzt auf einem Schlitten und wird von der Kolbenstange A mitgeschoben (Kaskade).'));
+world.add(info(box(guideLen, 8, 20, mat.steel, A_ROD_END0 + B_OFFSET + guideLen / 2 - 10, FLOOR_T + 4, ROW_Z), 'Linearführung für B', 'Vorschlag: Profilschiene MGN12, ~250 mm + Wagen MGN12H', 'B sitzt auf einem Schlitten und wird von der Kolbenstange A mitgeschoben (Kaskade).'));
 
 const bGroup = new THREE.Group();
 world.add(bGroup);
-bGroup.add(info(box(30, 30, 10, mat.dark, A_ROD_END0 + 2, AX_Y, ROW_Z).rotateY(Math.PI / 2), 'Gelenkkupplung A → B', 'Airtec RO-20 (M8)', 'Verbindet Kolbenstange A mit dem Schlitten von B. Gleicht Fluchtfehler aus, damit nichts klemmt.'));
+bGroup.add(info(cyl(9, A_ROD_END0, A_ROD_END0 + RO20, mat.dark, 'x', AX_Y, ROW_Z), 'Gelenkkupplung A → B', 'Airtec RO-20 (M8)', 'Verbindet Kolbenstange A mit dem Schlitten von B. Gleicht Fluchtfehler aus, damit nichts klemmt.'));
 bGroup.add(info(cyl(CYL_R, A_ROD_END0 + B_OFFSET, A_ROD_END0 + B_OFFSET + B_BODY, mat.alu, 'x', AX_Y, ROW_Z), 'Zylinder B (Reihe, Kaskade vorn)', 'Airtec HM-20 (vorläufig), Hub ~34 mm', 'Neutral → oben. Wird mit der Kolbenstange A mitgeschoben.'));
 bGroup.add(box(B_BODY, AX_Y - CYL_R - 14, 30, mat.dark, A_ROD_END0 + B_OFFSET + B_BODY / 2, (AX_Y - CYL_R + 14) / 2, ROW_Z)); // carriage on guide
 const bRod = cyl(ROD_R, 0, 80, mat.steel, 'x', AX_Y, ROW_Z);
@@ -221,13 +228,20 @@ function wire() {
 }
 const gWire = wire(), rowWire = wire();
 world.add(gWire, rowWire);
-for (const [z, name] of [[G_Z, 'Wählseil'], [ROW_Z, 'Schaltseil']]) {
-  const k = name === 'Wählseil' ? 'G' : 'R';
-  const ax = ANCHOR[k];
-  world.add(info(box(4, 70, 50, mat.frame, ax, 41, z), `Seil-Widerlager ${name}`, `Blech 2 mm an der Bohrung, Ø ${HOLE_D[k]} mm (wie Original)`, 'Seilende clipst hier ein wie im originalen Schaltgehäuse. Blech muss an der Bohrung 2 mm dick sein, damit der Clip rastet; drumherum steif abstützen (Winkel/Rippe).'));
-  world.add(box(12, 70, 50, mat.dark, ax + 8, 41, z)); // stiffening rib behind the 2 mm plate
-  world.add(info(cyl(HOLE_D[k] / 2 - 2, ax - RIGID[k], ax + 2, mat.knob, 'x', AX_Y, z), `Festes Seilende ${name}`, `${RIGID[k]} mm in der Box (Notiz)`, 'Starres Endstück des Seilzugs, das Innenseil kommt vorne heraus zum Seilauge.'));
-  world.add(cyl(6, ax + 2, CB.x1 + 4, mat.knob, 'x', AX_Y, z));
+world.add(info(box(WALL_T, CB.h - FLOOR_T, CB.z1 - CB.z0, mat.alu, WALL_X + WALL_T / 2, FLOOR_T + (CB.h - FLOOR_T) / 2, (CB.z0 + CB.z1) / 2),
+  'Stirnwand = Seil-Widerlager', `Blech ${WALL_T} mm mit Clip-Bohrungen Ø ${HOLE_D.G} (Wählseil) / Ø ${HOLE_D.R} (Schaltseil)`,
+  'Die Seilenden clipsen direkt in die Boxwand ein wie im Original-Schaltgehäuse. Wand mit der Grundplatte verschrauben/verschweißen und außen mit zwei Knotenblechen abstützen – sie nimmt die volle Seilkraft auf.'));
+for (const z of [CB.z0 + 6, CB.z1 - 6]) {
+  world.add(info(box(40, 50, 4, mat.dark, WALL_X + WALL_T + 20, FLOOR_T + 25, z), 'Knotenblech', '4 mm, außen an der Stirnwand', 'Stützt die 2-mm-Stirnwand gegen die Seilkraft ab.'));
+}
+world.add(box(40, FLOOR_T, CB.z1 - CB.z0, mat.frame, WALL_X + WALL_T + 20, FLOOR_T / 2, (CB.z0 + CB.z1) / 2));
+for (const [z, name, k] of [[G_Z, 'Wählseil', 'G'], [ROW_Z, 'Schaltseil', 'R']]) {
+  const clip = new THREE.Mesh(new THREE.TorusGeometry(HOLE_D[k] / 2, 2, 8, 24), mat.knob);
+  clip.rotation.y = Math.PI / 2;
+  clip.position.set(WALL_X + WALL_T, AX_Y, z);
+  world.add(info(clip, `Clip-Bohrung ${name}`, `Ø ${HOLE_D[k]} mm in ${WALL_T} mm Wand`, 'Original-Seilende rastet hier ein.'));
+  world.add(info(cyl(HOLE_D[k] / 2 - 2, WALL_X - RIGID[k], WALL_X, mat.knob, 'x', AX_Y, z), `Festes Seilende ${name}`, `${RIGID[k]} mm in der Box (Notiz)`, 'Starres Endstück des Seilzugs, das Innenseil kommt vorne heraus zum Seilauge.'));
+  world.add(cyl(6, WALL_X + WALL_T, WALL_X + 60, mat.knob, 'x', AX_Y, z));
 }
 
 // poti on G rod end
@@ -374,12 +388,12 @@ for (const k of ['G', 'A', 'B']) for (const port of ['cap', 'rod']) {
   scene.add(m);
   hoses[k + port] = m;
 }
-function routeHose(mesh, from, to, dx = 0) {
-  const x = from.x + dx;
-  const pts = [from.clone(), V(from.x, HOSE_Y + 10, from.z - 30), V(x, HOSE_Y, VB.z0 + 4), V(x, HOSE_Y, CB.z1 - 4),
-    V((x + to.x) / 2, Math.min(Math.max(to.y + 25, HOSE_Y), CB.h - 6), (CB.z1 + to.z) / 2), V(to.x, to.y + 12, to.z), to.clone()];
+function routeHose(mesh, from, to, slot) {
+  const bz = BULK.z0 + slot * BULK.dz;
+  const pts = [from.clone(), V(from.x, HOSE_Y + 10, from.z - 30), V(from.x, HOSE_Y, VB.z0 + 4), V(CB.x0 - 30, HOSE_Y, VB.z0 - 12),
+    V(CB.x0 - 30, BULK.y, bz), V(CB.x0 + 12, BULK.y, bz), V((CB.x0 + to.x) / 2, CB.h - 8, (bz + to.z) / 2), V(to.x, to.y + 12, to.z), to.clone()];
   mesh.geometry.dispose();
-  mesh.geometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, 2.5, 6);
+  mesh.geometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 48, 2.5, 6);
 }
 
 // ---- simulation + UI
@@ -434,7 +448,7 @@ $('supply').onchange = (e) => (supply.visible = supplyLink.visible = e.target.ch
 $('lid').onchange = (e) => lids.forEach((l) => (l.visible = e.target.checked));
 const VIEWS = {
   all: { pos: [250, 1050, 1450], target: [250, 60, -40] },
-  box: { pos: [-40, 520, 560], target: [-10, 40, 40] },
+  box: { pos: [420, 330, -430], target: [20, 40, -20] },
   gearbox: { pos: [430, 620, 760], target: [760, 170, 0] },
   pedal: { pos: [560, 380, 40], target: [40, 120, -330] },
 };
@@ -591,8 +605,9 @@ function updateScene() {
     B: { cap: V(A_ROD_END0 + B_OFFSET + 14 + s.a, AX_Y + CYL_R, ROW_Z), rod: V(A_ROD_END0 + B_OFFSET + B_BODY - 14 + s.a, AX_Y + CYL_R, ROW_Z) },
   };
   for (const k of ['G', 'A', 'B']) {
-    routeHose(hoses[k + 'cap'], valvePorts[k].cap, ports[k].cap, -8);
-    routeHose(hoses[k + 'rod'], valvePorts[k].rod, ports[k].rod, 8);
+    const i = ['G', 'A', 'B'].indexOf(k) * 2;
+    routeHose(hoses[k + 'cap'], valvePorts[k].cap, ports[k].cap, i);
+    routeHose(hoses[k + 'rod'], valvePorts[k].rod, ports[k].rod, i + 1);
     hoses[k + 'cap'].material = s.valve[k] === 'ext' ? hoseMat.press : hoseMat.vent;
     hoses[k + 'rod'].material = s.valve[k] === 'ret' ? hoseMat.press : hoseMat.vent;
   }
