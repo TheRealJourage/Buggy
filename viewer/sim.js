@@ -1,30 +1,33 @@
 // Shift controller state machine + simple cylinder physics.
-// Model from Vault: Buggy/Druckluftanlage.md (3 gates 1/2, 3/4, 5/R; cascade A+B for rows).
+// Model from Vault: Buggy/Druckluftanlage.md (4 gates R | 1/2 | 3/4 | 5; cascade A+B for rows).
+// R and 5 sit at the G end positions and only have a top row; 1/2 and 3/4 are engaged on the fly.
 // Units: mm, s.
 
-export const GATE_X = [0, 32, 64];
-export const GATE_TRAVEL = 64;
+export const GATE_PITCH = 32; // assumed, notes say ~3-3.4 cm per gate
+export const GATE_X = [0, 1, 2, 3].map((i) => i * GATE_PITCH);
+export const GATE_TRAVEL = GATE_X[3];
+export const LAST_GATE = GATE_X.length - 1;
+export const GATE_NAMES = ['R', '1/2', '3/4', '5'];
 export const A_STROKE = 14; // bottom row -> neutral
 export const B_STROKE = 34; // neutral -> top row
 export const NEUTRAL_Z = A_STROKE;
 
 export const GEARS = {
-  R: { gate: 2, row: 'bottom' },
+  R: { gate: 0, row: 'top' },
   N: { gate: null, row: 'neutral' },
-  1: { gate: 0, row: 'top' },
-  2: { gate: 0, row: 'bottom' },
-  3: { gate: 1, row: 'top' },
-  4: { gate: 1, row: 'bottom' },
-  5: { gate: 2, row: 'top' },
+  1: { gate: 1, row: 'top' },
+  2: { gate: 1, row: 'bottom' },
+  3: { gate: 2, row: 'top' },
+  4: { gate: 2, row: 'bottom' },
+  5: { gate: 3, row: 'top' },
 };
 export const SEQUENCE = ['R', 'N', '1', '2', '3', '4', '5'];
 export const STATES = ['IDLE', 'TO_NEUTRAL', 'GATE_MOVE', 'ROW_ENGAGE', 'CORRECT', 'DONE', 'FAULT'];
 
 export const DEFAULTS = {
-  P_12: 10,
-  P_WIN_LO: 45,
-  P_WIN_HI: 55,
-  P_5R: 90,
+  P_END_LO: 10,      // poti % below = gate R reached
+  P_END_HI: 90,      // poti % above = gate 5 reached
+  WIN_HALF: 5,       // middle gates: window = center ± 5 %
   ventOffset: 0,     // % past the window edge before G is vented
   MAX_FAILS: 4,
   gSpeed: 250,       // mm/s, set by flow control on G
@@ -57,6 +60,10 @@ export function createSim(opts = {}) {
   };
 
   const poti = () => (s.x / GATE_TRAVEL) * 100;
+  const win = (g) => {
+    const c = (GATE_X[g] / GATE_TRAVEL) * 100;
+    return { c, lo: c - p.WIN_HALF, hi: c + p.WIN_HALF };
+  };
   const gateOf = () => GATE_X.findIndex((g) => Math.abs(s.x - g) <= p.captureTol);
   const sensors = () => ({
     Ain: s.a <= p.sensorTol, Aout: s.a >= A_STROKE - p.sensorTol,
@@ -130,26 +137,29 @@ export function createSim(opts = {}) {
         break;
       case 'GATE_MOVE': {
         const tg = tgt.gate;
+        const w = win(tg);
         if (tg === 0) setValve('G', 'ret');
-        else if (tg === 2) setValve('G', 'ext');
+        else if (tg === LAST_GATE) setValve('G', 'ext');
         else {
-          if (s.approach === 0) s.approach = s.x < GATE_X[1] ? 1 : -1;
+          if (s.approach === 0) s.approach = s.x < GATE_X[tg] ? 1 : -1;
           setValve('G', s.approach > 0 ? 'ext' : 'ret');
         }
         const reached =
-          tg === 0 ? pt < p.P_12 :
-          tg === 2 ? pt > p.P_5R :
-          s.approach > 0 ? pt >= p.P_WIN_LO : pt <= p.P_WIN_HI;
+          tg === 0 ? pt < p.P_END_LO :
+          tg === LAST_GATE ? pt > p.P_END_HI :
+          s.approach > 0 ? pt >= w.lo : pt <= w.hi;
         if (reached) enter('ROW_ENGAGE', `Poti ${pt.toFixed(1)} %`);
         break;
       }
       case 'ROW_ENGAGE': {
         setRow(tgt.row);
         const engaged = rowOf() === tgt.row;
-        if (tgt.gate === 1 && s.approach !== 0) {
-          if (s.approach > 0 && pt >= p.P_WIN_LO + p.ventOffset) setValve('G', 'vent');
-          if (s.approach < 0 && pt <= p.P_WIN_HI - p.ventOffset) setValve('G', 'vent');
-          const over = s.approach > 0 ? pt > p.P_WIN_HI : pt < p.P_WIN_LO;
+        const middle = tgt.gate > 0 && tgt.gate < LAST_GATE;
+        if (middle && s.approach !== 0) {
+          const w = win(tgt.gate);
+          if (s.approach > 0 && pt >= w.lo + p.ventOffset) setValve('G', 'vent');
+          if (s.approach < 0 && pt <= w.hi - p.ventOffset) setValve('G', 'vent');
+          const over = s.approach > 0 ? pt > w.hi : pt < w.lo;
           if (over && !engaged) {
             s.fails += 1;
             log(`Überschwingen ${s.fails}/${p.MAX_FAILS} (Poti ${pt.toFixed(1)} %)`);
@@ -162,11 +172,12 @@ export function createSim(opts = {}) {
         break;
       }
       case 'CORRECT': {
+        const w = win(tgt.gate);
         setRow('neutral');
-        if (pt > p.P_WIN_HI) setValve('G', 'ret');
-        else if (pt < p.P_WIN_LO) setValve('G', 'ext');
+        if (pt > w.hi) setValve('G', 'ret');
+        else if (pt < w.lo) setValve('G', 'ext');
         else setValve('G', 'vent');
-        if (pt >= p.P_WIN_LO && pt <= p.P_WIN_HI && rowOf() === 'neutral') {
+        if (pt >= w.lo && pt <= w.hi && rowOf() === 'neutral') {
           s.approach = s.vx >= 0 ? 1 : -1;
           enter('ROW_ENGAGE', 'neuer Versuch');
         }
@@ -215,7 +226,10 @@ export function createSim(opts = {}) {
     const na = clamp(s.a + vel('A') * dt, 0, A_STROKE);
     const nb = clamp(s.b + vel('B') * dt, 0, B_STROKE);
     const dNew = Math.abs(na + nb - NEUTRAL_Z);
-    const blocked = gateOf() === -1 && dNew > p.neutralTol && dNew > Math.abs(z - NEUTRAL_Z);
+    const g = gateOf();
+    const away = dNew > p.neutralTol && dNew > Math.abs(z - NEUTRAL_Z);
+    const noBottom = (g === 0 || g === LAST_GATE) && na + nb < NEUTRAL_Z - p.neutralTol; // R and 5 have no bottom row
+    const blocked = (g === -1 && away) || (noBottom && away);
     if (!blocked) {
       s.a = na;
       s.b = nb;
@@ -243,6 +257,7 @@ export function createSim(opts = {}) {
     plus: () => shift(1),
     minus: () => shift(-1),
     poti,
+    win,
     sensors,
     rowOf,
   };

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createSim, SEQUENCE } from '../sim.js';
+import { createSim, SEQUENCE, GEARS } from '../sim.js';
 
 const DT = 0.0005;
 
@@ -33,7 +33,8 @@ test('2 -> 3 goes through neutral, gate move and flying engage', () => {
   const states = sim.state.log.map((e) => e.msg.split(' ')[0]);
   assert.deepEqual(states.slice(1), ['TO_NEUTRAL', 'GATE_MOVE', 'ROW_ENGAGE', 'DONE', 'IDLE']);
   const pt = sim.poti();
-  assert.ok(pt >= 45 && pt <= 55, `poti ${pt}`);
+  const w = sim.win(2);
+  assert.ok(pt >= w.lo && pt <= w.hi, `poti ${pt}`);
 });
 
 test('3 -> 4 stays in gate, G never pressurized', () => {
@@ -74,4 +75,29 @@ test('plus/minus follow R N 1..5', () => {
   }
   assert.equal(sim.state.gear, 'R');
   assert.deepEqual(SEQUENCE, ['R', 'N', '1', '2', '3', '4', '5']);
+});
+
+test('layout R 1 3 5 top, 2 4 bottom, R and 5 at G end positions', () => {
+  assert.deepEqual(Object.entries(GEARS).filter(([, v]) => v.row === 'top').map(([k]) => k).sort(), ['1', '3', '5', 'R']);
+  const sim = createSim();
+  shiftTo(sim, 'R');
+  assert.ok(sim.poti() < 5);
+  shiftTo(sim, '1');
+  shiftTo(sim, '5');
+  assert.ok(sim.poti() > 95);
+  assert.equal(sim.rowOf(), 'top');
+});
+
+test('1/2 gate is also engaged on the fly from both sides', () => {
+  const sim = createSim();
+  shiftTo(sim, '5');
+  shiftTo(sim, '2');
+  assert.equal(sim.state.gear, '2');
+  shiftTo(sim, 'N');
+  shiftTo(sim, 'R');
+  shiftTo(sim, 'N');
+  shiftTo(sim, '1');
+  assert.equal(sim.state.gear, '1');
+  const w = sim.win(1);
+  assert.ok(sim.poti() >= w.lo && sim.poti() <= w.hi);
 });

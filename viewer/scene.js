@@ -1,12 +1,12 @@
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
-import { createSim, GATE_X, A_STROKE, B_STROKE, SEQUENCE, STATES } from './sim.js';
+import { createSim, GATE_X, GATE_TRAVEL, GATE_NAMES, A_STROKE, B_STROKE, SEQUENCE, STATES } from './sim.js';
 
 // ---- geometry constants (mm), HM-20 per Airtec catalog: body = 95 + stroke, WF 24, Ø27 / rod Ø8
 const CYL_R = 13.5;
 const ROD_R = 4;
 const WF = 24;
-const G_STROKE = 64;
+const G_STROKE = GATE_TRAVEL;
 const G_BODY = 95 + G_STROKE;
 const A_BODY = 95 + A_STROKE;
 const B_BODY = 95 + B_STROKE;
@@ -121,12 +121,12 @@ scene.add(world);
 
 world.add(box(520, 8, 420, mat.frame, -150, 4, -110));
 for (const z of [-250, 40]) {
-  world.add(info(cyl(6, -90, 160, mat.steel, 'x', 30, z), 'Führungsschiene', '—', 'Schematisch: der Schlitten trägt die Kaskade A+B und wird von G seitlich (Gasse) bewegt. Im Fahrzeug wirken die Zylinder über die Schaltzüge.'));
+  world.add(info(cyl(6, -90, GATE_TRAVEL + 100, mat.steel, 'x', 30, z), 'Führungsschiene', '—', 'Schematisch: der Schlitten trägt die Kaskade A+B und wird von G seitlich (Gasse) bewegt. Im Fahrzeug wirken die Zylinder über die Schaltzüge.'));
 }
 
 // G cylinder
 const gBodyStart = G_BODY_END - G_BODY;
-world.add(info(cyl(CYL_R, gBodyStart, G_BODY_END, mat.alu, 'x', G_Y, G_Z), 'Zylinder G (Gasse)', 'Airtec HM-20 (vorläufig), Hub ~64 mm', 'Wählt die Gasse 1/2 · 3/4 · 5/R. Position über Linear-Poti. In der Mitte (3/4) wird nicht angehalten: Reihe wird „fliegend“ eingelegt, G ab 45 % drucklos.'));
+world.add(info(cyl(CYL_R, gBodyStart, G_BODY_END, mat.alu, 'x', G_Y, G_Z), 'Zylinder G (Gasse)', `Airtec HM-20 (vorläufig), Hub ~${GATE_TRAVEL} mm`, 'Wählt die Gasse R · 1/2 · 3/4 · 5. R und 5 = Endlagen. In 1/2 und 3/4 wird nicht angehalten: Reihe wird „fliegend“ eingelegt, G ab Fensteranfang drucklos.'));
 world.add(box(14, 36, 36, mat.dark, gBodyStart - 4, G_Y, G_Z));
 world.add(box(20, 24, 40, mat.frame, gBodyStart - 4, 8, G_Z));
 const gRod = cyl(ROD_R, 0, 120, mat.steel, 'x', G_Y, G_Z);
@@ -140,24 +140,25 @@ world.add(label('G – Gasse', (gBodyStart + G_BODY_END) / 2, G_Y + 45, G_Z));
 
 // Poti
 const POTI_Z = 10;
-world.add(info(box(170, 14, 14, mat.dark, 30, 20, POTI_Z), 'Linear-Poti G', 'noch auswählen (nicht Airtec), ~75 mm', 'Misst die Gassenposition 0–100 %: < 10 % = 1/2, 45–55 % = 3/4, > 90 % = 5/R.'));
+world.add(info(box(GATE_TRAVEL + 110, 14, 14, mat.dark, GATE_TRAVEL / 2, 20, POTI_Z), 'Linear-Poti G', `noch auswählen (nicht Airtec), ≥ ${GATE_TRAVEL} mm`, 'Misst die Gassenposition 0–100 %: < 10 % = R, 1/2 und 3/4 je Mitte ± 5 %, > 90 % = 5.'));
 const potiWiper = box(6, 10, 18, mat.red, 0, 30, POTI_Z);
 world.add(potiWiper);
-world.add(label('Poti', 30, 2, POTI_Z + 30, 11));
+world.add(label('Poti', GATE_TRAVEL / 2, 2, POTI_Z + 30, 11));
 
 // Gate plate (H pattern)
-world.add(info(box(130, 4, 110, mat.plate, 32, PLATE_Y, 20), 'Schaltkulisse (Darstellung)', '—', 'Zeigt den Weg des Schaltfingers. Gassen: 1/2 · 3/4 · 5/R, oben 1/3/5, unten 2/4/R.'));
+world.add(info(box(GATE_TRAVEL + 70, 4, 110, mat.plate, GATE_TRAVEL / 2, PLATE_Y, 20), 'Schaltkulisse (Darstellung)', '—', 'Zeigt den Weg des Schaltfingers. Oben R · 1 · 3 · 5, unten 2 · 4.'));
 const slotY = PLATE_Y + 2.2;
-for (const gx of GATE_X) world.add(box(8, 0.5, TOP_PIN_Z - B_ROD_END0 + 8, mat.slot, gx, slotY, (TOP_PIN_Z + B_ROD_END0) / 2));
-world.add(box(GATE_TRAVEL_W(), 0.5, 8, mat.slot, 32, slotY, NEUTRAL_PIN_Z));
-function GATE_TRAVEL_W() { return GATE_X[2] - GATE_X[0] + 8; }
-const topGears = ['1', '3', '5'];
-const botGears = ['2', '4', 'R'];
+// slot per gate: R and 5 only neutral -> top, 1/2 and 3/4 full
+const topGears = ['R', '1', '3', '5'];
+const botGears = [null, '2', '4', null];
 GATE_X.forEach((gx, i) => {
+  const z0 = botGears[i] ? B_ROD_END0 : NEUTRAL_PIN_Z;
+  world.add(box(8, 0.5, TOP_PIN_Z - z0 + 8, mat.slot, gx, slotY, (TOP_PIN_Z + z0) / 2));
   world.add(label(topGears[i], gx, PLATE_Y + 12, TOP_PIN_Z + 18, 13, '#ffd27a'));
-  world.add(label(botGears[i], gx, PLATE_Y + 12, B_ROD_END0 - 18, 13, '#ffd27a'));
+  if (botGears[i]) world.add(label(botGears[i], gx, PLATE_Y + 12, B_ROD_END0 - 18, 13, '#ffd27a'));
 });
-world.add(label('N', GATE_X[2] + 22, PLATE_Y + 12, NEUTRAL_PIN_Z, 11, '#9ad'));
+world.add(box(GATE_TRAVEL + 8, 0.5, 8, mat.slot, GATE_TRAVEL / 2, slotY, NEUTRAL_PIN_Z));
+world.add(label('N', GATE_TRAVEL + 24, PLATE_Y + 12, NEUTRAL_PIN_Z, 11, '#9ad'));
 
 // ---- carriage with cascade A + B
 const carriage = new THREE.Group();
@@ -336,14 +337,20 @@ function drawPotiBar(pt) {
   ctx.clearRect(0, 0, W, c.height);
   ctx.fillStyle = '#2a2d33'; ctx.fillRect(x0, 14, w, 12);
   ctx.fillStyle = '#2d5a3a';
-  ctx.fillRect(x0, 14, X(p.P_12) - x0, 12);
-  ctx.fillRect(X(p.P_WIN_LO), 14, X(p.P_WIN_HI) - X(p.P_WIN_LO), 12);
-  ctx.fillRect(X(p.P_5R), 14, x0 + w - X(p.P_5R), 12);
-  ctx.fillStyle = '#c9822b';
-  for (const v of [p.P_WIN_LO + p.ventOffset, p.P_WIN_HI - p.ventOffset]) ctx.fillRect(X(v) - 1, 10, 2, 20);
+  ctx.fillRect(x0, 14, X(p.P_END_LO) - x0, 12);
+  ctx.fillRect(X(p.P_END_HI), 14, x0 + w - X(p.P_END_HI), 12);
+  const marks = [p.P_END_LO, p.P_END_HI];
+  for (const g of [1, 2]) {
+    const wn = sim.win(g);
+    ctx.fillStyle = '#2d5a3a';
+    ctx.fillRect(X(wn.lo), 14, X(wn.hi) - X(wn.lo), 12);
+    ctx.fillStyle = '#c9822b';
+    for (const v of [wn.lo + p.ventOffset, wn.hi - p.ventOffset]) ctx.fillRect(X(v) - 1, 10, 2, 20);
+    marks.push(Math.round(wn.lo), Math.round(wn.hi));
+  }
   ctx.fillStyle = '#aaa'; ctx.font = '10px system-ui';
-  for (const v of [p.P_12, p.P_WIN_LO, p.P_WIN_HI, p.P_5R]) ctx.fillText(v, X(v) - 6, 42);
-  ctx.fillText('1/2', x0, 9); ctx.fillText('3/4', X(50) - 8, 9); ctx.fillText('5/R', x0 + w - 18, 9);
+  for (const v of marks) ctx.fillText(v, X(v) - 6, 42);
+  GATE_X.forEach((gx, i) => ctx.fillText(GATE_NAMES[i], Math.min(X((gx / GATE_TRAVEL) * 100) - 6, x0 + w - 14), 9));
   ctx.fillStyle = '#ff5050';
   ctx.beginPath(); ctx.moveTo(X(pt), 28); ctx.lineTo(X(pt) - 5, 35); ctx.lineTo(X(pt) + 5, 35); ctx.fill();
   ctx.fillRect(X(pt) - 1, 12, 2, 16);
@@ -352,23 +359,24 @@ function drawPotiBar(pt) {
 function drawH(s) {
   const c = $('hPattern'), ctx = c.getContext('2d');
   const W = c.width, H = c.height;
-  const px = (x) => 50 + (x / 64) * (W - 100);
+  const px = (x) => 40 + (x / GATE_TRAVEL) * (W - 90);
   const pz = (z) => H - 22 - (z / (A_STROKE + B_STROKE)) * (H - 44); // z = a + b, top row up
   ctx.clearRect(0, 0, W, H);
   ctx.strokeStyle = '#555'; ctx.lineWidth = 8; ctx.lineCap = 'round';
   ctx.beginPath();
-  for (const gx of GATE_X) { ctx.moveTo(px(gx), pz(0)); ctx.lineTo(px(gx), pz(A_STROKE + B_STROKE)); }
-  ctx.moveTo(px(0), pz(A_STROKE)); ctx.lineTo(px(64), pz(A_STROKE));
+  GATE_X.forEach((gx, i) => { ctx.moveTo(px(gx), pz(botGears[i] ? 0 : A_STROKE)); ctx.lineTo(px(gx), pz(A_STROKE + B_STROKE)); });
+  ctx.moveTo(px(0), pz(A_STROKE)); ctx.lineTo(px(GATE_TRAVEL), pz(A_STROKE));
   ctx.stroke();
   ctx.font = 'bold 12px system-ui';
   GATE_X.forEach((gx, i) => {
     for (const [g, z, dy] of [[topGears[i], A_STROKE + B_STROKE, -8], [botGears[i], 0, 18]]) {
+      if (!g) continue;
       ctx.fillStyle = g === s.target ? '#ffd27a' : g === s.gear ? '#5f5' : '#aaa';
       ctx.fillText(g, px(gx) - 4, pz(z) + dy);
     }
   });
   ctx.fillStyle = s.gear === 'N' ? '#5f5' : '#9ad';
-  ctx.fillText('N', px(64) + 14, pz(A_STROKE) + 4);
+  ctx.fillText('N', px(GATE_TRAVEL) + 14, pz(A_STROKE) + 4);
   ctx.fillStyle = '#ff5050';
   ctx.beginPath(); ctx.arc(px(s.x), pz(s.a + s.b), 6, 0, Math.PI * 2); ctx.fill();
 }
