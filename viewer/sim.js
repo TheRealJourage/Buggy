@@ -22,7 +22,9 @@ export const GEARS = {
   5: { gate: 3, row: 'top' },
 };
 export const SEQUENCE = ['R', 'N', '1', '2', '3', '4', '5'];
-export const STATES = ['IDLE', 'TO_NEUTRAL', 'GATE_MOVE', 'ROW_ENGAGE', 'CORRECT', 'DONE', 'FAULT'];
+export const STATES = ['IDLE', 'CLUTCH_OPEN', 'TO_NEUTRAL', 'GATE_MOVE', 'ROW_ENGAGE', 'CORRECT', 'DONE', 'CLUTCH_CLOSE', 'FAULT'];
+export const CLUTCH_TRAVEL = 50; // mm pedal travel (notes)
+const SHIFTING = ['TO_NEUTRAL', 'GATE_MOVE', 'ROW_ENGAGE', 'CORRECT'];
 
 export const DEFAULTS = {
   P_END_LO: 10,      // poti % below = gate R reached
@@ -39,6 +41,12 @@ export const DEFAULTS = {
   captureTol: 2.5,   // mm: row can leave neutral only this close to a gate
   neutralTol: 1.5,   // mm: G can move only this close to neutral
   sensorTol: 0.5,    // mm
+  autoClutch: true,  // false: driver presses the pedal, controller only checks it
+  kSpeed: 400,       // mm/s clutch cylinder K pressing the pedal
+  kRelease: 150,     // mm/s pedal return, throttled (engagement speed)
+  pedalSpeed: 250,   // mm/s driver foot
+  clutchWait: 3.0,   // s manual mode: wait this long for the pedal, then drop the command
+  clutchTol: 3,      // mm: pedal sensors "getrennt" / "eingekuppelt"
 };
 
 const ROW_VALVES = {
@@ -53,9 +61,9 @@ export function createSim(opts = {}) {
   const p = { ...DEFAULTS, ...opts };
   const s = {
     t: 0, state: 'IDLE', stateT: 0, gear: 'N', target: null, fails: 0, message: '',
-    x: GATE_X[1], vx: 0, a: A_STROKE, b: 0,
-    cmd: { G: 'vent', A: 'vent', B: 'vent' },
-    valve: { G: 'vent', A: 'vent', B: 'vent' },
+    x: GATE_X[1], vx: 0, a: A_STROKE, b: 0, c: 0, foot: false, next: null,
+    cmd: { G: 'vent', A: 'vent', B: 'vent', K: 'vent' },
+    valve: { G: 'vent', A: 'vent', B: 'vent', K: 'vent' },
     pending: [], approach: 0, log: [],
   };
 
@@ -68,6 +76,11 @@ export function createSim(opts = {}) {
   const sensors = () => ({
     Ain: s.a <= p.sensorTol, Aout: s.a >= A_STROKE - p.sensorTol,
     Bin: s.b <= p.sensorTol, Bout: s.b >= B_STROKE - p.sensorTol,
+  });
+  const clutch = () => ({
+    pct: (s.c / CLUTCH_TRAVEL) * 100,
+    open: s.c >= CLUTCH_TRAVEL - p.clutchTol,
+    closed: s.c <= p.clutchTol,
   });
   const rowOf = () => {
     const se = sensors();
@@ -109,23 +122,41 @@ export function createSim(opts = {}) {
     s.message = '';
     s.approach = 0;
     log(`Befehl ${s.gear} → ${g}`);
-    if (g === 'N') enter('TO_NEUTRAL');
-    else if (gateOf() === GEARS[g].gate) enter('ROW_ENGAGE', 'gleiche Gasse');
-    else if (rowOf() === 'neutral') enter('GATE_MOVE');
-    else enter('TO_NEUTRAL');
+    if (g === 'N') s.next = ['TO_NEUTRAL', ''];
+    else if (gateOf() === GEARS[g].gate) s.next = ['ROW_ENGAGE', 'gleiche Gasse'];
+    else if (rowOf() === 'neutral') s.next = ['GATE_MOVE', ''];
+    else s.next = ['TO_NEUTRAL', ''];
+    enter('CLUTCH_OPEN', p.autoClutch ? 'Zylinder K' : 'warte auf Fußkupplung');
     return true;
   }
 
   function control() {
     const pt = poti();
     const tgt = s.target ? GEARS[s.target] : null;
-    if (['TO_NEUTRAL', 'GATE_MOVE', 'ROW_ENGAGE', 'CORRECT'].includes(s.state) && s.stateT > p.timeout) {
+    if (SHIFTING.includes(s.state) && s.stateT > p.timeout) {
       fault(`Timeout in ${s.state}`);
+      return;
+    }
+    if (SHIFTING.includes(s.state) && !clutch().open) {
+      fault('Kupplung während der Schaltung eingekuppelt');
       return;
     }
     switch (s.state) {
       case 'IDLE':
         ventAll();
+        setValve('K', 'vent');
+        break;
+      case 'CLUTCH_OPEN':
+        if (p.autoClutch) setValve('K', 'ext');
+        if (clutch().open) {
+          enter(...s.next);
+        } else if (p.autoClutch && s.stateT > p.timeout) {
+          fault('Kupplung trennt nicht (Zylinder K)');
+        } else if (!p.autoClutch && s.stateT > p.clutchWait) {
+          s.message = 'Kupplung nicht getreten – Befehl verworfen';
+          s.target = null;
+          enter('IDLE', 'kein Gangwechsel');
+        }
         break;
       case 'TO_NEUTRAL':
         setValve('G', 'vent');
@@ -188,13 +219,19 @@ export function createSim(opts = {}) {
         s.gear = s.target;
         s.target = null;
         s.fails = 0;
-        enter('IDLE', `Gang ${s.gear}`);
+        if (p.autoClutch) enter('CLUTCH_CLOSE', `Gang ${s.gear}`);
+        else enter('IDLE', `Gang ${s.gear} – Fußkupplung loslassen`);
+        break;
+      case 'CLUTCH_CLOSE':
+        setValve('K', 'vent'); // spring returns the pedal, speed set by the throttle
+        if (clutch().closed) enter('IDLE', 'eingekuppelt');
         break;
       case 'FAULT':
         setValve('G', 'vent');
         setRow('neutral');
         if (rowOf() === 'neutral') {
           ventAll();
+          setValve('K', 'vent');
           s.gear = 'N';
           s.target = null;
           enter('IDLE', 'Fehler → N, Meldung ans Cockpit');
@@ -221,6 +258,13 @@ export function createSim(opts = {}) {
       s.x = clamp(s.x, 0, GATE_TRAVEL);
       s.vx = 0;
     }
+
+    if (p.autoClutch) {
+      s.c += (s.valve.K === 'ext' ? p.kSpeed : -p.kRelease) * dt;
+    } else {
+      s.c += (s.foot ? p.pedalSpeed : -p.pedalSpeed) * dt;
+    }
+    s.c = clamp(s.c, 0, CLUTCH_TRAVEL);
 
     const vel = (k) => (s.valve[k] === 'ext' ? p.rowSpeed : s.valve[k] === 'ret' ? -p.rowSpeed : 0);
     const na = clamp(s.a + vel('A') * dt, 0, A_STROKE);
@@ -258,6 +302,8 @@ export function createSim(opts = {}) {
     minus: () => shift(-1),
     poti,
     win,
+    clutch,
+    setFoot: (v) => { s.foot = v; },
     sensors,
     rowOf,
   };

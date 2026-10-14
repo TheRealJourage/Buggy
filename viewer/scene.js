@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
-import { createSim, GATE_X, GATE_TRAVEL, GATE_NAMES, A_STROKE, B_STROKE, SEQUENCE, STATES } from './sim.js';
+import { createSim, GATE_X, GATE_TRAVEL, GATE_NAMES, A_STROKE, B_STROKE, SEQUENCE, STATES, CLUTCH_TRAVEL } from './sim.js';
 
 // ---- geometry constants (mm), HM-20 per Airtec catalog: body = 95 + stroke, WF 24, Ø27 / rod Ø8
 const CYL_R = 13.5;
@@ -231,7 +231,7 @@ const sensorMats = {
 };
 
 // valves on manifold (long axis along Z)
-world.add(info(box(115, 20, 170, mat.frame, VALVE_X.A, 16, VALVE_ZC), 'Ventilplatte / Verteiler', 'Airtec Reihenleiste (Option)', 'Gemeinsame Druckversorgung P (1), Abluft über Schalldämpfer 40-501-18.'));
+world.add(info(box(150, 20, 170, mat.frame, VALVE_X.A + 17, 16, VALVE_ZC), 'Ventilplatte / Verteiler', 'Airtec Reihenleiste (Option)', 'Gemeinsame Druckversorgung P (1), Abluft über Schalldämpfer 40-501-18.'));
 const coilMats = {};
 const valvePorts = {};
 for (const [k, x] of Object.entries(VALVE_X)) {
@@ -246,6 +246,38 @@ for (const [k, x] of Object.entries(VALVE_X)) {
 }
 world.add(info(cyl(7, BOX.x0 - 15, BOX.x0 + 10, mat.blue, 'x', 30, VALVE_ZC), 'Druckluft-Eingang (Schottverschraubung)', 'blue C-line', 'Vom Filterregler, Schaltdruck max. 10 bar.'));
 world.add(tube([V(BOX.x0 + 10, 30, VALVE_ZC), V(BOX.x0 + 25, 25, VALVE_ZC), V(VALVE_X.G - 30, 18, VALVE_ZC)], mat.supplyHose, 3));
+
+// ---- clutch: pedal outside the box, optional cylinder K + valve K (auto mode only)
+const PEDAL = { x: 60, pivotY: 270, pivotZ: -360, arm: 220 }; // behind the box, out of the box view
+const pedal = new THREE.Group();
+pedal.position.set(PEDAL.x, PEDAL.pivotY, PEDAL.pivotZ);
+pedal.add(cyl(8, -20, 20, mat.steel, 'x', 0, 0));
+pedal.add(info(box(14, PEDAL.arm, 10, mat.dark, 0, -PEDAL.arm / 2, 0), 'Kupplungspedal', 'Original, Weg ~5 cm (Notiz)', 'Manuell: Fuß tritt vor Plus/Minus. Automatisiert: Zylinder K drückt das Pedal.'));
+pedal.add(box(60, 40, 8, mat.knob, 0, -PEDAL.arm, -2));
+world.add(pedal);
+world.add(box(60, 20, 60, mat.frame, PEDAL.x, 10, PEDAL.pivotZ - 40));
+world.add(cyl(6, 10, PEDAL.pivotY, mat.frame, 'y', PEDAL.x, PEDAL.pivotZ - 40));
+world.add(label('Kupplungspedal', PEDAL.x, PEDAL.pivotY + 35, PEDAL.pivotZ, 12));
+
+const kGroup = new THREE.Group();
+world.add(kGroup);
+const K_Y = PEDAL.pivotY - PEDAL.arm + 15;
+const K_ROD0 = PEDAL.pivotZ + 6;            // rod end touches the pad at c = 0
+const K_BODY0 = K_ROD0 + WF;
+const K_BODY = 95 + CLUTCH_TRAVEL;
+kGroup.add(info(cyl(CYL_R, K_BODY0, K_BODY0 + K_BODY, mat.alu, 'z', PEDAL.x, K_Y), 'Kupplungszylinder K (Option)', `Airtec HM-20, Hub ${CLUTCH_TRAVEL} mm (vorläufig)`, 'Drückt das Pedal. Trennen schnell, Einkuppeln über Drossel langsam (Regler fehlt noch, fest 150 mm/s).'));
+kGroup.add(box(36, K_Y - CYL_R, 20, mat.dark, PEDAL.x, (K_Y - CYL_R) / 2, K_BODY0 + K_BODY - 10));
+const kRod = cyl(ROD_R, 0, 80, mat.steel, 'z', PEDAL.x, K_Y);
+kGroup.add(kRod);
+kGroup.add(label('K', PEDAL.x, K_Y + 40, K_BODY0 + K_BODY / 2, 12));
+const kValveX = -135;
+const kCoil = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, emissive: 0x000000 });
+kGroup.add(info(box(22, 30, 100, mat.valve, kValveX, 41, VALVE_ZC), 'Ventil K (Kupplung)', 'Vorschlag: Airtec M-04-511-HN-441 (5/2 monostabil)', 'Spule an = Pedal getreten. Spule aus = Federrückstellung, Pedal kommt gedrosselt zurück.'));
+kGroup.add(info(box(26, 30, 26, kCoil, kValveX, 41, VALVE_ZC - 63), 'Spule Ventil K', 'Stecker 28-ST-01', 'Bestromt = Kupplung trennen.'));
+kGroup.add(label('K', kValveX, 80, VALVE_ZC, 12, '#ffd27a'));
+const kHose = tube([V(kValveX, 56, VALVE_ZC - 15), V(kValveX, 100, VALVE_ZC - 80), V(-60, 135, BOX.z0 + 10), V(PEDAL.x, 120, BOX.z0 - 15), V(PEDAL.x, K_Y + 30, K_BODY0 + K_BODY - 14), V(PEDAL.x, K_Y + CYL_R, K_BODY0 + K_BODY - 14)], hoseMat.vent, 2.5);
+kGroup.add(kHose);
+kGroup.visible = false;
 
 // controller
 world.add(info(box(120, 40, 90, new THREE.MeshStandardMaterial({ color: 0x2b5d34, roughness: 0.6 }), -40, 26, 160), 'Steuergerät', 'offen (Mikrocontroller + 6 MOSFET-Treiber)', 'Liest Poti + 4 Endlagensensoren, schaltet 6 Spulen (je ~0,35 A bei 12 V), CAN SHIFT.SELECT 0x150.'));
@@ -371,6 +403,7 @@ initSliders();
 $('reset').onclick = () => {
   const keep = { gSpeed: sim.params.gSpeed, gDecel: sim.params.gDecel, ventOffset: sim.params.ventOffset };
   sim = createSim(keep);
+  applyClutchMode($('autoClutch').checked);
 };
 $('labels').onchange = (e) => labels.forEach((l) => (l.visible = e.target.checked));
 $('supply').onchange = (e) => (supply.visible = supplyLink.visible = e.target.checked);
@@ -379,6 +412,7 @@ const VIEWS = {
   all: { pos: [250, 1050, 1450], target: [250, 60, -40] },
   box: { pos: [-40, 520, 560], target: [-10, 40, 40] },
   gearbox: { pos: [430, 620, 760], target: [760, 170, 0] },
+  pedal: { pos: [560, 380, 40], target: [40, 120, -330] },
 };
 for (const [k, v] of Object.entries(VIEWS)) {
   $('view-' + k).onclick = () => {
@@ -391,6 +425,21 @@ for (const [k, v] of Object.entries(VIEWS)) {
 $('states').innerHTML = STATES.map((s) => `<span id="st-${s}">${s}</span>`).join('');
 
 const vText = { ext: 'ausfahren (Spule 14)', ret: 'einfahren (Spule 12)', vent: 'drucklos' };
+const kText = { ext: 'Kupplung trennen (Spule an)', vent: 'Feder, einkuppeln' };
+
+function applyClutchMode(auto) {
+  sim.params.autoClutch = auto;
+  sim.setFoot(false);
+  kGroup.visible = auto;
+  $('manualClutch').style.display = auto ? 'none' : 'block';
+}
+$('autoClutch').onchange = (e) => applyClutchMode(e.target.checked);
+const toggleFoot = () => sim.setFoot(!sim.state.foot);
+$('foot').onclick = toggleFoot;
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space' && !sim.params.autoClutch) { e.preventDefault(); toggleFoot(); }
+});
+applyClutchMode(false);
 
 function drawPotiBar(pt) {
   const c = $('potiBar'), ctx = c.getContext('2d'), p = sim.params;
@@ -451,7 +500,13 @@ function updateHud() {
   $('poti').textContent = `${pt.toFixed(1)} %`;
   $('fails').textContent = `${s.fails} / ${sim.params.MAX_FAILS}`;
   $('msg').textContent = s.message ? `⚠ ${s.message} → Meldung ans Cockpit` : '';
-  $('valves').innerHTML = ['G', 'A', 'B'].map((k) => `<tr><td>${k}</td><td class="v-${s.valve[k]}">${vText[s.valve[k]]}</td></tr>`).join('');
+  $('valves').innerHTML = ['G', 'A', 'B'].map((k) => `<tr><td>${k}</td><td class="v-${s.valve[k]}">${vText[s.valve[k]]}</td></tr>`).join('')
+    + (sim.params.autoClutch ? `<tr><td>K</td><td class="v-${s.valve.K}">${kText[s.valve.K]}</td></tr>` : '');
+  const cl = sim.clutch();
+  $('clutch').innerHTML = `${cl.pct.toFixed(0)} % – ${cl.open ? '<span class="s-on">getrennt</span>' : cl.closed ? 'eingekuppelt' : 'schleift'}`
+    + (sim.params.autoClutch ? '' : ` (Fuß ${s.foot ? 'getreten' : 'oben'})`);
+  $('foot').classList.toggle('active', s.foot);
+  $('foot').textContent = s.foot ? 'Kupplung loslassen' : 'Kupplung treten';
   const se = sim.sensors();
   $('sensors').innerHTML = [['A', 'Ain', 'Aout'], ['B', 'Bin', 'Bout']].map(([k, i, o]) =>
     `<tr><td>${k}</td><td class="${se[i] ? 's-on' : 's-off'}">● eingefahren</td><td class="${se[o] ? 's-on' : 's-off'}">● ausgefahren</td></tr>`).join('');
@@ -492,6 +547,12 @@ function updateScene() {
     m.scale.y = Math.max(1, Math.abs(tipX - sleeveEnd[k].x));
     m.position.set((tipX + sleeveEnd[k].x) / 2, GB.pivotY + 6, L.tipZ);
   }
+
+  const theta = Math.asin(Math.min(1, s.c / PEDAL.arm));
+  pedal.rotation.x = theta;
+  kRod.position.z = K_ROD0 - s.c + 40;
+  kCoil.emissive.setHex(s.valve.K === 'ext' ? 0xff8a20 : 0x000000);
+  kHose.material = s.valve.K === 'ext' ? hoseMat.press : hoseMat.vent;
 
   const se = sim.sensors();
   for (const [k, m] of Object.entries(sensorMats)) m.emissive.setHex(se[k] ? 0x22ff44 : 0x000000);

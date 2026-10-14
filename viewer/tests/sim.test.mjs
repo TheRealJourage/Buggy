@@ -31,7 +31,7 @@ test('2 -> 3 goes through neutral, gate move and flying engage', () => {
   sim.state.log.length = 0;
   shiftTo(sim, '3');
   const states = sim.state.log.map((e) => e.msg.split(' ')[0]);
-  assert.deepEqual(states.slice(1), ['TO_NEUTRAL', 'GATE_MOVE', 'ROW_ENGAGE', 'DONE', 'IDLE']);
+  assert.deepEqual(states.slice(1), ['CLUTCH_OPEN', 'TO_NEUTRAL', 'GATE_MOVE', 'ROW_ENGAGE', 'DONE', 'CLUTCH_CLOSE', 'IDLE']);
   const pt = sim.poti();
   const w = sim.win(2);
   assert.ok(pt >= w.lo && pt <= w.hi, `poti ${pt}`);
@@ -100,4 +100,47 @@ test('1/2 gate is also engaged on the fly from both sides', () => {
   assert.equal(sim.state.gear, '1');
   const w = sim.win(1);
   assert.ok(sim.poti() >= w.lo && sim.poti() <= w.hi);
+});
+
+test('auto clutch: pedal open during the whole shift, closed afterwards', () => {
+  const sim = createSim();
+  sim.request('3');
+  let closedWhileShifting = false;
+  do {
+    sim.step(DT);
+    if (['TO_NEUTRAL', 'GATE_MOVE', 'ROW_ENGAGE', 'CORRECT'].includes(sim.state.state) && !sim.clutch().open) closedWhileShifting = true;
+  } while (sim.state.state !== 'IDLE');
+  assert.equal(sim.state.gear, '3');
+  assert.equal(closedWhileShifting, false);
+  assert.ok(sim.clutch().closed);
+});
+
+test('manual clutch: command waits for the foot, then shifts', () => {
+  const sim = createSim({ autoClutch: false });
+  sim.request('3');
+  for (let i = 0; i < 1000; i++) sim.step(DT); // 0.5 s without pedal
+  assert.equal(sim.state.state, 'CLUTCH_OPEN');
+  sim.setFoot(true);
+  runUntilIdle(sim);
+  assert.equal(sim.state.gear, '3');
+});
+
+test('manual clutch: no pedal -> command dropped, gear unchanged, no fault', () => {
+  const sim = createSim({ autoClutch: false });
+  sim.request('3');
+  runUntilIdle(sim, 5);
+  assert.equal(sim.state.gear, 'N');
+  assert.match(sim.state.message, /nicht getreten/);
+});
+
+test('manual clutch released mid-shift -> fault to neutral', () => {
+  const sim = createSim({ autoClutch: false });
+  sim.setFoot(true);
+  shiftTo(sim, '2');
+  sim.request('5');
+  while (sim.state.state !== 'GATE_MOVE') sim.step(DT);
+  sim.setFoot(false);
+  runUntilIdle(sim);
+  assert.equal(sim.state.gear, 'N');
+  assert.match(sim.state.message, /Kupplung/);
 });

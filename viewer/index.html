@@ -39,8 +39,10 @@
     <div style="margin-top:6px">
       <button id="minus">− runter</button>
       <button id="plus">+ hoch</button>
-      <span class="note">Kupplung: manuell treten</span>
     </div>
+    <h3>Kupplung</h3>
+    <label><input id="autoClutch" type="checkbox" /> Kupplung automatisiert (Zylinder K)</label>
+    <div id="manualClutch" style="margin-top:4px"><button id="foot">Kupplung treten</button> <span class="note">oder Leertaste</span></div>
     <h3>Simulation</h3>
     <label>Zeitlupe <input id="timeScale" type="range" min="0.02" max="1" step="0.01" value="0.1" /> <span id="timeScaleV"></span></label>
     <label>G-Geschwindigkeit (Drossel) <input id="gSpeed" type="range" min="100" max="700" step="10" /> <span id="gSpeedV"></span></label>
@@ -49,7 +51,7 @@
     <label><input id="labels" type="checkbox" checked /> Beschriftungen</label>
     <label><input id="supply" type="checkbox" checked /> Versorgung (Kompressor, Tank) zeigen</label>
     <label><input id="lid" type="checkbox" /> Deckel der Box zeigen</label>
-    <div style="margin-top:6px">Ansicht: <button id="view-all">Gesamt</button> <button id="view-box">Box</button> <button id="view-gearbox">Getriebe</button></div>
+    <div style="margin-top:6px">Ansicht: <button id="view-all">Gesamt</button> <button id="view-box">Box</button> <button id="view-gearbox">Getriebe</button> <button id="view-pedal">Kupplung</button></div>
     <button id="reset" style="margin-top:6px">Zurücksetzen</button>
     <div class="note">Aufbau: alle Zylinder nebeneinander in einer Box, Wählseil (G) und Schaltseil (A+B Kaskade) direkt an den Kolbenstangen, Seile laufen zum Getriebe. Teile nach Airtec-Katalog (HM-20, M-04-533, ZS-6701). Annahmen: Hübe A 14 / B 34 mm, Gassenabstand 32 mm (G 96 mm), Boxmaße, Getriebe und Tank nur Platzhalter.</div>
   </div>
@@ -62,10 +64,11 @@
       <tr><td>Gang</td><td id="gear"></td></tr>
       <tr><td>Poti G</td><td id="poti"></td></tr>
       <tr><td>Fehlversuche</td><td id="fails"></td></tr>
+      <tr><td>Kupplung</td><td id="clutch"></td></tr>
     </table>
     <canvas id="potiBar" class="hud" width="276" height="44"></canvas>
     <canvas id="hPattern" class="hud" width="276" height="120"></canvas>
-    <h3>Ventile (5/3, Mitte entlüftet)</h3>
+    <h3>Ventile</h3>
     <table id="valves"></table>
     <h3>Endlagensensoren</h3>
     <table id="sensors"></table>
