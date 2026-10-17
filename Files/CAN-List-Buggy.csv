@@ -5,7 +5,7 @@ Lighting,Fernlicht,Button/Toggle,Dauer-Fernlicht umschalten,LIGHT.IN,0x110,0x010
 Lighting,Lichthupe,Momentary,Kurzzeitiges Fernlicht,LIGHT.IN,0x110,0x0104,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }","edge: 0=level,1=press,2=release; value optional (z.B. encoder delta)"
 Lighting,Zusatz-Fernlicht,Button/Toggle,Zusatzscheinwerfer (Dach/Front),LIGHT.IN,0x110,0x0105,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }","edge: 0=level,1=press,2=release; value optional (z.B. encoder delta)"
 Lighting,Offroad-Licht,Button/Toggle,Arbeitslicht vorn/hinten,LIGHT.IN,0x110,0x0106,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }","edge: 0=level,1=press,2=release; value optional (z.B. encoder delta)"
-Lighting,Nebel vorne,Button/Toggle,Frontnebler (optional),LIGHT.IN,0x110,0x0107,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }","edge: 0=level,1=press,2=release; value optional (z.B. encoder delta)"
+Lighting,Nebel vorne,Button/Toggle,Frontnebler (vorhanden; nur mit Stand- oder Abblendlicht),LIGHT.IN,0x110,0x0107,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }","edge: 0=level,1=press,2=release; value optional (z.B. encoder delta)"
 Lighting,Nebelschluss,Button/Toggle,Hecknebelleuchte (optional),LIGHT.IN,0x110,0x0108,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }","edge: 0=level,1=press,2=release; value optional (z.B. encoder delta)"
 Lighting,Warnblinker,Button/Toggle,Beide Blinker,LIGHT.IN,0x110,0x0109,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }","edge: 0=level,1=press,2=release; value optional (z.B. encoder delta)"
 Lighting,Rückfahr-Arbeitslicht (manuell),Button/Toggle,Licht beim Rangieren,LIGHT.IN,0x110,0x010A,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }","edge: 0=level,1=press,2=release; value optional (z.B. encoder delta)"
