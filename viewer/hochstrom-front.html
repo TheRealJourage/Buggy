@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Buggy – Front-Kabelbaum (Hochstrom)</title>
 <style>
-  :root { --b30:#ff5a5a; --b15:#f2d13d; --b31:#b07a45; }
+  :root { --b30:#ff5a5a; --b15:#f2d13d; --bL:#ff9a3c; --b31:#b07a45; }
   body { font-family: system-ui, sans-serif; margin: 0; padding: 12px; background: #111; color: #eee; font-size: 16px; line-height: 1.4; max-width: 1100px; }
   h1 { font-size: 21px; margin: 4px 0 6px; }
   h2 { font-size: 18px; margin: 26px 0 8px; color: #8cf; border-bottom: 1px solid #333; padding-bottom: 4px; }
@@ -14,7 +14,7 @@
   .hint { color: #aaa; font-size: 14px; }
   .warn { background: #3a2a10; border-left: 4px solid #e8a33d; padding: 8px 10px; margin: 10px 0; font-size: 15px; }
   .badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 13px; font-weight: 600; color: #111; }
-  .b30 { background: var(--b30); } .b15 { background: var(--b15); } .b31 { background: var(--b31); } .bS { background: #8cf; } .bQ { background: #c08cf0; }
+  .b30 { background: var(--b30); } .b15 { background: var(--b15); } .bL { background: var(--bL); } .b31 { background: var(--b31); } .bS { background: #8cf; } .bX { background: #ddd; }
   .hyp { color: #e8c547; }
   table { border-collapse: collapse; width: 100%; font-size: 15px; margin: 6px 0; }
   th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid #2a2a2a; vertical-align: top; }
@@ -30,47 +30,53 @@
   .legend span { margin-right: 10px; white-space: nowrap; }
   ul, ol { padding-left: 20px; }
   .wrap { overflow-x: auto; }
+  .dt { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; max-width: 640px; margin: 8px 0; }
+  .dt div { background: #222; border: 1px solid #444; border-radius: 6px; padding: 4px; font-size: 12px; text-align: center; }
+  .dt b { display: block; font-size: 15px; color: #fff; }
 </style>
 </head>
 <body>
-<h1>Front-Kabelbaum: Hochstrom-Verkabelung (Plan, 3. Fassung)</h1>
-<p class="hint">Stand 2026-10-19. <b>Neu in dieser Fassung:</b> Der Front-Controller an der Lenksäule (Nucleo, STM32Wiper + Hub) schaltet alles vorn selbst über Relais im Front-Verteiler. Zur Relaisbox laufen nur noch CAN und zwei Versorgungen. Bremslicht, ABS-Lampe und Pumpenstatus gehen über CAN nach hinten. Die Unterdruckpumpe ist ein fester Kreis mit Wechsler-Relais, die Spiegel hängen direkt am Schalter. Grundlage: Kabelbaum-Übersicht (Zonen, X1–X5), Bordnetz-Konzept, ABS (VW-Plan Nr. 53), Lichtströme 13.03. (Gesamtwerte). Werte in <span class="hyp">gelb</span> sind Annahmen.</p>
+<h1>Front-Kabelbaum: Hochstrom-Verkabelung (Plan, 4. Fassung)</h1>
+<p class="hint">Stand 2026-10-19. <b>Korrektur gegenüber der 3. Fassung:</b> Die Lichter schaltet wieder die <b>Relaisbox unter dem Beifahrersitz</b>, sie laufen über X1 nach vorn. Vorn gibt es keinen Relaisverteiler, nur einen kleinen <b>Sicherungsblock an der dicken roten Leitung</b> (Servolenkung, ABS, Unterdruckpumpe, Bremslichtschalter, Spiegelschalter) und das eine Relais K3 der Unterdruckpumpe. CAN läuft vorerst über einen eigenen Stecker. Der Front-Controller an der Lenksäule liest nur und meldet per CAN. Werte in <span class="hyp">gelb</span> sind Annahmen.</p>
 <div class="warn"><b>Vor dem Verdrahten:</b> Batterie ab. Jede Sicherung schützt die Leitung dahinter – nie einen größeren Wert einsetzen als in der Liste.</div>
 
 <h2>1. Ergebnis: Was zwischen Box und Front läuft</h2>
 <div class="wrap"><table>
-<tr><th>Anschluss</th><th>Leitung</th><th>Absicherung (in der Box)</th><th>Inhalt</th></tr>
-<tr><td><b>X2</b></td><td>16 mm² rot, 3 m, Ringöse auf Bolzen „15 vorn“</td><td>F30 80 A MIDI an <span class="badge b15">15</span></td><td>Servolenkung, ABS, Unterdruckpumpe, Bremslichtschalter, Spiegelschalter, Abblend-, Fern-, Nebellicht</td></tr>
-<tr><td><b>X2b</b></td><td>2,5 mm² rot/weiß, 3 m, Ringöse auf Bolzen „30 vorn“</td><td>F31 20 A an <span class="badge b30">30</span></td><td>Front-Controller, Lenkrad, Standlicht/TFL, Blinker/Warnblinker, Diagnosebuchse</td></tr>
-<tr><td><b>X1</b></td><td>Deutsch DT 12-pol</td><td>—</td><td>Pin 1 CAN-H, Pin 2 CAN-L (verdrillt), Pin 3–12 Reserve mit Blindstopfen</td></tr>
-<tr><td><b>X6</b> <span class="hyp">(neu, Vorschlag)</span></td><td>4 Adern geschirmt, Stecker vorn am ABS-Strang</td><td>—</td><td>Raddrehzahlfühler hinten (G46, G44) vom ABS-Steuergerät nach hinten. Passt nicht in X3 (nur 2 Pins frei), eigener Strang rechts rum</td></tr>
-<tr><td><b>Masse</b></td><td>vorn an M1 / M2</td><td>—</td><td>keine Masse durch die Stecker</td></tr>
+<tr><th>Anschluss</th><th>Leitung</th><th>Inhalt</th></tr>
+<tr><td><b>X1</b></td><td>Deutsch DT 12-pol, alle Adern 18 AWG (0,82 mm²)</td><td>Licht vorn (je Seite), Blinker, Servolenkung Einschalten, Dauerplus für Front-Controller/Lenkrad/Diagnose – Belegung Abschnitt 2</td></tr>
+<tr><td><b>X2</b></td><td>16 mm² rot, 3 m, Ringöse auf Bolzen am Front-Sicherungsblock</td><td><span class="badge b15">15</span> aus der Box über F30 80 A: Servolenkung, ABS, Unterdruckpumpe, Bremslichtschalter, Spiegelschalter</td></tr>
+<tr><td><b>CAN</b></td><td>eigener Stecker, <span class="hyp">Typ offen</span>, 2 Adern verdrillt</td><td>CAN-H gelb, CAN-L grün → Front-Controller</td></tr>
+<tr><td><b>X6</b> <span class="hyp">(Vorschlag)</span></td><td>4 Adern geschirmt</td><td>ABS-Raddrehzahlfühler hinten (G46, G44) vom ABS-Steuergerät nach hinten</td></tr>
+<tr><td><b>Masse</b></td><td>vorn an M1 / M2</td><td>keine Masse durch die Stecker</td></tr>
 </table></div>
-<p class="hint"><b>Warum zwei Versorgungen:</b> Standlicht, Warnblinker und der Front-Controller (er liest den Lenkrad-Code, bevor die Zündung freigegeben ist) müssen auch ohne Zündung laufen. Alles andere hängt an der Zündung. Die Servolenkung schaltet trotzdem erst bei laufendem Motor ein: Ihr Einschaltsignal schaltet der Front-Controller über K4, sobald per CAN „Motor läuft“ kommt (Drehzahl 0x0808).</p>
 
-<h2>2. X1 – Deutsch DT 12-pol</h2>
-<table>
-<tr><th>Pin</th><th>Funktion</th><th>Ader</th></tr>
-<tr><td>1</td><td>CAN-H</td><td>0,5 gelb, mit Pin 2 verdrillt</td></tr>
-<tr><td>2</td><td>CAN-L</td><td>0,5 grün</td></tr>
-<tr><td>3–12</td><td>Reserve, Blindstopfen 0413-204-2005</td><td>—</td></tr>
-</table>
-<p class="hint">Relaisbox-Seite DT06-12S, Front-Seite DT04-12P, Kontakte Größe 16 (0462-201-16141 Buchse / 0460-202-16141 Stift). <span class="hyp">Teilenummern beim Kauf prüfen.</span> Mögliche Belegung der Reserve (noch nicht festgelegt): Zündschalter-/Not-Aus-Schleife zur Spule von K1 (Hardware-UND aus dem Bordnetz-Konzept), Serial-Leitung Speeduino → Tacho-Pi. Abschluss 120 Ω nur an den beiden Bus-Enden.</p>
-
-<h2>3. Front-Verteiler (Sicherungen + Relais, im Fußraum)</h2>
-<div class="wrap"><table id="tFuse"><tr><th>Teil</th><th>Wert</th><th>Schiene</th><th>Für</th><th>Leitung</th></tr></table></div>
-<h3>Relais</h3>
+<h2>2. X1 – Deutsch DT 12-pol (18 AWG)</h2>
+<div class="dt">
+  <div><b>1</b>Abblend L</div><div><b>2</b>Abblend R</div><div><b>3</b>Fern L</div><div><b>4</b>Fern R</div><div><b>5</b>Stand/TFL</div><div><b>6</b>Nebel L</div>
+  <div><b>12</b>Reserve</div><div><b>11</b>Kl. 30</div><div><b>10</b>Servo ein</div><div><b>9</b>Blinker R</div><div><b>8</b>Blinker L</div><div><b>7</b>Nebel R</div>
+</div>
+<p class="hint">Schematisch, Blick auf die Steckseite: oben 1–6, unten läuft die Zählung zurück 7–12. Es gelten die Ziffern auf dem Gehäuse.</p>
 <div class="wrap"><table>
-<tr><th>Relais</th><th>Typ</th><th>Spule +</th><th>Spule −</th><th>Schaltet</th></tr>
-<tr><td>K3</td><td><b>Wechsler</b> 5-pol, Schließer ≥ 30 A</td><td>V6 (15 vorn)</td><td><b>Unterdruckschalter S1</b> → Masse</td><td>Masse der Unterdruckpumpe (siehe Abschnitt 4)</td></tr>
-<tr><td>K4</td><td>ISO-Mini Schließer</td><td>V16 (15 vorn)</td><td>Q1</td><td>Servolenkung Einschalten (V9)</td></tr>
-<tr><td>K5</td><td>ISO-Mini Schließer</td><td>V16</td><td>Q2</td><td>Abblendlicht → V10 / V11</td></tr>
-<tr><td>K6</td><td>ISO-Mini Schließer</td><td>V16</td><td>Q3</td><td>Fernlicht + Lichthupe → V12 / V13</td></tr>
-<tr><td>K7</td><td>ISO-Mini Schließer</td><td><b>Ausgang K8</b> (Standlicht)</td><td>Q4</td><td>Nebelscheinwerfer → V14 / V15 (geht nur mit Standlicht)</td></tr>
-<tr><td>K8</td><td>ISO-Mini Schließer</td><td>V26 (30 vorn)</td><td>Q5</td><td>Standlicht/TFL → V22 / V23</td></tr>
-<tr><td>K9 / K10</td><td>ISO-Mini Schließer</td><td>V26</td><td>Q6 / Q7</td><td>Blinker L / R (Takt vom Front-Controller, Firmware STM32Wiper)</td></tr>
+<tr><th>Pin</th><th>Funktion</th><th>Ader</th><th>Relaisbox (Quelle)</th><th>Front (Ziel)</th><th>Strom</th></tr>
+<tr><td><b>1</b></td><td>Abblendlicht links</td><td>blau</td><td>Relais Abblend · 5 A · <span class="badge b15">15</span></td><td>Scheinwerfer L, Superseal Pin 1</td><td>0,75 A</td></tr>
+<tr><td><b>2</b></td><td>Abblendlicht rechts</td><td>blau</td><td>Relais Abblend · 5 A</td><td>Scheinwerfer R, Pin 1</td><td>0,75 A</td></tr>
+<tr><td><b>3</b></td><td>Fernlicht links</td><td>weiß</td><td>Relais Fern · 5 A · <span class="badge b15">15</span></td><td>Scheinwerfer L, Pin 2</td><td>0,95 A</td></tr>
+<tr><td><b>4</b></td><td>Fernlicht rechts</td><td>weiß</td><td>Relais Fern · 5 A</td><td>Scheinwerfer R, Pin 2</td><td>0,95 A</td></tr>
+<tr><td><b>5</b></td><td>Standlicht/TFL L+R</td><td>rot</td><td>Relais Stand · 5 A · <span class="badge b30">30</span></td><td>Spleiß vorn → Scheinwerfer L + R, Pin 3</td><td>0,2 A</td></tr>
+<tr><td><b>6</b></td><td>Nebel links</td><td>gelb</td><td>Relais Nebel · 5 A · <span class="badge b15">15</span>, Spule + aus Relais Stand</td><td>Nebelscheinwerfer L</td><td>2,5 A</td></tr>
+<tr><td><b>7</b></td><td>Nebel rechts</td><td>gelb</td><td>Relais Nebel · 5 A</td><td>Nebelscheinwerfer R</td><td>2,5 A</td></tr>
+<tr><td><b>8</b></td><td>Blinker links</td><td>rot/schwarz</td><td>Blinkgeber · <span class="badge b30">30</span></td><td>Scheinwerfer L, Pin 4</td><td>0,1 A</td></tr>
+<tr><td><b>9</b></td><td>Blinker rechts</td><td>rot/schwarz, Markierung „R“</td><td>Blinkgeber</td><td>Scheinwerfer R, Pin 4</td><td>0,1 A</td></tr>
+<tr><td><b>10</b></td><td>Servolenkung Einschalten</td><td>schwarz/weiß</td><td><span class="badge bL">LAST</span> Motor läuft · 5 A</td><td>Kit-Box Zündungsplus</td><td>&lt; 1 A</td></tr>
+<tr><td><b>11</b></td><td>Dauerplus vorn</td><td>rot/weiß</td><td><span class="badge b30">30</span> · 3 A</td><td>Spleiß vorn → Front-Controller, Diagnosebuchse Pin 16, Lenkrad über eigene 1-A-Sicherung</td><td>&lt; 1 A</td></tr>
+<tr><td><b>12</b></td><td>Reserve</td><td>—</td><td>—</td><td>Blindstopfen</td><td>—</td></tr>
 </table></div>
-<p class="hint">Q1–Q7 = Low-Side-Ausgänge des Front-Controllers über einen Treiber, <span class="hyp">z. B. ULN2803A (Freilaufdioden eingebaut; prüfen, ob er mit 3,3-V-Pegel sicher durchschaltet)</span>. Relais mit eingebauter Diode: Spulen-Polarität beachten. Lichter vorn jetzt <b>je Seite einzeln abgesichert</b>, die Abzweige sitzen im Verteiler statt im Kabelbaum.</p>
+<p class="hint"><b>18 AWG</b> verträgt höchstens 10 A Sicherung; die größte Last hier ist Nebel mit 2,5 A je Seite (Gesamtwert 5 A aus der Messung geteilt). Spannungsfall bei <span class="hyp">4,5 m</span> Box → Scheinwerfer: Nebel 0,24 V, Licht &lt; 0,1 V. Stecker: Box-Seite DT06-12S (Buchsen, weil von dort Spannung kommt), Front-Seite DT04-12P, Kontakte Größe 16 für 16–20 AWG (0462-201-16141 / 0460-202-16141), Blindstopfen 0413-204-2005 für Pin 12. <span class="hyp">Teilenummern beim Kauf prüfen.</span><br>
+Abblend- und Fernlicht je Seite eigene Sicherung in der Box: Ein Kurzschluss links lässt rechts weiter leuchten. Die Nebel-Kopplung (nur mit Standlicht) sitzt in der Box: Spule + des Nebel-Relais kommt vom Ausgang des Standlicht-Relais.</p>
+
+<h2>3. Front-Sicherungsblock an X2</h2>
+<div class="wrap"><table id="tFuse"><tr><th>Teil</th><th>Wert</th><th>Für</th><th>Leitung</th></tr></table></div>
+<p class="hint">Aufbau: M8-Bolzen als Einspeisung (Ringöse 16 mm²) → MIDI-Halter für V1 + Flachsicherungsblock mit gemeinsamer Schiene für V2–V8 + Relaissockel K3, im Deckelgehäuse nah an ABS und Pumpe. V1 (50 A) löst vor F30 (80 A) in der Box aus: Ein Kurzschluss an der Servolenkung nimmt ABS und Pumpe nicht mit.</p>
 
 <h2>4. Unterdruckpumpe: fester Kreis, nur lesend am Controller</h2>
 <p>Pumpe: <b>Hella UP28</b>, 2-polig (ohne eingebautes Relais), 10,5–16 V, Hella-Angabe mittlere Stromaufnahme &lt; 10 A, Aussetzbetrieb (ca. 600 h Lebensdauer). Anlaufstrom nicht angegeben, <span class="hyp">vermutlich 2–4-fach</span> → beim ersten Lauf am Messstand messen.</p>
@@ -79,8 +85,8 @@
 <tr><td>30 (gemeinsam)</td><td>Masse M1, 2,5 mm²</td></tr>
 <tr><td>87 (Schließer)</td><td>Pumpe −</td></tr>
 <tr><td>87a (Öffner)</td><td>Front-Controller E1, Pull-up 1 kΩ auf 3,3 V + 100 nF gegen Masse</td></tr>
-<tr><td>85 / 86 (Spule)</td><td>V6 3 A (15 vorn) → Spule → Unterdruckschalter S1 → Masse</td></tr>
-<tr><td>Pumpe +</td><td>V5 20 A direkt (15 vorn), 2,5 mm² (UP28 &lt; 10 A im Mittel)</td></tr>
+<tr><td>85 / 86 (Spule)</td><td>V6 3 A → Spule → Unterdruckschalter S1 → Masse</td></tr>
+<tr><td>Pumpe +</td><td>V5 20 A direkt, 2,5 mm² (UP28 &lt; 10 A im Mittel)</td></tr>
 </table>
 <ul>
 <li>Pumpe aus → 87a auf Masse → E1 LOW. Pumpe an → 87a offen → E1 HIGH. Der Pin sieht nie 12 V.</li>
@@ -91,34 +97,30 @@
 </ul>
 
 <h2>5. Stromlaufplan</h2>
-<p class="hint">Oben die beiden Schienen im Front-Verteiler: „30 vorn“ (aus X2b) und „15 vorn“ (aus X2), unten Masse 31 (M1/M2). Relais: rechts die Spule mit „+“ (woher) und „−“ (wer schaltet, Q = Front-Controller). Blaue Linien = Eingänge des Front-Controllers. Pfad antippen hebt ihn hervor; auf dem Handy seitlich wischen.</p>
+<p class="hint">Links der vordere Teil an der Schiene „15 vorn“ (Front-Sicherungsblock an X2). Rechts die Pfade, die aus der Relaisbox über X1 kommen: oben steht, was sie in der Box schaltet, das weiße Kästchen ist der X1-Pin. Blaue Linien = Eingänge des Front-Controllers (gehen per CAN nach hinten). Unten Masse 31 (M1/M2). Pfad antippen hebt ihn hervor; auf dem Handy seitlich wischen.</p>
 <p class="legend">
-  <span><span class="badge b30">30 vorn</span> X2b, F31 20 A</span>
-  <span><span class="badge b15">15 vorn</span> X2, F30 80 A</span>
+  <span><span class="badge b15">15 vorn</span> X2, F30 80 A in der Box</span>
+  <span><span class="badge bX">X1/n</span> Pin am DT 12</span>
   <span><span class="badge b31">31</span> Masse</span>
-  <span><span class="badge bS">Eingang</span> zum Front-Controller</span>
+  <span><span class="badge bS">Eingang</span> Front-Controller</span>
 </p>
 <div class="svgwrap"><svg id="plan" xmlns="http://www.w3.org/2000/svg"></svg></div>
 
-<h2>6. Front-Controller (Nucleo an der Lenksäule) – Anschlüsse für diesen Plan</h2>
+<h2>6. Front-Controller (Nucleo an der Lenksäule) – nur lesen und melden</h2>
 <div class="wrap"><table>
-<tr><th>Anschluss</th><th>Funktion</th><th>Logik / CAN</th></tr>
-<tr><td>+12 V / Masse</td><td>V20 3 A (30 vorn) / M1</td><td>läuft ohne Zündung (Lenkrad-Code)</td></tr>
-<tr><td>CAN-H / CAN-L</td><td>X1/1, X1/2</td><td>250 kbit/s (Vorschlag)</td></tr>
-<tr><td>Q1 → K4</td><td>Servolenkung Einschalten</td><td>an bei Drehzahl &gt; <span class="hyp">400 1/min</span> (0x0808), aus mit Zündung</td></tr>
-<tr><td>Q2 → K5</td><td>Abblendlicht</td><td>0x0102; nur bei Zündung</td></tr>
-<tr><td>Q3 → K6</td><td>Fernlicht / Lichthupe</td><td>0x0103 nur mit Abblend; 0x0104 immer</td></tr>
-<tr><td>Q4 → K7</td><td>Nebel vorn</td><td>0x0107; hardwareseitig nur mit Standlicht, geht mit dem Licht aus</td></tr>
-<tr><td>Q5 → K8</td><td>Standlicht/TFL</td><td>0x0101 oder Abblend an</td></tr>
-<tr><td>Q6 / Q7 → K9 / K10</td><td>Blinker L / R, Warnblinker</td><td>Lenkstockhebel direkt am Controller; Warnblinker 0x0109; Heck bekommt den Zustand per CAN</td></tr>
-<tr><td>E1</td><td>Pumpe läuft (K3/87a)</td><td>Leck-Warnung, sendet Status</td></tr>
-<tr><td>E2</td><td>Bremslicht (Schalter F/2, Teiler 10 kΩ / 2,7 kΩ)</td><td>sendet 0x0405 → Relaisbox schaltet die Bremslichter hinten</td></tr>
-<tr><td>E3</td><td>ABS-Warnlampe T25/16</td><td>treibt die ABS-LED vorn mittig; <span class="hyp">Pegel (aktiv Low?) am Fahrzeug messen</span></td></tr>
+<tr><th>Anschluss</th><th>Funktion</th><th>CAN</th></tr>
+<tr><td>+12 V / Masse</td><td>X1/11 (Kl. 30, 3 A in der Box) / M1</td><td>läuft ohne Zündung (liest den Lenkrad-Code)</td></tr>
+<tr><td>CAN-H / CAN-L</td><td>eigener CAN-Stecker</td><td>250 kbit/s (Vorschlag)</td></tr>
+<tr><td>Licht- und Blinkerhebel</td><td>direkt am Controller (STM32Wiper)</td><td>0x0101–0x0110 → Relaisbox schaltet</td></tr>
+<tr><td>E1</td><td>Pumpe läuft (K3/87a)</td><td>Leck-Warnung</td></tr>
+<tr><td>E2</td><td>Bremslicht (Schalter F/2, Teiler 10 kΩ / 2,7 kΩ)</td><td>0x0405 → Relaisbox schaltet die Bremslichter hinten</td></tr>
+<tr><td>E3</td><td>ABS-Warnlampe T25/16</td><td>treibt die ABS-LED vorn; <span class="hyp">Pegel am Fahrzeug messen</span></td></tr>
 </table></div>
-<div class="warn"><b>Bremslicht über CAN – deine Entscheidung, mit einer Absicherung:</b> Fällt der Front-Controller oder der Bus aus, gehen hinten keine Bremslichter an. Vorschlag: Der Front-Controller sendet alle 100 ms einen Herzschlag. Bleibt er aus, schaltet die Relaisbox die Warnung im Cockpit an. <span class="hyp">Mit dem TÜV klären, ob das so abgenommen wird.</span></div>
+<div class="warn"><b>Bremslicht über CAN:</b> Fällt der Front-Controller oder der Bus aus, gehen hinten keine Bremslichter an. Vorschlag: Herzschlag alle 100 ms, bleibt er aus, meldet die Relaisbox das im Cockpit. <span class="hyp">Mit dem TÜV klären.</span></div>
 
 <h2>7. Leitungsliste Front-Kabelbaum (Abhaken wird im Browser gespeichert)</h2>
-<div class="wrap"><table id="tLines"><tr><th></th><th>Nr.</th><th>Von</th><th>Nach</th><th>mm²</th><th>Farbe</th><th>Sicherung</th></tr></table></div>
+<div class="wrap"><table id="tLines"><tr><th></th><th>Nr.</th><th>Von</th><th>Nach</th><th>Querschnitt</th><th>Farbe</th><th>Sicherung</th></tr></table></div>
+<p class="hint">Dieselbe Verdrahtung steht in harness.design: <code>WiringDiagram/harness.design/Front.harness</code> (83 Leitungen). Der Sicherungsblock heißt dort „Front-Sicherungen (X2)“.</p>
 
 <h2>8. Masse</h2>
 <table>
@@ -127,68 +129,66 @@
 <tr><td>M2</td><td>Rahmen vorn rechts, M8-Bolzen</td><td>Scheinwerfer R, Nebel R</td></tr>
 <tr><td>Rahmen ↔ Batterie −</td><td>Massband</td><td>≥ 25 mm², dazu Motorblock ↔ Rahmen ≥ 25 mm²</td></tr>
 </table>
-<p class="hint">Massepunkt blank schleifen, Zahnscheibe, danach versiegeln; dicke Ösen unten. Scheinwerfer: Masse über den 5. Pin am LightConn (harness.design) bzw. eigene Ader 1,0 mm² braun.</p>
 
 <h2>9. Strombilanz</h2>
 <table>
 <tr><th>Leitung</th><th>Verbraucher</th><th>Dauer</th><th>Spitze</th></tr>
-<tr><td>X2 15 vorn (16 mm²)</td><td>Servolenkung, ABS, Unterdruckpumpe, Abblend 1,5 A, Fern 1,9 A, Nebel 5 A, Schalter</td><td><span class="hyp">~15–25 A</span></td><td><span class="hyp">~95 A</span> kurz (Servolenkung beim Rangieren + ABS-Regelung + Pumpenanlauf). 80 A träge, Spannungsfall 0,27 V</td></tr>
-<tr><td>X2b 30 vorn (2,5 mm²)</td><td>Front-Controller, Lenkrad, Stand/TFL 0,2 A, Blinker 0,2 A, Spulen</td><td>&lt; 2 A</td><td>&lt; 3 A</td></tr>
+<tr><td>X2 (16 mm²)</td><td>Servolenkung, ABS, Unterdruckpumpe, Schalter</td><td><span class="hyp">~10–20 A</span></td><td><span class="hyp">~90 A</span> kurz (Servolenkung beim Rangieren + ABS-Regelung + Pumpenanlauf), 80 A träge reicht</td></tr>
+<tr><td>X1 (12 × 18 AWG)</td><td>Licht vorn, Blinker, Servo-Einschalten, Front-Controller</td><td>max. ~9 A gesamt, je Pin ≤ 2,5 A</td><td>—</td></tr>
 </table>
 
-<h2>10. Bewusst nicht im Front-Kabelbaum</h2>
+<h2>10. Nicht im Front-Kabelbaum</h2>
 <ul>
-<li><b>Zusatz-Fernlicht</b> und <b>Offroad</b>: sitzen in der Mitte des Fahrzeugs. In harness.design stehen HighBeamEx/OffroadFront noch im Front-Plan, ohne Versorgung – gehören in einen eigenen Abschnitt „Mitte“</li>
-<li>Hupe (Lautsprecher in der Box-Zone), Seilwinde (hinten), Seitenblinker (keine), Raspberry Pis (Cockpit-Elektronik, eigene Planung)</li>
-<li>Spiegelheizung: Adern am Spiegelstecker (Pin 4/5) vorgesehen, Ansteuerung später</li>
+<li>Zusatz-Fernlicht und Offroad (sitzen in der Mitte), Hupe (Lautsprecher in der Box-Zone), Seilwinde (hinten), Seitenblinker (keine)</li>
+<li>Spiegelheizung: Pin 4/5 am Spiegelstecker frei gelassen, Ansteuerung später</li>
 <li>Kühlerlüfter: Lage des Kühlers offen</li>
 </ul>
 
 <h2>11. Offen</h2>
 <ol>
+<li><b>CAN-Stecker:</b> Typ festlegen (eigener kleiner Stecker)</li>
 <li><b>Unterdruckpumpe (Hella UP28):</b> Anlaufstrom messen, Rückschlagventil, S1-Schaltpunkte</li>
-<li><b>X6:</b> Steckertyp für die ABS-Fühler hinten, Weg rechts rum mit dem Heckstrang</li>
-<li><b>Front-Controller:</b> Treiber für Q1–Q7 auswählen, Pegel an T25/16 messen</li>
-<li><b>Servolenkung:</b> Stecker der Kit-Box fotografieren, Drehzahlschwelle für „Motor läuft“</li>
-<li><b>Relaisbox:</b> F30 80 A und F31 20 A, K1 ≥ 100 A (trägt X2 plus Motor)</li>
+<li><b>X6:</b> Steckertyp für die ABS-Fühler hinten, Weg rechts rum</li>
+<li><b>Relaisbox:</b> Relais Abblend/Fern/Stand/Nebel + Blinkgeber + Sicherungen für X1, F30 80 A für X2, K1 ≥ 100 A</li>
+<li><b>Servolenkung:</b> Stecker der Kit-Box fotografieren</li>
 </ol>
 
 <h2>12. Abhak-Liste Aufbau</h2>
 <div id="checks"></div>
 
 <script>
-const BUS = {'30': {y: 34, c: '#ff5a5a', t: '30 vorn'}, '15': {y: 58, c: '#f2d13d', t: '15 vorn'}};
-const Y = {upLab: 96, fA: 126, rel: 186, split: 236, fB: 272, wire: 318, conn: 350, cons: 420, relLow: 498, gnd: 600};
+const BUS15 = {y: 58, c: '#f2d13d', t: '15 vorn'};
+const Y = {src: 30, x1: 112, upLab: 96, fA: 132, rel: 186, split: 236, fB: 272, wire: 318, conn: 350, cons: 420, relLow: 498, gnd: 600};
 const COLW = 86, X0 = 96, H = 690;
 const SIG = '#8cf', LINE = '#ddd';
 
-// one entry per current path (column); 'from' = column index whose relay output feeds this one
+// one entry per current path (column). x1 = pin number on X1 (source in the relay box), from = split source column
 const P = [
- {id: 'eps1', name: 'Servo|Hauptstrom', bus: '15', fA: ['V1', '50 A'], wire: '10 rt', conn: 'Haupt +', box: 'eps', gnd: ['Haupt −', '10 br', 'M1']},
- {id: 'eps2', name: 'Servo|Einschalten', bus: '15', fA: ['V9', '5 A'], rel: {k: 'K4', p: 'V16', m: 'Q1'}, wire: '0,5 sw/ws', conn: 'Zünd +', box: 'eps'},
- {id: 'abs9', name: 'ABS|Pin 9', bus: '15', fA: ['V2', '30 A'], wire: '4,0 rt', conn: 'T25/9', box: 'abs', gnd: ['T25/8', '4,0 br', 'M1']},
- {id: 'abs25', name: 'ABS|Pin 25', bus: '15', fA: ['V3', '30 A'], wire: '4,0 rt', conn: 'T25/25', box: 'abs', gnd: ['T25/24', '4,0 br', 'M1']},
- {id: 'abs23', name: 'ABS|Zündung', bus: '15', fA: ['V4', '5 A'], wire: '0,5 sw/ge', conn: 'T25/23', box: 'abs'},
+ {id: 'eps1', name: 'Servo|Hauptstrom', bus: true, fA: ['V1', '50 A'], wire: '10 rt', conn: 'Haupt +', box: 'eps', gnd: ['Haupt −', '10 br', 'M1']},
+ {id: 'eps2', name: 'Servo|Einschalten', x1: 10, src: ['LAST', '5 A'], wire: '18 AWG sw/ws', conn: 'Zünd +', box: 'eps'},
+ {id: 'abs9', name: 'ABS|Pin 9', bus: true, fA: ['V2', '30 A'], wire: '4,0 rt', conn: 'T25/9', box: 'abs', gnd: ['T25/8', '4,0 br', 'M1']},
+ {id: 'abs25', name: 'ABS|Pin 25', bus: true, fA: ['V3', '30 A'], wire: '4,0 rt', conn: 'T25/25', box: 'abs', gnd: ['T25/24', '4,0 br', 'M1']},
+ {id: 'abs23', name: 'ABS|Zündung', bus: true, fA: ['V4', '5 A'], wire: '0,5 sw/ge', conn: 'T25/23', box: 'abs'},
  {id: 'absW', name: 'ABS|Warnlampe', up: ['E3 Front-', 'Controller'], wire: '0,5 gr/ws', conn: 'T25/16', box: 'abs'},
  {id: 'absK', name: 'ABS|K-Leitung', up: ['Diagnose-', 'buchse 7'], wire: '0,5 gr/bl', conn: 'T25/13', box: 'abs'},
- {id: 'vac', name: 'Unterdruck-|pumpe', bus: '15', fA: ['V5', '20 A'], wire: '2,5 rt/gn', conn: 'Pumpe +', cons: ['motor', 'Pumpe'], relLow: {k: 'K3', p: 'V6 3 A', m: 'S1'}, gnd: ['K3/30', '2,5 br', 'M1']},
+ {id: 'vac', name: 'Unterdruck-|pumpe', bus: true, fA: ['V5', '20 A'], wire: '2,5 rt/gn', conn: 'Pumpe +', cons: ['motor', 'UP28'], relLow: {k: 'K3', p: 'V6 3 A', m: 'S1'}, gnd: ['K3/30', '2,5 br', 'M1']},
  {id: 'vacS', name: 'Pumpe|Status', up: ['E1 Front-', 'Controller'], upFrom: 7, wire: '0,5 gn/ws'},
- {id: 'brk', name: 'Brems-|lichtschalter', bus: '15', fA: ['V7', '3 A'], wire: '0,5 sw/rt', conn: 'F/1', cons: ['switch', 'F']},
+ {id: 'brk', name: 'Brems-|lichtschalter', bus: true, fA: ['V7', '3 A'], wire: '0,5 sw/rt', conn: 'F/1', cons: ['switch', 'F']},
  {id: 'brkO', name: 'Brems-|signal', up: ['E2 → CAN', '0x0405'], upFrom: 9, wire: '0,5 sw/rt', out: ['Abzweig', '→ ABS T25/12']},
- {id: 'e43', name: 'Spiegel-|schalter', bus: '15', fA: ['V8', '5 A'], wire: '0,5 sw/bl', conn: 'E43/6', cons: ['box', 'E43', '→ T5/T5a 1–3'], gnd: ['E43/8', '0,5 br', 'M1']},
- {id: 'lowL', name: 'Abblend|links', bus: '15', rel: {k: 'K5', p: 'V16', m: 'Q2'}, fB: ['V10', '5 A'], wire: '0,5 bl', conn: 'SW-L/1', cons: ['lamp', 'Abblend L'], gnd: ['', 'über SW-L', 'M1']},
- {id: 'lowR', name: 'Abblend|rechts', from: 12, fB: ['V11', '5 A'], wire: '0,5 bl', conn: 'SW-R/1', cons: ['lamp', 'Abblend R'], gnd: ['', 'über SW-R', 'M2']},
- {id: 'hiL', name: 'Fernlicht|links', bus: '15', rel: {k: 'K6', p: 'V16', m: 'Q3'}, fB: ['V12', '5 A'], wire: '0,5 ws', conn: 'SW-L/2', cons: ['lamp', 'Fern L'], gnd: ['', 'über SW-L', 'M1']},
- {id: 'hiR', name: 'Fernlicht|rechts', from: 14, fB: ['V13', '5 A'], wire: '0,5 ws', conn: 'SW-R/2', cons: ['lamp', 'Fern R'], gnd: ['', 'über SW-R', 'M2']},
- {id: 'fogL', name: 'Nebel|links', bus: '15', rel: {k: 'K7', p: 'K8-Ausg.', m: 'Q4'}, fB: ['V14', '5 A'], wire: '1,0 ge', conn: 'NSW-L', cons: ['lamp', 'NSW L'], gnd: ['', '1,0 br', 'M1']},
- {id: 'fogR', name: 'Nebel|rechts', from: 16, fB: ['V15', '5 A'], wire: '1,0 ge', conn: 'NSW-R', cons: ['lamp', 'NSW R'], gnd: ['', '1,0 br', 'M2']},
- {id: 'parkL', name: 'Stand/TFL|links', bus: '30', rel: {k: 'K8', p: 'V26', m: 'Q5'}, fB: ['V22', '3 A'], wire: '0,5 rt', conn: 'SW-L/3', cons: ['lamp', 'Stand L'], gnd: ['', 'über SW-L', 'M1']},
- {id: 'parkR', name: 'Stand/TFL|rechts', from: 18, fB: ['V23', '3 A'], wire: '0,5 rt', conn: 'SW-R/3', cons: ['lamp', 'Stand R'], gnd: ['', 'über SW-R', 'M2']},
- {id: 'indL', name: 'Blinker|links', bus: '30', fA: ['V24', '5 A'], rel: {k: 'K9', p: 'V26', m: 'Q6'}, wire: '0,5 rt/sw', conn: 'SW-L/4', cons: ['lamp', 'Blinker L'], gnd: ['', 'über SW-L', 'M1']},
- {id: 'indR', name: 'Blinker|rechts', bus: '30', fA: ['V25', '5 A'], rel: {k: 'K10', p: 'V26', m: 'Q7'}, wire: '0,5 rt/sw', conn: 'SW-R/4', cons: ['lamp', 'Blinker R'], gnd: ['', 'über SW-R', 'M2']},
- {id: 'fc', name: 'Front-|Controller', bus: '30', fA: ['V20', '3 A'], wire: '0,5 rt/ws', conn: '+12 V', cons: ['box', 'Nucleo', 'CAN → X1/1+2'], gnd: ['', '0,5 br', 'M1']},
- {id: 'sw', name: 'Lenkrad', bus: '30', fA: ['V21', '1 A'], wire: '0,5 rt', conn: 'LIN-Strang', cons: ['box', 'Lenkrad', '(SteeringControl)']},
- {id: 'obd', name: 'Diagnose-|buchse', bus: '30', fA: ['V27', '5 A'], wire: '0,5 rt', conn: 'OBD/16', cons: ['box', 'OBD vorn', '7 ← T25/13'], gnd: ['OBD/4', '0,5 br', 'M1']}
+ {id: 'e43', name: 'Spiegel-|schalter', bus: true, fA: ['V8', '5 A'], wire: '0,5 sw/bl', conn: 'E43/6', cons: ['box', 'E43', '→ T5/T5a 1–3'], gnd: ['E43/8', '0,5 br', 'M1']},
+ {id: 'lowL', name: 'Abblend|links', x1: 1, src: ['Rel. Abbl.', '5 A · 15'], wire: '18 AWG bl', conn: 'SW-L/1', cons: ['lamp', 'Abblend L'], gnd: ['', 'über SW-L', 'M1']},
+ {id: 'lowR', name: 'Abblend|rechts', x1: 2, src: ['Rel. Abbl.', '5 A · 15'], wire: '18 AWG bl', conn: 'SW-R/1', cons: ['lamp', 'Abblend R'], gnd: ['', 'über SW-R', 'M2']},
+ {id: 'hiL', name: 'Fernlicht|links', x1: 3, src: ['Rel. Fern', '5 A · 15'], wire: '18 AWG ws', conn: 'SW-L/2', cons: ['lamp', 'Fern L'], gnd: ['', 'über SW-L', 'M1']},
+ {id: 'hiR', name: 'Fernlicht|rechts', x1: 4, src: ['Rel. Fern', '5 A · 15'], wire: '18 AWG ws', conn: 'SW-R/2', cons: ['lamp', 'Fern R'], gnd: ['', 'über SW-R', 'M2']},
+ {id: 'parkL', name: 'Stand/TFL|links', x1: 5, src: ['Rel. Stand', '5 A · 30'], split: true, wire: '18 AWG rt', conn: 'SW-L/3', cons: ['lamp', 'Stand L'], gnd: ['', 'über SW-L', 'M1']},
+ {id: 'parkR', name: 'Stand/TFL|rechts', from: 16, wire: '18 AWG rt', conn: 'SW-R/3', cons: ['lamp', 'Stand R'], gnd: ['', 'über SW-R', 'M2']},
+ {id: 'fogL', name: 'Nebel|links', x1: 6, src: ['Rel. Nebel', '5 A · 15'], wire: '18 AWG ge', conn: 'NSW-L', cons: ['lamp', 'NSW L'], gnd: ['', '1,0 br', 'M1']},
+ {id: 'fogR', name: 'Nebel|rechts', x1: 7, src: ['Rel. Nebel', '5 A · 15'], wire: '18 AWG ge', conn: 'NSW-R', cons: ['lamp', 'NSW R'], gnd: ['', '1,0 br', 'M2']},
+ {id: 'indL', name: 'Blinker|links', x1: 8, src: ['Blinkgeber', '30'], wire: '18 AWG rt/sw', conn: 'SW-L/4', cons: ['lamp', 'Blinker L'], gnd: ['', 'über SW-L', 'M1']},
+ {id: 'indR', name: 'Blinker|rechts', x1: 9, src: ['Blinkgeber', '30'], wire: '18 AWG rt/sw', conn: 'SW-R/4', cons: ['lamp', 'Blinker R'], gnd: ['', 'über SW-R', 'M2']},
+ {id: 'fc', name: 'Front-|Controller', x1: 11, src: ['Kl. 30', '3 A'], split: true, wire: '18 AWG rt/ws', conn: '+12 V', cons: ['box', 'Nucleo', 'liest, meldet CAN'], gnd: ['', '0,5 br', 'M1']},
+ {id: 'obd', name: 'Diagnose-|buchse', from: 22, wire: '0,5 rt/ws', conn: 'OBD/16', cons: ['box', 'OBD vorn', '7 ← T25/13'], gnd: ['OBD/4', '0,5 br', 'M1']},
+ {id: 'sw', name: 'Lenkrad', from: 22, fB: ['Inline', '1 A'], wire: '0,5 rt/ws', conn: 'LIN-Strang', cons: ['box', 'Lenkrad', '(SteeringControl)']}
 ];
 const BOX = {
  eps: {c1: 0, c2: 1, y: Y.cons - 26, h: 64, t: ['Servolenkung', 'Corsa-C-Kit']},
@@ -217,14 +217,11 @@ function fuse(g, x, y, f) {
   txt(g, x + 10, y - 2, f[0], {fill: '#fff', 'font-weight': 700});
   txt(g, x + 10, y + 12, f[1], {fill: '#e8c547'});
 }
-function relay(g, x, y, r, changeover) {
+function relay(g, x, y, r) {
   el('line', {x1: x, y1: y - 22, x2: x, y2: y - 10, stroke: LINE, 'stroke-width': 2}, null, g);
   el('line', {x1: x, y1: y + 10, x2: x, y2: y + 22, stroke: LINE, 'stroke-width': 2}, null, g);
   el('line', {x1: x, y1: y + 10, x2: x - 9, y2: y - 8, stroke: LINE, 'stroke-width': 2}, null, g);
-  if (changeover) {
-    // normally-closed contact (87a) drawn to the right, leads to the status input
-    el('line', {x1: x + 2, y1: y - 10, x2: x + 8, y2: y - 10, stroke: SIG, 'stroke-width': 1.5}, null, g);
-  }
+  el('line', {x1: x + 2, y1: y - 10, x2: x + 8, y2: y - 10, stroke: SIG, 'stroke-width': 1.5}, null, g);
   el('rect', {x: x + 14, y: y - 12, width: 24, height: 24, fill: '#1e2a3a', stroke: '#6ab0ff', 'stroke-width': 1.5}, null, g);
   el('line', {x1: x + 4, y1: y, x2: x + 14, y2: y, stroke: '#6ab0ff', 'stroke-width': 1, 'stroke-dasharray': '2 2'}, null, g);
   txt(g, x + 26, y + 4, r.k, {'text-anchor': 'middle', fill: '#fff', 'font-size': 10, 'font-weight': 700});
@@ -236,24 +233,21 @@ function consumer(g, x, y, c) {
   if (k === 'lamp') {
     el('circle', {cx: x, cy: y, r: 13, fill: '#222', stroke: '#fff', 'stroke-width': 2}, null, g);
     el('path', {d: `M${x - 9} ${y - 9} L${x + 9} ${y + 9} M${x + 9} ${y - 9} L${x - 9} ${y + 9}`, stroke: '#fff', 'stroke-width': 1.5}, null, g);
+    c.slice(1).forEach((s, i) => txt(g, x, y + 30 + i * 12, s, {fill: '#fff', 'font-size': 10, 'text-anchor': 'middle'}));
   } else if (k === 'motor') {
     el('circle', {cx: x, cy: y, r: 14, fill: '#222', stroke: '#fff', 'stroke-width': 2}, null, g);
     txt(g, x, y + 5, 'M', {'text-anchor': 'middle', fill: '#fff', 'font-size': 14, 'font-weight': 700});
-    txt(g, x - 18, y + 5, '', {});
+    txt(g, x + 18, y + 4, c[1], {fill: '#fff', 'font-size': 10});
   } else if (k === 'switch') {
     el('circle', {cx: x, cy: y - 12, r: 2.5, fill: '#fff'}, null, g);
     el('circle', {cx: x, cy: y + 12, r: 2.5, fill: '#fff'}, null, g);
     el('line', {x1: x, y1: y + 12, x2: x - 10, y2: y - 8, stroke: '#fff', 'stroke-width': 2}, null, g);
     txt(g, x + 8, y + 4, c[1], {fill: '#fff', 'font-size': 10, 'font-weight': 700});
-    return;
   } else {
     el('rect', {x: x - 38, y: y - 16, width: 76, height: 32, rx: 4, fill: '#222', stroke: '#fff', 'stroke-width': 1.5}, null, g);
     txt(g, x, y - 2, c[1], {'text-anchor': 'middle', fill: '#fff', 'font-size': 10, 'font-weight': 700});
     txt(g, x, y + 10, c[2] || '', {'text-anchor': 'middle', fill: '#bbb', 'font-size': 9});
-    return;
   }
-  if (k === 'motor') return;
-  c.slice(1).forEach((s, i) => txt(g, x, y + 30 + i * 12, s, {fill: '#fff', 'font-size': 10, 'text-anchor': 'middle'}));
 }
 function connBox(g, x, label) {
   el('rect', {x: x - 4, y: Y.conn - 9, width: 8, height: 18, fill: '#555', stroke: '#aaa'}, null, g);
@@ -262,10 +256,13 @@ function connBox(g, x, label) {
 
 function render() {
   el('rect', {x: 0, y: 0, width: W, height: H, fill: '#181818'});
-  Object.values(BUS).forEach(b => {
-    el('line', {x1: 60, y1: b.y, x2: W - 10, y2: b.y, stroke: b.c, 'stroke-width': 3});
-    txt(null, 4, b.y + 4, b.t, {fill: b.c, 'font-size': 11, 'font-weight': 700});
-  });
+  const firstX1 = P.findIndex(p => p.id === 'lowL');
+  el('rect', {x: cx(firstX1) - 40, y: 4, width: W - cx(firstX1) + 30, height: 74, rx: 6, fill: '#1c1f26'});
+  txt(null, cx(firstX1) - 34, 18, 'Relaisbox (unter dem Beifahrersitz) → X1', {fill: '#6a7a90', 'font-size': 11, 'font-weight': 700});
+  const lastBus = Math.max(...P.map((p, i) => (p.bus ? i : 0)));
+  el('line', {x1: 60, y1: BUS15.y, x2: cx(lastBus) + 20, y2: BUS15.y, stroke: BUS15.c, 'stroke-width': 4});
+  txt(null, 4, BUS15.y + 4, BUS15.t, {fill: BUS15.c, 'font-size': 11, 'font-weight': 700});
+  txt(null, 4, BUS15.y + 18, 'X2 16 mm²', {fill: '#aaa', 'font-size': 9.5});
   el('line', {x1: 60, y1: Y.gnd, x2: W - 10, y2: Y.gnd, stroke: '#b07a45', 'stroke-width': 4});
   txt(null, 4, Y.gnd + 4, '31', {fill: '#b07a45', 'font-size': 12, 'font-weight': 700});
 
@@ -293,10 +290,15 @@ function render() {
       txt(g, x + 5, Y.wire, p.wire, {fill: '#9f9', 'font-size': 10.5});
       (p.out || []).forEach((s, k) => txt(g, x + 4, Y.cons + 50 + k * 13, s, {fill: SIG, 'font-size': 9.5}));
     } else {
-      el('circle', {cx: x, cy: BUS[p.bus || P[p.from].bus].y, r: p.bus ? 4 : 0, fill: BUS[p.bus || '15'].c}, null, g);
-      if (p.bus) y = BUS[p.bus].y;
+      if (p.bus) { el('circle', {cx: x, cy: BUS15.y, r: 4, fill: BUS15.c}, null, g); y = BUS15.y; }
+      if (p.x1) {
+        p.src.forEach((s, k) => txt(g, x, Y.src + 14 + k * 12, s, {'text-anchor': 'middle', fill: k ? '#e8c547' : '#ddd', 'font-size': 10}));
+        vline(g, x, 62, Y.x1 - 11, '#888', 1.5);
+        el('rect', {x: x - 11, y: Y.x1 - 11, width: 22, height: 22, rx: 3, fill: '#2a2a2a', stroke: '#fff', 'stroke-width': 1.5}, null, g);
+        txt(g, x, Y.x1 + 4, p.x1, {'text-anchor': 'middle', fill: '#fff', 'font-size': 11, 'font-weight': 700});
+        y = Y.x1 + 11;
+      }
       if (p.fA) { step(Y.fA - 15); fuse(g, x, Y.fA, p.fA); y = Y.fA + 15; }
-      if (p.rel) { step(Y.rel - 22); relay(g, x, Y.rel, p.rel); y = Y.rel + 22; }
       if (p.from !== undefined) {
         const fx = cx(p.from);
         el('line', {x1: fx, y1: Y.split, x2: x, y2: Y.split, stroke: LINE, 'stroke-width': 2}, null, g);
@@ -304,7 +306,7 @@ function render() {
         y = Y.split;
       }
       if (p.fB) { step(Y.fB - 15); fuse(g, x, Y.fB, p.fB); y = Y.fB + 15; }
-      txt(g, x + 5, Y.wire, p.wire, {fill: '#9f9', 'font-size': 10.5});
+      txt(g, x + 5, Y.wire, p.wire, {fill: '#9f9', 'font-size': 10});
       step(Y.conn - 9); connBox(g, x, p.conn); y = Y.conn + 9;
       let below;
       if (p.box) { step(BOX[p.box].y); below = BOX[p.box].y + BOX[p.box].h; }
@@ -313,12 +315,11 @@ function render() {
         step(Y.cons - (k === 'switch' ? 12 : k === 'box' ? 16 : 14));
         consumer(g, x, Y.cons, p.cons);
         below = Y.cons + (k === 'lamp' ? 16 + 12 * (p.cons.length - 1) + 4 : k === 'switch' ? 14 : 16);
-        if (k === 'motor') txt(g, x + 18, Y.cons + 4, p.cons[1], {fill: '#fff', 'font-size': 10});
       }
       if (p.relLow) {
         txt(g, x + 4, Y.cons + 34, 'Pumpe −', {fill: '#ccc', 'font-size': 10});
         vline(g, x, below, Y.relLow - 22);
-        relay(g, x, Y.relLow, p.relLow, true);
+        relay(g, x, Y.relLow, p.relLow);
         txt(g, x - 40, Y.relLow - 2, '87', {fill: '#888', 'font-size': 9});
         txt(g, x + 10, Y.relLow - 28, '87a', {fill: SIG, 'font-size': 9});
         below = Y.relLow + 22;
@@ -363,107 +364,85 @@ svg.addEventListener('click', ev => {
 });
 
 const FUSES = [
- ['V1', '50 A MIDI', '15', 'Servolenkung Hauptstrom', '10 mm²'],
- ['V2 / V3', '30 A', '15', 'ABS T25/9 / T25/25', '4,0 mm²'],
- ['V4', '5 A', '15', 'ABS Zündung T25/23', '0,5'],
- ['V5', '20 A', '15', 'Unterdruckpumpe + (UP28 < 10 A)', '2,5 (max. 25 A)'],
- ['V6', '3 A', '15', 'Spule K3 (über S1)', '0,5'],
- ['V7', '3 A', '15', 'Bremslichtschalter (nur Signal: ABS + Controller)', '0,5'],
- ['V8', '5 A', '15', 'Spiegelschalter E43', '0,5'],
- ['V9', '5 A', '15', 'Servolenkung Einschalten (über K4)', '0,5'],
- ['V10 / V11', '5 A', '15', 'Abblend L / R (nach K5)', '0,5'],
- ['V12 / V13', '5 A', '15', 'Fern L / R (nach K6)', '0,5'],
- ['V14 / V15', '5 A', '15', 'Nebel L / R (nach K7)', '1,0'],
- ['V16', '3 A', '15', 'Spulen K4, K5, K6', 'intern'],
- ['V20', '3 A', '30', 'Front-Controller', '0,5'],
- ['V21', '1 A', '30', 'Lenkrad (bisher „1 A im Fahrzeugverteiler“)', '0,5'],
- ['V22 / V23', '3 A', '30', 'Stand/TFL L / R (nach K8)', '0,5'],
- ['V24 / V25', '5 A', '30', 'Blinker L / R (vor K9 / K10)', '0,5'],
- ['V26', '3 A', '30', 'Spulen K8, K9, K10', 'intern'],
- ['V27', '5 A', '30', 'Diagnosebuchse Pin 16', '0,5']
+ ['V1', '50 A MIDI', 'Servolenkung Hauptstrom', '10 mm²'],
+ ['V2 / V3', '30 A', 'ABS T25/9 / T25/25', '4,0 mm²'],
+ ['V4', '5 A', 'ABS Zündung T25/23', '0,5'],
+ ['V5', '20 A', 'Unterdruckpumpe + (UP28 < 10 A)', '2,5 (max. 25 A)'],
+ ['V6', '3 A', 'Spule K3 (über S1)', '0,5'],
+ ['V7', '3 A', 'Bremslichtschalter (Signal an ABS + Controller)', '0,5'],
+ ['V8', '5 A', 'Spiegelschalter E43', '0,5'],
+ ['Inline', '1 A', 'Lenkrad (an X1/11, Kl. 30)', '0,5']
 ];
-const BADGE = {'30': 'b30', '15': 'b15'};
 const tF = document.getElementById('tFuse');
 FUSES.forEach(f => {
   const tr = document.createElement('tr');
-  tr.innerHTML = `<td><b>${f[0]}</b></td><td>${f[1]}</td><td><span class="badge ${BADGE[f[2]]}">${f[2]} vorn</span></td><td>${f[3]}</td><td>${f[4]}</td>`;
+  tr.innerHTML = `<td><b>${f[0]}</b></td><td>${f[1]}</td><td>${f[2]}</td><td>${f[3]}</td>`;
   tF.appendChild(tr);
 });
-const tFn = document.createElement('p');
-tFn.className = 'hint';
-tFn.innerHTML = 'Aufbau: zwei M8-Bolzen (15 vorn, 30 vorn) → MIDI-Halter für V1 + Flachsicherungsblöcke mit gemeinsamer Schiene je Ebene + Relaissockel, im Deckelgehäuse. V1 (50 A) löst vor F30 (80 A) aus: Ein Kurzschluss an der Servolenkung nimmt ABS und Licht nicht mit.';
-tF.parentNode.after(tFn);
 
 const LINES = [
- ['Box F30 (15)', 'FV-Bolzen 15 vorn (X2)', '16', 'rot', 'F30 80 A'],
- ['Box F31 (30)', 'FV-Bolzen 30 vorn (X2b)', '2,5', 'rot/weiß', 'F31 20 A'],
- ['X1/1 · X1/2', 'Front-Controller CAN-H · CAN-L', '0,5 verdrillt', 'gelb · grün', '—'],
- ['FV V20', 'Front-Controller +12 V', '0,5', 'rot/weiß', 'V20 3 A'],
+ ['X1/1 · X1/2', 'Scheinwerfer L · R, Pin 1 (Abblend)', '18 AWG', 'blau', 'Box 5 A je Seite'],
+ ['X1/3 · X1/4', 'Scheinwerfer L · R, Pin 2 (Fern)', '18 AWG', 'weiß', 'Box 5 A je Seite'],
+ ['X1/5 → Spleiß', 'Scheinwerfer L + R, Pin 3 (Stand/TFL)', '18 AWG', 'rot', 'Box 5 A'],
+ ['X1/6 · X1/7', 'Nebel L · R', '18 AWG', 'gelb', 'Box 5 A je Seite'],
+ ['X1/8 · X1/9', 'Scheinwerfer L · R, Pin 4 (Blinker)', '18 AWG', 'rot/schwarz', 'Blinkgeber'],
+ ['X1/10', 'Servolenkung Zündungsplus', '18 AWG', 'schwarz/weiß', 'Box 5 A (LAST)'],
+ ['X1/11 → Spleiß', 'Front-Controller +12 V · Diagnose Pin 16 · Lenkrad (Inline 1 A)', '18 AWG / 0,5', 'rot/weiß', 'Box 3 A (Kl. 30)'],
+ ['Scheinwerfer / Nebel Masse', 'M1 / M2', '1,0', 'braun', '—'],
+ ['CAN-Stecker', 'Front-Controller CAN-H · CAN-L', '0,5 verdrillt', 'gelb · grün', '—'],
  ['Front-Controller Masse', 'M1', '0,5', 'braun', '—'],
- ['FV K4…K10 Spule −', 'Front-Controller Q1…Q7', '7 × 0,5', 'lila', '—'],
- ['FV V1', 'Servolenkung Hauptstrom +', '10', 'rot', 'V1 50 A'],
- ['Servolenkung Hauptstrom −', 'M1', '10', 'braun', '—'],
- ['FV K4 (V9)', 'Servolenkung Zündungsplus', '0,5', 'schwarz/weiß', 'V9 5 A'],
- ['FV V2 · V3', 'ABS T25/9 · T25/25', '4,0', 'rot', 'V2 · V3 30 A'],
- ['FV V4', 'ABS T25/23', '0,5', 'schwarz/gelb', 'V4 5 A'],
- ['ABS T25/8 + T25/24', 'M1', '2 × 4,0', 'braun', '—'],
+ ['Box F30 (15)', 'Bolzen Front-Sicherungen (X2)', '16 mm²', 'rot', 'F30 80 A'],
+ ['V1', 'Servolenkung Hauptstrom +', '10 mm²', 'rot', 'V1 50 A'],
+ ['Servolenkung Hauptstrom −', 'M1', '10 mm²', 'braun', '—'],
+ ['V2 · V3', 'ABS T25/9 · T25/25', '4,0 mm²', 'rot', 'V2 · V3 30 A'],
+ ['V4', 'ABS T25/23', '0,5', 'schwarz/gelb', 'V4 5 A'],
+ ['ABS T25/8 + T25/24', 'M1', '2 × 4,0 mm²', 'braun', '—'],
  ['ABS T25/7', 'ABS T25/22 (Brücke)', '0,5', 'blau', '—'],
  ['ABS T25/16', 'Front-Controller E3', '0,5', 'grau/weiß', '—'],
  ['ABS T25/13', 'Diagnosebuchse Pin 7', '0,5', 'grau/blau', '—'],
  ['ABS T25/11 + 4 · 18 + 3', 'Fühler G47 VL · G45 VR', '2 × 2 × 0,5 geschirmt', 'grau / hellgrau', '—'],
  ['ABS T25/2 + 10 · 1 + 17', 'X6 → Fühler G46 HL · G44 HR', '4 × 0,5 geschirmt', 'grau / hellgrau', '—'],
- ['FV V5', 'Unterdruckpumpe +', '2,5', 'rot/grün', 'V5 20 A'],
- ['Unterdruckpumpe −', 'FV K3/87', '2,5', 'braun/weiß', '—'],
- ['FV K3/30', 'M1', '2,5', 'braun', '—'],
- ['FV K3/87a', 'Front-Controller E1', '0,5', 'grün/weiß', '—'],
- ['FV K3 Spule −', 'Unterdruckschalter S1 → M1', '0,5', 'grün', 'V6 3 A'],
- ['FV V7', 'Bremslichtschalter F/1', '0,5', 'schwarz/rot', 'V7 3 A'],
+ ['V5', 'Unterdruckpumpe +', '2,5 mm²', 'rot/grün', 'V5 20 A'],
+ ['Unterdruckpumpe −', 'K3/87', '2,5 mm²', 'braun/weiß', '—'],
+ ['K3/30', 'M1', '2,5 mm²', 'braun', '—'],
+ ['K3/87a', 'Front-Controller E1', '0,5', 'grün/weiß', '—'],
+ ['K3 Spule − (Spule + an V6)', 'Unterdruckschalter S1 → M1', '0,5', 'grün', 'V6 3 A'],
+ ['V7', 'Bremslichtschalter F/1', '0,5', 'schwarz/rot', 'V7 3 A'],
  ['Bremslichtschalter F/2', 'Spleiß → ABS T25/12 + Front-Controller E2', '0,5', 'schwarz/rot', 'V7'],
- ['FV V8', 'Spiegelschalter E43/6', '0,5', 'schwarz/blau', 'V8 5 A'],
+ ['V8', 'Spiegelschalter E43/6', '0,5', 'schwarz/blau', 'V8 5 A'],
  ['E43/8', 'M1', '0,5', 'braun', '—'],
  ['E43/5 · 1 · 4', 'Spiegel L T5/1 · 2 · 3', '0,5', 'grün · gelb · lila', 'V8'],
  ['E43/7 · 3 · 4', 'Spiegel R T5a/1 · 2 · 3 (Pin 4 über Spleiß)', '0,5', 'grün · gelb · lila', 'V8'],
- ['FV V10 / V11', 'Scheinwerfer L / R Pin 1 (Abblend)', '0,5', 'blau', 'V10 / V11'],
- ['FV V12 / V13', 'Scheinwerfer L / R Pin 2 (Fern)', '0,5', 'weiß', 'V12 / V13'],
- ['FV V22 / V23', 'Scheinwerfer L / R Pin 3 (Stand/TFL)', '0,5', 'rot', 'V22 / V23'],
- ['FV K9 / K10', 'Scheinwerfer L / R Pin 4 (Blinker)', '0,5', 'rot/schwarz', 'V24 / V25'],
- ['FV V14 / V15', 'Nebel L / R', '1,0', 'gelb', 'V14 / V15'],
- ['Scheinwerfer / Nebel Masse', 'M1 / M2', '1,0', 'braun', '—'],
- ['FV V27', 'Diagnosebuchse Pin 16', '0,5', 'rot', 'V27 5 A'],
  ['Diagnosebuchse Pin 4', 'M1', '0,5', 'braun', '—']
 ];
 const tL = document.getElementById('tLines');
 LINES.forEach((l, i) => {
   const tr = document.createElement('tr');
-  const key = 'hsfront3_line_' + i;
+  const key = 'hsfront4_line_' + i;
   tr.innerHTML = `<td><input type="checkbox"></td><td>${i + 1}</td><td>${l[0]}</td><td>${l[1]}</td><td>${l[2]}</td><td>${l[3]}</td><td>${l[4]}</td>`;
   const cb = tr.querySelector('input');
   cb.checked = localStorage.getItem(key) === '1';
   cb.addEventListener('change', () => localStorage.setItem(key, cb.checked ? '1' : '0'));
   tL.appendChild(tr);
 });
-const tLn = document.createElement('p');
-tLn.className = 'hint';
-tLn.innerHTML = 'Dieselbe Verdrahtung steht in <b>harness.design</b>: <code>WiringDiagram/harness.design/Front.harness</code> (89 Leitungen). Die Teile des Front-Verteilers heißen dort FV-A (Leistung), FV-B (Licht), FV-C (Steuerung) – in der App zu einer Gruppe „Front-Verteiler“ zusammenfassen.';
-tL.parentNode.after(tLn);
 
 const CHECKS = [
  'Massepunkte M1 + M2 gesetzt, Rahmen ↔ Batterie − und Motorblock ↔ Rahmen ≥ 25 mm²',
- 'Box: F30 80 A an 15, F31 20 A an 30, X2 (16 mm²) und X2b (2,5 mm²) mit Tülle nach vorn',
- 'Front-Verteiler montiert: Spannung an „15 vorn“ nur bei Zündung, „30 vorn“ immer',
- 'X1 gecrimpt, CAN verdrillt, Abschluss 120 Ω nur an den Bus-Enden (Widerstand CAN-H ↔ CAN-L stromlos ≈ 60 Ω)',
+ 'X1 gecrimpt (DT04-12P vorn, DT06-12S Box), Pin 12 Blindstopfen, jeden Pin durchgeklingelt',
+ 'X2 16 mm² mit Tülle nach vorn, F30 80 A in der Box, Front-Sicherungsblock montiert',
+ 'CAN-Stecker gecrimpt, Adern verdrillt, stromlos CAN-H ↔ CAN-L ≈ 60 Ω (beide Abschlüsse)',
  'ABS: T25 bestätigt, Brücke 7↔22, ABS-LED geht beim Einschalten an und nach dem Selbsttest aus',
  'Unterdruckpumpe: läuft bei Zündung bis S1 abschaltet, E1 zeigt den Zustand, Freilaufdiode drin',
- 'Servolenkung: Einschalten erst bei laufendem Motor, Motorausgang 0 V in Ruhe',
- 'Abblend, Fern, Stand/TFL, Blinker je Seite einzeln geprüft (Sicherung ziehen → nur eine Seite aus)',
- 'Nebel nur mit Standlicht, Warnblinker ohne Zündung',
- 'Bremsschalter: ABS T25/12 bekommt 12 V, Bremslicht hinten geht über CAN an, Herzschlag-Ausfall wird gemeldet',
+ 'Servolenkung: X1/10 erst bei laufendem Motor, Motorausgang 0 V in Ruhe',
+ 'Abblend, Fern, Nebel je Seite geprüft (Sicherung in der Box ziehen → nur eine Seite aus)',
+ 'Stand/TFL, Blinker, Warnblinker ohne Zündung',
+ 'Bremsschalter: ABS T25/12 bekommt 12 V, Bremslicht hinten geht über CAN an',
  'Spiegel: alle Richtungen je Seite',
  'Diagnose: VCDS verbindet mit dem ABS'
 ];
 const box = document.getElementById('checks');
 CHECKS.forEach((t, i) => {
-  const key = 'hsfront3_chk_' + i;
+  const key = 'hsfront4_chk_' + i;
   const lab = document.createElement('label');
   lab.className = 'chk';
   const cb = document.createElement('input');

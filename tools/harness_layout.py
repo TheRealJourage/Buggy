@@ -18,6 +18,7 @@ A, B, C, D, E, F, G, H = 0, 750, 1500, 2400, 3300, 4200, 4500, 4800
 CONNECTORS = {
     # A: interface to the box / rear
     "X1 Front DT12": (A, -240),
+    "CAN Front (eigener Stecker)": (A, -600),
     "X6 ABS-Fuehler hinten": (A, 720),
     # B: middle of the vehicle (behind the cockpit)
     "HighBeamEx2": (B, -1500),
@@ -31,10 +32,8 @@ CONNECTORS = {
     "Spiegelschalter E43": (C, 60),
     "Bremslichtschalter F": (C, 480),
     "Spiegel R T5a": (C, 1500),
-    # D: front distributor
-    "FV-C Steuerung": (D, -1050),
-    "FV-A Leistung": (D, -600),
-    "FV-B Licht": (D, 0),
+    # D: front fuse block on X2
+    "Front-Sicherungen (X2)": (D, -600),
     # E: front units
     "ABS-Fuehler G47 VL": (E, -1800),
     "Servolenkung (Corsa-C-Kit)": (E, -1500),
@@ -53,11 +52,9 @@ LIGHT_CONN = [(F, -1800), (F, 1200)]
 
 TERMINALS = {
     "X2 Box F30 80 A Kl. 15": (A, 360),
-    "X2b Box F31 20 A Kl. 30": (A, 450),
     "RingHighBeamEx GND": (B - 390, -1380),
     "RingDriverLeft GND": (B - 390, 900),
-    "X2 FV-Bolzen 15 vorn": (D, -1260),
-    "X2b FV-Bolzen 30 vorn": (D, -1170),
+    "X2 Bolzen 15 vorn (Front-Sicherungen)": (D, -1260),
     "M1 Rahmen vorn links": (F, -1950),
     "M2 Rahmen vorn rechts": (F, 1500),
     "RingFogL GND": (H, -1200),
@@ -110,7 +107,9 @@ def main():
             missing.append(f"splice {s['id']}")
             continue
         # leftmost neighbour, then 390 to the left of it, vertically on its first row
-        n = min(neigh, key=lambda c: c["schematicPosition"]["x"])
+        # the box interface column never hosts splices (Gesamt has the rear harness left of it)
+        inner = [c for c in neigh if c["schematicPosition"]["x"] > A] or neigh
+        n = min(inner, key=lambda c: c["schematicPosition"]["x"])
         x = n["schematicPosition"]["x"] - 390
         y = n["schematicPosition"]["y"] + 60
         while any(o["schematicPosition"] == {"x": x, "y": y} for o in front["splices"] if o is not s):
