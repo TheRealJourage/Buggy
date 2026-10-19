@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Kabelbaum-Übersicht (Gesamtfahrzeug)</title>
+<style>
+  :root { --heck:#f2d13d; --winde:#ff5a5a; --motor:#8cf; --x2:#ff9a3c; --x1:#6fd36f; --can:#c58cff; --kam:#4ad6c8; --lin:#e8e8e8; }
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 12px; background: #111; color: #eee; font-size: 16px; line-height: 1.4; max-width: 1100px; }
+  h1 { font-size: 21px; margin: 4px 0 6px; }
+  h2 { font-size: 18px; margin: 26px 0 8px; color: #8cf; border-bottom: 1px solid #333; padding-bottom: 4px; }
+  p, li { color: #ddd; }
+  .hint { color: #aaa; font-size: 14px; }
+  .warn { background: #3a2a10; border-left: 4px solid #e8a33d; padding: 8px 10px; margin: 10px 0; font-size: 15px; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; margin: 6px 0; }
+  th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid #2a2a2a; vertical-align: top; }
+  th { color: #8cf; font-weight: 600; }
+  .wrap { overflow-x: auto; }
+  .open { color: #e8c547; }
+  .layout { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+  .svgwrap { background: #181818; border-radius: 8px; padding: 6px; flex: 0 0 auto; }
+  svg { display: block; width: 560px; max-width: 100%; height: auto; }
+  svg text { font-family: system-ui, sans-serif; fill: #ddd; }
+  svg .zone { fill: #202020; stroke: #3a3a3a; stroke-width: 1; }
+  svg .ztitle { fill: #8cf; font-size: 13px; font-weight: 600; letter-spacing: .05em; }
+  svg .part { fill: #2a2a2a; stroke: #666; stroke-width: 1; rx: 5; }
+  svg .box { fill: #28303a; stroke: #8cf; stroke-width: 1.5; }
+  svg .lbl { font-size: 11px; }
+  svg .small { font-size: 10px; fill: #aaa; }
+  svg .ctrl { fill: #3a2a4a; stroke: var(--can); }
+  svg .conn { fill: #333; stroke: #ccc; stroke-width: 1.5; }
+  svg .conn + text, svg .ct { font-size: 11px; font-weight: 700; fill: #fff; }
+  svg [data-c] { transition: opacity .15s; }
+  svg.focus [data-c] { opacity: .12; }
+  svg.focus [data-c].on { opacity: 1; }
+  svg path, svg line, svg polyline { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .legend { flex: 1 1 260px; min-width: 240px; }
+  .legend button { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; background: #1c1c1c; color: #eee; border: 1px solid #333; border-radius: 6px; padding: 7px 9px; margin: 4px 0; cursor: pointer; font-size: 14px; }
+  .legend button.active { border-color: #8cf; background: #22303a; }
+  .legend i { display: inline-block; width: 26px; height: 0; border-top: 4px solid; flex: none; }
+  .legend i.dash { border-top-style: dashed; }
+  .legend small { color: #999; display: block; font-size: 12px; }
+  ul { padding-left: 20px; }
+</style>
+</head>
+<body>
+<h1>Kabelbaum-Übersicht: Gesamtfahrzeug</h1>
+<p class="hint">Stand 2026-10-19. Draufsicht, <b>Front oben</b>, links = links in Fahrtrichtung, Tandem-Sitze (Fahrer vorn, Beifahrer dahinter). Quelle und Pflegeort: Vault <code>Buggy/Kabelbaum-Übersicht.md</code> – diese Seite ist die Skizze dazu. Details: <a href="hochstrom-front.html" style="color:#8cf">Front-Hochstrom-Plan</a>, <a href="verkabelung.html" style="color:#8cf">Speeduino-Verkabelung</a>. Positionen sind schematisch, keine Maße.</p>
+
+<div class="layout">
+<div class="svgwrap">
+<svg id="map" viewBox="0 0 560 900" xmlns="http://www.w3.org/2000/svg">
+  <!-- Zonen -->
+  <rect class="zone" x="20" y="20" width="520" height="250" rx="10"/>
+  <text class="ztitle" x="30" y="40">FRONT – Fußraum / Fahrer</text>
+  <rect class="zone" x="20" y="285" width="520" height="215" rx="10"/>
+  <text class="ztitle" x="30" y="305">BEIFAHRER</text>
+  <rect class="zone" x="20" y="515" width="520" height="165" rx="10"/>
+  <text class="ztitle" x="50" y="535">MOTOR</text>
+  <rect class="zone" x="20" y="695" width="520" height="185" rx="10"/>
+  <text class="ztitle" x="50" y="715">HECK</text>
+  <text class="small" x="490" y="40">▲ vorn</text>
+  <text class="small" x="30" y="893">links</text>
+  <text class="small" x="500" y="893">rechts</text>
+
+  <!-- FRONT Teile -->
+  <rect class="part" x="40" y="50" width="70" height="26"/><text class="lbl" x="75" y="67" text-anchor="middle">Scheinw. L</text>
+  <rect class="part" x="450" y="50" width="70" height="26"/><text class="lbl" x="485" y="67" text-anchor="middle">Scheinw. R</text>
+  <rect class="part" x="135" y="50" width="100" height="26"/><text class="lbl" x="185" y="67" text-anchor="middle">LEDs vorn mittig</text>
+  <rect class="part" x="325" y="50" width="100" height="26"/><text class="lbl" x="375" y="67" text-anchor="middle">Nebel / Blinker</text>
+
+  <rect class="part" x="40" y="100" width="55" height="30"/><text class="lbl" x="67" y="119" text-anchor="middle">ABS</text>
+  <rect class="part" x="100" y="100" width="72" height="30"/><text class="lbl" x="136" y="114" text-anchor="middle">Unterdruck-</text><text class="lbl" x="136" y="126" text-anchor="middle">pumpe</text>
+  <rect class="part" x="186" y="100" width="72" height="30"/><text class="lbl" x="222" y="119" text-anchor="middle">Servolenkung</text>
+  <rect class="box" x="290" y="100" width="90" height="30"/><text class="lbl" x="335" y="114" text-anchor="middle">Front-Verteiler</text><text class="small" x="335" y="126" text-anchor="middle">Sicherungen vorn</text>
+  <circle cx="60" cy="150" r="4" fill="#b07a45"/><text class="small" x="68" y="154">M1 Masse</text>
+  <circle cx="500" cy="150" r="4" fill="#b07a45"/><text class="small" x="450" y="154">M2 Masse</text>
+
+  <rect class="part ctrl" x="190" y="150" width="150" height="32"/><text class="lbl" x="265" y="164" text-anchor="middle">Front-Controller</text><text class="small" x="265" y="177" text-anchor="middle">Lenksäule · Hub · LIN-Master</text>
+  <rect class="part ctrl" x="225" y="200" width="80" height="26"/><text class="lbl" x="265" y="217" text-anchor="middle">Lenkrad</text>
+  <rect class="part" x="135" y="196" width="70" height="32"/><text class="lbl" x="170" y="210" text-anchor="middle">Tacho-Pi</text><text class="small" x="170" y="222" text-anchor="middle">über Lenkstock</text>
+  <rect class="part" x="330" y="196" width="80" height="32"/><text class="lbl" x="370" y="210" text-anchor="middle">CarPlay-Pi</text><text class="small" x="370" y="222" text-anchor="middle">Seite offen</text>
+  <rect class="part ctrl" x="440" y="190" width="85" height="40"/><text class="lbl" x="482" y="206" text-anchor="middle">Schaltpanel</text><text class="small" x="482" y="219" text-anchor="middle">RP2040, seitlich</text>
+
+  <!-- Spritzwand mit X1 / X2 -->
+  <line x1="20" y1="277" x2="540" y2="277" stroke="#555" stroke-dasharray="6 4"/>
+  <text class="small" x="30" y="273">Spritzwand</text>
+  <rect class="conn" x="245" y="266" width="44" height="22" rx="4"/><text class="ct" x="267" y="281" text-anchor="middle">X1</text>
+  <rect class="conn" x="315" y="266" width="44" height="22" rx="4"/><text class="ct" x="337" y="281" text-anchor="middle">X2</text>
+
+  <!-- BEIFAHRER Teile -->
+  <rect class="part" x="62" y="320" width="70" height="40"/><text class="lbl" x="97" y="337" text-anchor="middle">Batterie</text><text class="small" x="97" y="351" text-anchor="middle">Kiste, links</text>
+  <rect class="part" x="62" y="370" width="70" height="30"/><text class="lbl" x="97" y="384" text-anchor="middle">Lautspr.</text><text class="small" x="97" y="395" text-anchor="middle">Hupe</text>
+  <rect class="part" x="62" y="410" width="70" height="30"/><text class="lbl" x="97" y="424" text-anchor="middle">Benzinpumpe</text><text class="small" x="97" y="435" text-anchor="middle">+ Filter</text>
+  <rect class="box" x="200" y="340" width="190" height="90"/>
+  <text class="lbl" x="295" y="358" text-anchor="middle" style="font-weight:700;fill:#fff">Box unter dem Beifahrersitz</text>
+  <text class="small" x="295" y="372" text-anchor="middle">wasserdicht, Typ offen</text>
+  <rect class="part" x="212" y="382" width="80" height="36"/><text class="lbl" x="252" y="398" text-anchor="middle">Speeduino</text><text class="small" x="252" y="411" text-anchor="middle">Arduino Mega</text>
+  <rect class="part ctrl" x="300" y="382" width="80" height="36"/><text class="lbl" x="340" y="398" text-anchor="middle">Relaisbox</text><text class="small" x="340" y="411" text-anchor="middle">+ Controller</text>
+  <rect x="150" y="455" width="280" height="80" rx="12" fill="none" stroke="#e8a33d" stroke-dasharray="5 4"/>
+  <text class="small" x="290" y="470" text-anchor="middle" style="fill:#e8a33d">Tank (darüber, zwischen Beifahrer und Motor)</text>
+
+  <!-- MOTOR -->
+  <rect class="part" x="160" y="560" width="240" height="90" rx="12"/><text class="lbl" x="280" y="605" text-anchor="middle" style="font-size:14px">VR6 AUE</text>
+  <text class="small" x="280" y="622" text-anchor="middle">Sensoren, Zündung, Einspritzung, LiMa, Anlasser</text>
+  <circle cx="280" cy="560" r="5" fill="var(--motor)"/><text class="small" x="292" y="556">Sammelpunkt Motorkabelbaum (mittig, unten)</text>
+  <rect class="conn" x="478" y="595" width="44" height="22" rx="4"/><text class="ct" x="500" y="610" text-anchor="middle">X3</text>
+  <text class="small" x="470" y="580" text-anchor="end">DT 12-pol, hängt frei</text>
+
+  <!-- HECK -->
+  <rect class="part" x="40" y="730" width="80" height="26"/><text class="lbl" x="80" y="747" text-anchor="middle">Rücklicht L</text>
+  <rect class="part" x="440" y="730" width="80" height="26"/><text class="lbl" x="480" y="747" text-anchor="middle">Rücklicht R</text>
+  <rect class="part" x="160" y="730" width="110" height="26"/><text class="lbl" x="215" y="747" text-anchor="middle">Offroad / Kennz.</text>
+  <rect class="part" x="300" y="730" width="110" height="26"/><text class="lbl" x="355" y="747" text-anchor="middle">Rückfahrkamera</text>
+  <rect class="part" x="190" y="800" width="180" height="40"/><text class="lbl" x="280" y="817" text-anchor="middle">Seilwinde 2,8 t</text><text class="small" x="280" y="831" text-anchor="middle">dicke Kabel direkt zur Batterie</text>
+  <rect class="part ctrl" x="440" y="790" width="85" height="40" stroke-dasharray="4 3"/><text class="lbl" x="482" y="806" text-anchor="middle">Heck-Ctrl?</text><text class="small" x="482" y="819" text-anchor="middle">offen</text>
+
+  <!-- ===== Leitungen ===== -->
+  <!-- Seilwinde: links rum zur Batterie -->
+  <path data-c="winde" d="M 190 820 L 32 820 L 32 340 L 62 340" stroke="var(--winde)" stroke-width="7"/>
+  <text data-c="winde" class="small" x="48" y="620" text-anchor="middle" style="fill:var(--winde)" transform="rotate(-90 48 620)">Winde: 2 dicke Kabel, LINKS rum</text>
+
+  <!-- Heckkabelbaum: rechts rum bis X3 (verbaut), weiter bis Box (fehlt) -->
+  <path data-c="heck" d="M 120 743 L 160 743 M 270 743 L 300 743 M 410 743 L 440 743 M 500 730 L 500 617" stroke="var(--heck)" stroke-width="4"/>
+  <path data-c="heck" d="M 500 595 L 500 445 L 390 400" stroke="var(--heck)" stroke-width="4" stroke-dasharray="8 6"/>
+  <text data-c="heck" class="small" x="506" y="520" style="fill:var(--heck)">X3 → Box:</text>
+  <text data-c="heck" class="small" x="506" y="533" style="fill:var(--heck)">fehlt noch</text>
+
+  <!-- Kamera AV: rechts rum nach vorn zum CarPlay-Pi -->
+  <path data-c="kamera" d="M 355 730 L 355 712 L 536 712 L 536 236 L 370 236 L 370 228" stroke="var(--kam)" stroke-width="2"/>
+  <rect data-c="kamera" class="conn" x="524" y="645" width="24" height="16" rx="3"/><text data-c="kamera" class="ct" x="536" y="657" text-anchor="middle" style="font-size:9px">X4</text>
+
+  <!-- Motorkabelbaum: Sammelpunkt → Box -->
+  <path data-c="motor" d="M 280 560 L 280 540 L 280 430" stroke="var(--motor)" stroke-width="4"/>
+  <rect data-c="motor" class="conn" x="268" y="495" width="24" height="16" rx="3"/><text data-c="motor" class="ct" x="280" y="507" text-anchor="middle" style="font-size:9px">X5</text>
+
+  <!-- X2: 16 mm² Box → Front-Verteiler -->
+  <path data-c="x2" d="M 337 340 L 337 288 M 337 266 L 337 130" stroke="var(--x2)" stroke-width="6"/>
+  <path data-c="x2" d="M 290 115 L 258 115 M 186 115 L 172 115 M 100 115 L 95 115" stroke="var(--x2)" stroke-width="3"/>
+  <text data-c="x2" class="small" x="345" y="320" style="fill:var(--x2)">16 mm², Ebene offen</text>
+
+  <!-- X1: Box → DT12 → Licht/Blinker/Meldungen -->
+  <path data-c="x1" d="M 267 340 L 267 288 M 267 266 L 267 245 L 30 245 L 30 63 L 40 63 M 267 245 L 530 245 L 530 63 L 520 63 M 530 88 L 375 88 L 375 76" stroke="var(--x1)" stroke-width="2.5"/>
+  <path data-c="can" d="M 200 150 L 180 150 L 180 76" stroke="var(--can)" stroke-width="1.5"/>
+
+  <!-- CAN-Rückgrat -->
+  <path data-c="can" d="M 300 182 L 300 240 L 300 266 M 300 288 L 300 340 M 340 430 L 420 470 L 420 560 L 420 695 L 462 790" stroke="var(--can)" stroke-width="2.5" stroke-dasharray="5 4"/>
+  <text data-c="can" class="small" x="306" y="255" style="fill:var(--can)">CAN</text>
+  <text data-c="can" class="small" x="428" y="688" style="fill:var(--can)">CAN nach hinten: offen</text>
+  <!-- Panel → Front-Controller -->
+  <path data-c="can" d="M 440 205 L 330 170" stroke="var(--can)" stroke-width="2" stroke-dasharray="2 4"/>
+  <text data-c="can" class="small" x="380" y="186" style="fill:var(--can)">UART oder CAN</text>
+  <!-- LIN Lenkrad -->
+  <path data-c="lin" d="M 265 200 L 265 182" stroke="var(--lin)" stroke-width="2.5"/>
+  <text data-c="lin" class="small" x="270" y="195">LIN</text>
+  <!-- Speeduino Serial → Tacho-Pi -->
+  <path data-c="lin" d="M 212 400 L 170 400 L 170 228" stroke="var(--lin)" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <text data-c="lin" class="small" x="176" y="320">Serial3</text>
+</svg>
+</div>
+
+<div class="legend" id="legend">
+  <p class="hint">Antippen hebt den Strang hervor, nochmal antippen zeigt alles.</p>
+  <button data-k="heck"><i style="border-color:var(--heck)"></i><span>Heckkabelbaum <small>verbaut, rechts rum; Verlängerung X3 → Box fehlt (gestrichelt)</small></span></button>
+  <button data-k="winde"><i style="border-color:var(--winde)"></i><span>Seilwinde <small>2 dicke Kabel, einzige Leitung links rum, direkt an die Batterie</small></span></button>
+  <button data-k="motor"><i style="border-color:var(--motor)"></i><span>Motorkabelbaum <small>eigenständig, Sammelpunkt vor dem Motor → Box</small></span></button>
+  <button data-k="x2"><i style="border-color:var(--x2)"></i><span>X2: 16 mm² <small>Box → Front-Verteiler (ABS, Unterdruck, Servo). Ebene Kl. 30 / 15 offen</small></span></button>
+  <button data-k="x1"><i style="border-color:var(--x1)"></i><span>X1: DT 12-pol <small>Licht, Blinker, Bremslicht, Meldeleitungen</small></span></button>
+  <button data-k="kamera"><i style="border-color:var(--kam)"></i><span>Kamera AV <small>eigener kleiner Stecker X4, zum CarPlay-Pi</small></span></button>
+  <button data-k="can"><i class="dash" style="border-color:var(--can)"></i><span>CAN-Rückgrat <small>Front-Controller ↔ Relaisbox (↔ Heck offen). Speeduino nicht am CAN</small></span></button>
+  <button data-k="lin"><i style="border-color:var(--lin)"></i><span>LIN / Serial <small>Lenkrad ↔ Front-Controller; Speeduino → Tacho-Pi</small></span></button>
+</div>
+</div>
+
+<h2>1. Zonen</h2>
+<div class="wrap"><table>
+<tr><th>Zone</th><th>Was dort sitzt</th><th>Kabelbaum</th><th>Status</th></tr>
+<tr><td><b>Front</b></td><td>Scheinwerfer, Blinker, Nebel, ABS, Unterdruckpumpe, Servolenkung, Lenksäule, Lenkrad, Schaltpanel, Tacho-Pi, CarPlay-Pi</td><td>Frontkabelbaum</td><td>Plan fertig, Verdrahtung läuft</td></tr>
+<tr><td><b>Beifahrer</b></td><td>Box unter dem Sitz (Speeduino + Relaisbox). Links in einer Reihe: Batterie, Lautsprecher (Hupe), Benzinpumpe + Filter. Darüber der Tank</td><td>Knotenpunkt</td><td class="open">Box noch nicht gebaut</td></tr>
+<tr><td><b>Motor</b></td><td>VR6 mit allen Speeduino-Sensoren, Zündung, Einspritzung, LiMa, Anlasser</td><td>Motorkabelbaum, eigenständig</td><td>dokumentiert, nicht durchgeklingelt</td></tr>
+<tr><td><b>Heck</b></td><td>Heckleuchten, Offroad, Kennzeichen, Rückfahrkamera, Seilwinde</td><td>Heckkabelbaum</td><td>verbaut, X3 hängt frei</td></tr>
+</table></div>
+
+<h2>2. Leitungswege</h2>
+<ul>
+<li><b>Rechts rum:</b> Heckkabelbaum, Motorkabelbaum, alle Signalleitungen.</li>
+<li><b>Links rum nur die Seilwinde:</b> zwei dicke Kabel direkt zur Batterie (links vor dem Motor), nicht durch die Box.</li>
+<li><b>Motorkabelbaum:</b> Sammelpunkt mittig vor dem Motor unten, von dort unter den Beifahrersitz.</li>
+</ul>
+
+<h2>3. Schnittstellen</h2>
+<div class="wrap"><table>
+<tr><th>Nr.</th><th>Zwischen</th><th>Stecker / Leitung</th><th>Status</th></tr>
+<tr><td><b>X1</b></td><td>Box ↔ Front</td><td>Deutsch DT 12-pol an der Spritzwand</td><td>festgelegt (Belegung: Hochstrom-Plan)</td></tr>
+<tr><td><b>X2</b></td><td>Box ↔ Front-Verteiler</td><td>16 mm² rot, Sicherung in der Box</td><td class="open">Ebene Kl. 30 / 15 offen</td></tr>
+<tr><td><b>X3</b></td><td>Box ↔ Heck</td><td>Deutsch DT 12-pol auf Motorhöhe, Pin 1 + 12 frei</td><td class="open">Verlängerung bis in die Box fehlt</td></tr>
+<tr><td><b>X4</b></td><td>Heck ↔ CarPlay-Pi</td><td>AV-Kabel, kleiner Stecker, am DT vorbei</td><td class="open">Steckertyp offen</td></tr>
+<tr><td><b>X5</b></td><td>Motor ↔ Box</td><td>Speeduino-Stecker (DT 3-pol, Superseal, Einzelsensoren)</td><td>dokumentiert, nicht gemessen</td></tr>
+<tr><td><b>W</b></td><td>Heck ↔ Batterie</td><td>2 dicke Winden-Kabel, links rum</td><td class="open">Absicherung / Trennschalter offen</td></tr>
+</table></div>
+<p class="hint">Stecker-Regel: Deutsch DT als Standard (≤ ~13 A je Kontakt). Darüber Bolzen / Ringkabelschuh, darunter (CAN, LIN, Kamera) kleinere Stecker, Typ offen. Masse vorn über M1/M2, nie durch die Stecker.</p>
+
+<h2>4. Controller-Knoten</h2>
+<div class="wrap"><table>
+<tr><th>Knoten</th><th>Ort</th><th>Controller</th><th>Aufgabe</th><th>Status</th></tr>
+<tr><td>Lenkrad</td><td>Lenkrad</td><td>RP2040-Tiny</td><td>Tasten, Paddel, Hupe, Code (LIN-Slave)</td><td>verbaut</td></tr>
+<tr><td>Front-Controller</td><td>Lenksäule</td><td>Nucleo-F446RE (geplant)</td><td>Lenkstockschalter, LIN-Master, LEDs vorn, CAN nach hinten</td><td>Firmware in Arbeit</td></tr>
+<tr><td>Panel-Controller</td><td>Schaltpanel seitlich</td><td>kleiner RP2040 o. ä.</td><td>Potis + Schalter → UART an Front-Controller oder direkt CAN</td><td class="open">offen</td></tr>
+<tr><td>Relaisbox-Controller</td><td>Box Beifahrersitz</td><td>STM32 oder Teensy</td><td>Freigabe Kl. 15/50/Last, Relais, Panel-Befehle</td><td class="open">Auswahl offen</td></tr>
+<tr><td>Heck-Controller</td><td>hinten oben (vermutlich)</td><td>offen</td><td>Lichter hinten, evtl. Kamera</td><td class="open">ob nötig, offen</td></tr>
+<tr><td>Tacho-Pi</td><td>mittig über Lenkstock</td><td>Raspberry Pi</td><td>Tacho + Eckdaten, Serial am Speeduino</td><td>geplant</td></tr>
+<tr><td>CarPlay-Pi</td><td>links oder rechts vom Tacho</td><td>Raspberry Pi</td><td>CarPlay, Navi, Rückfahrkamera</td><td>geplant</td></tr>
+</table></div>
+
+<h2>5. Offen</h2>
+<ul>
+<li>Ebene der 16 mm² (X2): Dauerplus oder Zündungsplus → Front-Session</li>
+<li>X3: Verlängerung vom Heck-Stecker rechts rum bis in die Box</li>
+<li>X4 Kamera-Stecker und kleiner Steckertyp für Signal-/Datenleitungen</li>
+<li>Box unter dem Beifahrersitz: Typ, Größe, Durchführungen</li>
+<li>Heck-Controller nötig? Panel per UART oder CAN? Seilwinde absichern, Massepunkte Motor/Heck, Heckkabelbaum auf Vollständigkeit prüfen</li>
+</ul>
+
+<script>
+(function () {
+  const svg = document.getElementById('map');
+  const btns = document.querySelectorAll('#legend button');
+  let active = null;
+  btns.forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.k;
+    active = (active === k) ? null : k;
+    btns.forEach(x => x.classList.toggle('active', x.dataset.k === active));
+    svg.classList.toggle('focus', !!active);
+    svg.querySelectorAll('[data-c]').forEach(el => el.classList.toggle('on', el.dataset.c === active));
+  }));
+})();
+</script>
+</body>
+</html>
