@@ -260,8 +260,8 @@
       "id": "pWSQfa",
       "label": "HighBeamEx1",
       "schematicPosition": {
-        "x": -240,
-        "y": -1020
+        "x": 750,
+        "y": -1290
       },
       "cavities": [
         {
@@ -279,8 +279,8 @@
       "id": "PEzLEM",
       "label": "HighBeamEx2",
       "schematicPosition": {
-        "x": -240,
-        "y": -1230
+        "x": 750,
+        "y": -1500
       },
       "cavities": [
         {
@@ -298,8 +298,8 @@
       "id": "vDWFN4",
       "label": "OffroadFront2",
       "schematicPosition": {
-        "x": 2250,
-        "y": -1020
+        "x": 750,
+        "y": 1050
       },
       "cavities": [
         {
@@ -317,8 +317,8 @@
       "id": "DCs1Rd",
       "label": "OffroadFront1",
       "schematicPosition": {
-        "x": 2250,
-        "y": -1230
+        "x": 750,
+        "y": 840
       },
       "cavities": [
         {
@@ -336,8 +336,8 @@
       "id": "Oq3eyY",
       "label": "FogFront1",
       "schematicPosition": {
-        "x": 4770,
-        "y": -1320
+        "x": 4500,
+        "y": -1200
       },
       "cavities": [
         {
@@ -354,8 +354,8 @@
       "id": "XokHeS",
       "label": "FogFront2",
       "schematicPosition": {
-        "x": 4770,
-        "y": -1140
+        "x": 4500,
+        "y": 900
       },
       "cavities": [
         {
@@ -372,7 +372,7 @@
       "id": "SEWtYk",
       "label": "FrontLightLeft",
       "schematicPosition": {
-        "x": 4230,
+        "x": 4500,
         "y": -1650
       },
       "cavities": [
@@ -398,8 +398,8 @@
       "id": "6CIp4s",
       "label": "LightConn",
       "schematicPosition": {
-        "x": 4500,
-        "y": -1860
+        "x": 4200,
+        "y": -1800
       },
       "cavities": [
         {
@@ -428,8 +428,8 @@
       "id": "C9USxN",
       "label": "FrontLightRight",
       "schematicPosition": {
-        "x": 4230,
-        "y": -420
+        "x": 4500,
+        "y": 1350
       },
       "cavities": [
         {
@@ -454,8 +454,8 @@
       "id": "Y5gt3e",
       "label": "LightConn",
       "schematicPosition": {
-        "x": 4500,
-        "y": -630
+        "x": 4200,
+        "y": 1200
       },
       "cavities": [
         {
@@ -484,8 +484,8 @@
       "id": "L88nHq",
       "label": "X1 Front DT12",
       "schematicPosition": {
-        "x": 3300,
-        "y": -1320
+        "x": 0,
+        "y": -240
       },
       "cavities": [
         {
@@ -542,8 +542,8 @@
       "id": "Caf3c_",
       "label": "Front-Controller (Nucleo)",
       "schematicPosition": {
-        "x": 0,
-        "y": 0
+        "x": 1500,
+        "y": -1200
       },
       "cavities": [
         {
@@ -606,8 +606,8 @@
       "id": "9qjFA8",
       "label": "FV-C Steuerung",
       "schematicPosition": {
-        "x": 600,
-        "y": 0
+        "x": 2400,
+        "y": -1050
       },
       "cavities": [
         {
@@ -652,8 +652,8 @@
       "id": "FxJN4n",
       "label": "FV-A Leistung",
       "schematicPosition": {
-        "x": 600,
-        "y": 420
+        "x": 2400,
+        "y": -600
       },
       "cavities": [
         {
@@ -714,8 +714,8 @@
       "id": "b4NPm6",
       "label": "FV-B Licht",
       "schematicPosition": {
-        "x": 600,
-        "y": 900
+        "x": 2400,
+        "y": 0
       },
       "cavities": [
         {
@@ -764,8 +764,8 @@
       "id": "AHqw5Q",
       "label": "Servolenkung (Corsa-C-Kit)",
       "schematicPosition": {
-        "x": 1500,
-        "y": 0
+        "x": 3300,
+        "y": -1500
       },
       "cavities": [
         {
@@ -784,8 +784,8 @@
       "id": "57M_iK",
       "label": "ABS J104 T25",
       "schematicPosition": {
-        "x": 1500,
-        "y": 240
+        "x": 3300,
+        "y": -1200
       },
       "cavities": [
         {
@@ -890,8 +890,8 @@
       "id": "4cS9vc",
       "label": "Unterdruckpumpe",
       "schematicPosition": {
-        "x": 1500,
-        "y": 1140
+        "x": 3300,
+        "y": -240
       },
       "cavities": [
         {
@@ -906,8 +906,8 @@
       "id": "I_V46Q",
       "label": "Unterdruckschalter S1",
       "schematicPosition": {
-        "x": 1500,
-        "y": 1290
+        "x": 3300,
+        "y": -60
       },
       "cavities": [
         {
@@ -924,7 +924,7 @@
       "label": "Bremslichtschalter F",
       "schematicPosition": {
         "x": 1500,
-        "y": 1440
+        "y": 480
       },
       "cavities": [
         {
@@ -941,7 +941,7 @@
       "label": "Diagnosebuchse vorn",
       "schematicPosition": {
         "x": 1500,
-        "y": 1590
+        "y": -600
       },
       "cavities": [
         {
@@ -1013,7 +1013,7 @@
       "label": "Spiegelschalter E43",
       "schematicPosition": {
         "x": 1500,
-        "y": 2190
+        "y": 60
       },
       "cavities": [
         {
@@ -1053,8 +1053,8 @@
       "id": "v0cKU8",
       "label": "ABS-Fuehler G47 VL",
       "schematicPosition": {
-        "x": 2400,
-        "y": 240
+        "x": 3300,
+        "y": -1800
       },
       "cavities": [
         {
@@ -1069,8 +1069,8 @@
       "id": "nz9ChX",
       "label": "ABS-Fuehler G45 VR",
       "schematicPosition": {
-        "x": 2400,
-        "y": 390
+        "x": 3300,
+        "y": 1500
       },
       "cavities": [
         {
@@ -1085,8 +1085,8 @@
       "id": "tLlIt_",
       "label": "X6 ABS-Fuehler hinten",
       "schematicPosition": {
-        "x": 2400,
-        "y": 540
+        "x": 0,
+        "y": 720
       },
       "cavities": [
         {
@@ -1111,8 +1111,8 @@
       "id": "YdF_tG",
       "label": "Spiegel L T5",
       "schematicPosition": {
-        "x": 2400,
-        "y": 2190
+        "x": 1500,
+        "y": -1800
       },
       "cavities": [
         {
@@ -1138,8 +1138,8 @@
       "id": "ZoWusq",
       "label": "Spiegel R T5a",
       "schematicPosition": {
-        "x": 2400,
-        "y": 2430
+        "x": 1500,
+        "y": 1500
       },
       "cavities": [
         {
@@ -1238,8 +1238,8 @@
     {
       "id": "t9acCB",
       "schematicPosition": {
-        "x": 2250,
-        "y": -1560
+        "x": 360,
+        "y": 900
       },
       "signal": "RingDriverLeft GND",
       "type": "Ring"
@@ -1247,8 +1247,8 @@
     {
       "id": "6NamjU",
       "schematicPosition": {
-        "x": 4500,
-        "y": -1920
+        "x": 4200,
+        "y": -1950
       },
       "signal": "M1 Rahmen vorn links",
       "type": "Ring"
@@ -1256,8 +1256,8 @@
     {
       "id": "Rbuvmt",
       "schematicPosition": {
-        "x": 4230,
-        "y": -1710
+        "x": 4500,
+        "y": -1860
       },
       "signal": "GND",
       "type": "Ring"
@@ -1265,8 +1265,8 @@
     {
       "id": "Fjsp_6",
       "schematicPosition": {
-        "x": 4500,
-        "y": -690
+        "x": 4200,
+        "y": 1500
       },
       "signal": "M2 Rahmen vorn rechts",
       "type": "Ring"
@@ -1274,8 +1274,8 @@
     {
       "id": "7la5Ks",
       "schematicPosition": {
-        "x": 4230,
-        "y": -480
+        "x": 4500,
+        "y": 1290
       },
       "signal": "GND",
       "type": "Ring"
@@ -1283,8 +1283,8 @@
     {
       "id": "Bj4QB9",
       "schematicPosition": {
-        "x": 5100,
-        "y": -1320
+        "x": 4800,
+        "y": -1200
       },
       "signal": "RingFogL GND",
       "type": "Ring"
@@ -1292,8 +1292,8 @@
     {
       "id": "bSfwXq",
       "schematicPosition": {
-        "x": 5100,
-        "y": -1140
+        "x": 4800,
+        "y": 900
       },
       "signal": "RingFogR GND",
       "type": "Ring"
@@ -1301,8 +1301,8 @@
     {
       "id": "o5sHBn",
       "schematicPosition": {
-        "x": -600,
-        "y": -960
+        "x": 360,
+        "y": -1380
       },
       "signal": "RingHighBeamEx GND",
       "type": "Ring"
@@ -1310,8 +1310,8 @@
     {
       "id": "rglylm",
       "schematicPosition": {
-        "x": -600,
-        "y": 900
+        "x": 0,
+        "y": 360
       },
       "signal": "X2 Box F30 80 A Kl. 15",
       "type": "Ring"
@@ -1319,8 +1319,8 @@
     {
       "id": "W2K_Px",
       "schematicPosition": {
-        "x": 90,
-        "y": 900
+        "x": 2400,
+        "y": -1260
       },
       "signal": "X2 FV-Bolzen 15 vorn",
       "type": "Ring"
@@ -1328,8 +1328,8 @@
     {
       "id": "RL7AXF",
       "schematicPosition": {
-        "x": -600,
-        "y": 990
+        "x": 0,
+        "y": 450
       },
       "signal": "X2b Box F31 20 A Kl. 30",
       "type": "Ring"
@@ -1337,8 +1337,8 @@
     {
       "id": "mb7X1v",
       "schematicPosition": {
-        "x": 90,
-        "y": 990
+        "x": 2400,
+        "y": -1170
       },
       "signal": "X2b FV-Bolzen 30 vorn",
       "type": "Ring"
@@ -1348,29 +1348,29 @@
     {
       "id": "x_NHnW",
       "schematicPosition": {
-        "x": -330,
-        "y": -960
+        "x": 360,
+        "y": -1440
       }
     },
     {
       "id": "xMBT8b",
       "schematicPosition": {
-        "x": -300,
-        "y": -990
+        "x": 360,
+        "y": -1230
       }
     },
     {
       "id": "4dt9iP",
       "schematicPosition": {
-        "x": 1200,
-        "y": 1470
+        "x": 1110,
+        "y": 540
       }
     },
     {
       "id": "9Z_eUH",
       "schematicPosition": {
-        "x": 2100,
-        "y": 2280
+        "x": 1110,
+        "y": 120
       }
     }
   ],
