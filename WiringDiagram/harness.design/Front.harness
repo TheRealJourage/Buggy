@@ -1,0 +1,1035 @@
+{
+  "$schema": "https://docs.harness.design/files/harness/schema/v1.2.json",
+  "$docs": "https://docs.harness.design/files/harness/editing-guide.md",
+  "version": 1.2,
+  "lengthUnit": "mm",
+  "pdfExportSettings": {
+    "includeSchematic": true,
+    "includeLayout": false,
+    "schematic": {
+      "showParts": true,
+      "showAccessories": true,
+      "showComponentIds": true
+    },
+    "layout": {
+      "showParts": false,
+      "showAccessories": false,
+      "showComponentIds": false
+    },
+    "wireThickness": "Regular",
+    "includeTitleBlock": false,
+    "includeNotes": false,
+    "includeParts": false,
+    "parts": {
+      "columns": [
+        "PartNumber",
+        "Manufacturer",
+        "Details",
+        "Description",
+        "Quantity",
+        "Price",
+        "TotalPrice"
+      ],
+      "pageMode": "Single",
+      "pageSize": "A4"
+    },
+    "includeConnections": false,
+    "connections": {
+      "includeAll": true,
+      "includeComponents": false,
+      "columns": [
+        "Conductor",
+        "PartNumber",
+        "Ident",
+        "Length",
+        "Contact"
+      ],
+      "showConductorIds": false,
+      "pageMode": "Multiple",
+      "pageSize": "A4",
+      "showPart": true,
+      "showPartImage": true,
+      "showAccessories": true,
+      "showPinout": true,
+      "showUnconnected": true
+    }
+  },
+  "titleBlock": {
+    "title": "Buggy Frontkabelbaum",
+    "date": "2026-10-19",
+    "drawnBy": "TheRealJourage + Claude"
+  },
+  "connectors": [
+    {
+      "id": "pWSQfa",
+      "label": "HighBeamEx1",
+      "schematicPosition": {
+        "x": -240,
+        "y": -1020
+      },
+      "cavities": [
+        {
+          "id": "_fFL_E",
+          "signal": "12V"
+        },
+        {
+          "id": "27MiSP",
+          "designation": "2",
+          "signal": "GND"
+        }
+      ]
+    },
+    {
+      "id": "PEzLEM",
+      "label": "HighBeamEx2",
+      "schematicPosition": {
+        "x": -240,
+        "y": -1230
+      },
+      "cavities": [
+        {
+          "id": "UmVTWq",
+          "signal": "12V"
+        },
+        {
+          "id": "XAihQp",
+          "designation": "2",
+          "signal": "GND"
+        }
+      ]
+    },
+    {
+      "id": "vDWFN4",
+      "label": "OffroadFront2",
+      "schematicPosition": {
+        "x": 2250,
+        "y": -1020
+      },
+      "cavities": [
+        {
+          "id": "ycrUbD",
+          "signal": "12V"
+        },
+        {
+          "id": "aUGbkc",
+          "designation": "2",
+          "signal": "GND"
+        }
+      ]
+    },
+    {
+      "id": "DCs1Rd",
+      "label": "OffroadFront1",
+      "schematicPosition": {
+        "x": 2250,
+        "y": -1230
+      },
+      "cavities": [
+        {
+          "id": "kSr6NT",
+          "signal": "12V"
+        },
+        {
+          "id": "5__B9H",
+          "designation": "2",
+          "signal": "GND"
+        }
+      ]
+    },
+    {
+      "id": "Oq3eyY",
+      "label": "FogFront1",
+      "schematicPosition": {
+        "x": 4770,
+        "y": -1320
+      },
+      "cavities": [
+        {
+          "id": "o9e8Ma",
+          "signal": "12V"
+        },
+        {
+          "id": "57sDRa",
+          "signal": "GND"
+        }
+      ]
+    },
+    {
+      "id": "XokHeS",
+      "label": "FogFront2",
+      "schematicPosition": {
+        "x": 4770,
+        "y": -1140
+      },
+      "cavities": [
+        {
+          "id": "_uojsr",
+          "signal": "12V"
+        },
+        {
+          "id": "WggIpc",
+          "signal": "GND"
+        }
+      ]
+    },
+    {
+      "id": "SEWtYk",
+      "label": "FrontLightLeft",
+      "schematicPosition": {
+        "x": 4230,
+        "y": -1650
+      },
+      "cavities": [
+        {
+          "id": "GkK9cl",
+          "signal": "LowBeam - 1.5"
+        },
+        {
+          "id": "lmeDWG",
+          "signal": "HighBeam - 1.9"
+        },
+        {
+          "id": "6UOZaD",
+          "signal": "DrivngLight - 0.2"
+        },
+        {
+          "id": "kQm6Vf",
+          "signal": "Indicator 0.2"
+        }
+      ]
+    },
+    {
+      "id": "6CIp4s",
+      "label": "LightConn",
+      "schematicPosition": {
+        "x": 4500,
+        "y": -1860
+      },
+      "cavities": [
+        {
+          "id": "me8USI",
+          "signal": "LowBeam"
+        },
+        {
+          "id": "gnbTGq",
+          "signal": "HighBeam"
+        },
+        {
+          "id": "lRMZL3",
+          "signal": "DrivngLight"
+        },
+        {
+          "id": "mBSYsA",
+          "signal": "Indicator"
+        },
+        {
+          "id": "1Y0nN7",
+          "signal": "GND"
+        }
+      ]
+    },
+    {
+      "id": "C9USxN",
+      "label": "FrontLightRight",
+      "schematicPosition": {
+        "x": 4230,
+        "y": -420
+      },
+      "cavities": [
+        {
+          "id": "ZcI8cG",
+          "signal": "LowBeam - 1.5"
+        },
+        {
+          "id": "3owIgA",
+          "signal": "HighBeam - 1.9"
+        },
+        {
+          "id": "YGjy3p",
+          "signal": "DrivngLight - 0.2"
+        },
+        {
+          "id": "16gLaW",
+          "signal": "Indicator 0.2"
+        }
+      ]
+    },
+    {
+      "id": "Y5gt3e",
+      "label": "LightConn",
+      "schematicPosition": {
+        "x": 4500,
+        "y": -630
+      },
+      "cavities": [
+        {
+          "id": "qOnmfO",
+          "signal": "LowBeam"
+        },
+        {
+          "id": "yNR5nV",
+          "signal": "HighBeam"
+        },
+        {
+          "id": "DH-I9X",
+          "signal": "DrivngLight"
+        },
+        {
+          "id": "Dg3L_c",
+          "signal": "Indicator"
+        },
+        {
+          "id": "m6b25o",
+          "signal": "GND"
+        }
+      ]
+    },
+    {
+      "id": "L88nHq",
+      "label": "X1 Front DT12",
+      "schematicPosition": {
+        "x": 3300,
+        "y": -1320
+      },
+      "cavities": [
+        {
+          "id": "biTsOr",
+          "signal": "Abblendlicht L+R"
+        },
+        {
+          "id": "teOofz",
+          "signal": "Fernlicht L+R"
+        },
+        {
+          "id": "1bIPvZ",
+          "signal": "Standlicht/TFL L+R"
+        },
+        {
+          "id": "K5xcKa",
+          "signal": "Blinker L"
+        },
+        {
+          "id": "T2uKqt",
+          "signal": "Blinker R"
+        },
+        {
+          "id": "pgSFDo",
+          "signal": "Nebelscheinwerfer L+R"
+        },
+        {
+          "id": "ndv_Lp",
+          "signal": "Zusatz-Fernlicht"
+        },
+        {
+          "id": "LS7yTq",
+          "signal": "Servolenkung Zuendung"
+        },
+        {
+          "id": "tHPYL7",
+          "signal": "Bremslicht"
+        },
+        {
+          "id": "r36s7E",
+          "signal": "ABS-Warnlampe"
+        },
+        {
+          "id": "gNtSZu",
+          "signal": "ABS K-Leitung"
+        },
+        {
+          "id": "qMpVuJ",
+          "signal": "Unterdruck-Warnung"
+        }
+      ]
+    }
+  ],
+  "terminals": [
+    {
+      "id": "t9acCB",
+      "schematicPosition": {
+        "x": 2250,
+        "y": -1560
+      },
+      "signal": "RingDriverLeft GND",
+      "type": "Ring"
+    },
+    {
+      "id": "6NamjU",
+      "schematicPosition": {
+        "x": 4500,
+        "y": -1920
+      },
+      "signal": "M1 Rahmen vorn links",
+      "type": "Ring"
+    },
+    {
+      "id": "Rbuvmt",
+      "schematicPosition": {
+        "x": 4230,
+        "y": -1710
+      },
+      "signal": "GND",
+      "type": "Ring"
+    },
+    {
+      "id": "Fjsp_6",
+      "schematicPosition": {
+        "x": 4500,
+        "y": -690
+      },
+      "signal": "M2 Rahmen vorn rechts",
+      "type": "Ring"
+    },
+    {
+      "id": "7la5Ks",
+      "schematicPosition": {
+        "x": 4230,
+        "y": -480
+      },
+      "signal": "GND",
+      "type": "Ring"
+    },
+    {
+      "id": "Bj4QB9",
+      "schematicPosition": {
+        "x": 5100,
+        "y": -1320
+      },
+      "signal": "RingFogL GND",
+      "type": "Ring"
+    },
+    {
+      "id": "bSfwXq",
+      "schematicPosition": {
+        "x": 5100,
+        "y": -1140
+      },
+      "signal": "RingFogR GND",
+      "type": "Ring"
+    },
+    {
+      "id": "o5sHBn",
+      "schematicPosition": {
+        "x": -600,
+        "y": -960
+      },
+      "signal": "RingHighBeamEx GND",
+      "type": "Ring"
+    }
+  ],
+  "splices": [
+    {
+      "id": "x_NHnW",
+      "schematicPosition": {
+        "x": -330,
+        "y": -960
+      }
+    },
+    {
+      "id": "xMBT8b",
+      "schematicPosition": {
+        "x": -300,
+        "y": -990
+      }
+    },
+    {
+      "id": "18Sj7G",
+      "schematicPosition": {
+        "x": 3900,
+        "y": -1500
+      }
+    },
+    {
+      "id": "_lDGbD",
+      "schematicPosition": {
+        "x": 3900,
+        "y": -1410
+      }
+    },
+    {
+      "id": "MuH8r0",
+      "schematicPosition": {
+        "x": 3900,
+        "y": -1320
+      }
+    },
+    {
+      "id": "5FcPAR",
+      "schematicPosition": {
+        "x": 3900,
+        "y": -1140
+      }
+    }
+  ],
+  "wires": [
+    {
+      "id": "u3_GRn",
+      "color": "Brown",
+      "source": {
+        "id": "x_NHnW",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "PEzLEM",
+        "handle": "XAihQp"
+      },
+      "layoutPoints": [
+        {
+          "id": "5hyiKz",
+          "schematicPosition": {
+            "x": -330,
+            "y": -1170
+          }
+        }
+      ]
+    },
+    {
+      "id": "QOrGkA",
+      "color": "Brown",
+      "source": {
+        "id": "pWSQfa",
+        "handle": "27MiSP"
+      },
+      "target": {
+        "id": "x_NHnW",
+        "handle": "Splice"
+      }
+    },
+    {
+      "id": "Q9mmNH",
+      "color": "Blue",
+      "source": {
+        "id": "xMBT8b",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "pWSQfa",
+        "handle": "_fFL_E"
+      }
+    },
+    {
+      "id": "y5nW_4",
+      "color": "Blue",
+      "source": {
+        "id": "PEzLEM",
+        "handle": "UmVTWq"
+      },
+      "target": {
+        "id": "xMBT8b",
+        "handle": "Splice"
+      }
+    },
+    {
+      "id": "MCuB0S",
+      "color": "Black",
+      "source": {
+        "id": "t9acCB",
+        "handle": "Terminal"
+      },
+      "target": {
+        "id": "DCs1Rd",
+        "handle": "5__B9H"
+      },
+      "layoutPoints": [
+        {
+          "id": "2aflBA",
+          "schematicPosition": {
+            "x": 2160,
+            "y": -1560
+          }
+        },
+        {
+          "id": "W792C5",
+          "schematicPosition": {
+            "x": 2160,
+            "y": -1170
+          }
+        }
+      ]
+    },
+    {
+      "id": "gq_rhH",
+      "color": "Black",
+      "source": {
+        "id": "vDWFN4",
+        "handle": "aUGbkc"
+      },
+      "target": {
+        "id": "DCs1Rd",
+        "handle": "5__B9H"
+      },
+      "layoutPoints": [
+        {
+          "id": "SX8fiz",
+          "schematicPosition": {
+            "x": 2160,
+            "y": -960
+          }
+        },
+        {
+          "id": "tMLs5o",
+          "schematicPosition": {
+            "x": 2160,
+            "y": -1170
+          }
+        }
+      ]
+    },
+    {
+      "id": "MKpJGU",
+      "color": "Red",
+      "source": {
+        "id": "DCs1Rd",
+        "handle": "kSr6NT"
+      },
+      "target": {
+        "id": "vDWFN4",
+        "handle": "ycrUbD"
+      },
+      "layoutPoints": [
+        {
+          "id": "UGc50R",
+          "schematicPosition": {
+            "x": 2190,
+            "y": -1170
+          }
+        }
+      ]
+    },
+    {
+      "id": "GOYEkU",
+      "color": "Blue",
+      "source": {
+        "id": "6CIp4s",
+        "handle": "me8USI"
+      },
+      "target": {
+        "id": "SEWtYk",
+        "handle": "GkK9cl"
+      }
+    },
+    {
+      "id": "7ML4ZS",
+      "color": "White",
+      "source": {
+        "id": "SEWtYk",
+        "handle": "lmeDWG"
+      },
+      "target": {
+        "id": "6CIp4s",
+        "handle": "gnbTGq"
+      }
+    },
+    {
+      "id": "u3rRic",
+      "color": "Red",
+      "source": {
+        "id": "SEWtYk",
+        "handle": "6UOZaD"
+      },
+      "target": {
+        "id": "6CIp4s",
+        "handle": "lRMZL3"
+      }
+    },
+    {
+      "id": "ioqBjX",
+      "color": "Red",
+      "source": {
+        "id": "SEWtYk",
+        "handle": "kQm6Vf"
+      },
+      "target": {
+        "id": "6CIp4s",
+        "handle": "mBSYsA"
+      },
+      "stripeColor": "Black"
+    },
+    {
+      "id": "IrmkP-",
+      "color": "Black",
+      "source": {
+        "id": "Rbuvmt",
+        "handle": "Terminal"
+      },
+      "target": {
+        "id": "6CIp4s",
+        "handle": "1Y0nN7"
+      }
+    },
+    {
+      "id": "gcWfNH",
+      "color": "Black",
+      "source": {
+        "id": "Rbuvmt",
+        "handle": "Terminal"
+      },
+      "target": {
+        "id": "6NamjU",
+        "handle": "Terminal"
+      },
+      "layoutPoints": [
+        {
+          "id": "9JIxlK",
+          "schematicPosition": {
+            "x": 4170,
+            "y": -1920
+          }
+        }
+      ]
+    },
+    {
+      "id": "IMuFvD",
+      "color": "Blue",
+      "source": {
+        "id": "Y5gt3e",
+        "handle": "qOnmfO"
+      },
+      "target": {
+        "id": "C9USxN",
+        "handle": "ZcI8cG"
+      }
+    },
+    {
+      "id": "tsJ5rJ",
+      "color": "White",
+      "source": {
+        "id": "C9USxN",
+        "handle": "3owIgA"
+      },
+      "target": {
+        "id": "Y5gt3e",
+        "handle": "yNR5nV"
+      }
+    },
+    {
+      "id": "4oAxZJ",
+      "color": "Red",
+      "source": {
+        "id": "C9USxN",
+        "handle": "YGjy3p"
+      },
+      "target": {
+        "id": "Y5gt3e",
+        "handle": "DH-I9X"
+      }
+    },
+    {
+      "id": "Li0JIG",
+      "color": "Red",
+      "source": {
+        "id": "C9USxN",
+        "handle": "16gLaW"
+      },
+      "target": {
+        "id": "Y5gt3e",
+        "handle": "Dg3L_c"
+      },
+      "stripeColor": "Black"
+    },
+    {
+      "id": "G3Vmud",
+      "color": "Black",
+      "source": {
+        "id": "7la5Ks",
+        "handle": "Terminal"
+      },
+      "target": {
+        "id": "Y5gt3e",
+        "handle": "m6b25o"
+      }
+    },
+    {
+      "id": "ww_Pim",
+      "color": "Black",
+      "source": {
+        "id": "7la5Ks",
+        "handle": "Terminal"
+      },
+      "target": {
+        "id": "Fjsp_6",
+        "handle": "Terminal"
+      },
+      "layoutPoints": [
+        {
+          "id": "nVtk68",
+          "layoutPosition": {
+            "x": 4230,
+            "y": -1860
+          },
+          "schematicPosition": {
+            "x": 4170,
+            "y": -690
+          }
+        }
+      ]
+    },
+    {
+      "id": "At7Kqw",
+      "color": "Blue",
+      "source": {
+        "id": "L88nHq",
+        "handle": "biTsOr"
+      },
+      "target": {
+        "id": "18Sj7G",
+        "handle": "Splice"
+      }
+    },
+    {
+      "id": "ewhZ_8",
+      "color": "Blue",
+      "source": {
+        "id": "18Sj7G",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "6CIp4s",
+        "handle": "me8USI"
+      }
+    },
+    {
+      "id": "n1n02T",
+      "color": "Blue",
+      "source": {
+        "id": "18Sj7G",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "Y5gt3e",
+        "handle": "qOnmfO"
+      }
+    },
+    {
+      "id": "NlOwVb",
+      "color": "White",
+      "source": {
+        "id": "L88nHq",
+        "handle": "teOofz"
+      },
+      "target": {
+        "id": "_lDGbD",
+        "handle": "Splice"
+      }
+    },
+    {
+      "id": "eh_4bB",
+      "color": "White",
+      "source": {
+        "id": "_lDGbD",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "6CIp4s",
+        "handle": "gnbTGq"
+      }
+    },
+    {
+      "id": "PWPd5I",
+      "color": "White",
+      "source": {
+        "id": "_lDGbD",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "Y5gt3e",
+        "handle": "yNR5nV"
+      }
+    },
+    {
+      "id": "BwClIK",
+      "color": "Red",
+      "source": {
+        "id": "L88nHq",
+        "handle": "1bIPvZ"
+      },
+      "target": {
+        "id": "MuH8r0",
+        "handle": "Splice"
+      }
+    },
+    {
+      "id": "v5OgbH",
+      "color": "Red",
+      "source": {
+        "id": "MuH8r0",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "6CIp4s",
+        "handle": "lRMZL3"
+      }
+    },
+    {
+      "id": "mviGYo",
+      "color": "Red",
+      "source": {
+        "id": "MuH8r0",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "Y5gt3e",
+        "handle": "DH-I9X"
+      }
+    },
+    {
+      "id": "_OdEhP",
+      "color": "Red",
+      "source": {
+        "id": "L88nHq",
+        "handle": "K5xcKa"
+      },
+      "target": {
+        "id": "6CIp4s",
+        "handle": "mBSYsA"
+      },
+      "stripeColor": "Black"
+    },
+    {
+      "id": "rchH3C",
+      "color": "Red",
+      "source": {
+        "id": "L88nHq",
+        "handle": "T2uKqt"
+      },
+      "target": {
+        "id": "Y5gt3e",
+        "handle": "Dg3L_c"
+      },
+      "stripeColor": "Black"
+    },
+    {
+      "id": "tRMkxG",
+      "color": "Yellow",
+      "source": {
+        "id": "L88nHq",
+        "handle": "pgSFDo"
+      },
+      "target": {
+        "id": "5FcPAR",
+        "handle": "Splice"
+      }
+    },
+    {
+      "id": "txS5DK",
+      "color": "Yellow",
+      "source": {
+        "id": "5FcPAR",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "Oq3eyY",
+        "handle": "o9e8Ma"
+      }
+    },
+    {
+      "id": "jcJ6S6",
+      "color": "Yellow",
+      "source": {
+        "id": "5FcPAR",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "XokHeS",
+        "handle": "_uojsr"
+      }
+    },
+    {
+      "id": "t9YvvK",
+      "color": "White",
+      "source": {
+        "id": "L88nHq",
+        "handle": "ndv_Lp"
+      },
+      "target": {
+        "id": "xMBT8b",
+        "handle": "Splice"
+      },
+      "stripeColor": "Black"
+    },
+    {
+      "id": "Qm09BQ",
+      "color": "Brown",
+      "source": {
+        "id": "Oq3eyY",
+        "handle": "57sDRa"
+      },
+      "target": {
+        "id": "Bj4QB9",
+        "handle": "Terminal"
+      }
+    },
+    {
+      "id": "ycKpIr",
+      "color": "Brown",
+      "source": {
+        "id": "XokHeS",
+        "handle": "WggIpc"
+      },
+      "target": {
+        "id": "bSfwXq",
+        "handle": "Terminal"
+      }
+    },
+    {
+      "id": "U3NAaQ",
+      "color": "Brown",
+      "source": {
+        "id": "x_NHnW",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "o5sHBn",
+        "handle": "Terminal"
+      }
+    },
+    {
+      "id": "rw5byx",
+      "color": "Black",
+      "source": {
+        "id": "Bj4QB9",
+        "handle": "Terminal"
+      },
+      "target": {
+        "id": "6NamjU",
+        "handle": "Terminal"
+      }
+    },
+    {
+      "id": "PyUQR5",
+      "color": "Black",
+      "source": {
+        "id": "bSfwXq",
+        "handle": "Terminal"
+      },
+      "target": {
+        "id": "Fjsp_6",
+        "handle": "Terminal"
+      }
+    },
+    {
+      "id": "R2kBze",
+      "color": "Black",
+      "source": {
+        "id": "o5sHBn",
+        "handle": "Terminal"
+      },
+      "target": {
+        "id": "Fjsp_6",
+        "handle": "Terminal"
+      }
+    },
+    {
+      "id": "lvDloI",
+      "color": "Black",
+      "source": {
+        "id": "t9acCB",
+        "handle": "Terminal"
+      },
+      "target": {
+        "id": "6NamjU",
+        "handle": "Terminal"
+      }
+    }
+  ]
+}
