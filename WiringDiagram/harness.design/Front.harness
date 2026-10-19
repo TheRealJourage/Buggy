@@ -294,51 +294,674 @@
       "cavities": [
         {
           "id": "biTsOr",
-          "signal": "Abblendlicht L+R"
+          "signal": "CAN-H"
         },
         {
           "id": "teOofz",
-          "signal": "Fernlicht L+R"
+          "signal": "CAN-L"
         },
         {
           "id": "1bIPvZ",
-          "signal": "Standlicht/TFL L+R"
+          "notConnected": true
         },
         {
           "id": "K5xcKa",
-          "signal": "Blinker L"
+          "notConnected": true
         },
         {
           "id": "T2uKqt",
-          "signal": "Blinker R"
+          "notConnected": true
         },
         {
           "id": "pgSFDo",
-          "signal": "Nebelscheinwerfer L+R"
+          "notConnected": true
         },
         {
           "id": "ndv_Lp",
-          "signal": "Zusatz-Fernlicht"
+          "notConnected": true
         },
         {
           "id": "LS7yTq",
-          "signal": "Servolenkung Zuendung"
+          "notConnected": true
         },
         {
           "id": "tHPYL7",
-          "signal": "Bremslicht"
+          "notConnected": true
         },
         {
           "id": "r36s7E",
-          "signal": "ABS-Warnlampe"
+          "notConnected": true
         },
         {
           "id": "gNtSZu",
-          "signal": "ABS K-Leitung"
+          "notConnected": true
         },
         {
           "id": "qMpVuJ",
-          "signal": "Unterdruck-Warnung"
+          "notConnected": true
+        }
+      ]
+    },
+    {
+      "id": "Caf3c_",
+      "label": "Front-Controller (Nucleo)",
+      "schematicPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "cavities": [
+        {
+          "id": "Fk7kB9",
+          "signal": "+12 V Kl. 30 (V20 3 A)"
+        },
+        {
+          "id": "5pIaqS",
+          "signal": "Masse"
+        },
+        {
+          "id": "coVo_t"
+        },
+        {
+          "id": "H7vsSz"
+        },
+        {
+          "id": "BCkz6q",
+          "signal": "Q1 Spule K4 Servo ein"
+        },
+        {
+          "id": "yF5o8F",
+          "signal": "Q2 Spule K5 Abblend"
+        },
+        {
+          "id": "mJuwec",
+          "signal": "Q3 Spule K6 Fern"
+        },
+        {
+          "id": "8o9hbD",
+          "signal": "Q4 Spule K7 Nebel"
+        },
+        {
+          "id": "IdNf_s",
+          "signal": "Q5 Spule K8 Stand/TFL"
+        },
+        {
+          "id": "M7pENQ",
+          "signal": "Q6 Spule K9 Blinker L"
+        },
+        {
+          "id": "USBbeC",
+          "signal": "Q7 Spule K10 Blinker R"
+        },
+        {
+          "id": "xPjqIk",
+          "signal": "E1 Pumpe laeuft (Pull-up 1k)"
+        },
+        {
+          "id": "d8SLZT",
+          "signal": "E2 Bremslicht (Teiler 10k/2k7)"
+        },
+        {
+          "id": "hA_k48",
+          "signal": "E3 ABS-Lampe"
+        }
+      ]
+    },
+    {
+      "id": "9qjFA8",
+      "label": "FV-C Steuerung",
+      "schematicPosition": {
+        "x": 600,
+        "y": 0
+      },
+      "cavities": [
+        {
+          "id": "kBcZn3",
+          "signal": "K4 Spule -"
+        },
+        {
+          "id": "QhBI7P",
+          "signal": "K5 Spule -"
+        },
+        {
+          "id": "fwUmny",
+          "signal": "K6 Spule -"
+        },
+        {
+          "id": "Z8AYPO",
+          "signal": "K7 Spule -"
+        },
+        {
+          "id": "fdECIY",
+          "signal": "K8 Spule -"
+        },
+        {
+          "id": "H1k8X2",
+          "signal": "K9 Spule -"
+        },
+        {
+          "id": "nfBpPc",
+          "signal": "K10 Spule -"
+        },
+        {
+          "id": "4qTiAC",
+          "signal": "V20 Front-Controller 3 A"
+        },
+        {
+          "id": "UsGxSq",
+          "signal": "V21 Lenkrad 1 A"
+        }
+      ]
+    },
+    {
+      "id": "FxJN4n",
+      "label": "FV-A Leistung",
+      "schematicPosition": {
+        "x": 600,
+        "y": 420
+      },
+      "cavities": [
+        {
+          "id": "bzTHED",
+          "signal": "V1 Servo +12 V 50 A (10 mm2)"
+        },
+        {
+          "id": "LUtBc2",
+          "signal": "V2 ABS 30 A (4 mm2)"
+        },
+        {
+          "id": "lrNdAU",
+          "signal": "V3 ABS 30 A (4 mm2)"
+        },
+        {
+          "id": "_VIhsq",
+          "signal": "V4 ABS Zuendung 5 A"
+        },
+        {
+          "id": "gLiKrE",
+          "signal": "V5 Pumpe +12 V 20 A (2,5 mm2)"
+        },
+        {
+          "id": "iaXFAZ",
+          "signal": "K3/87 Pumpe - (Low-Side)"
+        },
+        {
+          "id": "oa1xq7",
+          "signal": "K3/87a Pumpe-Status"
+        },
+        {
+          "id": "J1fcVR",
+          "signal": "K3 Spule - (V6 3 A)"
+        },
+        {
+          "id": "jxUSb_",
+          "signal": "V7 Bremslichtschalter 3 A"
+        },
+        {
+          "id": "puPvGK",
+          "signal": "V8 Spiegelschalter 5 A"
+        },
+        {
+          "id": "oUyrJJ",
+          "signal": "V9 Servo Einschalten (K4)"
+        },
+        {
+          "id": "ZMNYyc",
+          "signal": "V27 Diagnose Kl. 30 5 A"
+        },
+        {
+          "id": "SCXInt",
+          "signal": "K3/30 Masse (2,5 mm2)"
+        }
+      ]
+    },
+    {
+      "id": "b4NPm6",
+      "label": "FV-B Licht",
+      "schematicPosition": {
+        "x": 600,
+        "y": 900
+      },
+      "cavities": [
+        {
+          "id": "d6Wur9",
+          "signal": "V10 Abblend L 5 A"
+        },
+        {
+          "id": "FHbGJM",
+          "signal": "V11 Abblend R 5 A"
+        },
+        {
+          "id": "FGF4j1",
+          "signal": "V12 Fern L 5 A"
+        },
+        {
+          "id": "NOlCa1",
+          "signal": "V13 Fern R 5 A"
+        },
+        {
+          "id": "i2wxfq",
+          "signal": "V22 Stand/TFL L 3 A"
+        },
+        {
+          "id": "VkGrje",
+          "signal": "V23 Stand/TFL R 3 A"
+        },
+        {
+          "id": "5YX8Ig",
+          "signal": "V24 Blinker L 5 A"
+        },
+        {
+          "id": "SYg2tS",
+          "signal": "V25 Blinker R 5 A"
+        },
+        {
+          "id": "RNH4KW",
+          "signal": "V14 Nebel L 5 A"
+        },
+        {
+          "id": "U_GBBS",
+          "signal": "V15 Nebel R 5 A"
+        }
+      ]
+    },
+    {
+      "id": "AHqw5Q",
+      "label": "Servolenkung (Corsa-C-Kit)",
+      "schematicPosition": {
+        "x": 1500,
+        "y": 0
+      },
+      "cavities": [
+        {
+          "id": "FSND4F"
+        },
+        {
+          "id": "RbALeD",
+          "signal": "Masse (10 mm2)"
+        },
+        {
+          "id": "4J392i"
+        }
+      ]
+    },
+    {
+      "id": "57M_iK",
+      "label": "ABS J104 T25",
+      "schematicPosition": {
+        "x": 1500,
+        "y": 240
+      },
+      "cavities": [
+        {
+          "id": "kYgOfs",
+          "signal": "G44 HR"
+        },
+        {
+          "id": "srfdpa",
+          "signal": "G46 HL"
+        },
+        {
+          "id": "oHLlcl",
+          "signal": "G45 VR"
+        },
+        {
+          "id": "fgJlth",
+          "signal": "G47 VL"
+        },
+        {
+          "id": "yBCHPk",
+          "notConnected": true
+        },
+        {
+          "id": "oqNKYC",
+          "notConnected": true
+        },
+        {
+          "id": "VXQQvm",
+          "signal": "Bruecke 7-22"
+        },
+        {
+          "id": "pIsFoJ",
+          "signal": "Masse (4 mm2)"
+        },
+        {
+          "id": "XKX954"
+        },
+        {
+          "id": "3dfK6m",
+          "signal": "G46 HL"
+        },
+        {
+          "id": "liiCt3",
+          "signal": "G47 VL"
+        },
+        {
+          "id": "3PxDiS"
+        },
+        {
+          "id": "DOGVvB",
+          "signal": "K-Leitung"
+        },
+        {
+          "id": "sbUo99",
+          "notConnected": true
+        },
+        {
+          "id": "WOB2cs",
+          "notConnected": true
+        },
+        {
+          "id": "cEaueg",
+          "signal": "ABS-Lampe"
+        },
+        {
+          "id": "h635W3",
+          "signal": "G44 HR"
+        },
+        {
+          "id": "L_7wUq",
+          "signal": "G45 VR"
+        },
+        {
+          "id": "3Wnoyg",
+          "notConnected": true
+        },
+        {
+          "id": "pmzDXH",
+          "notConnected": true
+        },
+        {
+          "id": "5U8c_g",
+          "notConnected": true
+        },
+        {
+          "id": "LPu_5D",
+          "signal": "Bruecke 7-22"
+        },
+        {
+          "id": "oL53Io"
+        },
+        {
+          "id": "aWjXBp",
+          "signal": "Masse (4 mm2)"
+        },
+        {
+          "id": "zGycYJ"
+        }
+      ]
+    },
+    {
+      "id": "4cS9vc",
+      "label": "Unterdruckpumpe",
+      "schematicPosition": {
+        "x": 1500,
+        "y": 1140
+      },
+      "cavities": [
+        {
+          "id": "7ME9R_"
+        },
+        {
+          "id": "VP1w8v"
+        }
+      ]
+    },
+    {
+      "id": "I_V46Q",
+      "label": "Unterdruckschalter S1",
+      "schematicPosition": {
+        "x": 1500,
+        "y": 1290
+      },
+      "cavities": [
+        {
+          "id": "KlSdwh"
+        },
+        {
+          "id": "JVxsOa",
+          "signal": "Masse"
+        }
+      ]
+    },
+    {
+      "id": "ImD0Qe",
+      "label": "Bremslichtschalter F",
+      "schematicPosition": {
+        "x": 1500,
+        "y": 1440
+      },
+      "cavities": [
+        {
+          "id": "sp_y0f"
+        },
+        {
+          "id": "QL2hBp",
+          "signal": "Bremslicht-Signal"
+        }
+      ]
+    },
+    {
+      "id": "tIYlnG",
+      "label": "Diagnosebuchse vorn",
+      "schematicPosition": {
+        "x": 1500,
+        "y": 1590
+      },
+      "cavities": [
+        {
+          "id": "J1u_bR",
+          "notConnected": true
+        },
+        {
+          "id": "LZB5xt",
+          "notConnected": true
+        },
+        {
+          "id": "1uHHsM",
+          "notConnected": true
+        },
+        {
+          "id": "225_Oa",
+          "signal": "Masse"
+        },
+        {
+          "id": "8Lvsvl",
+          "notConnected": true
+        },
+        {
+          "id": "CdIgFS",
+          "notConnected": true
+        },
+        {
+          "id": "yfBOkF"
+        },
+        {
+          "id": "TAchOz",
+          "notConnected": true
+        },
+        {
+          "id": "Tny13V",
+          "notConnected": true
+        },
+        {
+          "id": "_ct7QO",
+          "notConnected": true
+        },
+        {
+          "id": "LtCKT_",
+          "notConnected": true
+        },
+        {
+          "id": "nj_BF5",
+          "notConnected": true
+        },
+        {
+          "id": "tXaR8A",
+          "notConnected": true
+        },
+        {
+          "id": "WdjOwU",
+          "notConnected": true
+        },
+        {
+          "id": "8r2z3K",
+          "notConnected": true
+        },
+        {
+          "id": "6QxmK3"
+        }
+      ]
+    },
+    {
+      "id": "ShvS_n",
+      "label": "Spiegelschalter E43",
+      "schematicPosition": {
+        "x": 1500,
+        "y": 2190
+      },
+      "cavities": [
+        {
+          "id": "qmqggC",
+          "signal": "Spiegel L Sammel (K1)"
+        },
+        {
+          "id": "8bHGXP",
+          "notConnected": true
+        },
+        {
+          "id": "U7TpZZ",
+          "signal": "Spiegel R Sammel (K3)"
+        },
+        {
+          "id": "tgwlPF",
+          "signal": "Spiegel L+R (K4)"
+        },
+        {
+          "id": "SOoIQL",
+          "signal": "Spiegel L (K5)"
+        },
+        {
+          "id": "j7rc04"
+        },
+        {
+          "id": "UWNxQY",
+          "signal": "Spiegel R (K7)"
+        },
+        {
+          "id": "gadMsK",
+          "signal": "Masse"
+        }
+      ]
+    },
+    {
+      "id": "v0cKU8",
+      "label": "ABS-Fuehler G47 VL",
+      "schematicPosition": {
+        "x": 2400,
+        "y": 240
+      },
+      "cavities": [
+        {
+          "id": "ZGxieY"
+        },
+        {
+          "id": "gz6tTE"
+        }
+      ]
+    },
+    {
+      "id": "nz9ChX",
+      "label": "ABS-Fuehler G45 VR",
+      "schematicPosition": {
+        "x": 2400,
+        "y": 390
+      },
+      "cavities": [
+        {
+          "id": "WZhn0L"
+        },
+        {
+          "id": "ou6lL4"
+        }
+      ]
+    },
+    {
+      "id": "tLlIt_",
+      "label": "X6 ABS-Fuehler hinten",
+      "schematicPosition": {
+        "x": 2400,
+        "y": 540
+      },
+      "cavities": [
+        {
+          "id": "Fu_hZG",
+          "signal": "G46 HL a"
+        },
+        {
+          "id": "XHjVM7",
+          "signal": "G46 HL b"
+        },
+        {
+          "id": "ZGJgDg",
+          "signal": "G44 HR a"
+        },
+        {
+          "id": "5QBEOX",
+          "signal": "G44 HR b"
+        }
+      ]
+    },
+    {
+      "id": "YdF_tG",
+      "label": "Spiegel L T5",
+      "schematicPosition": {
+        "x": 2400,
+        "y": 2190
+      },
+      "cavities": [
+        {
+          "id": "aqZXNK"
+        },
+        {
+          "id": "PMmm8Z"
+        },
+        {
+          "id": "OrZVc3"
+        },
+        {
+          "id": "deW21U",
+          "signal": "Heizung + (spaeter)"
+        },
+        {
+          "id": "NMNRv6",
+          "signal": "Heizung - (spaeter)"
+        }
+      ]
+    },
+    {
+      "id": "ZoWusq",
+      "label": "Spiegel R T5a",
+      "schematicPosition": {
+        "x": 2400,
+        "y": 2430
+      },
+      "cavities": [
+        {
+          "id": "vA0Mt_"
+        },
+        {
+          "id": "cWkQIm"
+        },
+        {
+          "id": "7kZGAv"
+        },
+        {
+          "id": "e8M7y3",
+          "signal": "Heizung + (spaeter)"
+        },
+        {
+          "id": "I0WYJw",
+          "signal": "Heizung - (spaeter)"
         }
       ]
     }
@@ -415,6 +1038,42 @@
       },
       "signal": "RingHighBeamEx GND",
       "type": "Ring"
+    },
+    {
+      "id": "rglylm",
+      "schematicPosition": {
+        "x": -600,
+        "y": 900
+      },
+      "signal": "X2 Box F30 80 A Kl. 15",
+      "type": "Ring"
+    },
+    {
+      "id": "W2K_Px",
+      "schematicPosition": {
+        "x": 90,
+        "y": 900
+      },
+      "signal": "X2 FV-Bolzen 15 vorn",
+      "type": "Ring"
+    },
+    {
+      "id": "RL7AXF",
+      "schematicPosition": {
+        "x": -600,
+        "y": 990
+      },
+      "signal": "X2b Box F31 20 A Kl. 30",
+      "type": "Ring"
+    },
+    {
+      "id": "mb7X1v",
+      "schematicPosition": {
+        "x": 90,
+        "y": 990
+      },
+      "signal": "X2b FV-Bolzen 30 vorn",
+      "type": "Ring"
     }
   ],
   "splices": [
@@ -433,31 +1092,17 @@
       }
     },
     {
-      "id": "18Sj7G",
+      "id": "4dt9iP",
       "schematicPosition": {
-        "x": 3900,
-        "y": -1500
+        "x": 1200,
+        "y": 1470
       }
     },
     {
-      "id": "_lDGbD",
+      "id": "9Z_eUH",
       "schematicPosition": {
-        "x": 3900,
-        "y": -1410
-      }
-    },
-    {
-      "id": "MuH8r0",
-      "schematicPosition": {
-        "x": 3900,
-        "y": -1320
-      }
-    },
-    {
-      "id": "5FcPAR",
-      "schematicPosition": {
-        "x": 3900,
-        "y": -1140
+        "x": 2100,
+        "y": 2280
       }
     }
   ],
@@ -765,189 +1410,6 @@
       ]
     },
     {
-      "id": "At7Kqw",
-      "color": "Blue",
-      "source": {
-        "id": "L88nHq",
-        "handle": "biTsOr"
-      },
-      "target": {
-        "id": "18Sj7G",
-        "handle": "Splice"
-      }
-    },
-    {
-      "id": "ewhZ_8",
-      "color": "Blue",
-      "source": {
-        "id": "18Sj7G",
-        "handle": "Splice"
-      },
-      "target": {
-        "id": "6CIp4s",
-        "handle": "me8USI"
-      }
-    },
-    {
-      "id": "n1n02T",
-      "color": "Blue",
-      "source": {
-        "id": "18Sj7G",
-        "handle": "Splice"
-      },
-      "target": {
-        "id": "Y5gt3e",
-        "handle": "qOnmfO"
-      }
-    },
-    {
-      "id": "NlOwVb",
-      "color": "White",
-      "source": {
-        "id": "L88nHq",
-        "handle": "teOofz"
-      },
-      "target": {
-        "id": "_lDGbD",
-        "handle": "Splice"
-      }
-    },
-    {
-      "id": "eh_4bB",
-      "color": "White",
-      "source": {
-        "id": "_lDGbD",
-        "handle": "Splice"
-      },
-      "target": {
-        "id": "6CIp4s",
-        "handle": "gnbTGq"
-      }
-    },
-    {
-      "id": "PWPd5I",
-      "color": "White",
-      "source": {
-        "id": "_lDGbD",
-        "handle": "Splice"
-      },
-      "target": {
-        "id": "Y5gt3e",
-        "handle": "yNR5nV"
-      }
-    },
-    {
-      "id": "BwClIK",
-      "color": "Red",
-      "source": {
-        "id": "L88nHq",
-        "handle": "1bIPvZ"
-      },
-      "target": {
-        "id": "MuH8r0",
-        "handle": "Splice"
-      }
-    },
-    {
-      "id": "v5OgbH",
-      "color": "Red",
-      "source": {
-        "id": "MuH8r0",
-        "handle": "Splice"
-      },
-      "target": {
-        "id": "6CIp4s",
-        "handle": "lRMZL3"
-      }
-    },
-    {
-      "id": "mviGYo",
-      "color": "Red",
-      "source": {
-        "id": "MuH8r0",
-        "handle": "Splice"
-      },
-      "target": {
-        "id": "Y5gt3e",
-        "handle": "DH-I9X"
-      }
-    },
-    {
-      "id": "_OdEhP",
-      "color": "Red",
-      "source": {
-        "id": "L88nHq",
-        "handle": "K5xcKa"
-      },
-      "target": {
-        "id": "6CIp4s",
-        "handle": "mBSYsA"
-      },
-      "stripeColor": "Black"
-    },
-    {
-      "id": "rchH3C",
-      "color": "Red",
-      "source": {
-        "id": "L88nHq",
-        "handle": "T2uKqt"
-      },
-      "target": {
-        "id": "Y5gt3e",
-        "handle": "Dg3L_c"
-      },
-      "stripeColor": "Black"
-    },
-    {
-      "id": "tRMkxG",
-      "color": "Yellow",
-      "source": {
-        "id": "L88nHq",
-        "handle": "pgSFDo"
-      },
-      "target": {
-        "id": "5FcPAR",
-        "handle": "Splice"
-      }
-    },
-    {
-      "id": "txS5DK",
-      "color": "Yellow",
-      "source": {
-        "id": "5FcPAR",
-        "handle": "Splice"
-      },
-      "target": {
-        "id": "Oq3eyY",
-        "handle": "o9e8Ma"
-      }
-    },
-    {
-      "id": "jcJ6S6",
-      "color": "Yellow",
-      "source": {
-        "id": "5FcPAR",
-        "handle": "Splice"
-      },
-      "target": {
-        "id": "XokHeS",
-        "handle": "_uojsr"
-      }
-    },
-    {
-      "id": "t9YvvK",
-      "color": "White",
-      "source": {
-        "id": "L88nHq",
-        "handle": "ndv_Lp"
-      },
-      "target": {
-        "id": "xMBT8b",
-        "handle": "Splice"
-      },
-      "stripeColor": "Black"
-    },
-    {
       "id": "Qm09BQ",
       "color": "Brown",
       "source": {
@@ -1029,6 +1491,778 @@
       "target": {
         "id": "6NamjU",
         "handle": "Terminal"
+      }
+    },
+    {
+      "id": "MMC5lU",
+      "color": "Red",
+      "source": {
+        "id": "rglylm",
+        "handle": "Terminal"
+      },
+      "target": {
+        "id": "W2K_Px",
+        "handle": "Terminal"
+      }
+    },
+    {
+      "id": "K1kmEJ",
+      "color": "Red",
+      "source": {
+        "id": "RL7AXF",
+        "handle": "Terminal"
+      },
+      "target": {
+        "id": "mb7X1v",
+        "handle": "Terminal"
+      },
+      "stripeColor": "White"
+    },
+    {
+      "id": "kf3WL2",
+      "color": "Yellow",
+      "source": {
+        "id": "L88nHq",
+        "handle": "biTsOr"
+      },
+      "target": {
+        "id": "Caf3c_",
+        "handle": "coVo_t"
+      }
+    },
+    {
+      "id": "RGrTkR",
+      "color": "Green",
+      "source": {
+        "id": "L88nHq",
+        "handle": "teOofz"
+      },
+      "target": {
+        "id": "Caf3c_",
+        "handle": "H7vsSz"
+      }
+    },
+    {
+      "id": "GeiFne",
+      "color": "Red",
+      "source": {
+        "id": "9qjFA8",
+        "handle": "4qTiAC"
+      },
+      "target": {
+        "id": "Caf3c_",
+        "handle": "Fk7kB9"
+      },
+      "stripeColor": "White"
+    },
+    {
+      "id": "aKeYzZ",
+      "color": "Brown",
+      "source": {
+        "id": "Caf3c_",
+        "handle": "5pIaqS"
+      },
+      "target": {
+        "id": "6NamjU",
+        "handle": "Terminal"
+      }
+    },
+    {
+      "id": "khAc8j",
+      "color": "Violet",
+      "source": {
+        "id": "9qjFA8",
+        "handle": "kBcZn3"
+      },
+      "target": {
+        "id": "Caf3c_",
+        "handle": "BCkz6q"
+      }
+    },
+    {
+      "id": "f64N60",
+      "color": "Violet",
+      "source": {
+        "id": "9qjFA8",
+        "handle": "QhBI7P"
+      },
+      "target": {
+        "id": "Caf3c_",
+        "handle": "yF5o8F"
+      }
+    },
+    {
+      "id": "ph2Ieb",
+      "color": "Violet",
+      "source": {
+        "id": "9qjFA8",
+        "handle": "fwUmny"
+      },
+      "target": {
+        "id": "Caf3c_",
+        "handle": "mJuwec"
+      }
+    },
+    {
+      "id": "UK3Izt",
+      "color": "Violet",
+      "source": {
+        "id": "9qjFA8",
+        "handle": "Z8AYPO"
+      },
+      "target": {
+        "id": "Caf3c_",
+        "handle": "8o9hbD"
+      }
+    },
+    {
+      "id": "GjkBbV",
+      "color": "Violet",
+      "source": {
+        "id": "9qjFA8",
+        "handle": "fdECIY"
+      },
+      "target": {
+        "id": "Caf3c_",
+        "handle": "IdNf_s"
+      }
+    },
+    {
+      "id": "4Fx__q",
+      "color": "Violet",
+      "source": {
+        "id": "9qjFA8",
+        "handle": "H1k8X2"
+      },
+      "target": {
+        "id": "Caf3c_",
+        "handle": "M7pENQ"
+      }
+    },
+    {
+      "id": "FFUmVZ",
+      "color": "Violet",
+      "source": {
+        "id": "9qjFA8",
+        "handle": "nfBpPc"
+      },
+      "target": {
+        "id": "Caf3c_",
+        "handle": "USBbeC"
+      }
+    },
+    {
+      "id": "kFZC1N",
+      "color": "Red",
+      "source": {
+        "id": "FxJN4n",
+        "handle": "bzTHED"
+      },
+      "target": {
+        "id": "AHqw5Q",
+        "handle": "FSND4F"
+      }
+    },
+    {
+      "id": "_RXOUB",
+      "color": "Brown",
+      "source": {
+        "id": "AHqw5Q",
+        "handle": "RbALeD"
+      },
+      "target": {
+        "id": "6NamjU",
+        "handle": "Terminal"
+      }
+    },
+    {
+      "id": "2YpdL8",
+      "color": "Black",
+      "source": {
+        "id": "FxJN4n",
+        "handle": "oUyrJJ"
+      },
+      "target": {
+        "id": "AHqw5Q",
+        "handle": "4J392i"
+      },
+      "stripeColor": "White"
+    },
+    {
+      "id": "31CCH4",
+      "color": "Red",
+      "source": {
+        "id": "FxJN4n",
+        "handle": "LUtBc2"
+      },
+      "target": {
+        "id": "57M_iK",
+        "handle": "XKX954"
+      }
+    },
+    {
+      "id": "HZgK1F",
+      "color": "Red",
+      "source": {
+        "id": "FxJN4n",
+        "handle": "lrNdAU"
+      },
+      "target": {
+        "id": "57M_iK",
+        "handle": "zGycYJ"
+      }
+    },
+    {
+      "id": "kkxpYM",
+      "color": "Black",
+      "source": {
+        "id": "FxJN4n",
+        "handle": "_VIhsq"
+      },
+      "target": {
+        "id": "57M_iK",
+        "handle": "oL53Io"
+      },
+      "stripeColor": "Yellow"
+    },
+    {
+      "id": "wkEO4n",
+      "color": "Brown",
+      "source": {
+        "id": "57M_iK",
+        "handle": "pIsFoJ"
+      },
+      "target": {
+        "id": "6NamjU",
+        "handle": "Terminal"
+      }
+    },
+    {
+      "id": "5nUAZ_",
+      "color": "Brown",
+      "source": {
+        "id": "57M_iK",
+        "handle": "aWjXBp"
+      },
+      "target": {
+        "id": "6NamjU",
+        "handle": "Terminal"
+      }
+    },
+    {
+      "id": "rA2Ji0",
+      "color": "Blue",
+      "source": {
+        "id": "57M_iK",
+        "handle": "VXQQvm"
+      },
+      "target": {
+        "id": "57M_iK",
+        "handle": "LPu_5D"
+      }
+    },
+    {
+      "id": "_TRv6w",
+      "color": "Gray",
+      "source": {
+        "id": "57M_iK",
+        "handle": "cEaueg"
+      },
+      "target": {
+        "id": "Caf3c_",
+        "handle": "hA_k48"
+      },
+      "stripeColor": "White"
+    },
+    {
+      "id": "YF8bD4",
+      "color": "Gray",
+      "source": {
+        "id": "57M_iK",
+        "handle": "DOGVvB"
+      },
+      "target": {
+        "id": "tIYlnG",
+        "handle": "yfBOkF"
+      },
+      "stripeColor": "Blue"
+    },
+    {
+      "id": "KQaUz1",
+      "color": "Gray",
+      "source": {
+        "id": "57M_iK",
+        "handle": "liiCt3"
+      },
+      "target": {
+        "id": "v0cKU8",
+        "handle": "ZGxieY"
+      }
+    },
+    {
+      "id": "z1Wumh",
+      "color": "Light Gray",
+      "source": {
+        "id": "57M_iK",
+        "handle": "fgJlth"
+      },
+      "target": {
+        "id": "v0cKU8",
+        "handle": "gz6tTE"
+      }
+    },
+    {
+      "id": "ZqkuwV",
+      "color": "Gray",
+      "source": {
+        "id": "57M_iK",
+        "handle": "L_7wUq"
+      },
+      "target": {
+        "id": "nz9ChX",
+        "handle": "WZhn0L"
+      }
+    },
+    {
+      "id": "Ss6sJD",
+      "color": "Light Gray",
+      "source": {
+        "id": "57M_iK",
+        "handle": "oHLlcl"
+      },
+      "target": {
+        "id": "nz9ChX",
+        "handle": "ou6lL4"
+      }
+    },
+    {
+      "id": "gw3Ozn",
+      "color": "Gray",
+      "source": {
+        "id": "57M_iK",
+        "handle": "srfdpa"
+      },
+      "target": {
+        "id": "tLlIt_",
+        "handle": "Fu_hZG"
+      }
+    },
+    {
+      "id": "HkVQOH",
+      "color": "Light Gray",
+      "source": {
+        "id": "57M_iK",
+        "handle": "3dfK6m"
+      },
+      "target": {
+        "id": "tLlIt_",
+        "handle": "XHjVM7"
+      }
+    },
+    {
+      "id": "NS2VuZ",
+      "color": "Gray",
+      "source": {
+        "id": "57M_iK",
+        "handle": "kYgOfs"
+      },
+      "target": {
+        "id": "tLlIt_",
+        "handle": "ZGJgDg"
+      }
+    },
+    {
+      "id": "NGBaK5",
+      "color": "Light Gray",
+      "source": {
+        "id": "57M_iK",
+        "handle": "h635W3"
+      },
+      "target": {
+        "id": "tLlIt_",
+        "handle": "5QBEOX"
+      }
+    },
+    {
+      "id": "GQ_P8s",
+      "color": "Red",
+      "source": {
+        "id": "FxJN4n",
+        "handle": "gLiKrE"
+      },
+      "target": {
+        "id": "4cS9vc",
+        "handle": "7ME9R_"
+      },
+      "stripeColor": "Green"
+    },
+    {
+      "id": "rqOGRo",
+      "color": "Brown",
+      "source": {
+        "id": "4cS9vc",
+        "handle": "VP1w8v"
+      },
+      "target": {
+        "id": "FxJN4n",
+        "handle": "iaXFAZ"
+      },
+      "stripeColor": "White"
+    },
+    {
+      "id": "nIN3Mv",
+      "color": "Green",
+      "source": {
+        "id": "FxJN4n",
+        "handle": "oa1xq7"
+      },
+      "target": {
+        "id": "Caf3c_",
+        "handle": "xPjqIk"
+      },
+      "stripeColor": "White"
+    },
+    {
+      "id": "uT8pPu",
+      "color": "Green",
+      "source": {
+        "id": "FxJN4n",
+        "handle": "J1fcVR"
+      },
+      "target": {
+        "id": "I_V46Q",
+        "handle": "KlSdwh"
+      }
+    },
+    {
+      "id": "kUwJn2",
+      "color": "Brown",
+      "source": {
+        "id": "I_V46Q",
+        "handle": "JVxsOa"
+      },
+      "target": {
+        "id": "6NamjU",
+        "handle": "Terminal"
+      }
+    },
+    {
+      "id": "UXh_Ih",
+      "color": "Brown",
+      "source": {
+        "id": "FxJN4n",
+        "handle": "SCXInt"
+      },
+      "target": {
+        "id": "6NamjU",
+        "handle": "Terminal"
+      }
+    },
+    {
+      "id": "nFIp0L",
+      "color": "Black",
+      "source": {
+        "id": "FxJN4n",
+        "handle": "jxUSb_"
+      },
+      "target": {
+        "id": "ImD0Qe",
+        "handle": "sp_y0f"
+      },
+      "stripeColor": "Red"
+    },
+    {
+      "id": "VFA_Rj",
+      "color": "Black",
+      "source": {
+        "id": "ImD0Qe",
+        "handle": "QL2hBp"
+      },
+      "target": {
+        "id": "4dt9iP",
+        "handle": "Splice"
+      },
+      "stripeColor": "Red"
+    },
+    {
+      "id": "NGOahS",
+      "color": "Black",
+      "source": {
+        "id": "4dt9iP",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "57M_iK",
+        "handle": "3PxDiS"
+      },
+      "stripeColor": "Red"
+    },
+    {
+      "id": "Ne0mIc",
+      "color": "Black",
+      "source": {
+        "id": "4dt9iP",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "Caf3c_",
+        "handle": "d8SLZT"
+      },
+      "stripeColor": "Red"
+    },
+    {
+      "id": "v1FFKF",
+      "color": "Red",
+      "source": {
+        "id": "FxJN4n",
+        "handle": "ZMNYyc"
+      },
+      "target": {
+        "id": "tIYlnG",
+        "handle": "6QxmK3"
+      }
+    },
+    {
+      "id": "FNROQO",
+      "color": "Brown",
+      "source": {
+        "id": "tIYlnG",
+        "handle": "225_Oa"
+      },
+      "target": {
+        "id": "6NamjU",
+        "handle": "Terminal"
+      }
+    },
+    {
+      "id": "iPPXly",
+      "color": "Black",
+      "source": {
+        "id": "FxJN4n",
+        "handle": "puPvGK"
+      },
+      "target": {
+        "id": "ShvS_n",
+        "handle": "j7rc04"
+      },
+      "stripeColor": "Blue"
+    },
+    {
+      "id": "LIEG0G",
+      "color": "Brown",
+      "source": {
+        "id": "ShvS_n",
+        "handle": "gadMsK"
+      },
+      "target": {
+        "id": "6NamjU",
+        "handle": "Terminal"
+      }
+    },
+    {
+      "id": "qkQMID",
+      "color": "Green",
+      "source": {
+        "id": "ShvS_n",
+        "handle": "SOoIQL"
+      },
+      "target": {
+        "id": "YdF_tG",
+        "handle": "aqZXNK"
+      }
+    },
+    {
+      "id": "45xcMb",
+      "color": "Yellow",
+      "source": {
+        "id": "ShvS_n",
+        "handle": "qmqggC"
+      },
+      "target": {
+        "id": "YdF_tG",
+        "handle": "PMmm8Z"
+      }
+    },
+    {
+      "id": "xQlpXd",
+      "color": "Violet",
+      "source": {
+        "id": "ShvS_n",
+        "handle": "tgwlPF"
+      },
+      "target": {
+        "id": "9Z_eUH",
+        "handle": "Splice"
+      }
+    },
+    {
+      "id": "vDAfsf",
+      "color": "Violet",
+      "source": {
+        "id": "9Z_eUH",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "YdF_tG",
+        "handle": "OrZVc3"
+      }
+    },
+    {
+      "id": "xjzj4z",
+      "color": "Violet",
+      "source": {
+        "id": "9Z_eUH",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "ZoWusq",
+        "handle": "7kZGAv"
+      }
+    },
+    {
+      "id": "GnntIA",
+      "color": "Green",
+      "source": {
+        "id": "ShvS_n",
+        "handle": "UWNxQY"
+      },
+      "target": {
+        "id": "ZoWusq",
+        "handle": "vA0Mt_"
+      }
+    },
+    {
+      "id": "kVdb5I",
+      "color": "Yellow",
+      "source": {
+        "id": "ShvS_n",
+        "handle": "U7TpZZ"
+      },
+      "target": {
+        "id": "ZoWusq",
+        "handle": "cWkQIm"
+      }
+    },
+    {
+      "id": "jE0ms6",
+      "color": "Blue",
+      "source": {
+        "id": "b4NPm6",
+        "handle": "d6Wur9"
+      },
+      "target": {
+        "id": "6CIp4s",
+        "handle": "me8USI"
+      }
+    },
+    {
+      "id": "KPnQb9",
+      "color": "Blue",
+      "source": {
+        "id": "b4NPm6",
+        "handle": "FHbGJM"
+      },
+      "target": {
+        "id": "Y5gt3e",
+        "handle": "qOnmfO"
+      }
+    },
+    {
+      "id": "TMVIwr",
+      "color": "White",
+      "source": {
+        "id": "b4NPm6",
+        "handle": "FGF4j1"
+      },
+      "target": {
+        "id": "6CIp4s",
+        "handle": "gnbTGq"
+      }
+    },
+    {
+      "id": "R3n8as",
+      "color": "White",
+      "source": {
+        "id": "b4NPm6",
+        "handle": "NOlCa1"
+      },
+      "target": {
+        "id": "Y5gt3e",
+        "handle": "yNR5nV"
+      }
+    },
+    {
+      "id": "2xc204",
+      "color": "Red",
+      "source": {
+        "id": "b4NPm6",
+        "handle": "i2wxfq"
+      },
+      "target": {
+        "id": "6CIp4s",
+        "handle": "lRMZL3"
+      }
+    },
+    {
+      "id": "OLmBO4",
+      "color": "Red",
+      "source": {
+        "id": "b4NPm6",
+        "handle": "VkGrje"
+      },
+      "target": {
+        "id": "Y5gt3e",
+        "handle": "DH-I9X"
+      }
+    },
+    {
+      "id": "WHUTai",
+      "color": "Red",
+      "source": {
+        "id": "b4NPm6",
+        "handle": "5YX8Ig"
+      },
+      "target": {
+        "id": "6CIp4s",
+        "handle": "mBSYsA"
+      },
+      "stripeColor": "Black"
+    },
+    {
+      "id": "TCjDVp",
+      "color": "Red",
+      "source": {
+        "id": "b4NPm6",
+        "handle": "SYg2tS"
+      },
+      "target": {
+        "id": "Y5gt3e",
+        "handle": "Dg3L_c"
+      },
+      "stripeColor": "Black"
+    },
+    {
+      "id": "ejR4gK",
+      "color": "Yellow",
+      "source": {
+        "id": "b4NPm6",
+        "handle": "RNH4KW"
+      },
+      "target": {
+        "id": "Oq3eyY",
+        "handle": "o9e8Ma"
+      }
+    },
+    {
+      "id": "MzbsCf",
+      "color": "Yellow",
+      "source": {
+        "id": "b4NPm6",
+        "handle": "U_GBBS"
+      },
+      "target": {
+        "id": "XokHeS",
+        "handle": "_uojsr"
       }
     }
   ]
