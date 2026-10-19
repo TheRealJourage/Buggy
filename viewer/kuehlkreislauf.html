@@ -104,15 +104,11 @@
   </g>
   <path class="ln thin hide" data-c="vent_u" data-v="u" data-m="fahrt" stroke="var(--vent)"
         d="M935,576 V562 H985 V25 H940 V40"/>
-  <path class="ln thin hide" data-c="tank16_u" data-v="u" data-m="fahrt warm nachlauf" data-static="1" stroke="var(--vent)"
-        d="M900,110 V160 H450 V300"/>
-  <text x="460" y="152" font-size="12" class="hide" data-v="u" fill="#e8c547">nur mit 2. Anschluss am Behälter (ersetzt Rohr 16)</text>
-  <text x="700" y="20" font-size="12" class="hide" data-v="u" fill="#bbb">Entlüftung: Kühlernippel → Behälter oben</text>
+  <text x="560" y="20" font-size="12" class="hide" data-v="u" fill="#bbb">einzige Behälter-Leitung: Kühlernippel → Behälter</text>
   <!-- heater delete loop: rear nipple -> port B -->
   <path class="ln hide" data-c="loop_u" data-v="u" data-m="fahrt warm nachlauf" stroke="var(--bridge)"
         d="M240,345 V300 H660 V420 H620"/>
   <text x="290" y="292" font-size="12" class="hide" data-v="u" fill="#ff9a3c">Heizung überbrückt: Nippel hinten → B</text>
-  <g class="part hide" data-i="tee16" data-v="u"><circle cx="450" cy="300" r="6" fill="#fff"/></g>
 
   <!-- ===== engine (front view) ===== -->
   <g class="part" data-i="engine">
@@ -206,12 +202,12 @@
   <tr><td>Nippel hinten (AGR-Seite)</td><td>„To heat exchanger“ – Heizungsvorlauf, <b>Ausgang</b>, J338 hängt mit dran</td><td>Schleife zu B (Heizung überbrückt)</td></tr>
   <tr><td>Nippel Front unter Rohr 13</td><td>Einspeisung V51 in den Block (über 10, 11)</td><td>E-Pumpe + Rückschlagventil, Saugseite an Schlauch 6</td></tr>
   <tr><td>Nippel oben am Kühler (neu)</td><td>entspricht Rohr 2 (Entlüftung zum Behälter)</td><td>zum neuen Behälter oben</td></tr>
-  <tr><td>Behälter unten</td><td>Rohr 16 → mündet in den Heizungsrücklauf (Saugseite)</td><td class="hyp">T-Stück in der Schleife – nur wenn der Behälter einen 2. Anschluss bekommt</td></tr>
+  <tr><td>Rohr 16 (Behälter unten → Heizungsrücklauf)</td><td>legt den Druck am Pumpeneingang fest, kaum Durchfluss</td><td>entfällt – Behälter hat nur einen Anschluss, hängt nur am Kühler (Entscheidung 2026-10-19)</td></tr>
   <tr><td>Sensor + Stopfen am Gehäuse 5</td><td>Teile 9 und 10 in N19-0225</td><td>Kühlmittelsensor Speeduino / Reserve</td></tr>
 </table>
 
 <div class="warn"><b>Noch zu bestätigen:</b> A und B sind aus Lage und deinen Pfeilen abgeleitet, nicht gemessen. A muss groß sein (voller Kühlerstrom), B ist meist kleiner. C (Thermostat) ist laut Handbuch sicher der Eingang vom Kühler.</div>
-<div class="warn"><b>Befüllen:</b> langsam über den Ausgleichsbehälter, Stopfen am Gehäuse kurz lockern bis Wasser kommt, warmlaufen bis Thermostat öffnet (ca. 80 °C, voll offen ca. 105 °C), nachfüllen. E-Pumpe unterhalb des Wasserspiegels montieren.</div>
+<div class="warn"><b>Befüllen:</b> langsam über den Ausgleichsbehälter, Schlauch am Nippel hinten und Stopfen am Gehäuse kurz lösen bis Wasser kommt, warmlaufen bis Thermostat öffnet (ca. 80 °C, voll offen ca. 105 °C), nachfüllen. E-Pumpe unterhalb des Wasserspiegels montieren.</div>
 
 <script>
 const info = {
@@ -223,11 +219,9 @@ const info = {
   ret_o: 'Heizungsrücklauf („From heat exchanger“) → Gehäuse 5, Anschluss B.',
   p16_o: '16 Kühlmittelrohr unten: Behälter unten → in den Heizungsrücklauf (Saugseite).',
   p2_o: '2 Kühlmittelrohr oben: Entlüftung vom oberen Kühlerschlauch zum Behälter oben.',
-  tank_u: 'Neuer Ausgleichsbehälter: höchster Punkt, Druckdeckel 1,4–1,6 bar. Oben Entlüftung vom Kühlernippel. Mit 2. Anschluss unten: T-Stück in der Heizungs-Schleife (wie Rohr 16).',
+  tank_u: 'Neuer Ausgleichsbehälter mit nur einem Anschluss: hängt am Entlüftungsnippel oben am Kühler. Höchster Punkt, Druckdeckel 1,4–1,6 bar. Kein Rohr 16 – Pumpeneingang liegt dadurch etwas unter Behälterdruck, für Straßenbetrieb vermutlich unkritisch.',
   vent_u: 'Entlüftung: Nippel oben am Kühler → Behälter oben. Stetig steigend.',
-  tank16_u: 'Ersatz für Rohr 16: Behälter unten → T-Stück in der Schleife. Geht nur mit einem Behälter mit 2 Anschlüssen.',
-  loop_u: 'Heizung überbrückt: Nippel hinten (Heizungsvorlauf, Ausgang) → Anschluss B (Heizungsrücklauf). Nicht verschließen, sonst steht das Wasser hinten im Kopf bis der Thermostat öffnet.',
-  tee16: 'T-Stück für die Leitung vom Behälter-Boden.',
+  loop_u: 'Heizung überbrückt: Nippel hinten (Heizungsvorlauf, Ausgang) → Anschluss B (Heizungsrücklauf). Nicht verschließen, sonst steht das Wasser hinten im Kopf bis der Thermostat öffnet. Ohne Buckel verlegen; beim Befüllen am Nippel hinten entlüften.',
   engine: '15 Zylinderkopf / 12 Zylinderblock, von vorn gesehen.',
   mpump: '14 Kühlmittelpumpe am Anfang von Rohr 13. Saugt aus dem Gehäuse 5, drückt in den Block.',
   oil: '9 Ölkühler im Ölfiltergehäuse, bleibt wie angeschlossen.',
