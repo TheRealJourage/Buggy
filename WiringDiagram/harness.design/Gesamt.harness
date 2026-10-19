@@ -888,17 +888,19 @@
     },
     {
       "id": "4cS9vc",
-      "label": "Unterdruckpumpe",
+      "label": "Unterdruckpumpe (Hella UP28)",
       "schematicPosition": {
         "x": 3300,
         "y": -240
       },
       "cavities": [
         {
-          "id": "7ME9R_"
+          "id": "7ME9R_",
+          "signal": "Pumpe +"
         },
         {
-          "id": "VP1w8v"
+          "id": "VP1w8v",
+          "signal": "Pumpe −"
         }
       ]
     },

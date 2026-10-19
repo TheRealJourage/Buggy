@@ -39,7 +39,7 @@ CONNECTORS = {
     "ABS-Fuehler G47 VL": (E, -1800),
     "Servolenkung (Corsa-C-Kit)": (E, -1500),
     "ABS J104 T25": (E, -1200),
-    "Unterdruckpumpe": (E, -240),
+    "Unterdruckpumpe (Hella UP28)": (E, -240),
     "Unterdruckschalter S1": (E, -60),
     "ABS-Fuehler G45 VR": (E, 1500),
     # F/G: lamps, left at the top, right at the bottom

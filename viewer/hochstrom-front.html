@@ -73,20 +73,21 @@
 <p class="hint">Q1–Q7 = Low-Side-Ausgänge des Front-Controllers über einen Treiber, <span class="hyp">z. B. ULN2803A (Freilaufdioden eingebaut; prüfen, ob er mit 3,3-V-Pegel sicher durchschaltet)</span>. Relais mit eingebauter Diode: Spulen-Polarität beachten. Lichter vorn jetzt <b>je Seite einzeln abgesichert</b>, die Abzweige sitzen im Verteiler statt im Kabelbaum.</p>
 
 <h2>4. Unterdruckpumpe: fester Kreis, nur lesend am Controller</h2>
+<p>Pumpe: <b>Hella UP28</b>, 2-polig (ohne eingebautes Relais), 10,5–16 V, Hella-Angabe mittlere Stromaufnahme &lt; 10 A, Aussetzbetrieb (ca. 600 h Lebensdauer). Anlaufstrom nicht angegeben, <span class="hyp">vermutlich 2–4-fach</span> → beim ersten Lauf am Messstand messen.</p>
 <table>
 <tr><th>K3-Klemme</th><th>Anschluss</th></tr>
 <tr><td>30 (gemeinsam)</td><td>Masse M1, 2,5 mm²</td></tr>
 <tr><td>87 (Schließer)</td><td>Pumpe −</td></tr>
 <tr><td>87a (Öffner)</td><td>Front-Controller E1, Pull-up 1 kΩ auf 3,3 V + 100 nF gegen Masse</td></tr>
 <tr><td>85 / 86 (Spule)</td><td>V6 3 A (15 vorn) → Spule → Unterdruckschalter S1 → Masse</td></tr>
-<tr><td>Pumpe +</td><td>V5 <span class="hyp">20 A</span> direkt (15 vorn), 2,5 mm²</td></tr>
+<tr><td>Pumpe +</td><td>V5 20 A direkt (15 vorn), 2,5 mm² (UP28 &lt; 10 A im Mittel)</td></tr>
 </table>
 <ul>
 <li>Pumpe aus → 87a auf Masse → E1 LOW. Pumpe an → 87a offen → E1 HIGH. Der Pin sieht nie 12 V.</li>
 <li>Masseschluss am Pumpen-Minus → Pumpe läuft durch (sichere Fehlerrichtung für die Bremse). Controller hängt → Pumpe läuft trotzdem nach S1.</li>
 <li>Freilaufdiode über der Pumpe (1N5408, Ring zu Pumpe +).</li>
 <li>Warnungen im Controller per CAN: Pumpe läuft &gt; <span class="hyp">30 s</span> am Stück → Leck; Pumpe springt sehr oft an → Rückschlagventil undicht. Optional später: 1-bar-Drucksensor an einen ADC-Eingang.</li>
-<li>Offen: Pumpenmodell und Strom, Rückschlagventil am Bremskraftverstärker, Schaltpunkte S1, Mindestlast des Relais-Öffners (flackert E1, Pull-up kräftiger machen).</li>
+<li>Offen: Anlaufstrom UP28 messen, Rückschlagventil am Bremskraftverstärker, Schaltpunkte S1, Mindestlast des Relais-Öffners (flackert E1, Pull-up kräftiger machen).</li>
 </ul>
 
 <h2>5. Stromlaufplan</h2>
@@ -145,7 +146,7 @@
 
 <h2>11. Offen</h2>
 <ol>
-<li><b>Unterdruckpumpe:</b> Modell + Strom (V5), Rückschlagventil, S1-Schaltpunkte</li>
+<li><b>Unterdruckpumpe (Hella UP28):</b> Anlaufstrom messen, Rückschlagventil, S1-Schaltpunkte</li>
 <li><b>X6:</b> Steckertyp für die ABS-Fühler hinten, Weg rechts rum mit dem Heckstrang</li>
 <li><b>Front-Controller:</b> Treiber für Q1–Q7 auswählen, Pegel an T25/16 messen</li>
 <li><b>Servolenkung:</b> Stecker der Kit-Box fotografieren, Drehzahlschwelle für „Motor läuft“</li>
@@ -365,7 +366,7 @@ const FUSES = [
  ['V1', '50 A MIDI', '15', 'Servolenkung Hauptstrom', '10 mm²'],
  ['V2 / V3', '30 A', '15', 'ABS T25/9 / T25/25', '4,0 mm²'],
  ['V4', '5 A', '15', 'ABS Zündung T25/23', '0,5'],
- ['V5', '<span class="hyp">20 A</span>', '15', 'Unterdruckpumpe +', '2,5 (max. 25 A)'],
+ ['V5', '20 A', '15', 'Unterdruckpumpe + (UP28 < 10 A)', '2,5 (max. 25 A)'],
  ['V6', '3 A', '15', 'Spule K3 (über S1)', '0,5'],
  ['V7', '3 A', '15', 'Bremslichtschalter (nur Signal: ABS + Controller)', '0,5'],
  ['V8', '5 A', '15', 'Spiegelschalter E43', '0,5'],
