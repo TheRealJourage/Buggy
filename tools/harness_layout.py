@@ -36,7 +36,7 @@ CONNECTORS = {
     "Front-Sicherungen (X2)": (D, -600),
     # E: front units
     "ABS-Fuehler G47 VL": (E, -1800),
-    "Servolenkung (Corsa-C-Kit)": (E, -1500),
+    "Servolenkung Hauptstrom (Corsa B/C, BoostWorks)": (E, -1500),
     "ABS J104 T25": (E, -1200),
     "Unterdruckpumpe (Hella UP28)": (E, -240),
     "Unterdruckschalter S1": (E, -60),

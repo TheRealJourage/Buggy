@@ -122,7 +122,7 @@ Je Funktion eine Sicherung für beide Seiten: Ein Kurzschluss auf einer Seite sc
 <h2>8. Masse</h2>
 <table>
 <tr><th>Punkt</th><th>Ort</th><th>Was daran</th></tr>
-<tr><td>M1</td><td>Rahmen vorn links, M8-Bolzen</td><td>Servolenkung (10), ABS T25/8 + 24 (2 × 4,0), K3/30 Pumpenmasse (2,5), S1, Front-Controller, E43, Diagnose, Scheinwerfer L, Nebel L</td></tr>
+<tr><td>M1</td><td>Rahmen vorn links, M8-Bolzen</td><td>Servolenkung (6), ABS T25/8 + 24 (2 × 4,0), K3/30 Pumpenmasse (2,5), S1, Front-Controller, E43, Diagnose, Scheinwerfer L, Nebel L</td></tr>
 <tr><td>M2</td><td>Rahmen vorn rechts, M8-Bolzen</td><td>Scheinwerfer R, Nebel R</td></tr>
 <tr><td>Rahmen ↔ Batterie −</td><td>Massband</td><td>≥ 25 mm², dazu Motorblock ↔ Rahmen ≥ 25 mm²</td></tr>
 </table>
@@ -161,7 +161,7 @@ const SIG = '#8cf', LINE = '#ddd';
 
 // one entry per current path (column). x1 = pin number on X1 (source in the relay box), from = split source column
 const P = [
- {id: 'eps1', name: 'Servo|Hauptstrom', bus: true, fA: ['V1', '50 A'], wire: '10 rt', conn: 'Haupt +', box: 'eps', gnd: ['Haupt −', '10 br', 'M1']},
+ {id: 'eps1', name: 'Servo|Hauptstrom', bus: true, fA: ['V1', '50 A'], wire: '6 rt', conn: 'Haupt +', box: 'eps', gnd: ['Haupt −', '6 br', 'M1']},
  {id: 'eps2', name: 'Servo|Einschalten', x1: 7, src: ['LAST', '5 A'], wire: '18 AWG sw/ws', conn: 'Zünd +', box: 'eps'},
  {id: 'abs9', name: 'ABS|Pin 9', bus: true, fA: ['V2', '30 A'], wire: '4,0 rt', conn: 'T25/9', box: 'abs', gnd: ['T25/8', '4,0 br', 'M1']},
  {id: 'abs25', name: 'ABS|Pin 25', bus: true, fA: ['V3', '30 A'], wire: '4,0 rt', conn: 'T25/25', box: 'abs', gnd: ['T25/24', '4,0 br', 'M1']},
@@ -361,7 +361,7 @@ svg.addEventListener('click', ev => {
 });
 
 const FUSES = [
- ['V1', '50 A MIDI', 'Servolenkung Hauptstrom', '10 mm²'],
+ ['V1', '50 A MIDI', 'Servolenkung Hauptstrom (Stecker BoostWorks, Kontakte 4–6 mm²)', '6 mm²'],
  ['V2 / V3', '30 A', 'ABS T25/9 / T25/25', '4,0 mm²'],
  ['V4', '5 A', 'ABS Zündung T25/23', '0,5'],
  ['V5', '20 A', 'Unterdruckpumpe + (UP28 < 10 A)', '2,5 (max. 25 A)'],
@@ -390,8 +390,8 @@ const LINES = [
  ['CAN-Stecker', 'Front-Controller CAN-H · CAN-L', '0,5 verdrillt', 'gelb · grün', '—'],
  ['Front-Controller Masse', 'M1', '0,5', 'braun', '—'],
  ['Box F30 (15)', 'Bolzen Front-Sicherungen (X2)', '16 mm²', 'rot', 'F30 80 A'],
- ['V1', 'Servolenkung Hauptstrom +', '10 mm²', 'rot', 'V1 50 A'],
- ['Servolenkung Hauptstrom −', 'M1', '10 mm²', 'braun', '—'],
+ ['V1', 'Servolenkung Hauptstrom + (Corsa-B/C-Stecker, BoostWorks)', '6 mm²', 'rot', 'V1 50 A'],
+ ['Servolenkung Hauptstrom −', 'M1', '6 mm²', 'braun', '—'],
  ['V2 · V3', 'ABS T25/9 · T25/25', '4,0 mm²', 'rot', 'V2 · V3 30 A'],
  ['V4', 'ABS T25/23', '0,5', 'schwarz/gelb', 'V4 5 A'],
  ['ABS T25/8 + T25/24', 'M1', '2 × 4,0 mm²', 'braun', '—'],
