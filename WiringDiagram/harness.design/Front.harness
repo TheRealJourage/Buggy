@@ -294,47 +294,47 @@
       "cavities": [
         {
           "id": "biTsOr",
-          "signal": "Abblendlicht L"
+          "signal": "Abblendlicht L+R"
         },
         {
           "id": "teOofz",
-          "signal": "Abblendlicht R"
+          "signal": "Fernlicht L+R"
         },
         {
           "id": "1bIPvZ",
-          "signal": "Fernlicht L"
-        },
-        {
-          "id": "K5xcKa",
-          "signal": "Fernlicht R"
-        },
-        {
-          "id": "T2uKqt",
           "signal": "Standlicht/TFL L+R"
         },
         {
-          "id": "pgSFDo",
-          "signal": "Nebel L"
-        },
-        {
-          "id": "ndv_Lp",
-          "signal": "Nebel R"
-        },
-        {
-          "id": "LS7yTq",
-          "signal": "Blinker L"
-        },
-        {
-          "id": "tHPYL7",
+          "id": "K5xcKa",
           "signal": "Blinker R"
         },
         {
-          "id": "r36s7E",
+          "id": "T2uKqt",
+          "signal": "Blinker L"
+        },
+        {
+          "id": "pgSFDo",
+          "signal": "Nebel L+R"
+        },
+        {
+          "id": "ndv_Lp",
           "signal": "Servolenkung Einschalten (Motor laeuft)"
         },
         {
-          "id": "gNtSZu",
+          "id": "LS7yTq",
           "signal": "Kl. 30 Front-Controller/Lenkrad/Diagnose"
+        },
+        {
+          "id": "tHPYL7",
+          "notConnected": true
+        },
+        {
+          "id": "r36s7E",
+          "notConnected": true
+        },
+        {
+          "id": "gNtSZu",
+          "notConnected": true
         },
         {
           "id": "qMpVuJ",
@@ -352,7 +352,7 @@
       "cavities": [
         {
           "id": "Fk7kB9",
-          "signal": "+12 V Kl. 30 (X1/11)"
+          "signal": "+12 V Kl. 30 (X1/8)"
         },
         {
           "id": "5pIaqS",
@@ -976,14 +976,35 @@
       }
     },
     {
-      "id": "yOBNhN",
+      "id": "6BiYw3",
       "schematicPosition": {
         "x": 3810,
         "y": -1740
       }
     },
     {
-      "id": "OpR2aF",
+      "id": "phxW8_",
+      "schematicPosition": {
+        "x": 3810,
+        "y": -1680
+      }
+    },
+    {
+      "id": "KuwAQ9",
+      "schematicPosition": {
+        "x": 3810,
+        "y": -1620
+      }
+    },
+    {
+      "id": "SD5xYz",
+      "schematicPosition": {
+        "x": 4110,
+        "y": -1140
+      }
+    },
+    {
+      "id": "fZETdy",
       "schematicPosition": {
         "x": 1110,
         "y": -1140
@@ -1869,192 +1890,6 @@
       }
     },
     {
-      "id": "EKhopa",
-      "color": "Blue",
-      "source": {
-        "id": "L88nHq",
-        "handle": "biTsOr"
-      },
-      "target": {
-        "id": "6CIp4s",
-        "handle": "me8USI"
-      }
-    },
-    {
-      "id": "ddHri9",
-      "color": "Blue",
-      "source": {
-        "id": "L88nHq",
-        "handle": "teOofz"
-      },
-      "target": {
-        "id": "Y5gt3e",
-        "handle": "qOnmfO"
-      }
-    },
-    {
-      "id": "MFimJt",
-      "color": "White",
-      "source": {
-        "id": "L88nHq",
-        "handle": "1bIPvZ"
-      },
-      "target": {
-        "id": "6CIp4s",
-        "handle": "gnbTGq"
-      }
-    },
-    {
-      "id": "z1lRcY",
-      "color": "White",
-      "source": {
-        "id": "L88nHq",
-        "handle": "K5xcKa"
-      },
-      "target": {
-        "id": "Y5gt3e",
-        "handle": "yNR5nV"
-      }
-    },
-    {
-      "id": "fQSURt",
-      "color": "Red",
-      "source": {
-        "id": "L88nHq",
-        "handle": "T2uKqt"
-      },
-      "target": {
-        "id": "yOBNhN",
-        "handle": "Splice"
-      }
-    },
-    {
-      "id": "Yw5DK8",
-      "color": "Red",
-      "source": {
-        "id": "yOBNhN",
-        "handle": "Splice"
-      },
-      "target": {
-        "id": "6CIp4s",
-        "handle": "lRMZL3"
-      }
-    },
-    {
-      "id": "gTm_1v",
-      "color": "Red",
-      "source": {
-        "id": "yOBNhN",
-        "handle": "Splice"
-      },
-      "target": {
-        "id": "Y5gt3e",
-        "handle": "DH-I9X"
-      }
-    },
-    {
-      "id": "s7zJBC",
-      "color": "Yellow",
-      "source": {
-        "id": "L88nHq",
-        "handle": "pgSFDo"
-      },
-      "target": {
-        "id": "Oq3eyY",
-        "handle": "o9e8Ma"
-      }
-    },
-    {
-      "id": "PWqAo9",
-      "color": "Yellow",
-      "source": {
-        "id": "L88nHq",
-        "handle": "ndv_Lp"
-      },
-      "target": {
-        "id": "XokHeS",
-        "handle": "_uojsr"
-      }
-    },
-    {
-      "id": "WFxpFI",
-      "color": "Red",
-      "source": {
-        "id": "L88nHq",
-        "handle": "LS7yTq"
-      },
-      "target": {
-        "id": "6CIp4s",
-        "handle": "mBSYsA"
-      },
-      "stripeColor": "Black"
-    },
-    {
-      "id": "9LnwL5",
-      "color": "Red",
-      "source": {
-        "id": "L88nHq",
-        "handle": "tHPYL7"
-      },
-      "target": {
-        "id": "Y5gt3e",
-        "handle": "Dg3L_c"
-      },
-      "stripeColor": "Black"
-    },
-    {
-      "id": "7O1Sfv",
-      "color": "Black",
-      "source": {
-        "id": "L88nHq",
-        "handle": "r36s7E"
-      },
-      "target": {
-        "id": "AHqw5Q",
-        "handle": "4J392i"
-      },
-      "stripeColor": "White"
-    },
-    {
-      "id": "61pEyn",
-      "color": "Red",
-      "source": {
-        "id": "L88nHq",
-        "handle": "gNtSZu"
-      },
-      "target": {
-        "id": "OpR2aF",
-        "handle": "Splice"
-      },
-      "stripeColor": "White"
-    },
-    {
-      "id": "QOitsQ",
-      "color": "Red",
-      "source": {
-        "id": "OpR2aF",
-        "handle": "Splice"
-      },
-      "target": {
-        "id": "Caf3c_",
-        "handle": "Fk7kB9"
-      },
-      "stripeColor": "White"
-    },
-    {
-      "id": "MNiwRJ",
-      "color": "Red",
-      "source": {
-        "id": "OpR2aF",
-        "handle": "Splice"
-      },
-      "target": {
-        "id": "tIYlnG",
-        "handle": "6QxmK3"
-      },
-      "stripeColor": "White"
-    },
-    {
       "id": "7fNU65",
       "color": "Yellow",
       "source": {
@@ -2077,6 +1912,228 @@
         "id": "Caf3c_",
         "handle": "H7vsSz"
       }
+    },
+    {
+      "id": "ttvYBo",
+      "color": "Blue",
+      "source": {
+        "id": "L88nHq",
+        "handle": "biTsOr"
+      },
+      "target": {
+        "id": "6BiYw3",
+        "handle": "Splice"
+      }
+    },
+    {
+      "id": "tvTbhN",
+      "color": "Blue",
+      "source": {
+        "id": "6BiYw3",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "6CIp4s",
+        "handle": "me8USI"
+      }
+    },
+    {
+      "id": "BySpxc",
+      "color": "Blue",
+      "source": {
+        "id": "6BiYw3",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "Y5gt3e",
+        "handle": "qOnmfO"
+      }
+    },
+    {
+      "id": "0ptgT2",
+      "color": "White",
+      "source": {
+        "id": "L88nHq",
+        "handle": "teOofz"
+      },
+      "target": {
+        "id": "phxW8_",
+        "handle": "Splice"
+      }
+    },
+    {
+      "id": "pRI4rW",
+      "color": "White",
+      "source": {
+        "id": "phxW8_",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "6CIp4s",
+        "handle": "gnbTGq"
+      }
+    },
+    {
+      "id": "vZv95W",
+      "color": "White",
+      "source": {
+        "id": "phxW8_",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "Y5gt3e",
+        "handle": "yNR5nV"
+      }
+    },
+    {
+      "id": "r7HnOv",
+      "color": "Red",
+      "source": {
+        "id": "L88nHq",
+        "handle": "1bIPvZ"
+      },
+      "target": {
+        "id": "KuwAQ9",
+        "handle": "Splice"
+      }
+    },
+    {
+      "id": "m5vr5T",
+      "color": "Red",
+      "source": {
+        "id": "KuwAQ9",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "6CIp4s",
+        "handle": "lRMZL3"
+      }
+    },
+    {
+      "id": "G5j35Q",
+      "color": "Red",
+      "source": {
+        "id": "KuwAQ9",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "Y5gt3e",
+        "handle": "DH-I9X"
+      }
+    },
+    {
+      "id": "ag8jMx",
+      "color": "Red",
+      "source": {
+        "id": "L88nHq",
+        "handle": "K5xcKa"
+      },
+      "target": {
+        "id": "Y5gt3e",
+        "handle": "Dg3L_c"
+      },
+      "stripeColor": "Black"
+    },
+    {
+      "id": "QchUsq",
+      "color": "Red",
+      "source": {
+        "id": "L88nHq",
+        "handle": "T2uKqt"
+      },
+      "target": {
+        "id": "6CIp4s",
+        "handle": "mBSYsA"
+      },
+      "stripeColor": "Black"
+    },
+    {
+      "id": "YE8eGe",
+      "color": "Yellow",
+      "source": {
+        "id": "L88nHq",
+        "handle": "pgSFDo"
+      },
+      "target": {
+        "id": "SD5xYz",
+        "handle": "Splice"
+      }
+    },
+    {
+      "id": "jNQgd_",
+      "color": "Yellow",
+      "source": {
+        "id": "SD5xYz",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "Oq3eyY",
+        "handle": "o9e8Ma"
+      }
+    },
+    {
+      "id": "ajBAtx",
+      "color": "Yellow",
+      "source": {
+        "id": "SD5xYz",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "XokHeS",
+        "handle": "_uojsr"
+      }
+    },
+    {
+      "id": "Q4x4Br",
+      "color": "Black",
+      "source": {
+        "id": "L88nHq",
+        "handle": "ndv_Lp"
+      },
+      "target": {
+        "id": "AHqw5Q",
+        "handle": "4J392i"
+      },
+      "stripeColor": "White"
+    },
+    {
+      "id": "Hmxn2f",
+      "color": "Red",
+      "source": {
+        "id": "L88nHq",
+        "handle": "LS7yTq"
+      },
+      "target": {
+        "id": "fZETdy",
+        "handle": "Splice"
+      },
+      "stripeColor": "White"
+    },
+    {
+      "id": "3aLTqw",
+      "color": "Red",
+      "source": {
+        "id": "fZETdy",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "Caf3c_",
+        "handle": "Fk7kB9"
+      },
+      "stripeColor": "White"
+    },
+    {
+      "id": "ZufXw_",
+      "color": "Red",
+      "source": {
+        "id": "fZETdy",
+        "handle": "Splice"
+      },
+      "target": {
+        "id": "tIYlnG",
+        "handle": "6QxmK3"
+      },
+      "stripeColor": "White"
     }
   ]
 }
