@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Buggy – Kühlkreislauf (Plan)</title>
 <style>
-  :root { --hot:#ff5a5a; --cold:#5ab4ff; --bridge:#ff9a3c; --vent:#bbb; --pump:#7fe0c8; --gone:#555; }
+  :root { --hot:#ff5a5a; --cold:#5ab4ff; --vent:#bbb; --pump:#7fe0c8; }
   body { font-family: system-ui, sans-serif; margin: 0; padding: 12px; background: #111; color: #eee; font-size: 16px; line-height: 1.4; max-width: 1100px; }
   h1 { font-size: 21px; margin: 4px 0 6px; }
   h2 { font-size: 18px; margin: 26px 0 8px; color: #8cf; border-bottom: 1px solid #333; padding-bottom: 4px; }
@@ -27,19 +27,18 @@
   .ln.thin { stroke-width: 4; }
   .ln.off { opacity: .15; }
   .ln.flow { stroke-dasharray: 10 8; animation: flow .6s linear infinite; }
-  .ln.gone { stroke: var(--gone) !important; stroke-dasharray: 3 6; opacity: .7; animation: none; }
   @keyframes flow { from { stroke-dashoffset: 18; } to { stroke-dashoffset: 0; } }
   .part { cursor: pointer; }
   .tag { fill: #e8c547 !important; font-size: 12px; }
   .num { font-weight: 700; fill: #fff !important; }
   .legend span { margin-right: 12px; white-space: nowrap; font-size: 14px; }
   .sw { display: inline-block; width: 22px; height: 6px; border-radius: 3px; vertical-align: middle; margin-right: 4px; }
-  [data-v="o"] { } .hide { display: none; }
+  .hide { display: none; }
 </style>
 </head>
 <body>
-<h1>Kühlkreislauf: Verschlauchung nach VW-Anschlussplan</h1>
-<p class="hint">Stand 2026-10-19. Aufbau wie VW-Plan N19-0275 (AUE), Nummern 1–16 wie im Plan. <b>Rot/Blau ist die Einfärbung des Users und eine Vermutung</b>, nicht geprüft. Im Umbau ist der Kühler real liegend über dem Motor, hier bleibt er wie im Plan unten rechts. Zuordnungen in <span class="hyp">gelb</span> sind Annahmen. Element anklicken für Details.</p>
+<h1>Kühlkreislauf nach VW-Anschlussplan (Ansicht von vorn)</h1>
+<p class="hint">Stand 2026-10-19. Aufbau wie VW-Plan N19-0275 (AUE), Motor von vorn gesehen, Nummern 1–16 wie im Plan. <b>Rot/Blau ist die Einfärbung des Users</b> und folgt den Linien im VW-Plan. Der Kühler steht hier wie im Plan unten rechts, real liegt er über dem Motor. Gelb = offen/Annahme. Element anklicken für Details.</p>
 
 <div class="bar" id="views">
   <b>Ansicht:</b>
@@ -53,205 +52,197 @@
   <button data-mode="nachlauf">Nachlauf (Motor aus)</button>
 </div>
 <div class="legend">
-  <span><i class="sw" style="background:var(--hot)"></i>heiß (vermutet)</span>
-  <span><i class="sw" style="background:var(--cold)"></i>kalt (vermutet)</span>
+  <span><i class="sw" style="background:var(--hot)"></i>heiß</span>
+  <span><i class="sw" style="background:var(--cold)"></i>kalt</span>
   <span><i class="sw" style="background:#9a9a9a"></i>Rohr 13 / Ölkühler</span>
-  <span><i class="sw" style="background:var(--pump)"></i>Nachlauf</span>
-  <span><i class="sw" style="background:var(--bridge)"></i>Brücke (Umbau)</span>
-  <span><i class="sw" style="background:var(--vent)"></i>Entlüftung / Ausgleich</span>
-  <span><i class="sw" style="background:var(--gone)"></i>entfällt</span>
+  <span><i class="sw" style="background:var(--pump)"></i>Nachlauf (10, 11)</span>
+  <span><i class="sw" style="background:var(--vent)"></i>Ausgleichsbehälter-Leitungen</span>
+  <span><i class="sw" style="background:#666"></i>im Motor</span>
 </div>
 
 <div class="svgwrap">
-<svg id="sv" viewBox="0 0 1000 700" width="100%" style="min-width:820px">
+<svg id="sv" viewBox="0 0 1000 710" width="100%" style="min-width:820px">
   <defs>
     <marker id="arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#8cf"/></marker>
   </defs>
 
-  <!-- 4 heater core -->
-  <g class="part" data-i="heater">
-    <rect x="330" y="60" width="140" height="26" rx="3" fill="#262626" stroke="#777"/>
-    <text x="400" y="78" text-anchor="middle" font-size="12"><tspan class="num">4</tspan> Wärmetauscher Heizung</text>
+  <!-- ===== original only: 4 heater, 3 J338, 1 tank ===== -->
+  <g class="part hide" data-i="heater" data-v="o">
+    <rect x="330" y="70" width="140" height="26" rx="3" fill="#262626" stroke="#777"/>
+    <text x="400" y="88" text-anchor="middle" font-size="12"><tspan class="num">4</tspan> Wärmetauscher Heizung</text>
   </g>
-  <!-- 3 J338 -->
-  <g class="part" data-i="j338">
+  <g class="part hide" data-i="j338" data-v="o">
     <rect x="405" y="190" width="46" height="30" rx="3" fill="#262626" stroke="#777"/>
     <text x="428" y="183" text-anchor="middle" font-size="12"><tspan class="num">3</tspan> J338</text>
   </g>
-  <!-- 1 tank -->
-  <g class="part" data-i="tank">
-    <circle cx="110" cy="285" r="48" fill="#3a1e1e" stroke="#bbb"/>
-    <rect x="100" y="228" width="20" height="10" fill="#bbb"/>
-    <text x="110" y="290" text-anchor="middle" font-size="12"><tspan class="num">1</tspan> Ausgleich</text>
-    <text x="110" y="378" text-anchor="middle" font-size="12" class="hide" data-v="u" fill="#aaa">neu, höchster Punkt</text>
+  <g class="part hide" data-i="tank_o" data-v="o">
+    <circle cx="170" cy="270" r="45" fill="#3a1e1e" stroke="#bbb"/>
+    <text x="170" y="275" text-anchor="middle" font-size="12"><tspan class="num">1</tspan> Ausgleich</text>
   </g>
-  <!-- engine: 15 head, 12 block, 14 pump -->
+  <path class="ln thin hide" data-c="heat" data-v="o" data-m="fahrt warm" stroke="#cfcfcf"
+        d="M360,360 V96 M455,96 V115 H640 V330"/>
+  <path class="ln thin hide" data-c="j338l" data-v="o" data-m="fahrt warm" stroke="#cfcfcf"
+        d="M428,330 V220 M451,205 H640"/>
+  <path class="ln thin hide" data-c="p2o" data-v="o" data-m="fahrt" stroke="var(--hot)"
+        d="M970,615 H990 V240 H380 V205 H175 V226"/>
+  <path class="ln hide" data-c="tankline_o" data-v="o" data-m="fahrt warm nachlauf" data-static="1" stroke="var(--hot)"
+        d="M170,315 V330 H240"/>
+
+  <!-- ===== rebuild only: new tank near radiator ===== -->
+  <g class="part hide" data-i="tank_u" data-v="u">
+    <rect x="880" y="50" width="70" height="60" rx="8" fill="#2b2b2b" stroke="#bbb"/>
+    <rect x="905" y="40" width="20" height="10" fill="#bbb"/>
+    <text x="870" y="74" text-anchor="end" font-size="13">neuer Ausgleichsbehälter</text>
+    <text x="870" y="91" text-anchor="end" font-size="11" fill="#aaa">real oben am Käfig, höchster Punkt</text>
+  </g>
+  <path class="ln thin hide" data-c="vent_u" data-v="u" data-m="fahrt" stroke="var(--vent)"
+        d="M935,576 V562 H985 V25 H940 V40"/>
+  <path class="ln thin hide" data-c="tankline_u" data-v="u" data-m="fahrt warm nachlauf" data-static="1" stroke="var(--vent)"
+        d="M900,110 V160 H240 V330"/>
+  <text x="560" y="152" font-size="12" class="hide" data-v="u" fill="#bbb">Behälter unten → Nippel hinten (ersetzt die alte Behälter-Leitung)</text>
+  <text x="700" y="20" font-size="12" class="hide" data-v="u" fill="#bbb">Entlüftung: Kühlernippel → Behälter oben</text>
+
+  <!-- ===== engine (front view) ===== -->
   <g class="part" data-i="engine">
-    <rect x="300" y="368" width="245" height="37" fill="#2a2a2a" stroke="#555"/>
-    <rect x="300" y="405" width="245" height="85" fill="#222" stroke="#555"/>
-    <text x="350" y="392" font-size="12" fill="#999"><tspan class="num">15</tspan> Zylinderkopf</text>
-    <text x="350" y="480" font-size="12" fill="#999"><tspan class="num">12</tspan> Zylinderblock</text>
+    <rect x="300" y="360" width="260" height="50" fill="#2a2a2a" stroke="#555"/>
+    <rect x="300" y="410" width="260" height="110" fill="#222" stroke="#555"/>
+    <text x="315" y="380" font-size="12" fill="#999"><tspan class="num">15</tspan> Zylinderkopf</text>
+    <text x="315" y="512" font-size="12" fill="#999"><tspan class="num">12</tspan> Zylinderblock</text>
   </g>
   <g class="part" data-i="mpump">
-    <rect x="302" y="418" width="38" height="24" rx="3" fill="#111" stroke="#999"/>
-    <text x="321" y="434" text-anchor="middle" font-size="11"><tspan class="num">14</tspan></text>
-  </g>
-  <!-- 5 housing -->
-  <g class="part" data-i="housing">
-    <rect x="545" y="365" width="55" height="85" fill="#2a2430" stroke="#999"/>
-    <text x="606" y="395" font-size="12"><tspan class="num">5</tspan> Regler-Gehäuse</text>
-    <circle cx="572" cy="430" r="9" fill="#333" stroke="#ddd"/>
-    <text x="572" y="434" text-anchor="middle" font-size="10" font-weight="700">T</text>
+    <rect x="305" y="432" width="44" height="26" rx="3" fill="#111" stroke="#999"/>
+    <text x="327" y="449" text-anchor="middle" font-size="11"><tspan class="num">14</tspan> P</text>
   </g>
   <!-- 9 oil cooler -->
   <g class="part" data-i="oil">
-    <rect x="450" y="505" width="80" height="25" rx="3" fill="#2a2a2a" stroke="#888"/>
-    <text x="490" y="522" text-anchor="middle" font-size="11"><tspan class="num">9</tspan> Ölkühler</text>
+    <rect x="470" y="540" width="80" height="25" rx="3" fill="#2a2a2a" stroke="#888"/>
+    <text x="510" y="557" text-anchor="middle" font-size="11"><tspan class="num">9</tspan> Ölkühler</text>
+  </g>
+  <!-- 5 housing with ports A/B/C -->
+  <g class="part" data-i="housing">
+    <rect x="560" y="360" width="60" height="120" fill="#2a2430" stroke="#999"/>
+    <text x="590" y="400" text-anchor="middle" font-size="13"><tspan class="num">5</tspan></text>
+    <circle cx="606" cy="460" r="9" fill="#333" stroke="#ddd"/>
+    <text x="606" y="464" text-anchor="middle" font-size="10" font-weight="700">T</text>
   </g>
   <!-- 8 radiator -->
   <g class="part" data-i="rad">
-    <rect x="560" y="600" width="300" height="35" fill="#2e2e2e" stroke="#888"/>
-    <rect x="860" y="590" width="90" height="55" rx="4" fill="#262626" stroke="#888"/>
-    <text x="700" y="622" text-anchor="middle" font-size="13"><tspan class="num">8</tspan> Kühler</text>
-    <line x1="620" y1="690" x2="620" y2="646" stroke="#8cf" stroke-width="2" marker-end="url(#arr)"/>
-    <line x1="700" y1="690" x2="700" y2="646" stroke="#8cf" stroke-width="2" marker-end="url(#arr)"/>
-    <line x1="780" y1="690" x2="780" y2="646" stroke="#8cf" stroke-width="2" marker-end="url(#arr)"/>
-    <text x="795" y="680" font-size="11" fill="#8cf" class="hide" data-v="u">Lüfter</text>
-    <line x1="905" y1="590" x2="905" y2="576" stroke="#bbb" stroke-width="4" class="hide" data-v="u"/>
+    <rect x="640" y="600" width="260" height="35" fill="#2e2e2e" stroke="#888"/>
+    <rect x="900" y="590" width="80" height="55" rx="4" fill="#262626" stroke="#888"/>
+    <text x="770" y="622" text-anchor="middle" font-size="13"><tspan class="num">8</tspan> Kühler</text>
+    <line x1="830" y1="695" x2="830" y2="646" stroke="#8cf" stroke-width="2" marker-end="url(#arr)"/>
+    <line x1="870" y1="695" x2="870" y2="646" stroke="#8cf" stroke-width="2" marker-end="url(#arr)"/>
+    <line x1="935" y1="590" x2="935" y2="576" stroke="#bbb" stroke-width="4" class="hide" data-v="u"/>
   </g>
 
-  <!-- 16 left part: tank bottom -> 16 (static fill line) -->
+  <!-- 16: rear nipple ... head branch ... Thermostat-Rohr into port A -->
   <path class="ln" data-c="p16a" data-v="o u" data-m="fahrt warm nachlauf" data-static="1" stroke="var(--hot)"
-        d="M110,333 V340 H490"/>
-  <!-- head -> 16 (branch up) -->
+        d="M240,330 H520"/>
   <path class="ln thin" data-c="branch" data-v="o u" data-m="fahrt warm nachlauf" stroke="var(--hot)"
-        d="M490,368 V340"/>
-  <!-- 16 right part + Thermostat-Rohr into 5 -->
+        d="M520,360 V330"/>
   <path class="ln" data-c="p16b" data-v="o u" data-m="fahrt warm nachlauf" stroke="var(--hot)"
-        d="M490,340 H615 L590,365"/>
+        d="M520,330 H640 L600,360"/>
   <!-- internal: pump 14 -> block -> head -->
   <path class="ln thin" data-c="intern" data-v="o u" data-m="fahrt warm nachlauf" stroke="#666"
-        d="M321,442 V470 H490 V405"/>
-  <!-- 13: housing -> pump 14 -->
+        d="M327,458 V500 H520 V360"/>
+  <!-- 13 diagonal: housing -> pump 14 -->
   <path class="ln" data-c="p13" data-v="o u" data-m="fahrt warm" stroke="#9a9a9a"
-        d="M545,430 H340"/>
-  <!-- warm-up bypass inside 5 -->
+        d="M560,420 L349,445"/>
+  <!-- warm-up bypass inside 5: A -> 13 -->
   <path class="ln thin" data-c="bypass" data-v="o u" data-m="warm" stroke="#e8c547"
-        d="M556,372 V420"/>
-  <!-- 7 Rohrausgang: 5 -> radiator -->
+        d="M585,368 V418"/>
+  <!-- 7: port C (bottom, thermostat) -> radiator -->
   <path class="ln" data-c="p7" data-v="o u" data-m="fahrt nachlauf" stroke="var(--hot)"
-        d="M575,450 V475 H938 V590"/>
-  <!-- 6 Grosses Rohr: radiator -> 5 -->
+        d="M620,460 H740 V500 H965 V590"/>
+  <!-- 6: radiator -> port B (middle) -->
   <path class="ln" data-c="p6" data-v="o u" data-m="fahrt nachlauf" stroke="var(--cold)"
-        d="M872,590 V520 H620 L600,430"/>
-  <!-- oil cooler lines (direction unclear) -->
+        d="M915,590 V550 H700 V420 H620"/>
+  <!-- oil cooler lines (as installed, direction unclear) -->
   <path class="ln thin" data-c="oil1" data-v="o u" data-m="fahrt warm" data-static="1" stroke="#9a9a9a"
-        d="M470,430 V505 M530,518 H600 V665"/>
-  <!-- V51 / e-pump branch: T on 6 -> RV 10 -> pump 11 -> block nipple -->
+        d="M490,442 V540 M550,552 H760 V670"/>
+  <!-- after-run: T on 6 -> RV 10 -> pump 11 -> front nipple under 13 -->
   <path class="ln" data-c="v51" data-v="o u" data-m="nachlauf" stroke="var(--pump)"
-        d="M680,520 V665 H320 V490"/>
-  <!-- 2 original: hose 7 / radiator -> tank top -->
-  <path class="ln thin" data-c="p2o" data-v="o" data-m="fahrt" stroke="var(--hot)"
-        d="M950,612 H965 V250 H380 V206 H140 V247"/>
-  <!-- 2 rebuild: radiator nipple -> new tank top -->
-  <path class="ln thin" data-c="p2u" data-v="u" data-m="fahrt" stroke="var(--vent)"
-        d="M905,576 V560 H965 V250 H380 V206 H140 V247"/>
-  <!-- heater feed / return, J338 (original; greyed in rebuild) -->
-  <path class="ln thin" data-c="heat" data-v="o u" data-m="fahrt warm" data-gone="u" stroke="#cfcfcf"
-        d="M345,368 V86 M455,86 V110 H615 V340"/>
-  <path class="ln thin" data-c="j338l" data-v="o u" data-m="fahrt warm" data-gone="u" stroke="#cfcfcf"
-        d="M428,340 V220 M451,205 H615"/>
-  <!-- rebuild: heater delete bridge -->
-  <path class="ln" data-c="bridge" data-v="u" data-m="fahrt warm" stroke="var(--bridge)"
-        d="M345,368 V150 H615 V340"/>
+        d="M800,550 V670 H440 V485"/>
 
   <!-- markers -->
-  <g class="part" data-i="tee"><circle cx="680" cy="520" r="6" fill="#fff"/></g>
+  <g class="part" data-i="rearnip"><rect x="228" y="322" width="14" height="16" fill="#ff9a3c"/></g>
+  <g class="part" data-i="frontnip"><circle cx="440" cy="485" r="6" fill="var(--pump)"/></g>
+  <g class="part" data-i="tee"><circle cx="800" cy="550" r="6" fill="#fff"/></g>
   <g class="part" data-i="valve">
-    <rect x="540" y="653" width="40" height="24" rx="4" fill="#1d2b28" stroke="var(--pump)"/>
-    <text x="560" y="669" text-anchor="middle" font-size="11">RV</text>
-    <text x="560" y="695" text-anchor="middle" font-size="11"><tspan class="num">10</tspan> Rückschlagventil</text>
+    <rect x="680" y="658" width="40" height="24" rx="4" fill="#1d2b28" stroke="var(--pump)"/>
+    <text x="700" y="674" text-anchor="middle" font-size="11">RV</text>
+    <text x="700" y="700" text-anchor="middle" font-size="11"><tspan class="num">10</tspan> Rückschlagventil</text>
   </g>
   <g class="part" data-i="epump">
-    <circle cx="440" cy="665" r="16" fill="#1d2b28" stroke="var(--pump)"/>
-    <text x="440" y="669" text-anchor="middle" font-size="10">P</text>
-    <text x="440" y="695" text-anchor="middle" font-size="11"><tspan class="num">11</tspan> <tspan data-v="o" class="hide">V51</tspan><tspan data-v="u" class="hide">E-Pumpe</tspan></text>
-  </g>
-  <g class="part" data-i="nipple"><circle cx="320" cy="490" r="6" fill="var(--pump)"/></g>
-  <g class="part hide" data-i="caps" data-v="u">
-    <text x="428" y="333" font-size="14" fill="#e8c547" text-anchor="middle">✕</text>
-    <text x="200" y="232" class="tag">J338-Abgänge: zu oder in die Brücke?</text>
+    <circle cx="560" cy="670" r="16" fill="#1d2b28" stroke="var(--pump)"/>
+    <text x="560" y="674" text-anchor="middle" font-size="10">P</text>
+    <text x="560" y="700" text-anchor="middle" font-size="11"><tspan class="num">11</tspan> <tspan data-v="o" class="hide">V51</tspan><tspan data-v="u" class="hide">E-Pumpe</tspan></text>
   </g>
 
-  <!-- line labels -->
-  <text x="250" y="357" font-size="12"><tspan class="num">16</tspan> Rohr unten</text>
-  <text x="352" y="426" font-size="12"><tspan class="num">13</tspan> Rohr <tspan class="hide tag" data-v="u">= langes Plastikrohr</tspan></text>
-  <text x="760" y="469" font-size="12"><tspan class="num">7</tspan> Schlauch oben</text>
-  <text x="760" y="514" font-size="12"><tspan class="num">6</tspan> Schlauch unten</text>
-  <text x="700" y="244" font-size="12"><tspan class="num">2</tspan> Rohr oben <tspan data-v="u" class="hide">(Entlüftung vom Kühlernippel)</tspan></text>
-  <text x="450" y="144" font-size="12" class="hide" data-v="u" fill="#ff9a3c">Brücke statt Heizung</text>
-
-  <!-- user's real ports (rebuild only) -->
-  <g class="hide" data-v="u">
-    <text x="584" y="467" class="tag">Silikonschlauch?</text>
-    <text x="608" y="540" class="tag">Rohr „←“?</text>
-    <text x="622" y="300" class="tag">kleiner Stutzen „↑“?</text>
-    <text x="150" y="328" class="tag">Flansch hinten „&lt;“? (Rohr 16 vom Behälter?)</text>
-    <text x="200" y="510" class="tag" style="fill:#7fe0c8 !important">Nippel Mitte Block</text>
-  </g>
+  <!-- labels -->
+  <text x="150" y="352" font-size="12" fill="#ff9a3c">Nippel hinten (AGR-Seite)</text>
+  <text x="380" y="350" font-size="12"><tspan class="num">16</tspan> Rohr unten</text>
+  <text x="360" y="428" font-size="12" transform="rotate(-7 360 428)"><tspan class="num">13</tspan> Rohr, schräg</text>
+  <text x="432" y="489" text-anchor="end" font-size="12" fill="#7fe0c8">Nippel Front (unter 13)</text>
+  <text x="628" y="378" font-size="12"><tspan class="num">A</tspan> oben: Thermostat-Rohr</text>
+  <text x="708" y="414" font-size="12"><tspan class="num">B</tspan> Mitte: Großes Rohr ← 6</text>
+  <text x="750" y="466" font-size="12"><tspan class="num">C</tspan> unten: Rohrausgang → 7 (Thermostat)</text>
+  <text x="800" y="492" font-size="12"><tspan class="num">7</tspan> Schlauch oben</text>
+  <text x="815" y="543" font-size="12"><tspan class="num">6</tspan> Schlauch unten</text>
+  <text x="700" y="232" font-size="12" class="hide" data-v="o"><tspan class="num">2</tspan> Rohr oben</text>
 </svg>
 </div>
 
 <div id="info">Element anklicken.</div>
 
-<h2>Plan-Anschluss ↔ dein Motor</h2>
+<h2>Anschlüsse am Motor</h2>
 <table>
-  <tr><th>VW-Plan</th><th>Bei dir (Foto/Markierung)</th><th>Umbau</th></tr>
-  <tr><td>13 Rohr Pumpe ↔ Regler-Gehäuse</td><td>langes Plastikrohr vorn, über dem Nippel</td><td>bleibt</td></tr>
-  <tr><td>7 Rohrausgang (5 → Kühler)</td><td class="hyp">Silikonschlauch, groß</td><td>zum Kühleranschluss neben dem Nippel</td></tr>
-  <tr><td>6 Großes Rohr (Kühler → 5)</td><td class="hyp">Rohr „←“</td><td>vom zweiten Kühleranschluss, T-Stück für E-Pumpe</td></tr>
-  <tr><td>Heizungs-Rücklauf in Rohr 16 / Thermostat-Rohr</td><td class="hyp">kleiner Stutzen „↑“</td><td>Brücke vom Heizungs-Abgang</td></tr>
-  <tr><td>16 Rohr unten, Anschluss Ausgleichsbehälter</td><td class="hyp">Flansch hinten „&lt;“ (Pfeil = Eingang passt)</td><td>Leitung vom Boden des neuen Behälters</td></tr>
-  <tr><td>Heizungs-Abgang am Kopf</td><td class="hyp">noch nicht gefunden</td><td>Brücke zum Rücklauf</td></tr>
-  <tr><td>12 Einspeisung V51 in den Block</td><td>Nippel Mitte Block</td><td>E-Pumpe 11 + Rückschlagventil 10</td></tr>
-  <tr><td>2 Rohr oben (Entlüftung zum Behälter)</td><td>neuer Nippel oben am Kühler</td><td>zum neuen Behälter oben</td></tr>
-  <tr><td>3 J338, 4 Heizung</td><td>nicht vorhanden</td><td>entfällt, Anschlüsse brücken oder verschließen</td></tr>
-  <tr><td>9 Ölkühler</td><td>angeschlossen</td><td>bleibt</td></tr>
+  <tr><th>Anschluss</th><th>VW-Plan</th><th>Umbau</th></tr>
+  <tr><td><b>5 A</b> – oben</td><td>Thermostat-Rohr, kommt von Rohr 16 (Kopf)</td><td>bleibt mit 16 verbunden <span class="hyp">(ist er bei dir offen?)</span></td></tr>
+  <tr><td><b>5 B</b> – Mitte</td><td>Großes Rohr ← Schlauch 6 vom Kühler (Pfeil im Plan: Richtung Motor)</td><td>vom Kühler, kalt. T-Stück für die Nachlaufpumpe</td></tr>
+  <tr><td><b>5 C</b> – unten, mit Thermostat</td><td>Rohrausgang → Schlauch 7 zum Kühler</td><td>zum Kühler, heiß, an den Anschluss neben dem Nippel</td></tr>
+  <tr><td>Nippel hinten (AGR-Seite)</td><td>Leitung vom Boden des Ausgleichsbehälters in Rohr 16</td><td>Leitung vom Boden des <b>neuen</b> Behälters</td></tr>
+  <tr><td>Nippel Front unter Rohr 13</td><td>Einspeisung V51 in den Block (über 10, 11)</td><td>E-Pumpe + Rückschlagventil, Saugseite am Schlauch 6</td></tr>
+  <tr><td>Nippel oben am Kühler (neu)</td><td>entspricht Rohr 2 (Entlüftung zum Behälter)</td><td>zum neuen Behälter oben</td></tr>
+  <tr><td>9 Ölkühler</td><td>an Rohr 13</td><td>bleibt wie angeschlossen</td></tr>
+  <tr><td>3 J338, 4 Heizung</td><td>vorhanden</td><td>nicht vorhanden</td></tr>
 </table>
 
-<div class="warn"><b>Offen:</b> Ist der Flansch hinten „&lt;“ der Behälter-Anschluss von Rohr 16, dann gehört die Leitung vom Boden des neuen Ausgleichsbehälters dorthin (statt T-Stück), und die Brücke braucht einen anderen Heizungs-Abgang. Prüfen: in den Flansch blasen – kommt die Luft oben am Kopf/Rohr 16 bzw. am Regler-Gehäuse raus?</div>
+<div class="warn"><b>Offen:</b> Welcher deiner drei Schläuche am Gehäuse 5 ist A, B, C (Silikonschlauch / „←“ / klein mit Thermostat)? Laut dir ist C der unterste mit Thermostat – dann ist C nach VW-Plan der <b>Ausgang</b> zum Kühler.</div>
 <div class="warn"><b>Befüllen:</b> langsam über den Ausgleichsbehälter, Sensorkappen kurz lockern bis Wasser kommt, warmlaufen bis Thermostat öffnet, nachfüllen. E-Pumpe unterhalb des Wasserspiegels montieren.</div>
 
 <script>
 const info = {
-  heater: '4 Wärmetauscher Heizung: im Umbau nicht vorhanden. Vorlauf (vom Kopf, Pfeil ↑) und Rücklauf (in Rohr 16 / Thermostat-Rohr, Pfeil ↓) werden gebrückt.',
-  j338: '3 Drosselklappensteuereinheit J338: entfällt (K100-Drosselklappen). Abgänge verschließen oder in die Brücke einbinden.',
-  tank: '1 Ausgleichsbehälter: original unten an Rohr 16, oben über Rohr 2 entlüftet. Im Umbau neuer Behälter, muss höchster Punkt sein, Druckdeckel.',
-  engine: '15 Zylinderkopf / 12 Zylinderblock. Pumpe 14 drückt in den Block, Wasser steigt in den Kopf und geht über Rohr 16 / Thermostat-Rohr ins Regler-Gehäuse 5.',
-  mpump: '14 mechanische Kühlmittelpumpe, saugt über Rohr 13 aus dem Regler-Gehäuse.',
-  housing: '5 Kühlmittelregler-Gehäuse mit Thermostat. Heiß kommt über das Thermostat-Rohr, geht über 7 zum Kühler. Kalt kommt über 6 (Großes Rohr) und geht über 13 zur Pumpe.',
-  oil: '9 Ölkühler: angeschlossen, bleibt. Flussrichtung im Plan nicht eindeutig.',
-  rad: '8 Kühler: Anschlüsse 6 und 7 auf einer Seite. Im Umbau liegt er über dem Motor, mit neuem Entlüftungsnippel oben. Lüfter saugt nach oben, damit keine heiße Luft in die Ansaugtrichter gedrückt wird.',
-  p16a: '16 Kühlmittelrohr unten, linker Teil: Verbindung vom Boden des Ausgleichsbehälters. Hypothese: Dein Flansch hinten „<“ ist dieser Anschluss.',
+  heater: '4 Wärmetauscher Heizung (nur VW-Original, bei dir nicht vorhanden).',
+  j338: '3 Drosselklappensteuereinheit J338 (nur VW-Original, bei dir K100-Drosselklappen).',
+  tank_o: '1 Ausgleichsbehälter im VW-Original: unten an Rohr 16 (dein Nippel hinten), oben Entlüftung über Rohr 2.',
+  tank_u: 'Neuer Ausgleichsbehälter: höchster Punkt, Druckdeckel. Oben Entlüftung vom Kühlernippel, unten Leitung zum Nippel hinten – genau wie der alte Behälter.',
+  heat: 'Heizungsleitungen (nur VW-Original).',
+  j338l: 'J338-Leitungen (nur VW-Original).',
+  p2o: '2 Kühlmittelrohr oben: Entlüftung vom Kühler zum Behälter.',
+  tankline_o: 'Behälter unten → Rohr 16 (VW-Original).',
+  vent_u: 'Entlüftung: Nippel oben am Kühler → neuer Behälter oben. Stetig steigend verlegen.',
+  tankline_u: 'Neuer Behälter unten → Nippel hinten. Ersetzt die Leitung vom alten Behälter in Rohr 16. Fließt kaum, hält nur den Kreis gefüllt.',
+  engine: '15 Zylinderkopf / 12 Zylinderblock, von vorn gesehen.',
+  mpump: '14 mechanische Kühlmittelpumpe am Anfang von Rohr 13. Saugt aus dem Gehäuse 5 und drückt in den Block.',
+  oil: '9 Ölkühler: an Rohr 13, bleibt wie angeschlossen.',
+  housing: '5 Kühlmittelregler-Gehäuse. A oben: heiß vom Kopf (Rohr 16). B Mitte: kalt vom Kühler (6). C unten mit Thermostat: zum Kühler (7). Links geht Rohr 13 zur Pumpe. Thermostat zu: Wasser A → 13 → Pumpe (Warmlauf). Offen: A → C → Kühler → B → 13.',
+  rad: '8 Kühler. Real liegend über dem Motor, Anschlüsse auf einer Seite, neuer Entlüftungsnippel oben.',
+  p16a: 'Rohr 16, Teil zum Nippel hinten: hier hing der Ausgleichsbehälter. Bei dir: Leitung vom neuen Behälter.',
   branch: 'Abgang vom Zylinderkopf in Rohr 16.',
-  p16b: '16 rechter Teil + Thermostat-Rohr ins Regler-Gehäuse 5.',
+  p16b: 'Rohr 16 vorn + Thermostat-Rohr in Anschluss A.',
   intern: 'Im Motor: Pumpe 14 → Block → Kopf.',
-  p13: '13 Kühlmittelrohr zwischen Pumpe und Regler-Gehäuse – dein langes Plastikrohr vorn über dem Nippel.',
-  bypass: 'Warmlauf: Thermostat zu, Wasser geht im Gehäuse ohne Kühler zurück zur Pumpe.',
-  p7: '7 Kühlmittelschlauch oben (Rohrausgang): Gehäuse 5 → Kühler. Bei dir vermutlich der Silikonschlauch.',
-  p6: '6 Kühlmittelschlauch unten (Großes Rohr): Kühler → Gehäuse 5. Bei dir vermutlich Rohr „←“.',
-  oil1: 'Ölkühler-Anschlüsse wie vorhanden.',
-  v51: 'Nachlauf: T-Stück im Schlauch 6 → Rückschlagventil 10 → Pumpe 11 → Nippel Mitte Block (12).',
-  p2o: '2 Kühlmittelrohr oben (original): Entlüftung vom Kühler-/Schlauch-7-Bereich zum Behälter oben.',
-  p2u: '2 im Umbau: vom neuen Nippel oben am Kühler zum neuen Behälter oben. Stetig steigend verlegen.',
-  heat: 'Heizungs-Vorlauf (vom Kopf, ↑) und Rücklauf (↓ in Rohr 16). Im Umbau entfällt der Wärmetauscher.',
-  j338l: 'J338-Leitungen: entfallen im Umbau.',
-  bridge: 'Heater Delete: Heizungs-Abgang am Kopf direkt mit dem Heizungs-Rücklauf verbinden. Hält den Durchfluss wie mit Heizung. Welche Stutzen bei dir das sind: Hypothese.',
-  tee: 'T-Stück im Schlauch 6 für die Nachlaufpumpe.',
-  valve: '10 Rückschlagventil: Durchlass Richtung Block, verhindert Rückfluss durch die stehende Pumpe.',
-  epump: '11 Nachlaufpumpe (original V51, bei dir E-Pumpe). Tief montieren, unter dem Wasserspiegel.',
-  nipple: 'Nippel Mitte Block (unter Rohr 13): Einspeisung der Nachlaufpumpe in den Zylinderblock.',
-  caps: 'J338-Abgänge im Umbau: verschließen oder in die Brücke einbinden – offen.'
+  p13: '13 Kühlmittelrohr zwischen Gehäuse 5 und Pumpe 14 – das schräge Rohr vorn.',
+  bypass: 'Warmlauf: Thermostat zu, Wasser geht von A direkt über 13 zur Pumpe, ohne Kühler.',
+  p7: '7 Kühlmittelschlauch oben: Anschluss C (unten, Thermostat) → Kühler. Heiß.',
+  p6: '6 Kühlmittelschlauch unten: Kühler → Anschluss B (Mitte). Kalt. Pfeil im VW-Plan zeigt Richtung Motor.',
+  oil1: 'Ölkühler-Leitungen wie vorhanden.',
+  v51: 'Nachlauf: T-Stück in Schlauch 6 → Rückschlagventil 10 → Pumpe 11 → Nippel Front unter Rohr 13.',
+  rearnip: 'Nippel hinten (AGR-Seite): im VW-Plan geht hier die Leitung vom Boden des Ausgleichsbehälters in Rohr 16. Bei dir kommt die Leitung vom neuen Behälter dran.',
+  frontnip: 'Nippel Front unter Rohr 13: Einspeisung der Nachlaufpumpe in den Block.',
+  tee: 'T-Stück in Schlauch 6 (kalt) für die Saugseite der Nachlaufpumpe.',
+  valve: '10 Rückschlagventil: Durchlass Richtung Block.',
+  epump: '11 Nachlaufpumpe (VW: V51). Tief montieren, unter dem Wasserspiegel.'
 };
 const sv = document.getElementById('sv'), box = document.getElementById('info');
 let view = location.hash === '#o' ? 'o' : 'u', mode = 'fahrt';
@@ -264,14 +255,10 @@ function render() {
   document.querySelectorAll('#modes button').forEach(b => b.classList.toggle('on', b.dataset.mode === mode));
   document.querySelectorAll('#sv [data-v]').forEach(el => el.classList.toggle('hide', !el.dataset.v.split(' ').includes(view)));
   document.querySelectorAll('#sv .ln').forEach(p => {
-    const gone = p.dataset.gone === view;
-    const on = !gone && p.dataset.m.split(' ').includes(mode);
-    p.classList.toggle('gone', gone);
-    p.classList.toggle('off', !on && !gone);
+    const on = p.dataset.m.split(' ').includes(mode);
+    p.classList.toggle('off', !on);
     p.classList.toggle('flow', on && !p.dataset.static);
   });
-  document.querySelector('#sv [data-i=heater] rect').setAttribute('stroke-dasharray', view === 'u' ? '4 4' : '');
-  document.querySelector('#sv [data-i=j338] rect').setAttribute('stroke-dasharray', view === 'u' ? '4 4' : '');
 }
 document.querySelectorAll('#views button').forEach(b => b.onclick = () => { view = b.dataset.view; render(); });
 document.querySelectorAll('#modes button').forEach(b => b.onclick = () => { mode = b.dataset.mode; render(); });
