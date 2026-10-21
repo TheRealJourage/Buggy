@@ -104,11 +104,11 @@
   </g>
   <path class="ln thin hide" data-c="vent_u" data-v="u" data-m="fahrt" stroke="var(--vent)"
         d="M935,576 V562 H985 V25 H940 V40"/>
-  <text x="560" y="20" font-size="12" class="hide" data-v="u" fill="#bbb">einzige Behälter-Leitung: Kühlernippel → Behälter</text>
+  <text x="560" y="20" font-size="12" class="hide" data-v="u" fill="#bbb">L4 Entlüftung: K9 (8,8) → K10 (9,9)</text>
   <!-- heater delete loop: rear nipple -> port B -->
   <path class="ln hide" data-c="loop_u" data-v="u" data-m="fahrt warm nachlauf" stroke="var(--bridge)"
         d="M240,345 V300 H660 V420 H620"/>
-  <text x="290" y="292" font-size="12" class="hide" data-v="u" fill="#ff9a3c">Heizung überbrückt: Nippel hinten → B</text>
+  <text x="290" y="292" font-size="12" class="hide" data-v="u" fill="#ff9a3c">L3 Heizungs-Schleife: K4 → K3</text>
 
   <!-- ===== engine (front view) ===== -->
   <g class="part" data-i="engine">
@@ -178,35 +178,57 @@
   </g>
 
   <!-- labels -->
-  <text x="100" y="376" font-size="12" fill="#ff9a3c">Nippel hinten = zur Heizung</text>
+  <text x="100" y="376" font-size="12" fill="#ff9a3c"><tspan class="num">K4</tspan> Nippel hinten 19,9 (Heizung)</text>
   <text x="360" y="428" font-size="12" transform="rotate(-7 360 428)"><tspan class="num">13</tspan> Rohr, schräg</text>
-  <text x="432" y="489" text-anchor="end" font-size="12" fill="#7fe0c8">Nippel Front (unter 13)</text>
-  <text x="628" y="372" font-size="12"><tspan class="num">A</tspan> oben → Kühler oben</text>
-  <text x="628" y="440" font-size="12"><tspan class="num">B</tspan> Heizungsrücklauf</text>
-  <text x="628" y="497" font-size="12"><tspan class="num">C</tspan> Thermostat ← Kühler</text>
+  <text x="432" y="489" text-anchor="end" font-size="12" fill="#7fe0c8"><tspan class="num">K5</tspan> Nippel Front (unter 13)</text>
+  <text x="628" y="372" font-size="12"><tspan class="num">K1</tspan> Silikonschlauch → Kühler</text>
+  <text x="628" y="440" font-size="12"><tspan class="num">K3</tspan> 25,3 Heizungsrücklauf</text>
+  <text x="628" y="497" font-size="12"><tspan class="num">K2</tspan> 32,1 Thermostat</text>
   <text x="800" y="492" font-size="12"><tspan class="num">7</tspan> Schlauch oben</text>
   <text x="815" y="543" font-size="12"><tspan class="num">6</tspan> Schlauch unten</text>
   <text x="130" y="318" font-size="12" class="hide" data-v="o"><tspan class="num">16</tspan> Rohr unten</text>
   <text x="700" y="152" font-size="12" class="hide" data-v="o"><tspan class="num">2</tspan> Rohr oben</text>
+  <g class="hide" data-v="u">
+    <text x="985" y="585" text-anchor="end" font-size="11"><tspan class="num">K8</tspan> <tspan class="num">K9</tspan> <tspan class="num">K7</tspan></text>
+    <text x="960" y="125" font-size="11"><tspan class="num">K10</tspan></text>
+    <text x="808" y="565" font-size="11"><tspan class="num">T1</tspan></text>
+    <text x="640" y="652" font-size="11"><tspan class="num">K13/K14</tspan></text>
+    <text x="520" y="652" font-size="11"><tspan class="num">K11/K12</tspan></text>
+  </g>
 </svg>
 </div>
 
 <div id="info">Element anklicken.</div>
 
-<h2>Anschlüsse am Motor</h2>
+<h2>Anschluss-Nummern (K…) und Leitungen (L…)</h2>
+<p class="hint">Stand 2026-10-21. Ø = Außendurchmesser des Stutzens, gemessen mit Messschieber. Gelb = Zuordnung noch bestätigen.</p>
 <table>
-  <tr><th>Anschluss</th><th>Laut VW-Handbuch</th><th>Umbau</th></tr>
-  <tr><td><b>5 C</b> – unten, Thermostat</td><td>„From bottom of radiator“ – Thermostat sitzt im Rücklauf (sicher)</td><td>vom Kühler, kalt. T-Stück für die Nachlaufpumpe</td></tr>
-  <tr><td><b>5 A</b> – oben, groß</td><td>„To top of radiator“</td><td class="hyp">Silikonschlauch → Kühleranschluss neben dem Nippel</td></tr>
-  <tr><td><b>5 B</b> – Mitte</td><td>Heizungsrücklauf, Rohr 16 vom Behälter mündet hier ein</td><td class="hyp">Rohr „←“ ← Schleife vom Nippel hinten</td></tr>
-  <tr><td>Nippel hinten (AGR-Seite)</td><td>„To heat exchanger“ – Heizungsvorlauf, <b>Ausgang</b>, J338 hängt mit dran</td><td>Schleife zu B (Heizung überbrückt)</td></tr>
-  <tr><td>Nippel Front unter Rohr 13</td><td>Einspeisung V51 in den Block (über 10, 11)</td><td>E-Pumpe + Rückschlagventil, Saugseite an Schlauch 6</td></tr>
-  <tr><td>Nippel oben am Kühler (neu)</td><td>entspricht Rohr 2 (Entlüftung zum Behälter)</td><td>zum neuen Behälter oben</td></tr>
-  <tr><td>Rohr 16 (Behälter unten → Heizungsrücklauf)</td><td>legt den Druck am Pumpeneingang fest, kaum Durchfluss</td><td>entfällt – Behälter hat nur einen Anschluss, hängt nur am Kühler (Entscheidung 2026-10-19)</td></tr>
-  <tr><td>Sensor + Stopfen am Gehäuse 5</td><td>Teile 9 und 10 in N19-0225</td><td>Kühlmittelsensor Speeduino / Reserve</td></tr>
+  <tr><th>Nr.</th><th>Anschluss</th><th>Ø mm</th><th>Funktion</th></tr>
+  <tr><td><b>K1</b></td><td>Regler-Gehäuse, oranger Silikonschlauch (Reduzierstück)</td><td>31,4 (Schlauchende)</td><td>heiß → Kühler („To top of radiator“)</td></tr>
+  <tr><td><b>K2</b></td><td class="hyp">Regler-Gehäuse, schwarzer Stutzen neben K1</td><td>32,1</td><td>Thermostat, kalt ← Kühler</td></tr>
+  <tr><td><b>K3</b></td><td class="hyp">Regler-Gehäuse, Stutzen Rohr „←“, Öffnung oben</td><td>25,3</td><td>Heizungsrücklauf (Eingang)</td></tr>
+  <tr><td><b>K4</b></td><td>Alu-Nippel hinten am Kopf, neben Krümmer</td><td>19,9</td><td>Heizungsvorlauf (Ausgang)</td></tr>
+  <tr><td><b>K5</b></td><td>Nippel Front am Block unter Rohr 13</td><td>offen</td><td>Einspeisung Nachlaufpumpe</td></tr>
+  <tr><td><b>K6</b></td><td>Sensoranschluss am Regler-Gehäuse</td><td>–</td><td>Kühlmittelsensor Speeduino (verbaut)</td></tr>
+  <tr><td><b>K7</b></td><td>Kühleranschluss neben dem Entlüftungsnippel</td><td>32 (Hersteller)</td><td>Eingang heiß</td></tr>
+  <tr><td><b>K8</b></td><td>zweiter Kühleranschluss</td><td>32 (Hersteller)</td><td>Ausgang kalt</td></tr>
+  <tr><td><b>K9</b></td><td class="hyp">Entlüftungsnippel am Kühler</td><td>8,8</td><td>Entlüftung</td></tr>
+  <tr><td><b>K10</b></td><td class="hyp">Nippel am Ausgleichsbehälter</td><td>9,9</td><td>einziger Behälter-Anschluss</td></tr>
+  <tr><td><b>K11 / K12</b></td><td>Nachlaufpumpe V51 Saug- / Druckseite</td><td>offen</td><td>Nachlauf</td></tr>
+  <tr><td><b>K13 / K14</b></td><td>Rückschlagventil Ein / Aus</td><td>offen</td><td>Durchlass Richtung Block</td></tr>
+  <tr><td><b>T1</b></td><td>T-Stück in L2</td><td>32 / ?</td><td>Abzweig Nachlauf</td></tr>
+  <tr><td>–</td><td>Steckkupplung Topran 111 233 am Kühler, Schlauchstutzen</td><td>32,2</td><td>eine verbaut, zweite fehlt (für K7 bzw. K8)</td></tr>
+</table>
+<table>
+  <tr><th>Leitung</th><th>von → nach</th><th>Schlauch</th></tr>
+  <tr><td><b>L1</b></td><td>K1 → K7 (heiß)</td><td>32 × 40 mm, vorhanden</td></tr>
+  <tr><td><b>L2</b></td><td>K8 → T1 → K2 (kalt)</td><td>32 × 40 mm, vorhanden</td></tr>
+  <tr><td><b>L3</b></td><td>K4 → K3 (Heizungs-Schleife)</td><td class="hyp">19 mm Drahtspirale + Reduzierung auf 25 mm</td></tr>
+  <tr><td><b>L4</b></td><td>K9 → K10 (Entlüftung)</td><td class="hyp">Silikon 9 mm innen</td></tr>
+  <tr><td><b>L5</b></td><td>T1 → K13 → K14 → K11 → K12 → K5 (Nachlauf)</td><td>Ø offen</td></tr>
 </table>
 
-<div class="warn"><b>Noch zu bestätigen:</b> A und B sind aus Lage und deinen Pfeilen abgeleitet, nicht gemessen. A muss groß sein (voller Kühlerstrom), B ist meist kleiner. C (Thermostat) ist laut Handbuch sicher der Eingang vom Kühler.</div>
+<div class="warn"><b>Noch zu bestätigen:</b> K2 (32,1) = Thermostat und K3 (25,3) = Rohr „←“ sind aus Größe und Lage abgeleitet. Der Thermostat-Anschluss muss der große sein (voller Kühlerstrom). K9/K10 aus den Fotos zugeordnet.</div>
 <div class="warn"><b>Befüllen:</b> langsam über den Ausgleichsbehälter, Schlauch am Nippel hinten und Stopfen am Gehäuse kurz lösen bis Wasser kommt, warmlaufen bis Thermostat öffnet (ca. 80 °C, voll offen ca. 105 °C), nachfüllen. E-Pumpe unterhalb des Wasserspiegels montieren.</div>
 
 <script>
