@@ -43,11 +43,11 @@ const PANELS = [
 
 const WHEEL = [
   { id: 'hupe', x: 340, y: 300, r: 36, fill: '#444', text: 'HUPE', fn: 'Hupe', info: 'Hupe (GP8, Bit 2). Festgelegt.' },
-  { id: 'gelb', x: 248, y: 240, r: 16, fill: '#e6c200', fn: 'offen', sub: 'Vorschlag', info: 'Gelb (GP11): offen. Vorschläge aus der Diskussion: PTT, Megafon, Audio-Modus. Positionen am Lenkrad prüft der User.' },
-  { id: 'blau', x: 248, y: 296, r: 16, fill: '#1e64d8', fn: 'offen', sub: 'Vorschlag', info: 'Blau (GP10): offen (PTT / Megafon / Audio-Modus).' },
+  { id: 'gelb', x: 278, y: 350, r: 16, fill: '#e6c200', fn: 'offen', below: true, info: 'Gelb (GP11): liegt weit innen, beim Fahren schwer erreichbar → für seltene Funktionen. Offen.' },
+  { id: 'blau', x: 236, y: 262, r: 16, fill: '#1e64d8', fn: 'PTT Funk', info: 'Blau (GP10): außen, beim Fahren gut erreichbar. Tendenz: Push-to-Talk Funk (CB/PMR).' },
   { id: 'minus', paddle: 'L', fn: 'runter', info: 'Große Schaltwippe links = Minus (GP12): runterschalten 5→…→1→R. Festgelegt.' },
-  { id: 'gruen', x: 432, y: 240, r: 16, fill: '#1faa3a', fn: 'offen', sub: 'Vorschlag', info: 'Grün (GP5): offen (PTT / Megafon / Audio-Modus).' },
-  { id: 'rot', x: 432, y: 296, r: 16, fill: '#d42020', fn: 'offen', sub: 'Vorschlag', info: 'Rot (GP6): offen (PTT / Megafon / Audio-Modus).' },
+  { id: 'gruen', x: 444, y: 262, r: 16, fill: '#1faa3a', fn: 'offen (PTT?)', info: 'Grün (GP5): außen, beim Fahren gut erreichbar. Wahrscheinlich ein zweites Push-to-Talk, Ziel noch offen.' },
+  { id: 'rot', x: 402, y: 350, r: 16, fill: '#d42020', fn: 'offen', below: true, info: 'Rot (GP6): liegt weit innen, beim Fahren schwer erreichbar → für seltene Funktionen. Offen.' },
   { id: 'plus', paddle: 'R', fn: 'hoch', info: 'Große Schaltwippe rechts = Plus (GP7): hochschalten R→1→…→5. Festgelegt.' },
   { id: 'schwarz', x: 340, y: 392, r: 16, fill: '#111', text: 'N', fn: 'Neutral', info: 'Schwarz (GP9), unten mittig: Gang N. Festgelegt 2026-10-22. Position am Lenkrad bestätigt der User noch.' },
 ];
@@ -376,7 +376,7 @@ function buildWheel() {
       <circle cx="${b.x}" cy="${b.y}" r="${b.r}" fill="${b.fill}"/>
       <ellipse cx="${b.x - b.r * 0.3}" cy="${b.y - b.r * 0.4}" rx="${b.r * 0.45}" ry="${b.r * 0.22}" fill="#ffffff35"/>
       ${b.text ? `<text x="${b.x}" y="${b.y + (b.r > 20 ? 5 : 6)}" text-anchor="middle" font-size="${b.r > 20 ? 14 : 17}" font-weight="700" fill="#fff">${b.text}</text>` : ''}
-      ${b.id !== 'hupe' ? `<text x="${b.x + (b.x < cx ? -24 : b.x > cx ? 24 : 0)}" y="${b.y + (b.x === cx ? 32 : 4)}" text-anchor="${b.x < cx ? 'end' : b.x > cx ? 'start' : 'middle'}" font-size="10.5" fill="${b.fn === 'offen' ? '#e8c547' : '#ccc'}">${b.fn}</text>` : ''}
+      ${b.id !== 'hupe' ? (() => { const c = b.below || b.x === cx; return `<text x="${c ? b.x : b.x + (b.x < cx ? -24 : 24)}" y="${b.y + (c ? 32 : 4)}" text-anchor="${c ? 'middle' : b.x < cx ? 'end' : 'start'}" font-size="10.5" fill="${b.fn.startsWith('offen') ? '#e8c547' : '#ccc'}">${b.fn}</text>`; })() : ''}
     </g>`;
   }
   for (const p of WHEEL_POTS) {
@@ -444,7 +444,7 @@ function wheelPress(b) {
     log(`Gang ${s.gear}`);
   } else if (b.id === 'schwarz') { s.gear = 'N'; log('Gang N'); }
   else if (b.id === 'hupe') log('HUPE');
-  else log(`Lenkrad ${b.id}: noch unbelegt`);
+  else log(b.fn.startsWith('offen') ? `Lenkrad ${b.id}: noch unbelegt` : b.fn);
   update();
 }
 
