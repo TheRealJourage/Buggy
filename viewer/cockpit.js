@@ -8,8 +8,8 @@ const ILLEGAL = 'Kann im Straßenverkehr illegal sein → beleuchteter Schalter 
 const PANELS = [
   { id: 'licht', title: 'Lichtpanel', x: 20, y: 190, cols: 3, items: [
     { id: 'licht', type: 'B', label: 'Licht', pos: ['AUS', 'STAND', 'ABBLEND'], info: 'Aus / Standlicht / Abblendlicht inkl. Rücklicht + Kennzeichen. Standlicht-Stellung wird beim Abstellen im Parkmodus gehalten.' },
-    { id: 'nebel', type: 'B', label: 'Nebel', pos: ['AUS', 'VORN', 'V+SCHL'], info: 'Aus / Nebelscheinwerfer vorn / vorn + Nebelschlussleuchte. Wirkt nur mit Stand- oder Abblendlicht. Beleuchtung der Nebelschluss-Stellung: Idee vom User, noch offen.' },
-    { id: 'zusatz', type: 'C', label: 'Zusatz-Fern', sub: 'Freigabe', pos: ['AUS', 'FREI'], info: 'Freigabe Zusatz-Fernlicht. Brennt nur zusammen mit dem Fernlicht (Lichthebel). Typ C, unbeleuchtet.' },
+    { id: 'nebel', type: 'B', cover: true, label: 'Nebel', pos: ['AUS', 'VORN', 'V+SCHL'], info: 'Aus / Nebelscheinwerfer vorn / vorn + Nebelschlussleuchte. Wirkt nur mit Stand- oder Abblendlicht. Beleuchtung der Nebelschluss-Stellung: Idee vom User, noch offen.' },
+    { id: 'zusatz', type: 'C', cover: true, label: 'Zusatz-Fern', sub: 'Freigabe', pos: ['AUS', 'FREI'], info: 'Freigabe Zusatz-Fernlicht. Brennt nur zusammen mit dem Fernlicht (Lichthebel). Typ C, unbeleuchtet.' },
     { id: 'offM', type: 'A', cover: true, led: RED, label: 'Offroad', sub: 'Mitte', pos: ['AUS', 'AN'], illegal: true, info: 'Offroad-Scheinwerfer Mitte (2,85 A, Last-Ebene). ' + ILLEGAL },
     { id: 'offH', type: 'A', cover: true, led: RED, label: 'Offroad', sub: 'Heck', pos: ['AUS', 'AN'], illegal: true, info: 'Offroad Heck (2,70 A, DT-Pin 7). ' + ILLEGAL },
     { id: 'offV', type: 'reserve', label: 'Offroad vorn', sub: 'Reserve', info: 'Offroad vorn ist noch nicht vorhanden. Platz für einen weiteren Typ A mit Kappe.' },
