@@ -161,6 +161,10 @@ def cut_joystick(x, y):
     boss_h = -JOY_PCB_Z
     for sx in (-1, 1):
         for sy in (-1, 1):
+            # boss plus a rib out to the dam wall, a face contact with the plate alone does not fuse
+            inner = pw / 2 + 1
+            with Locations((x + sx * (hx / 2 + inner) / 2, y + sy * hy / 2, -boss_h / 2)):
+                Box(inner - hx / 2 + 0.5, 2.0, boss_h)
             with Locations((x + sx * hx / 2, y + sy * hy / 2, -boss_h / 2)):
                 Cylinder(3.0, boss_h)
                 Cylinder(hd / 2, boss_h + 0.01, mode=Mode.SUBTRACT)
@@ -192,10 +196,12 @@ def build(panel, labels=True):
                              align=(Align.CENTER, Align.CENTER))
                 extrude(sk.sketch, amount=-LABEL_DEPTH, mode=Mode.SUBTRACT)
 
+        # groove only into the wall (a ring), so dams and bosses inside stay whole
         gd, gh, gz = GROOVE
         with BuildSketch(Plane.XY.offset(-gz - gh / 2)):
             with Locations((xc, yc)):
                 RectangleRounded(w - 2 * WALL + 2 * gd, h - 2 * WALL + 2 * gd, INNER_R + gd)
+                RectangleRounded(w - 2 * WALL, h - 2 * WALL, INNER_R, mode=Mode.SUBTRACT)
         extrude(amount=gh, mode=Mode.SUBTRACT)
 
         side = panel['cable']
@@ -236,5 +242,6 @@ if __name__ == '__main__':
                 'joyPcbZ': JOY_PCB_Z, 'joyPcb': JOY_PCB,
                 'cells': [{'x': x, 'y': y} | c for x, y, c in cells(panel)]}
         (out / f'{name}.json').write_text(json.dumps(meta, ensure_ascii=False, indent=1))
+        assert len(part.solids()) == 1, f'{name}: {len(part.solids())} loose pieces'
         bb = part.bounding_box()
         print(f'{name}: {w:.1f} x {h:.1f} x {bb.size.Z:.1f} mm, {part.volume / 1000:.1f} cm³')
