@@ -1,7 +1,7 @@
 // Cockpit mock-up: switch assignment from Vault Buggy/Bordnetz-Konzept.md ("Bedienelemente & Panels", 2026-10-22).
 import { SHIFT_ORDER } from './sim.js';
 
-const W = 1760, H = 960;
+const W = 1760, H = 1070;
 const RED = '#ff3322', GREEN = '#33ff55', AMBER = '#ffaa00', BLUE = '#3aa0ff', YELLOW = '#ffe033';
 const ILLEGAL = 'Kann im Straßenverkehr illegal sein → beleuchteter Schalter (Regel: alles, was vor der Straße aus muss, leuchtet).';
 
@@ -28,11 +28,16 @@ const PANELS = [
     { id: 'sitz', type: 'C', label: 'Sitzheizung', pos: ['AUS', 'AN'], info: 'Einstufig, normaler Kippschalter (Typ C).' },
     { id: 'carplay', type: 'C', label: 'CarPlay-Pi', pos: ['AUS', 'AN'], info: 'Sound-/CarPlay-Pi zuschalten (Typ C).' },
     { id: 'spiegel', type: 'push', led: AMBER, label: 'Spiegel-', sub: 'heizung 10 min', info: 'Druckknopf mit Timer: drücken = 10 min an, nochmal drücken = aus.' },
-    { id: 'aussen12', type: 'A', led: BLUE, label: 'Außen 12 V', pos: ['AUS', 'AN'], info: 'Zubehör-Steckdosen außen.' },
-    { id: 'windeFrei', type: 'A', cover: true, led: YELLOW, label: 'Winde', sub: 'Freigabe', pos: ['AUS', 'FREI'], info: 'Freigabe als Signal an den Controller (bei Ansteuerung über Relais, z. B. Wischerhebel). Vorschlag: zusätzlich in Reihe zur Spulenversorgung der Winden-Relais.' },
-    { id: 'winde', type: 'T2', label: 'Winde', sub: 'ein / aus', pos: ['AUS', '', 'EIN'], info: 'Tastend in beide Richtungen, Mitte = Ruhe. Nur mit Freigabe. Fernbedienung der Winde bleibt zusätzlich.' },
+    { id: 'a12Front', type: 'A', led: BLUE, label: '12 V Front', pos: ['AUS', 'AN'], info: '12-V-Abnahmepunkt außen an der Front.' },
+    { id: 'a12Sitz', type: 'A', led: BLUE, label: '12 V Sitz', sub: 'hinter Fahrer', pos: ['AUS', 'AN'], info: '12-V-Abnahmepunkt hinter dem Fahrersitz.' },
+    { id: 'a12Heck', type: 'A', led: BLUE, label: '12 V Heck', pos: ['AUS', 'AN'], info: '12-V-Abnahmepunkt außen am Heck.' },
+    { id: 'windeFrei', type: 'A', cover: true, led: YELLOW, label: 'Winde', sub: 'Freigabe', pos: ['AUS', 'FREI'], info: 'Freigabe für die Winde am Wischerhebel (herziehen = ein, wegdrücken = aus). Signal an den Controller, der die Winden-Relais schaltet. Vorschlag: zusätzlich in Reihe zur Spulenversorgung der Winden-Relais. Fernbedienung der Winde bleibt.' },
   ] },
-  { id: 'audio', title: 'Audio & Helligkeit', x: 1090, y: 640, cols: 5, items: [
+  { id: 'such', title: 'Suchscheinwerfer', x: 1090, y: 620, cols: 3, items: [
+    { id: 'suchAn', type: 'A', cover: true, led: RED, label: 'Suchlicht', pos: ['AUS', 'AN'], illegal: true, info: 'Suchscheinwerfer an/aus (Last-Ebene). Im Straßenverkehr nicht zulässig (mit TÜV klären). ' + ILLEGAL },
+    { id: 'joy', type: 'joy', label: 'Joystick', sub: 'Pan / Tilt', info: 'Joystick X/Y als Ratenbefehl: Auslenkung = Drehgeschwindigkeit, loslassen = stehen bleiben. Wirkt nur, wenn das Suchlicht an ist. Presets/Home später.' },
+  ] },
+  { id: 'audio', title: 'Audio & Helligkeit', x: 1090, y: 850, cols: 5, items: [
     { id: 'volCar', type: 'pot', label: 'CarPlay-Pi', sub: 'Kopfhörer', info: 'Lautstärke Musik/Telefon im Kopfhörer.' },
     { id: 'volIc', type: 'pot', label: 'Intercom', sub: 'Kopfhörer', info: 'Lautstärke Beifahrer (Sena/Cardo) im Kopfhörer.' },
     { id: 'volFunk', type: 'pot', label: 'Funk', sub: 'CB / PMR', info: 'Lautstärke Funk im Kopfhörer. Sendepegel (CarPlay, Intercom, Funk, Megafon) im Pi-Menü (Vorschlag).' },
@@ -56,7 +61,7 @@ const WHEEL_POTS = [
   { id: 'potR', x: 454, y: 410, fn: 'Lautstärke', info: 'Lenkrad-Poti: Gesamtlautstärke (Tendenz).' },
 ];
 
-const s = { gear: 'N', blinkL: false, blinkR: false, fern: false, flash: false, spiegelUntil: 0, phase: false, log: [] };
+const s = { gear: 'N', winch: null, pan: 0, tilt: 0, blinkL: false, blinkR: false, fern: false, flash: false, spiegelUntil: 0, phase: false, log: [] };
 const controls = {};
 const dash = document.getElementById('dash');
 dash.style.width = W + 'px';
@@ -170,8 +175,24 @@ function renderPush(c) {
     <text x="${CX}" y="90" text-anchor="middle" font-size="10" fill="#9a9a9a">${lit ? `${mm}:${ss}` : 'aus'}</text>`;
 }
 
+function renderJoy(c) {
+  const { jx, jy } = c.st;
+  const bx = 92, by = 62, kx = bx + jx * 30, ky = by + jy * 30;
+  c.svg.innerHTML = `<rect x="22" y="4" width="140" height="116" rx="12" fill="#151618" stroke="#000"/>
+    <rect x="26" y="8" width="132" height="108" rx="10" fill="none" stroke="#ffffff12"/>
+    ${[44, 36, 28].map((r, i) => `<circle cx="${bx}" cy="${by}" r="${r}" fill="${['#0b0b0c', '#18191b', '#0f1011'][i]}" stroke="#2a2b2e"/>`).join('')}
+    <line x1="${bx}" y1="${by}" x2="${kx}" y2="${ky}" stroke="url(#chrome)" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="${kx + 2}" cy="${ky + 3}" r="15" fill="#0008"/>
+    <circle cx="${kx}" cy="${ky}" r="15" fill="url(#knob)" stroke="#111"/>
+    <circle cx="${kx}" cy="${ky}" r="6" fill="#c22" stroke="#400"/>
+    <text x="${bx}" y="${by - 48}" text-anchor="middle" font-size="8" fill="#888">TILT ▲</text>
+    <text x="30" y="${by + 3}" font-size="8" fill="#888">◀</text><text x="154" y="${by + 3}" font-size="8" fill="#888" text-anchor="end">▶</text>
+    <text x="${bx}" y="126" text-anchor="middle" font-size="9.5" fill="#9a9a9a">${on('suchAn') ? `Pan ${Math.round(s.pan)}° · Tilt ${Math.round(s.tilt)}°` : 'Suchlicht aus'}</text>`;
+}
+
 function render(c) {
-  if (c.def.type === 'pot') renderPot(c);
+  if (c.def.type === 'joy') renderJoy(c);
+  else if (c.def.type === 'pot') renderPot(c);
   else if (c.def.type === 'push') renderPush(c);
   else if (c.def.type !== 'reserve') renderToggle(c);
 }
@@ -203,6 +224,22 @@ function attach(c) {
       else { s.spiegelUntil = Date.now() + 10 * 60 * 1000; log('Spiegelheizung 10 min'); }
       update();
     });
+    return;
+  }
+  if (def.type === 'joy') {
+    const move = (e) => {
+      const r = svg.getBoundingClientRect();
+      let x = ((e.clientX - r.left) / r.width * 184 - 92) / 30, y = ((e.clientY - r.top) / r.height * 130 - 62) / 30;
+      const m = Math.hypot(x, y);
+      if (m > 1) { x /= m; y /= m; }
+      st.jx = x; st.jy = y;
+      render(c);
+    };
+    svg.addEventListener('pointerdown', (e) => { svg.setPointerCapture(e.pointerId); c.drag = true; move(e); });
+    svg.addEventListener('pointermove', (e) => { if (c.drag) move(e); });
+    const stop = () => { c.drag = false; st.jx = 0; st.jy = 0; render(c); };
+    svg.addEventListener('pointerup', stop);
+    svg.addEventListener('pointercancel', stop);
     return;
   }
   if (def.type === 'reserve') return;
@@ -238,10 +275,7 @@ function label(def, pos) {
 function act(def, why) {
   const st = controls[def.id].st;
   if (def.id === 'start' && st.pos === 'up') log(on('zuendung') ? 'Start → Kl. 50 (nur bei BEREIT)' : 'Start ohne Zündung: keine Wirkung');
-  else if (def.id === 'winde') {
-    if (st.pos === 'mid') return;
-    log(on('windeFrei') ? `Winde ${st.pos === 'up' ? 'EIN' : 'AUS'}` : 'Winde gesperrt (Freigabe aus)');
-  } else if (def.type !== 'T') log(`${def.label}${def.sub ? ' ' + def.sub : ''}: ${label(def, st.pos)}${why ? ' (' + why + ')' : ''}`);
+  else if (def.type !== 'T') log(`${def.label}${def.sub ? ' ' + def.sub : ''}: ${label(def, st.pos)}${why ? ' (' + why + ')' : ''}`);
 }
 
 const on = (id) => controls[id].st.pos === 'up';
@@ -270,10 +304,12 @@ function buildPanel(p) {
     const cell = document.createElement('div');
     cell.className = 'cell' + (def.type === 'reserve' ? ' reserve' : '');
     const h = def.type === 'pot' || def.type === 'push' ? 96 : 130;
+    const w = def.type === 'joy' ? 184 : 92;
+    if (def.type === 'joy') { cell.style.gridColumn = 'span 2'; cell.style.width = '184px'; }
     const svg = document.createElementNS(NS, 'svg');
-    svg.setAttribute('width', 92);
+    svg.setAttribute('width', w);
     svg.setAttribute('height', h);
-    svg.setAttribute('viewBox', `0 0 92 ${h}`);
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
     if (def.type === 'reserve') {
       svg.innerHTML = `<circle cx="${CX}" cy="${CY}" r="17" fill="#0a0a0a" stroke="#444" stroke-dasharray="3 3"/>`;
       svg.style.cursor = 'help';
@@ -285,10 +321,10 @@ function buildPanel(p) {
     cell.appendChild(plate);
     const type = document.createElement('div');
     type.className = 'type';
-    type.textContent = { A: 'A', B: 'B', C: 'C', T: 'T', T2: 'T2', push: 'Druckknopf', pot: 'Poti', reserve: '' }[def.type] + (def.cover ? ' + Kappe' : '');
+    type.textContent = { A: 'A', B: 'B', C: 'C', T: 'T', T2: 'T2', push: 'Druckknopf', pot: 'Poti', joy: 'Joystick 2 Achsen', reserve: '' }[def.type] + (def.cover ? ' + Kappe' : '');
     cell.appendChild(type);
     grid.appendChild(cell);
-    const st = { pos: def.type === 'T2' ? 'mid' : 'down', open: false, v: 0.4 };
+    const st = { pos: def.type === 'T2' ? 'mid' : 'down', open: false, v: 0.4, jx: 0, jy: 0 };
     controls[def.id] = { def, st, svg };
     attach(controls[def.id]);
     if (def.type === 'reserve') svg.addEventListener('pointerenter', () => info(def));
@@ -339,8 +375,8 @@ function buildWheel() {
       <text x="20" y="432" font-size="12" font-weight="700" fill="#bbb">Lichthebel (Corsa C)</text>
       ${stalkBtn('blinkL', 10, 442, 78, '◀ Blinker')}${stalkBtn('blinkR', 94, 442, 78, 'Blinker ▶')}
       ${stalkBtn('fern', 10, 472, 78, 'Fernlicht')}${stalkBtn('flash', 94, 472, 78, 'Lichthupe')}
-      <text x="660" y="432" font-size="12" font-weight="700" fill="#bbb" text-anchor="end">Wischerhebel – offen</text>
-      ${stalkBtn('wWeg', 508, 442, 78, 'wegdrücken')}${stalkBtn('wHer', 592, 442, 78, 'herziehen')}
+      <text x="660" y="432" font-size="12" font-weight="700" fill="#bbb" text-anchor="end">Wischer → Winde</text>
+      ${stalkBtn('wWeg', 508, 442, 78, 'Winde aus')}${stalkBtn('wHer', 592, 442, 78, 'Winde ein')}
       ${stalkBtn('wStufe', 508, 472, 162, 'Stufe 1 (rastend)')}
     </g>
     <!-- shift paddles (big, plus/minus) and hall paddles (small, below) sit behind the rim -->
@@ -411,15 +447,25 @@ function buildWheel() {
   for (const g of wrap.querySelectorAll('.stalkbtn')) {
     const id = g.dataset.id;
     g.addEventListener('pointerenter', () => info(stalkInfo(id)));
-    g.addEventListener('pointerdown', () => {
+    g.addEventListener('pointerdown', (e) => {
       if (id === 'blinkL') { s.blinkL = !s.blinkL; s.blinkR = false; }
       if (id === 'blinkR') { s.blinkR = !s.blinkR; s.blinkL = false; }
       if (id === 'fern') s.fern = !s.fern;
       if (id === 'flash') s.flash = true;
-      if (id.startsWith('w')) log(`Wischerhebel ${g.textContent}: noch unbelegt`);
+      if (id === 'wStufe') log('Wischerhebel Stufe 1: noch unbelegt');
+      if (id === 'wWeg' || id === 'wHer') {
+        g.setPointerCapture(e.pointerId);
+        if (on('windeFrei')) { s.winch = id === 'wHer' ? 'EIN' : 'AUS'; g.classList.add('on'); log(`Winde ${s.winch}`); }
+        else log('Winde gesperrt (Freigabe aus)');
+      }
       update();
     });
-    g.addEventListener('pointerup', () => { if (id === 'flash') { s.flash = false; update(); } });
+    const release = () => {
+      if (id === 'flash') { s.flash = false; update(); }
+      if ((id === 'wWeg' || id === 'wHer') && s.winch) { s.winch = null; g.classList.remove('on'); log('Winde stopp'); update(); }
+    };
+    g.addEventListener('pointerup', release);
+    g.addEventListener('pointercancel', release);
   }
   draggable(wrap, wrap.querySelector('svg'), 'wheel');
 }
@@ -428,7 +474,7 @@ function stalkInfo(id) {
   const m = {
     blinkL: 'Blinker links. Antippen (< 400 ms) = 3× Spurwechsel-Blinken.', blinkR: 'Blinker rechts. Antippen = 3× Spurwechsel-Blinken.',
     fern: 'Fernlicht als Toggle in Software, nur bei Abblendlicht. Zusatz-Fernlicht folgt, wenn freigegeben.', flash: 'Lichthupe, geht immer.',
-    wWeg: 'Wischerhebel wegdrücken: offen. Idee: Winde auslassen, nur mit Freigabe.', wHer: 'Wischerhebel herziehen: offen. Idee: Winde einziehen, nur mit Freigabe.',
+    wWeg: 'Wischerhebel wegdrücken (tastend) = Winde auslassen, nur mit Winden-Freigabe. Ersetzt den Kippschalter am Panel.', wHer: 'Wischerhebel herziehen (tastend) = Winde einziehen, nur mit Winden-Freigabe.',
     wStufe: 'Stufe 1 rastet: offen. Idee: Zusatz-Rückfahrlicht zum Rangieren.',
   };
   return { type: 'stalk', fn: id.startsWith('w') ? 'Wischerhebel' : 'Lichthebel', info: m[id] };
@@ -457,7 +503,7 @@ function buildStatus() {
   dash.appendChild(el);
   const i = document.createElement('div');
   i.id = 'info';
-  i.innerHTML = '<b>Fahrersicht</b> – Lenkrad mittig, Lichtpanel links, Motor/Komfort/Audio rechts (Anordnung frei verschiebbar). Maus über ein Bedienelement zeigt Funktion und Status aus Bordnetz-Konzept.md.';
+  i.innerHTML = '<b>Fahrersicht</b> – Lenkrad mittig, Lichtpanel links, Motor/Komfort/Suchlicht/Audio rechts (Anordnung frei verschiebbar). Maus über ein Bedienelement zeigt Funktion und Status aus Bordnetz-Konzept.md.';
   dash.appendChild(i);
 }
 
@@ -487,7 +533,7 @@ function updateStatus() {
   road.classList.toggle('bad', bad.length > 0);
   road.innerHTML = bad.length ? `<b>Vor der Straße aus:</b><br>${bad.join('<br>')}` : '<b>Straße: ok</b><br>kein Offroad-/Sonderlicht an';
   const komp = { down: 'AUTO', mid: 'AUS', up: 'AN' }[controls.kompressor.st.pos];
-  document.getElementById('events').innerHTML = `Kompressor ${komp}${on('zusatz') && fernActive() ? '<br>Zusatz-Fern AN' : ''}<br><span style="color:#666">${s.log.join('<br>')}</span>`;
+  document.getElementById('events').innerHTML = `Kompressor ${komp}${on('zusatz') && fernActive() ? '<br>Zusatz-Fern AN' : ''}${s.winch ? `<br><b style="color:#ffe033">Winde ${s.winch}</b>` : ''}<br><span style="color:#666">${s.log.join('<br>')}</span>`;
 }
 
 function update() {
@@ -509,3 +555,10 @@ window.addEventListener('resize', fit);
 fit();
 update();
 setInterval(() => { s.phase = !s.phase; update(); }, 333);
+setInterval(() => {
+  const j = controls.joy;
+  if (!on('suchAn') || (!j.st.jx && !j.st.jy)) return;
+  s.pan = Math.max(-180, Math.min(180, s.pan + j.st.jx * 60 * 0.05));
+  s.tilt = Math.max(-30, Math.min(60, s.tilt - j.st.jy * 40 * 0.05));
+  render(j);
+}, 50);
