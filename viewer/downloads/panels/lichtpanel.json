@@ -1,0 +1,75 @@
+{
+ "plateT": 8.0,
+ "capTop": 27.5,
+ "capW": 17.099999999999998,
+ "capH": 41.0,
+ "capT": 0.9,
+ "ledUp": 22.0,
+ "thread": 6.0,
+ "lever": 19.0,
+ "cells": [
+  {
+   "x": -72.0,
+   "y": 36.0,
+   "label": "LICHT",
+   "cap": false,
+   "led": false
+  },
+  {
+   "x": -72.0,
+   "y": -36.0,
+   "label": "NEBEL",
+   "cap": true,
+   "led": true
+  },
+  {
+   "x": -36.0,
+   "y": 36.0,
+   "label": "ZUSATZ-FERN",
+   "cap": true,
+   "led": false
+  },
+  {
+   "x": -36.0,
+   "y": -36.0,
+   "label": "RÜCKFAHR",
+   "cap": true,
+   "led": true
+  },
+  {
+   "x": 0.0,
+   "y": 36.0,
+   "label": "OFFROAD MITTE",
+   "cap": true,
+   "led": false
+  },
+  {
+   "x": 0.0,
+   "y": -36.0,
+   "label": "OFFROAD HECK",
+   "cap": true,
+   "led": false
+  },
+  {
+   "x": 36.0,
+   "y": 36.0,
+   "label": "RUNDUM",
+   "cap": false,
+   "led": false
+  },
+  {
+   "x": 36.0,
+   "y": -36.0,
+   "label": "NAHFELD",
+   "cap": false,
+   "led": false
+  },
+  {
+   "x": 72.0,
+   "y": 36.0,
+   "label": "SUCHLICHT",
+   "cap": true,
+   "led": false
+  }
+ ]
+}

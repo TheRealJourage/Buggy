@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Lichtpanel 3D (Druckteil)</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #111; color: #ddd; font-family: system-ui, sans-serif; overflow: hidden; }
+  #bar { position: fixed; top: 0; left: 0; right: 0; padding: 8px 12px; background: #151517cc; display: flex; gap: 14px; align-items: center; font-size: 14px; z-index: 2; flex-wrap: wrap; }
+  #bar a { color: #8cf; }
+  #bar label { cursor: pointer; }
+  #bar .hint { color: #888; }
+  canvas { display: block; }
+</style>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.js" } }</script>
+</head>
+<body>
+<div id="bar">
+  <b>Lichtpanel – Druckteil</b>
+  <label><input type="checkbox" id="parts" checked> Schalter + Kappen zeigen</label>
+  <label><input type="checkbox" id="open"> Kappen offen</label>
+  <label><input type="checkbox" id="back"> Rückseite</label>
+  <span id="dims" class="hint"></span>
+  <a href="downloads/panels/lichtpanel.stl" download>STL</a>
+  <a href="downloads/panels/lichtpanel.step" download>STEP</a>
+  <span class="hint">Maus: drehen · Rad: zoomen · rechts: verschieben</span>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from './vendor/OrbitControls.js';
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(devicePixelRatio);
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a1c);
+const camera = new THREE.PerspectiveCamera(35, 1, 1, 5000);
+camera.position.set(-120, -260, 330);
+camera.up.set(0, 0, 1);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0, 0);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x333344, 1.4));
+const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+sun.position.set(-150, -200, 400);
+scene.add(sun);
+const fill = new THREE.DirectionalLight(0xffffff, 1.6);
+fill.position.set(150, 200, -400);
+scene.add(fill);
+
+function parseStl(buf) {
+  const dv = new DataView(buf);
+  const n = dv.getUint32(80, true);
+  const pos = new Float32Array(n * 9);
+  for (let i = 0; i < n; i++) {
+    const o = 84 + i * 50 + 12;
+    for (let k = 0; k < 9; k++) pos[i * 9 + k] = dv.getFloat32(o + k * 4, true);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.computeVertexNormals();
+  return g;
+}
+
+const [stl, meta] = await Promise.all([
+  fetch('downloads/panels/lichtpanel.stl').then((r) => r.arrayBuffer()),
+  fetch('downloads/panels/lichtpanel.json').then((r) => r.json()),
+]);
+const geo = parseStl(stl);
+geo.computeBoundingBox();
+const bb = geo.boundingBox;
+const yc = (bb.max.y + bb.min.y) / 2;
+const panel = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0x55575c, roughness: 0.7, metalness: 0.05 }));
+const root = new THREE.Group();
+root.position.y = -yc;
+root.add(panel);
+scene.add(root);
+document.getElementById('dims').textContent =
+  `${(bb.max.x - bb.min.x).toFixed(0)} × ${(bb.max.y - bb.min.y).toFixed(0)} × ${(bb.max.z - bb.min.z).toFixed(0)} mm`;
+
+// simplified switches and covers on top of the print
+const chrome = new THREE.MeshStandardMaterial({ color: 0xd8dadd, metalness: 0.9, roughness: 0.25 });
+const redCap = new THREE.MeshStandardMaterial({ color: 0xc81a10, roughness: 0.35, transparent: true, opacity: 0.85 });
+const clearCap = new THREE.MeshStandardMaterial({ color: 0xff3a2e, roughness: 0.1, transparent: true, opacity: 0.45 });
+const ledMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xff2010, emissiveIntensity: 0.6 });
+const parts = new THREE.Group();
+const covers = [];
+const T = meta.plateT;
+for (const c of meta.cells) {
+  const g = new THREE.Group();
+  g.position.set(c.x, c.y, T);
+  const bush = new THREE.Mesh(new THREE.CylinderGeometry(6, 6, meta.thread, 24), chrome);
+  bush.rotation.x = Math.PI / 2; bush.position.z = meta.thread / 2; g.add(bush);
+  const nut = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 2.5, 6), chrome);
+  nut.rotation.x = Math.PI / 2; nut.position.z = 1.25 + (c.cap ? meta.capT : 0); g.add(nut);
+  const lever = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2, meta.lever, 16), chrome);
+  lever.rotation.x = Math.PI / 2 - 0.35; lever.position.set(0, -meta.lever * 0.17, meta.thread + meta.lever / 2 - 1); g.add(lever);
+  if (c.cap) {
+    const plate = new THREE.Mesh(new THREE.BoxGeometry(meta.capW, meta.capH, meta.capT), chrome);
+    plate.position.set(0, meta.capTop - meta.capH / 2, -meta.capT / 2 + 0.01); g.add(plate);
+    const hinge = new THREE.Group();
+    hinge.position.set(0, meta.capTop - 2, 2);
+    const shell = new THREE.Mesh(new THREE.BoxGeometry(meta.capW - 1, meta.capH - 4, 30), c.led ? clearCap : redCap);
+    shell.position.set(0, -(meta.capH - 4) / 2, 13);
+    hinge.add(shell); g.add(hinge); covers.push(hinge);
+  }
+  if (c.led) {
+    const led = new THREE.Mesh(new THREE.SphereGeometry(2.5, 16, 12), ledMat);
+    led.position.set(0, meta.ledUp, 0.5); g.add(led);
+  }
+  parts.add(g);
+}
+root.add(parts);
+
+const $ = (id) => document.getElementById(id);
+$('parts').onchange = (e) => { parts.visible = e.target.checked; };
+$('open').onchange = (e) => covers.forEach((h) => { h.rotation.x = e.target.checked ? -Math.PI / 2 : 0; });
+$('back').onchange = (e) => {
+  const d = camera.position.distanceTo(controls.target);
+  camera.position.set(e.target.checked ? 120 : -120, -260 * d / 430, (e.target.checked ? -330 : 330) * d / 430);
+  controls.update();
+};
+
+function resize() {
+  renderer.setSize(innerWidth, innerHeight);
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+resize();
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+</script>
+</body>
+</html>
