@@ -27,11 +27,10 @@ const PANELS = [
   { id: 'komfort', title: 'Komfort / Zubehör', x: 1420, y: 190, cols: 3, unlit: false, items: [
     { id: 'sitz', type: 'C', label: 'Sitzheizung', pos: ['AUS', 'AN'], info: 'Einstufig, normaler Kippschalter (Typ C).' },
     { id: 'carplay', type: 'C', label: 'CarPlay-Pi', pos: ['AUS', 'AN'], info: 'Sound-/CarPlay-Pi zuschalten (Typ C).' },
-    { id: 'spiegel', type: 'push', led: AMBER, label: 'Spiegel-', sub: 'heizung 10 min', info: 'Druckknopf mit Timer: drücken = 10 min an, nochmal drücken = aus.' },
+    { id: 'windeFrei', type: 'A', cover: true, led: YELLOW, label: 'Winde', sub: 'Freigabe', pos: ['AUS', 'FREI'], info: 'Freigabe für die Winde am Wischerhebel (herziehen = ein, wegdrücken = aus). Signal an den Controller, der die Winden-Relais schaltet. Vorschlag: zusätzlich in Reihe zur Spulenversorgung der Winden-Relais. Fernbedienung der Winde bleibt.' },
     { id: 'a12Front', type: 'A', led: BLUE, label: '12 V Front', pos: ['AUS', 'AN'], info: '12-V-Abnahmepunkt außen an der Front.' },
     { id: 'a12Sitz', type: 'A', led: BLUE, label: '12 V Sitz', sub: 'hinter Fahrer', pos: ['AUS', 'AN'], info: '12-V-Abnahmepunkt hinter dem Fahrersitz.' },
     { id: 'a12Heck', type: 'A', led: BLUE, label: '12 V Heck', pos: ['AUS', 'AN'], info: '12-V-Abnahmepunkt außen am Heck.' },
-    { id: 'windeFrei', type: 'A', cover: true, led: YELLOW, label: 'Winde', sub: 'Freigabe', pos: ['AUS', 'FREI'], info: 'Freigabe für die Winde am Wischerhebel (herziehen = ein, wegdrücken = aus). Signal an den Controller, der die Winden-Relais schaltet. Vorschlag: zusätzlich in Reihe zur Spulenversorgung der Winden-Relais. Fernbedienung der Winde bleibt.' },
   ] },
   { id: 'such', title: 'Suchscheinwerfer', x: 1090, y: 620, cols: 3, items: [
     { id: 'suchAn', type: 'A', cover: true, led: RED, label: 'Suchlicht', pos: ['AUS', 'AN'], illegal: true, info: 'Suchscheinwerfer an/aus (Last-Ebene). Im Straßenverkehr nicht zulässig (mit TÜV klären). ' + ILLEGAL },
@@ -48,7 +47,7 @@ const PANELS = [
 
 const WHEEL = [
   { id: 'hupe', x: 340, y: 300, r: 36, fill: '#444', text: 'HUPE', fn: 'Hupe', info: 'Hupe (GP8, Bit 2). Festgelegt.' },
-  { id: 'gelb', x: 278, y: 350, r: 16, fill: '#e6c200', fn: 'offen', below: true, info: 'Gelb (GP11): liegt weit innen, beim Fahren schwer erreichbar → für seltene Funktionen. Offen.' },
+  { id: 'gelb', x: 278, y: 350, r: 16, fill: '#e6c200', fn: 'Spiegelhzg.', below: true, info: 'Gelb (GP11): Spiegelheizung mit Timer – drücken = 10 min an, nochmal drücken = aus. Liegt weit innen, passt zu einer seltenen Funktion.' },
   { id: 'blau', x: 236, y: 262, r: 16, fill: '#1e64d8', fn: 'PTT Funk', info: 'Blau (GP10): außen, beim Fahren gut erreichbar. Tendenz: Push-to-Talk Funk (CB/PMR).' },
   { id: 'minus', paddle: 'L', fn: 'runter', info: 'Große Schaltwippe links = Minus (GP12): runterschalten 5→…→1→R. Festgelegt.' },
   { id: 'gruen', x: 444, y: 262, r: 16, fill: '#1faa3a', fn: 'offen (PTT?)', info: 'Grün (GP5): außen, beim Fahren gut erreichbar. Wahrscheinlich ein zweites Push-to-Talk, Ziel noch offen.' },
@@ -490,6 +489,10 @@ function wheelPress(b) {
     log(`Gang ${s.gear}`);
   } else if (b.id === 'schwarz') { s.gear = 'N'; log('Gang N'); }
   else if (b.id === 'hupe') log('HUPE');
+  else if (b.id === 'gelb') {
+    if (Date.now() < s.spiegelUntil) { s.spiegelUntil = 0; log('Spiegelheizung aus'); }
+    else { s.spiegelUntil = Date.now() + 10 * 60 * 1000; log('Spiegelheizung 10 min'); }
+  }
   else log(b.fn.startsWith('offen') ? `Lenkrad ${b.id}: noch unbelegt` : b.fn);
   update();
 }
@@ -516,6 +519,7 @@ const TELLS = [
   ['LÜFT M', BLUE, () => on('luefter')],
   ['KOMPR', YELLOW, () => controls.kompressor.st.pos !== 'mid'],
   ['WINDE', YELLOW, () => on('windeFrei')],
+  ['SPIEGEL', AMBER, () => Date.now() < s.spiegelUntil],
 ];
 const fernActive = () => (s.fern && controls.licht.st.pos === 'up') || s.flash;
 
@@ -526,7 +530,7 @@ function updateStatus() {
   document.getElementById('arrR').classList.toggle('on', (s.blinkR || warn) && s.phase);
   document.getElementById('tells').innerHTML = TELLS.map(([t, col, f], i) => {
     const lit = f();
-    return `<span class="tell${lit ? ' on' : ''}" style="left:${10 + i * 63}px;${lit ? `background:${col};box-shadow:0 0 8px ${col}` : ''}">${t}</span>`;
+    return `<span class="tell${lit ? ' on' : ''}" style="left:${8 + i * 56}px;${lit ? `background:${col};box-shadow:0 0 8px ${col}` : ''}">${t}</span>`;
   }).join('');
   const bad = PANELS.flatMap((p) => p.items).filter((d) => d.illegal && on(d.id)).map((d) => `${d.label} ${d.sub || ''}`.trim());
   const road = document.getElementById('road');
