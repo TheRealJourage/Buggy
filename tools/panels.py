@@ -25,7 +25,8 @@ LED_D = 5.2            # 5 mm LED from the back
 LED_UP = 6.0 + 16.0    # LED centre 16 mm above the hole edge
 # --- potentiometer: thread 6.75 x 6, body 16.3 dia, 9 deep, pin 2.4 dia left 4 mm from the thread ---
 POT_HOLE = 7.1
-POT_BODY = 18.0        # back pocket and dam inside; 16.3 body, 16 mm wide terminals
+POT_BODY = 17.0        # back pocket and dam inside, body 16.3
+POT_LUGS = (17.0, 6.75 / 2 + 14.0 + 0.5)  # solder lugs 16 wide, reach 14 mm below the thread edge: width, reach from centre
 POT_SKIN = 3.0         # plate left in front of the pot, rest of the 6 mm thread takes the nut
 POT_PIN = (7.0, 9.4, 2.8, 1.5)   # radial slot for the pin (left): r from, r to, width, depth into the skin
 POT_DAM = (2.0, 12.0)  # tube around the pot so the silicone stays out: wall, depth behind plate
@@ -100,7 +101,7 @@ def extent(cell):
         return hw, hh, hh
     if cell['kind'] == 'pot':
         r = POT_BODY / 2 + POT_DAM[0]
-        return r, r, label_bottom
+        return max(r, POT_LUGS[0] / 2 + POT_DAM[0]), r, max(label_bottom, POT_LUGS[1] + POT_DAM[0])
     return (CAP_W / 2, CAP_TOP, label_bottom) if cell['cap'] else (FOOT_W / 2, FOOT_H / 2, label_bottom)
 
 
@@ -132,15 +133,22 @@ def cut_switch(x, y, cap, led):
 
 
 def cut_pot(x, y):
-    """Thread hole, body pocket leaving POT_SKIN, pin slot on the left, dam tube behind the plate."""
+    """Thread hole, body pocket (round + slot down for the solder lugs) leaving POT_SKIN,
+    pin slot on the left, dam of the same shape behind the plate."""
     wall, depth = POT_DAM
+    lw, reach = POT_LUGS
     with Locations((x, y, -depth / 2)):
         Cylinder(POT_BODY / 2 + wall, depth)
+    with Locations((x, y - (reach + wall) / 2, -depth / 2)):
+        Box(lw + 2 * wall, reach + wall, depth)
     with Locations((x, y, PLATE_T / 2)):
         Cylinder(POT_HOLE / 2, PLATE_T + 1, mode=Mode.SUBTRACT)
     floor = PLATE_T - POT_SKIN
+    h = floor + depth + 0.01
     with Locations((x, y, (floor - depth) / 2)):
-        Cylinder(POT_BODY / 2, floor + depth + 0.01, mode=Mode.SUBTRACT)
+        Cylinder(POT_BODY / 2, h, mode=Mode.SUBTRACT)
+    with Locations((x, y - reach / 2, (floor - depth) / 2)):
+        Box(lw, reach, h, mode=Mode.SUBTRACT)
     r0, r1, pw, pd = POT_PIN
     with Locations((x - (r0 + r1) / 2, y, floor + pd / 2)):
         Box(r1 - r0, pw, pd, mode=Mode.SUBTRACT)
