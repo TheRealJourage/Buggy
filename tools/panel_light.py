@@ -33,11 +33,18 @@ WALL, RIM_H = 3.0, 45.0
 CORNER_R = 1.0         # angular box, only a small edge break
 CABLE_D = 7.0          # 4 wires, exit towards the steering wheel (right side)
 GROOVE = (1.0, 1.5, 5.0)  # silicone key groove in the inner wall: depth, height, distance behind plate
+# --- KY-023 style joystick module (product picture: PCB 34 x 27, 32 high). ASSUMED, measure when it arrives ---
+JOY_PCB = (27.0, 34.0, 1.6)     # X x Y x thickness, header pins at the bottom end
+JOY_HOLES = (20.0, 27.0, 2.6)   # mounting hole spacing X, Y and pilot diameter for M3 self-tapping (assumed)
+JOY_HOLE_D = 26.0               # front opening for the dome, must clear the tilted dome (assumed)
+JOY_POCKET = (26.0, 26.0, 2.0)  # square pocket from the back for the gimbal frame, leaves this skin at the front
+JOY_PCB_Z = -8.4                # PCB top face behind the plate (cap top then ~14 mm above the front)
+JOY_DAM = (WALL, 15.0)          # wall around the module so the silicone stays out: thickness, depth behind plate
 
 # column-wise pairs (top, bottom), mirrored 2026-10-22: light/fog is the rightmost column
 # (label, has_cap, led_under_cap); None = empty place
 CELLS = [
-    [("SUCHLICHT", True, False), None],  # gamepad stick later
+    [("SUCHLICHT", True, False), "JOY"],
     [("RUNDUM", False, False), ("NAHFELD", False, False)],
     [("OFFROAD MITTE", True, False), ("OFFROAD HECK", True, False)],
     [("ZUSATZ-FERN", True, False), ("RÜCKFAHR", True, True)],
@@ -51,8 +58,15 @@ def centres():
         x = (ci - (cols - 1) / 2) * PITCH_X
         for ri, cell in enumerate(col):
             y = PITCH_Y / 2 - ri * PITCH_Y
-            if cell:
+            if cell and cell != 'JOY':
                 yield x, y, cell
+
+
+def joystick_pos():
+    for ci, col in enumerate(CELLS):
+        for ri, cell in enumerate(col):
+            if cell == 'JOY':
+                return (ci - (len(CELLS) - 1) / 2) * PITCH_X, PITCH_Y / 2 - ri * PITCH_Y
 
 
 def outline():
@@ -103,6 +117,26 @@ def build(labels=True):
                          align=(Align.CENTER, Align.CENTER))
             extrude(sk.sketch, amount=-LABEL_DEPTH, mode=Mode.SUBTRACT)
 
+        # joystick: dam (added) first, then opening, gimbal pocket, inside of the dam, standoffs
+        jx, jy = joystick_pos()
+        pw, ph, _ = JOY_PCB
+        dw, dd = JOY_DAM
+        with Locations((jx, jy, -dd / 2)):
+            Box(pw + 2 + 2 * dw, ph + 2 + 2 * dw, dd)
+            Box(pw + 2, ph + 2, dd + 0.01, mode=Mode.SUBTRACT)
+        with Locations((jx, jy, PLATE_T / 2)):
+            Cylinder(JOY_HOLE_D / 2, PLATE_T + 1, mode=Mode.SUBTRACT)
+        qw, qh, skin = JOY_POCKET
+        with Locations((jx, jy, (PLATE_T - skin) / 2)):
+            Box(qw, qh, PLATE_T - skin, mode=Mode.SUBTRACT)
+        hx, hy, hd = JOY_HOLES
+        boss_h = -JOY_PCB_Z
+        for sx in (-1, 1):
+            for sy in (-1, 1):
+                with Locations((jx + sx * hx / 2, jy + sy * hy / 2, -boss_h / 2)):
+                    Cylinder(3.0, boss_h)
+                    Cylinder(hd / 2, boss_h + 0.01, mode=Mode.SUBTRACT)
+
         # silicone key groove in the inner wall
         gd, gh, gz = GROOVE
         with BuildSketch(Plane.XY.offset(-gz - gh / 2)):
@@ -127,7 +161,8 @@ if __name__ == '__main__':
     export_stl(part, str(out / 'lichtpanel.stl'))
     meta = {'plateT': PLATE_T, 'capTop': CAP_TOP, 'capW': CAP_W - 0.3, 'capH': CAP_H - 0.3, 'capT': CAP_T,
             'ledUp': LED_UP, 'thread': 12.0 - (PLATE_T - FOOT_POCKET), 'lever': 19.0,
-            'cells': [{'x': x, 'y': y, 'label': c[0], 'cap': c[1], 'led': c[2]} for x, y, c in centres()]}
+            'cells': [{'x': x, 'y': y, 'label': c[0], 'cap': c[1], 'led': c[2]} for x, y, c in centres()],
+            'joy': dict(zip(('x', 'y'), joystick_pos())) | {'pcbZ': JOY_PCB_Z, 'pcb': JOY_PCB}}
     (out / 'lichtpanel.json').write_text(json.dumps(meta, ensure_ascii=False, indent=1))
     bb = part.bounding_box()
     print(f'outline {w:.1f} x {h:.1f} mm, depth {bb.size.Z:.1f} mm, volume {part.volume / 1000:.1f} cm³')

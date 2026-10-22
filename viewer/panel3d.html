@@ -110,6 +110,20 @@ for (const c of meta.cells) {
   }
   parts.add(g);
 }
+if (meta.joy) {
+  const j = meta.joy, black = new THREE.MeshStandardMaterial({ color: 0x1b1b1d, roughness: 0.6 });
+  const g = new THREE.Group();
+  g.position.set(j.x, j.y, 0);
+  const pcb = new THREE.Mesh(new THREE.BoxGeometry(j.pcb[0], j.pcb[1], j.pcb[2]), new THREE.MeshStandardMaterial({ color: 0x0d2a14 }));
+  pcb.position.z = j.pcbZ - j.pcb[2] / 2; g.add(pcb);
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(12, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), black);
+  dome.rotation.x = Math.PI / 2; dome.position.z = j.pcbZ + 12; g.add(dome);
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(3.5, 3.5, 8, 16), black);
+  shaft.rotation.x = Math.PI / 2; shaft.position.z = j.pcbZ + 24 + 4 - 4; g.add(shaft);
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(12, 12, 4, 32), black);
+  cap.rotation.x = Math.PI / 2; cap.position.z = j.pcbZ + 32.4 - 2; g.add(cap);
+  parts.add(g);
+}
 root.add(parts);
 
 const $ = (id) => document.getElementById(id);
