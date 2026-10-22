@@ -69,11 +69,11 @@ PANELS = {
         [sw('LICHT'), sw('NEBEL', True, True)],
     ]},
     'motorpanel': {'cable': -1, 'cols': [
-        [sw('ZÜNDUNG', True), sw('LÜFTER')],
-        [sw('START', True), pot('LÜFTER %')],
+        [sw('ZÜNDUNG', True), sw('START', True)],
         [sw('KOMPRESSOR', True), sw('12 V FRONT')],
         [sw('WINDE', True), sw('12 V SITZ')],
         [sw('SITZHEIZUNG'), sw('12 V HECK')],
+        [sw('LÜFTER'), pot('LÜFTER %')],
     ]},
     'audiopanel': {'cable': -1, 'cols': [
         [sw('CARPLAY')], [pot('CARPLAY')], [pot('INTERCOM')], [pot('FUNK')], [pot('AMBIENT')], [pot('TACHO/LED')],

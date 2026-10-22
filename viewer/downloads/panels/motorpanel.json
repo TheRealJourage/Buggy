@@ -28,26 +28,12 @@
    "x": -72.0,
    "y": -36.0,
    "kind": "sw",
-   "label": "LÜFTER",
-   "cap": false,
-   "led": false
-  },
-  {
-   "x": -36.0,
-   "y": 36.0,
-   "kind": "sw",
    "label": "START",
    "cap": true,
    "led": false
   },
   {
    "x": -36.0,
-   "y": -36.0,
-   "kind": "pot",
-   "label": "LÜFTER %"
-  },
-  {
-   "x": 0.0,
    "y": 36.0,
    "kind": "sw",
    "label": "KOMPRESSOR",
@@ -55,7 +41,7 @@
    "led": false
   },
   {
-   "x": 0.0,
+   "x": -36.0,
    "y": -36.0,
    "kind": "sw",
    "label": "12 V FRONT",
@@ -63,7 +49,7 @@
    "led": false
   },
   {
-   "x": 36.0,
+   "x": 0.0,
    "y": 36.0,
    "kind": "sw",
    "label": "WINDE",
@@ -71,7 +57,7 @@
    "led": false
   },
   {
-   "x": 36.0,
+   "x": 0.0,
    "y": -36.0,
    "kind": "sw",
    "label": "12 V SITZ",
@@ -79,7 +65,7 @@
    "led": false
   },
   {
-   "x": 72.0,
+   "x": 36.0,
    "y": 36.0,
    "kind": "sw",
    "label": "SITZHEIZUNG",
@@ -87,12 +73,26 @@
    "led": false
   },
   {
-   "x": 72.0,
+   "x": 36.0,
    "y": -36.0,
    "kind": "sw",
    "label": "12 V HECK",
    "cap": false,
    "led": false
+  },
+  {
+   "x": 72.0,
+   "y": 36.0,
+   "kind": "sw",
+   "label": "LÜFTER",
+   "cap": false,
+   "led": false
+  },
+  {
+   "x": 72.0,
+   "y": -36.0,
+   "kind": "pot",
+   "label": "LÜFTER %"
   }
  ]
 }
