@@ -1,30 +1,32 @@
 // Cockpit mock-up: switch assignment from Vault Buggy/Bordnetz-Konzept.md ("Bedienelemente & Panels", 2026-10-22).
 import { SHIFT_ORDER } from './sim.js';
 
-const W = 1820, H = 1070;
+const W = 1920, H = 900;
 const RED = '#ff3322', GREEN = '#33ff55', AMBER = '#ffaa00', BLUE = '#3aa0ff', YELLOW = '#ffe033';
 const ILLEGAL = 'Kann im Straßenverkehr illegal sein → beleuchteter Schalter (Regel: alles, was vor der Straße aus muss, leuchtet).';
 
 const PANELS = [
-  { id: 'licht', title: 'Lichtpanel', x: 20, y: 190, cols: 4, items: [
+  { id: 'licht', title: 'Lichtpanel', x: 20, y: 190, cols: 5, items: [
     // column = function pair (top/bottom); left column is farthest from the driver = used most
     { id: 'licht', type: 'B', label: 'Licht', pos: ['AUS', 'STAND', 'ABBLEND'], info: 'Aus / Standlicht / Abblendlicht inkl. Rücklicht + Kennzeichen. Standlicht-Stellung wird beim Abstellen im Parkmodus gehalten.' },
     { id: 'zusatz', type: 'C', cover: true, label: 'Zusatz-Fern', sub: 'Freigabe', pos: ['AUS', 'FREI'], info: 'Freigabe Zusatz-Fernlicht. Brennt nur zusammen mit dem Fernlicht (Lichthebel). Typ C, unbeleuchtet.' },
     { id: 'offM', type: 'A', cover: true, led: RED, label: 'Offroad', sub: 'Mitte', pos: ['AUS', 'AN'], illegal: true, info: 'Offroad-Scheinwerfer Mitte (2,85 A, Last-Ebene). ' + ILLEGAL },
     { id: 'rundum', type: 'A', led: RED, label: 'Rundum', sub: 'orange', pos: ['AUS', 'AN'], illegal: true, info: 'Orange Rundumleuchte. Zulassung mit dem TÜV klären. ' + ILLEGAL },
+    { id: 'suchAn', type: 'A', cover: true, led: RED, label: 'Suchlicht', pos: ['AUS', 'AN'], illegal: true, info: 'Suchscheinwerfer an/aus (Last-Ebene). Im Straßenverkehr nicht zulässig (mit TÜV klären). ' + ILLEGAL },
     { id: 'nebel', type: 'B', cover: true, label: 'Nebel', pos: ['AUS', 'VORN', 'V+SCHL'], info: 'Aus / Nebelscheinwerfer vorn / vorn + Nebelschlussleuchte. Wirkt nur mit Stand- oder Abblendlicht. Beleuchtung der Nebelschluss-Stellung: Idee vom User, noch offen.' },
     { id: 'rueck', type: 'B', cover: true, label: 'Rückfahr', sub: 'Zusatz weiß', pos: ['AUS', 'R-AUTO', 'AN'], info: 'Zusatz-Rückfahrscheinwerfer weiß (3,40 A, DT-Pin 8). Kappe zu = AUS. Mitte = Rangieren: an, solange R eingelegt ist. Oben = dauerhaft AN. Typ B hat keine LED, Anzeige im Display. Zulassung mit TÜV klären.' },
     { id: 'offH', type: 'A', cover: true, led: RED, label: 'Offroad', sub: 'Heck', pos: ['AUS', 'AN'], illegal: true, info: 'Offroad Heck (2,70 A, DT-Pin 7). ' + ILLEGAL },
     { id: 'nahfeld', type: 'A', led: RED, label: 'Nahfeld', sub: 'Unterboden weiß', pos: ['AUS', 'AN'], illegal: true, info: 'Nahfeldbeleuchtung: helle weiße LEDs unter dem Fahrzeug (Unterboden-Idee, wegen der Bodenfreiheit als Nahfeld). Zulassung mit TÜV klären. ' + ILLEGAL },
+    { id: 'joy', type: 'joy', label: 'Joystick', sub: 'Pan / Tilt', info: 'Gamepad-Daumenstick X/Y als Ratenbefehl: Auslenkung = Drehgeschwindigkeit, loslassen = stehen bleiben. Wirkt nur, wenn das Suchlicht an ist. Presets/Home später.' },
   ] },
-  { id: 'motor', title: 'Motorpanel', x: 1150, y: 190, cols: 3, items: [
+  { id: 'motor', title: 'Motorpanel', x: 1250, y: 190, cols: 3, items: [
     { id: 'zuendung', type: 'A', led: GREEN, label: 'Zündung', sub: 'Kl. 15', pos: ['AUS', 'AN'], info: 'Rastender Kippschalter, nur freigegeben bei gültigem Lenkrad-Code. LED leuchtet nur, wenn Kl. 15 wirklich anliegt.' },
     { id: 'start', type: 'T', cover: true, label: 'Start', sub: 'Kl. 50', pos: ['', 'START'], info: 'Tastend (EIN)-AUS mit Kappe. Wirkt nur bei BEREIT (N oder Kupplung getreten, Selbsttest ok).' },
     { id: 'kompressor', type: 'B', cover: true, label: 'Kompressor', pos: ['AUTO', 'AUS', 'AN'], info: 'Kappe zu = AUTO (läuft erst bei laufendem Motor). Mitte = AUS. Oben = AN: übergeht nur „Motor läuft“, der Druckschalter schaltet immer ab.' },
     { id: 'luefter', type: 'A', led: BLUE, label: 'Lüfter', sub: 'Auto / Manuell', pos: ['AUTO', 'MAN'], info: 'Auto = Speeduino (CLT, Pin 47). Manuell = Tastgrad vom Poti daneben. Typ A oder C noch offen.' },
     { id: 'luefterPoti', type: 'pot', label: 'Lüfter', sub: 'Tastgrad', info: 'Tastgrad im Modus Manuell.' },
   ] },
-  { id: 'komfort', title: 'Komfort / Zubehör', x: 1480, y: 190, cols: 3, unlit: false, items: [
+  { id: 'komfort', title: 'Komfort / Zubehör', x: 1580, y: 190, cols: 3, unlit: false, items: [
     { id: 'sitz', type: 'C', label: 'Sitzheizung', pos: ['AUS', 'AN'], info: 'Einstufig, normaler Kippschalter (Typ C).' },
     { id: 'carplay', type: 'C', label: 'CarPlay-Pi', pos: ['AUS', 'AN'], info: 'Sound-/CarPlay-Pi zuschalten (Typ C).' },
     { id: 'windeFrei', type: 'A', cover: true, led: YELLOW, label: 'Winde', sub: 'Freigabe', pos: ['AUS', 'FREI'], info: 'Freigabe für die Winde am Wischerhebel (herziehen = ein, wegdrücken = aus). Signal an den Controller, der die Winden-Relais schaltet. Vorschlag: zusätzlich in Reihe zur Spulenversorgung der Winden-Relais. Fernbedienung der Winde bleibt.' },
@@ -32,11 +34,7 @@ const PANELS = [
     { id: 'a12Sitz', type: 'A', led: BLUE, label: '12 V Sitz', sub: 'hinter Fahrer', pos: ['AUS', 'AN'], info: '12-V-Abnahmepunkt hinter dem Fahrersitz.' },
     { id: 'a12Heck', type: 'A', led: BLUE, label: '12 V Heck', pos: ['AUS', 'AN'], info: '12-V-Abnahmepunkt außen am Heck.' },
   ] },
-  { id: 'such', title: 'Suchscheinwerfer', x: 1150, y: 620, cols: 3, items: [
-    { id: 'suchAn', type: 'A', cover: true, led: RED, label: 'Suchlicht', pos: ['AUS', 'AN'], illegal: true, info: 'Suchscheinwerfer an/aus (Last-Ebene). Im Straßenverkehr nicht zulässig (mit TÜV klären). ' + ILLEGAL },
-    { id: 'joy', type: 'joy', label: 'Joystick', sub: 'Pan / Tilt', info: 'Joystick X/Y als Ratenbefehl: Auslenkung = Drehgeschwindigkeit, loslassen = stehen bleiben. Wirkt nur, wenn das Suchlicht an ist. Presets/Home später.' },
-  ] },
-  { id: 'audio', title: 'Audio & Helligkeit', x: 1150, y: 850, cols: 5, items: [
+  { id: 'audio', title: 'Audio & Helligkeit', x: 1250, y: 630, cols: 5, items: [
     { id: 'volCar', type: 'pot', label: 'CarPlay-Pi', sub: 'Kopfhörer', info: 'Lautstärke Musik/Telefon im Kopfhörer.' },
     { id: 'volIc', type: 'pot', label: 'Intercom', sub: 'Kopfhörer', info: 'Lautstärke Beifahrer (Sena/Cardo) im Kopfhörer.' },
     { id: 'volFunk', type: 'pot', label: 'Funk', sub: 'CB / PMR', info: 'Lautstärke Funk im Kopfhörer. Sendepegel (CarPlay, Intercom, Funk, Megafon) im Pi-Menü (Vorschlag).' },
@@ -176,17 +174,15 @@ function renderPush(c) {
 
 function renderJoy(c) {
   const { jx, jy } = c.st;
-  const bx = 92, by = 62, kx = bx + jx * 30, ky = by + jy * 30;
-  c.svg.innerHTML = `<rect x="22" y="4" width="140" height="116" rx="12" fill="#151618" stroke="#000"/>
-    <rect x="26" y="8" width="132" height="108" rx="10" fill="none" stroke="#ffffff12"/>
-    ${[44, 36, 28].map((r, i) => `<circle cx="${bx}" cy="${by}" r="${r}" fill="${['#0b0b0c', '#18191b', '#0f1011'][i]}" stroke="#2a2b2e"/>`).join('')}
-    <line x1="${bx}" y1="${by}" x2="${kx}" y2="${ky}" stroke="url(#chrome)" stroke-width="9" stroke-linecap="round"/>
-    <circle cx="${kx + 2}" cy="${ky + 3}" r="15" fill="#0008"/>
-    <circle cx="${kx}" cy="${ky}" r="15" fill="url(#knob)" stroke="#111"/>
-    <circle cx="${kx}" cy="${ky}" r="6" fill="#c22" stroke="#400"/>
-    <text x="${bx}" y="${by - 48}" text-anchor="middle" font-size="8" fill="#888">TILT ▲</text>
-    <text x="30" y="${by + 3}" font-size="8" fill="#888">◀</text><text x="154" y="${by + 3}" font-size="8" fill="#888" text-anchor="end">▶</text>
-    <text x="${bx}" y="126" text-anchor="middle" font-size="9.5" fill="#9a9a9a">${on('suchAn') ? `Pan ${Math.round(s.pan)}° · Tilt ${Math.round(s.tilt)}°` : 'Suchlicht aus'}</text>`;
+  const bx = CX, by = CY, kx = bx + jx * 13, ky = by + jy * 13;
+  c.svg.innerHTML = `<rect x="16" y="${by - 30}" width="60" height="60" rx="10" fill="#151618" stroke="#000"/>
+    <circle cx="${bx}" cy="${by}" r="23" fill="#0a0a0b" stroke="#2a2b2e"/>
+    <circle cx="${kx + 1.5}" cy="${ky + 2.5}" r="17" fill="#000a"/>
+    <circle cx="${kx}" cy="${ky}" r="17" fill="#2b2c30" stroke="#111"/>
+    <circle cx="${kx}" cy="${ky}" r="13" fill="#1d1e21" stroke="#3a3c40" stroke-width="2" stroke-dasharray="2 2"/>
+    <circle cx="${kx}" cy="${ky}" r="7" fill="#151618"/>
+    <text x="${bx}" y="${by - 34}" text-anchor="middle" font-size="8" fill="#888">TILT ▲</text>
+    <text x="${bx}" y="${by + 50}" text-anchor="middle" font-size="9" fill="#9a9a9a">${on('suchAn') ? `P ${Math.round(s.pan)}° T ${Math.round(s.tilt)}°` : 'Suchlicht aus'}</text>`;
 }
 
 function render(c) {
@@ -228,7 +224,7 @@ function attach(c) {
   if (def.type === 'joy') {
     const move = (e) => {
       const r = svg.getBoundingClientRect();
-      let x = ((e.clientX - r.left) / r.width * 184 - 92) / 30, y = ((e.clientY - r.top) / r.height * 130 - 62) / 30;
+      let x = ((e.clientX - r.left) / r.width * 92 - CX) / 13, y = ((e.clientY - r.top) / r.height * 130 - CY) / 13;
       const m = Math.hypot(x, y);
       if (m > 1) { x /= m; y /= m; }
       st.jx = x; st.jy = y;
@@ -303,8 +299,7 @@ function buildPanel(p) {
     const cell = document.createElement('div');
     cell.className = 'cell' + (def.type === 'reserve' ? ' reserve' : '');
     const h = def.type === 'pot' || def.type === 'push' ? 96 : 130;
-    const w = def.type === 'joy' ? 184 : 92;
-    if (def.type === 'joy') { cell.style.gridColumn = 'span 2'; cell.style.width = '184px'; }
+    const w = 92;
     const svg = document.createElementNS(NS, 'svg');
     svg.setAttribute('width', w);
     svg.setAttribute('height', h);
@@ -320,7 +315,7 @@ function buildPanel(p) {
     cell.appendChild(plate);
     const type = document.createElement('div');
     type.className = 'type';
-    type.textContent = { A: 'A', B: 'B', C: 'C', T: 'T', T2: 'T2', push: 'Druckknopf', pot: 'Poti', joy: 'Joystick 2 Achsen', reserve: '' }[def.type] + (def.cover ? ' + Kappe' : '');
+    type.textContent = { A: 'A', B: 'B', C: 'C', T: 'T', T2: 'T2', push: 'Druckknopf', pot: 'Poti', joy: 'Gamepad-Stick', reserve: '' }[def.type] + (def.cover ? ' + Kappe' : '');
     cell.appendChild(type);
     grid.appendChild(cell);
     const st = { pos: def.type === 'T2' ? 'mid' : 'down', open: false, v: 0.4, jx: 0, jy: 0 };
@@ -358,7 +353,7 @@ function draggable(el, handle, key) {
 function buildWheel() {
   const wrap = document.createElement('div');
   wrap.id = 'wheelWrap';
-  const pos = saved.wheel || { x: 450, y: 180 };
+  const pos = saved.wheel || { x: 550, y: 180 };
   wrap.style.left = pos.x + 'px';
   wrap.style.top = pos.y + 'px';
   const cx = 340, cy = 300, r = 210;
