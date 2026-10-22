@@ -45,10 +45,10 @@ const WHEEL = [
   { id: 'hupe', x: 340, y: 300, r: 36, fill: '#444', text: 'HUPE', fn: 'Hupe', info: 'Hupe (GP8, Bit 2). Festgelegt.' },
   { id: 'gelb', x: 248, y: 240, r: 16, fill: '#e6c200', fn: 'offen', sub: 'Vorschlag', info: 'Gelb (GP11): offen. Vorschläge aus der Diskussion: PTT, Megafon, Audio-Modus. Positionen am Lenkrad prüft der User.' },
   { id: 'blau', x: 248, y: 296, r: 16, fill: '#1e64d8', fn: 'offen', sub: 'Vorschlag', info: 'Blau (GP10): offen (PTT / Megafon / Audio-Modus).' },
-  { id: 'minus', x: 248, y: 352, r: 16, fill: '#888', text: '−', fn: 'runter', info: 'Minus (GP12): runterschalten 5→…→1→R. Festgelegt.' },
+  { id: 'minus', paddle: 'L', fn: 'runter', info: 'Große Schaltwippe links = Minus (GP12): runterschalten 5→…→1→R. Festgelegt.' },
   { id: 'gruen', x: 432, y: 240, r: 16, fill: '#1faa3a', fn: 'offen', sub: 'Vorschlag', info: 'Grün (GP5): offen (PTT / Megafon / Audio-Modus).' },
   { id: 'rot', x: 432, y: 296, r: 16, fill: '#d42020', fn: 'offen', sub: 'Vorschlag', info: 'Rot (GP6): offen (PTT / Megafon / Audio-Modus).' },
-  { id: 'plus', x: 432, y: 352, r: 16, fill: '#888', text: '+', fn: 'hoch', info: 'Plus (GP7): hochschalten R→1→…→5. Festgelegt.' },
+  { id: 'plus', paddle: 'R', fn: 'hoch', info: 'Große Schaltwippe rechts = Plus (GP7): hochschalten R→1→…→5. Festgelegt.' },
   { id: 'schwarz', x: 340, y: 392, r: 16, fill: '#111', text: 'N', fn: 'Neutral', info: 'Schwarz (GP9), unten mittig: Gang N. Festgelegt 2026-10-22. Position am Lenkrad bestätigt der User noch.' },
 ];
 const WHEEL_POTS = [
@@ -343,12 +343,23 @@ function buildWheel() {
       ${stalkBtn('wWeg', 508, 442, 78, 'wegdrücken')}${stalkBtn('wHer', 592, 442, 78, 'herziehen')}
       ${stalkBtn('wStufe', 508, 472, 162, 'Stufe 1 (rastend)')}
     </g>
-    <!-- paddles -->
+    <!-- shift paddles (big, plus/minus) and hall paddles (small, below) sit behind the rim -->
+    ${WHEEL.filter((b) => b.paddle).map((b) => {
+      const x = b.paddle === 'L' ? 22 : 563;
+      const tx = b.paddle === 'L' ? 62 : 618;
+      return `<g class="wbtn" data-id="${b.id}">
+        <rect x="${x}" y="130" width="95" height="150" rx="22" fill="#000" transform="translate(0 3)"/>
+        <rect x="${x}" y="130" width="95" height="150" rx="22" fill="#5a5d62" stroke="#111"/>
+        <rect x="${x + 6}" y="136" width="83" height="20" rx="10" fill="#ffffff22"/>
+        <text x="${tx}" y="215" text-anchor="middle" font-size="40" font-weight="700" fill="#fff">${b.paddle === 'L' ? '−' : '+'}</text>
+        <text x="${tx}" y="242" text-anchor="middle" font-size="11" fill="#ddd">${b.fn}</text>
+      </g>`;
+    }).join('')}
     <g id="paddles" style="cursor:help">
-      <rect x="56" y="196" width="60" height="120" rx="16" fill="#3a3c40" stroke="#111"/>
-      <rect x="564" y="196" width="60" height="120" rx="16" fill="#3a3c40" stroke="#111"/>
-      <text x="14" y="176" font-size="11" fill="#888">Hall-Paddel L</text><text x="14" y="190" font-size="11" fill="#e8c547">unbelegt</text>
-      <text x="666" y="176" font-size="11" fill="#888" text-anchor="end">Hall-Paddel R</text><text x="666" y="190" font-size="11" fill="#e8c547" text-anchor="end">unbelegt</text>
+      <rect x="44" y="290" width="70" height="58" rx="14" fill="#2e3034" stroke="#111"/>
+      <rect x="566" y="290" width="70" height="58" rx="14" fill="#2e3034" stroke="#111"/>
+      <text x="74" y="314" text-anchor="middle" font-size="10" fill="#aaa">Hall L</text><text x="74" y="328" text-anchor="middle" font-size="10" fill="#e8c547">unbelegt</text>
+      <text x="606" y="314" text-anchor="middle" font-size="10" fill="#aaa">Hall R</text><text x="606" y="328" text-anchor="middle" font-size="10" fill="#e8c547">unbelegt</text>
     </g>
     <!-- rim + spokes -->
     <path d="M${cx} ${cy} L130 300 M${cx} ${cy} L550 300 M${cx} ${cy} L${cx} 480" stroke="#26272a" stroke-width="44"/>
@@ -358,7 +369,7 @@ function buildWheel() {
     <rect x="${cx - 6}" y="${cy - r - 22}" width="12" height="44" fill="#ff7a00"/>
     <rect x="196" y="196" width="288" height="240" rx="34" fill="url(#carbon)" stroke="#000" stroke-width="2"/>
     <rect x="202" y="202" width="276" height="228" rx="30" fill="none" stroke="#ffffff10"/>`;
-  for (const b of WHEEL) {
+  for (const b of WHEEL.filter((w) => !w.paddle)) {
     svg += `<g class="wbtn" data-id="${b.id}">
       <circle cx="${b.x}" cy="${b.y + 2}" r="${b.r + 3}" fill="#000"/>
       <circle cx="${b.x}" cy="${b.y}" r="${b.r + 2}" fill="url(#chrome)"/>
@@ -380,7 +391,7 @@ function buildWheel() {
   wrap.innerHTML = svg;
   dash.appendChild(wrap);
 
-  wrap.querySelector('#paddles').addEventListener('pointerenter', () => info({ type: 'wheel', fn: 'Hall-Paddel L/R', info: 'Simube Doppelpaddel (analog, Hall). Vorerst unbelegt – nicht zum Schalten, nicht zusammengelegt.' }));
+  wrap.querySelector('#paddles').addEventListener('pointerenter', () => info({ type: 'wheel', fn: 'Hall-Paddel L/R', info: 'Kleine Paddel unter den Schaltwippen: Simube Doppelpaddel (analog, Hall). Vorerst unbelegt – nicht zum Schalten, nicht zusammengelegt.' }));
   for (const g of wrap.querySelectorAll('.wbtn')) {
     const id = g.dataset.id;
     const b = WHEEL.find((x) => x.id === id) || WHEEL_POTS.find((x) => x.id === id);
