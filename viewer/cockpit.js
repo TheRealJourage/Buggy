@@ -13,8 +13,8 @@ const PANELS = [
     { id: 'offM', type: 'A', cover: true, led: RED, label: 'Offroad', sub: 'Mitte', pos: ['AUS', 'AN'], illegal: true, info: 'Offroad-Scheinwerfer Mitte (2,85 A, Last-Ebene). ' + ILLEGAL },
     { id: 'rundum', type: 'A', led: RED, label: 'Rundum', sub: 'orange', pos: ['AUS', 'AN'], illegal: true, info: 'Orange Rundumleuchte. Zulassung mit dem TÜV klären. ' + ILLEGAL },
     { id: 'suchAn', type: 'A', cover: true, led: RED, label: 'Suchlicht', pos: ['AUS', 'AN'], illegal: true, info: 'Suchscheinwerfer an/aus (Last-Ebene). Im Straßenverkehr nicht zulässig (mit TÜV klären). ' + ILLEGAL },
-    { id: 'nebel', type: 'B', cover: true, label: 'Nebel', pos: ['AUS', 'VORN', 'V+SCHL'], info: 'Aus / Nebelscheinwerfer vorn / vorn + Nebelschlussleuchte. Wirkt nur mit Stand- oder Abblendlicht. Beleuchtung der Nebelschluss-Stellung: Idee vom User, noch offen.' },
-    { id: 'rueck', type: 'B', cover: true, label: 'Rückfahr', sub: 'Zusatz weiß', pos: ['AUS', 'R-AUTO', 'AN'], info: 'Zusatz-Rückfahrscheinwerfer weiß (3,40 A, DT-Pin 8). Kappe zu = AUS. Mitte = Rangieren: an, solange R eingelegt ist. Oben = dauerhaft AN. Typ B hat keine LED, Anzeige im Display. Zulassung mit TÜV klären.' },
+    { id: 'nebel', type: 'B', cover: true, clearCap: true, capGlow: () => controls.nebel.st.pos === 'up' && controls.licht.st.pos !== 'down', label: 'Nebel', pos: ['AUS', 'VORN', 'V+SCHL'], info: 'Aus / Nebelscheinwerfer vorn / vorn + Nebelschlussleuchte. Wirkt nur mit Stand- oder Abblendlicht. Durchsichtige rote Kappe: leuchtet von unten (LED durch die Kappen-Platte), sobald die Nebelschlussleuchte an ist.' },
+    { id: 'rueck', type: 'B', cover: true, clearCap: true, capGlow: () => controls.rueck.st.pos === 'up', label: 'Rückfahr', sub: 'Zusatz weiß', pos: ['AUS', 'R-AUTO', 'AN'], info: 'Zusatz-Rückfahrscheinwerfer weiß (3,40 A, DT-Pin 8). Kappe zu = AUS. Mitte = Rangieren: an, solange R eingelegt ist. Oben = dauerhaft AN. Durchsichtige rote Kappe leuchtet bei AN (bei R-AUTO nicht, das ist straßenlegal). Zulassung mit TÜV klären.' },
     { id: 'offH', type: 'A', cover: true, led: RED, label: 'Offroad', sub: 'Heck', pos: ['AUS', 'AN'], illegal: true, info: 'Offroad Heck (2,70 A, DT-Pin 7). ' + ILLEGAL },
     { id: 'nahfeld', type: 'A', led: RED, label: 'Nahfeld', sub: 'Unterboden weiß', pos: ['AUS', 'AN'], illegal: true, info: 'Nahfeldbeleuchtung: helle weiße LEDs unter dem Fahrzeug (Unterboden-Idee, wegen der Bodenfreiheit als Nahfeld). Zulassung mit TÜV klären. ' + ILLEGAL },
     { id: 'joy', type: 'joy', label: 'Joystick', sub: 'Pan / Tilt', info: 'Gamepad-Daumenstick X/Y als Ratenbefehl: Auslenkung = Drehgeschwindigkeit, loslassen = stehen bleiben. Wirkt nur, wenn das Suchlicht an ist. Presets/Home später.' },
@@ -109,7 +109,13 @@ function nut() {
     <circle cx="${CX}" cy="${CY}" r="6" fill="#1a1a1a"/>`;
 }
 
-function cover(open) {
+function cover(open, clear, glow) {
+  if (open && clear) {
+    return `<rect x="22" y="2" width="48" height="15" rx="4" fill="${glow ? '#ff3a2e' : '#a8201a99'}" stroke="#600"${glow ? ' filter="url(#glow)"' : ''}/>
+      <rect x="25" y="4" width="42" height="3" rx="1.5" fill="#ffd0c8${glow ? 'cc' : '44'}"/>
+      <circle cx="46" cy="23" r="2" fill="${glow ? '#ff6050' : '#3a0a08'}"/>
+      <rect x="20" y="15" width="52" height="6" rx="2" fill="url(#chrome)" stroke="#333" stroke-width=".6"/>`;
+  }
   if (open) {
     return `<rect x="22" y="2" width="48" height="15" rx="4" fill="#7a0c08" stroke="#400"/>
       <rect x="25" y="4" width="42" height="3" rx="1.5" fill="#ff5a4a66"/>
@@ -131,7 +137,7 @@ function posText(def) {
 function renderToggle(c) {
   const { def, st } = c;
   const lit = def.led && isLit(def, st);
-  c.svg.innerHTML = nut() + lever(st.pos, def, lit) + (def.cover ? cover(st.open) : '') + posText(def);
+  c.svg.innerHTML = nut() + lever(st.pos, def, lit) + (def.cover ? cover(st.open, def.clearCap, def.capGlow && def.capGlow()) : '') + posText(def);
 }
 
 function isLit(def, st) {
@@ -313,7 +319,7 @@ function buildPanel(p) {
     cell.appendChild(plate);
     const type = document.createElement('div');
     type.className = 'type';
-    type.textContent = { A: 'A', B: 'B', C: 'C', T: 'T', T2: 'T2', push: 'Druckknopf', pot: 'Poti', joy: 'Gamepad-Stick', reserve: '' }[def.type] + (def.cover ? ' + Kappe' : '');
+    type.textContent = { A: 'A', B: 'B', C: 'C', T: 'T', T2: 'T2', push: 'Druckknopf', pot: 'Poti', joy: 'Gamepad-Stick', reserve: '' }[def.type] + (def.cover ? (def.clearCap ? ' + Kappe klar' : ' + Kappe') : '');
     cell.appendChild(type);
     grid.appendChild(cell);
     const st = { pos: def.type === 'T2' ? 'mid' : 'down', open: false, v: 0.4, jx: 0, jy: 0 };
