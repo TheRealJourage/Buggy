@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Buggy – Lichtpanel 3D (Druckteil)</title>
+<title>Buggy – Schaltpanels 3D (Druckteile)</title>
 <style>
   html, body { margin: 0; height: 100%; background: #111; color: #ddd; font-family: system-ui, sans-serif; overflow: hidden; }
   #bar { position: fixed; top: 0; left: 0; right: 0; padding: 8px 12px; background: #151517cc; display: flex; gap: 14px; align-items: center; font-size: 14px; z-index: 2; flex-wrap: wrap; }
@@ -16,15 +16,19 @@
 </head>
 <body>
 <div id="bar">
-  <b>Lichtpanel – Druckteil</b>
+  <b>Druckteil</b>
+  <select id="which">
+    <option value="lichtpanel">Lichtpanel</option>
+    <option value="motorpanel">Motor &amp; Zubehör</option>
+    <option value="audiopanel">Entertainment, Audio &amp; Helligkeit</option>
+  </select>
   <label><input type="checkbox" id="parts" checked> Schalter + Kappen zeigen</label>
   <label><input type="checkbox" id="open"> Kappen offen</label>
   <label><input type="checkbox" id="back"> Rückseite</label>
   <label><input type="checkbox" id="labels" checked> Schrift</label>
   <span id="dims" class="hint"></span>
-  <span>mit Schrift: <a href="downloads/panels/lichtpanel.stl" download>STL</a> · <a href="downloads/panels/lichtpanel.step" download>STEP</a></span>
+  <span id="dl"></span>
   <span>Probestück: <a href="downloads/panels/probestueck.stl" download>STL</a> · <a href="downloads/panels/probestueck.step" download>STEP</a></span>
-  <span>ohne: <a href="downloads/panels/lichtpanel_ohne_schrift.stl" download>STL</a> · <a href="downloads/panels/lichtpanel_ohne_schrift.step" download>STEP</a></span>
   <span class="hint">Maus: drehen · Rad: zoomen · rechts: verschieben</span>
 </div>
 <script type="module">
@@ -63,75 +67,97 @@ function parseStl(buf) {
   return g;
 }
 
-const [stl, meta] = await Promise.all([
-  fetch('downloads/panels/lichtpanel.stl').then((r) => r.arrayBuffer()),
-  fetch('downloads/panels/lichtpanel.json').then((r) => r.json()),
-]);
-const geo = parseStl(stl);
-geo.computeBoundingBox();
-const bb = geo.boundingBox;
-const yc = (bb.max.y + bb.min.y) / 2;
-const panel = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0x55575c, roughness: 0.7, metalness: 0.05 }));
-const root = new THREE.Group();
-root.position.y = -yc;
-root.add(panel);
-scene.add(root);
-document.getElementById('dims').textContent =
-  `${(bb.max.x - bb.min.x).toFixed(0)} × ${(bb.max.y - bb.min.y).toFixed(0)} × ${(bb.max.z - bb.min.z).toFixed(0)} mm`;
-
-// simplified switches and covers on top of the print
+const panelMat = new THREE.MeshStandardMaterial({ color: 0x55575c, roughness: 0.7, metalness: 0.05 });
 const chrome = new THREE.MeshStandardMaterial({ color: 0xd8dadd, metalness: 0.9, roughness: 0.25 });
 const redCap = new THREE.MeshStandardMaterial({ color: 0xc81a10, roughness: 0.35, transparent: true, opacity: 0.85 });
 const clearCap = new THREE.MeshStandardMaterial({ color: 0xff3a2e, roughness: 0.1, transparent: true, opacity: 0.45 });
 const ledMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xff2010, emissiveIntensity: 0.6 });
-const parts = new THREE.Group();
-const covers = [];
-const T = meta.plateT;
-for (const c of meta.cells) {
-  const g = new THREE.Group();
-  g.position.set(c.x, c.y, T);
-  const bush = new THREE.Mesh(new THREE.CylinderGeometry(6, 6, meta.thread, 24), chrome);
-  bush.rotation.x = Math.PI / 2; bush.position.z = meta.thread / 2; g.add(bush);
-  const nut = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 2.5, 6), chrome);
-  nut.rotation.x = Math.PI / 2; nut.position.z = 1.25 + (c.cap ? meta.capT : 0); g.add(nut);
-  const lever = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2, meta.lever, 16), chrome);
-  lever.rotation.x = Math.PI / 2 - 0.35; lever.position.set(0, -meta.lever * 0.17, meta.thread + meta.lever / 2 - 1); g.add(lever);
-  if (c.cap) {
-    const plate = new THREE.Mesh(new THREE.BoxGeometry(meta.capW, meta.capH, meta.capT), chrome);
-    plate.position.set(0, meta.capTop - meta.capH / 2, -meta.capT / 2 + 0.01); g.add(plate);
-    const hinge = new THREE.Group();
-    hinge.position.set(0, meta.capTop - 2, 2);
-    const shell = new THREE.Mesh(new THREE.BoxGeometry(meta.capW - 1, meta.capH - 4, 30), c.led ? clearCap : redCap);
-    shell.position.set(0, -(meta.capH - 4) / 2, 13);
-    hinge.add(shell); g.add(hinge); covers.push(hinge);
-  }
-  if (c.led) {
-    const led = new THREE.Mesh(new THREE.SphereGeometry(2.5, 16, 12), ledMat);
-    led.position.set(0, meta.ledUp, 0.5); g.add(led);
-  }
-  parts.add(g);
-}
-if (meta.joy) {
-  const j = meta.joy, black = new THREE.MeshStandardMaterial({ color: 0x1b1b1d, roughness: 0.6 });
-  const g = new THREE.Group();
-  g.position.set(j.x, j.y, 0);
-  const pcb = new THREE.Mesh(new THREE.BoxGeometry(j.pcb[0], j.pcb[1], j.pcb[2]), new THREE.MeshStandardMaterial({ color: 0x0d2a14 }));
-  pcb.position.z = j.pcbZ - j.pcb[2] / 2; g.add(pcb);
-  const dome = new THREE.Mesh(new THREE.SphereGeometry(12, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), black);
-  dome.rotation.x = Math.PI / 2; dome.position.z = j.pcbZ + 12; g.add(dome);
-  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(3.5, 3.5, 8, 16), black);
-  shaft.rotation.x = Math.PI / 2; shaft.position.z = j.pcbZ + 24 + 4 - 4; g.add(shaft);
-  const cap = new THREE.Mesh(new THREE.CylinderGeometry(12, 12, 4, 32), black);
-  cap.rotation.x = Math.PI / 2; cap.position.z = j.pcbZ + 32.4 - 2; g.add(cap);
-  parts.add(g);
-}
-root.add(parts);
-
+const black = new THREE.MeshStandardMaterial({ color: 0x1b1b1d, roughness: 0.6 });
+const root = new THREE.Group();
+scene.add(root);
+const panel = new THREE.Mesh(new THREE.BufferGeometry(), panelMat);
+root.add(panel);
+let parts = new THREE.Group();
+let covers = [];
+let current = 'lichtpanel';
 const $ = (id) => document.getElementById(id);
-$('labels').onchange = async (e) => {
-  const f = e.target.checked ? 'lichtpanel.stl' : 'lichtpanel_ohne_schrift.stl';
+
+async function loadGeometry() {
+  const f = `${current}${$('labels').checked ? '' : '_ohne_schrift'}.stl`;
   panel.geometry = parseStl(await fetch('downloads/panels/' + f).then((r) => r.arrayBuffer()));
-};
+  panel.geometry.computeBoundingBox();
+  const bb = panel.geometry.boundingBox;
+  root.position.set(-(bb.max.x + bb.min.x) / 2, -(bb.max.y + bb.min.y) / 2, 0);
+  $('dims').textContent = `${(bb.max.x - bb.min.x).toFixed(0)} × ${(bb.max.y - bb.min.y).toFixed(0)} × ${(bb.max.z - bb.min.z).toFixed(0)} mm`;
+}
+
+function buildParts(meta) {
+  root.remove(parts);
+  parts = new THREE.Group();
+  covers = [];
+  const T = meta.plateT;
+  for (const c of meta.cells) {
+    const g = new THREE.Group();
+    g.position.set(c.x, c.y, T);
+    if (c.kind === 'sw') {
+      const bush = new THREE.Mesh(new THREE.CylinderGeometry(6, 6, meta.thread, 24), chrome);
+      bush.rotation.x = Math.PI / 2; bush.position.z = meta.thread / 2; g.add(bush);
+      const nut = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 2.5, 6), chrome);
+      nut.rotation.x = Math.PI / 2; nut.position.z = 1.25 + (c.cap ? meta.capT : 0); g.add(nut);
+      const lever = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2, meta.lever, 16), chrome);
+      lever.rotation.x = Math.PI / 2 - 0.35; lever.position.set(0, -meta.lever * 0.17, meta.thread + meta.lever / 2 - 1); g.add(lever);
+      if (c.cap) {
+        const plate = new THREE.Mesh(new THREE.BoxGeometry(meta.capW, meta.capH, meta.capT), chrome);
+        plate.position.set(0, meta.capTop - meta.capH / 2, -meta.capT / 2 + 0.01); g.add(plate);
+        const hinge = new THREE.Group();
+        hinge.position.set(0, meta.capTop - 2, 2);
+        const shell = new THREE.Mesh(new THREE.BoxGeometry(meta.capW - 1, meta.capH - 4, 30), c.led ? clearCap : redCap);
+        shell.position.set(0, -(meta.capH - 4) / 2, 13);
+        hinge.add(shell); g.add(hinge); covers.push(hinge);
+      }
+      if (c.led) {
+        const led = new THREE.Mesh(new THREE.SphereGeometry(2.5, 16, 12), ledMat);
+        led.position.set(0, meta.ledUp, 0.5); g.add(led);
+      }
+    } else if (c.kind === 'pot') {
+      const knob = new THREE.Mesh(new THREE.CylinderGeometry(meta.knobD / 2, meta.knobD / 2 + 1, 15, 32), black);
+      knob.rotation.x = Math.PI / 2; knob.position.z = 2.5 + 7.5; g.add(knob);
+      const mark = new THREE.Mesh(new THREE.BoxGeometry(1.5, meta.knobD / 2 - 2, 0.5), chrome);
+      mark.position.set(0, meta.knobD / 4, 17.6); g.add(mark);
+    } else {
+      g.position.z = 0;
+      const pcb = new THREE.Mesh(new THREE.BoxGeometry(meta.joyPcb[0], meta.joyPcb[1], meta.joyPcb[2]), new THREE.MeshStandardMaterial({ color: 0x0d2a14 }));
+      pcb.position.z = meta.joyPcbZ - meta.joyPcb[2] / 2; g.add(pcb);
+      const dome = new THREE.Mesh(new THREE.SphereGeometry(12, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), black);
+      dome.rotation.x = Math.PI / 2; dome.position.z = meta.joyPcbZ + 12; g.add(dome);
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(3.5, 3.5, 8, 16), black);
+      shaft.rotation.x = Math.PI / 2; shaft.position.z = meta.joyPcbZ + 24; g.add(shaft);
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(12, 12, 4, 32), black);
+      cap.rotation.x = Math.PI / 2; cap.position.z = meta.joyPcbZ + 30.4; g.add(cap);
+    }
+    parts.add(g);
+  }
+  parts.visible = $('parts').checked;
+  if ($('open').checked) covers.forEach((h) => { h.rotation.x = -Math.PI / 2; });
+  root.add(parts);
+}
+
+async function load(name) {
+  current = name;
+  const f = (ext) => `downloads/panels/${name}${ext}`;
+  $('dl').innerHTML = `mit Schrift: <a href="${f('.stl')}" download>STL</a> · <a href="${f('.step')}" download>STEP</a> · ohne: <a href="${f('_ohne_schrift.stl')}" download>STL</a> · <a href="${f('_ohne_schrift.step')}" download>STEP</a>`;
+  const meta = await fetch(f('.json')).then((r) => r.json());
+  await loadGeometry();
+  buildParts(meta);
+}
+
+$('which').onchange = (e) => { history.replaceState(null, '', '?p=' + e.target.value); load(e.target.value); };
+const start = new URLSearchParams(location.search).get('p');
+if (start) $('which').value = start;
+await load($('which').value);
+
+
+$('labels').onchange = () => loadGeometry();
 $('parts').onchange = (e) => { parts.visible = e.target.checked; };
 $('open').onchange = (e) => covers.forEach((h) => { h.rotation.x = e.target.checked ? -Math.PI / 2 : 0; });
 $('back').onchange = (e) => {

@@ -1,0 +1,98 @@
+{
+ "plateT": 8.0,
+ "capTop": 27.5,
+ "capW": 17.099999999999998,
+ "capH": 41.0,
+ "capT": 0.9,
+ "ledUp": 22.0,
+ "thread": 6.0,
+ "lever": 19.0,
+ "potSkin": 3.0,
+ "knobD": 24.0,
+ "joyPcbZ": -8.4,
+ "joyPcb": [
+  27.0,
+  34.0,
+  1.6
+ ],
+ "cells": [
+  {
+   "x": -72.0,
+   "y": 36.0,
+   "kind": "sw",
+   "label": "ZÜNDUNG",
+   "cap": true,
+   "led": false
+  },
+  {
+   "x": -72.0,
+   "y": -36.0,
+   "kind": "sw",
+   "label": "LÜFTER",
+   "cap": false,
+   "led": false
+  },
+  {
+   "x": -36.0,
+   "y": 36.0,
+   "kind": "sw",
+   "label": "START",
+   "cap": true,
+   "led": false
+  },
+  {
+   "x": -36.0,
+   "y": -36.0,
+   "kind": "pot",
+   "label": "LÜFTER %"
+  },
+  {
+   "x": 0.0,
+   "y": 36.0,
+   "kind": "sw",
+   "label": "KOMPRESSOR",
+   "cap": true,
+   "led": false
+  },
+  {
+   "x": 0.0,
+   "y": -36.0,
+   "kind": "sw",
+   "label": "12 V FRONT",
+   "cap": false,
+   "led": false
+  },
+  {
+   "x": 36.0,
+   "y": 36.0,
+   "kind": "sw",
+   "label": "WINDE",
+   "cap": true,
+   "led": false
+  },
+  {
+   "x": 36.0,
+   "y": -36.0,
+   "kind": "sw",
+   "label": "12 V SITZ",
+   "cap": false,
+   "led": false
+  },
+  {
+   "x": 72.0,
+   "y": 36.0,
+   "kind": "sw",
+   "label": "SITZHEIZUNG",
+   "cap": false,
+   "led": false
+  },
+  {
+   "x": 72.0,
+   "y": -36.0,
+   "kind": "sw",
+   "label": "12 V HECK",
+   "cap": false,
+   "led": false
+  }
+ ]
+}

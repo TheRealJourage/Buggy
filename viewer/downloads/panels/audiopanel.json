@@ -1,0 +1,58 @@
+{
+ "plateT": 8.0,
+ "capTop": 27.5,
+ "capW": 17.099999999999998,
+ "capH": 41.0,
+ "capT": 0.9,
+ "ledUp": 22.0,
+ "thread": 6.0,
+ "lever": 19.0,
+ "potSkin": 3.0,
+ "knobD": 24.0,
+ "joyPcbZ": -8.4,
+ "joyPcb": [
+  27.0,
+  34.0,
+  1.6
+ ],
+ "cells": [
+  {
+   "x": -90.0,
+   "y": 0.0,
+   "kind": "sw",
+   "label": "CARPLAY",
+   "cap": false,
+   "led": false
+  },
+  {
+   "x": -54.0,
+   "y": 0.0,
+   "kind": "pot",
+   "label": "CARPLAY"
+  },
+  {
+   "x": -18.0,
+   "y": 0.0,
+   "kind": "pot",
+   "label": "INTERCOM"
+  },
+  {
+   "x": 18.0,
+   "y": 0.0,
+   "kind": "pot",
+   "label": "FUNK"
+  },
+  {
+   "x": 54.0,
+   "y": 0.0,
+   "kind": "pot",
+   "label": "AMBIENT"
+  },
+  {
+   "x": 90.0,
+   "y": 0.0,
+   "kind": "pot",
+   "label": "TACHO/LED"
+  }
+ ]
+}

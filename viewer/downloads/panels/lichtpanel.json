@@ -7,17 +7,33 @@
  "ledUp": 22.0,
  "thread": 6.0,
  "lever": 19.0,
+ "potSkin": 3.0,
+ "knobD": 24.0,
+ "joyPcbZ": -8.4,
+ "joyPcb": [
+  27.0,
+  34.0,
+  1.6
+ ],
  "cells": [
   {
    "x": -72.0,
    "y": 36.0,
+   "kind": "sw",
    "label": "SUCHLICHT",
    "cap": true,
    "led": false
   },
   {
+   "x": -72.0,
+   "y": -36.0,
+   "kind": "joy",
+   "label": ""
+  },
+  {
    "x": -36.0,
    "y": 36.0,
+   "kind": "sw",
    "label": "OFFROAD MITTE",
    "cap": true,
    "led": false
@@ -25,6 +41,7 @@
   {
    "x": -36.0,
    "y": -36.0,
+   "kind": "sw",
    "label": "OFFROAD HECK",
    "cap": true,
    "led": false
@@ -32,6 +49,7 @@
   {
    "x": 0.0,
    "y": 36.0,
+   "kind": "sw",
    "label": "RUNDUM",
    "cap": false,
    "led": false
@@ -39,6 +57,7 @@
   {
    "x": 0.0,
    "y": -36.0,
+   "kind": "sw",
    "label": "NAHFELD",
    "cap": false,
    "led": false
@@ -46,6 +65,7 @@
   {
    "x": 36.0,
    "y": 36.0,
+   "kind": "sw",
    "label": "ZUSATZ-FERN",
    "cap": true,
    "led": false
@@ -53,6 +73,7 @@
   {
    "x": 36.0,
    "y": -36.0,
+   "kind": "sw",
    "label": "RÜCKFAHR",
    "cap": true,
    "led": true
@@ -60,6 +81,7 @@
   {
    "x": 72.0,
    "y": 36.0,
+   "kind": "sw",
    "label": "LICHT",
    "cap": false,
    "led": false
@@ -67,19 +89,10 @@
   {
    "x": 72.0,
    "y": -36.0,
+   "kind": "sw",
    "label": "NEBEL",
    "cap": true,
    "led": true
   }
- ],
- "joy": {
-  "x": -72.0,
-  "y": -36.0,
-  "pcbZ": -8.4,
-  "pcb": [
-   27.0,
-   34.0,
-   1.6
-  ]
- }
+ ]
 }
