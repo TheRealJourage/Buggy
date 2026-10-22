@@ -1,31 +1,30 @@
 // Cockpit mock-up: switch assignment from Vault Buggy/Bordnetz-Konzept.md ("Bedienelemente & Panels", 2026-10-22).
 import { SHIFT_ORDER } from './sim.js';
 
-const W = 1760, H = 1070;
+const W = 1820, H = 1070;
 const RED = '#ff3322', GREEN = '#33ff55', AMBER = '#ffaa00', BLUE = '#3aa0ff', YELLOW = '#ffe033';
 const ILLEGAL = 'Kann im Straßenverkehr illegal sein → beleuchteter Schalter (Regel: alles, was vor der Straße aus muss, leuchtet).';
 
 const PANELS = [
-  { id: 'licht', title: 'Lichtpanel', x: 20, y: 190, cols: 3, items: [
+  { id: 'licht', title: 'Lichtpanel', x: 20, y: 190, cols: 4, items: [
+    // column = function pair (top/bottom); left column is farthest from the driver = used most
     { id: 'licht', type: 'B', label: 'Licht', pos: ['AUS', 'STAND', 'ABBLEND'], info: 'Aus / Standlicht / Abblendlicht inkl. Rücklicht + Kennzeichen. Standlicht-Stellung wird beim Abstellen im Parkmodus gehalten.' },
-    { id: 'nebel', type: 'B', cover: true, label: 'Nebel', pos: ['AUS', 'VORN', 'V+SCHL'], info: 'Aus / Nebelscheinwerfer vorn / vorn + Nebelschlussleuchte. Wirkt nur mit Stand- oder Abblendlicht. Beleuchtung der Nebelschluss-Stellung: Idee vom User, noch offen.' },
     { id: 'zusatz', type: 'C', cover: true, label: 'Zusatz-Fern', sub: 'Freigabe', pos: ['AUS', 'FREI'], info: 'Freigabe Zusatz-Fernlicht. Brennt nur zusammen mit dem Fernlicht (Lichthebel). Typ C, unbeleuchtet.' },
     { id: 'offM', type: 'A', cover: true, led: RED, label: 'Offroad', sub: 'Mitte', pos: ['AUS', 'AN'], illegal: true, info: 'Offroad-Scheinwerfer Mitte (2,85 A, Last-Ebene). ' + ILLEGAL },
-    { id: 'offH', type: 'A', cover: true, led: RED, label: 'Offroad', sub: 'Heck', pos: ['AUS', 'AN'], illegal: true, info: 'Offroad Heck (2,70 A, DT-Pin 7). ' + ILLEGAL },
-    { id: 'rueck', type: 'B', cover: true, label: 'Rückfahr', sub: 'Zusatz weiß', pos: ['AUS', 'R-AUTO', 'AN'], info: 'Zusatz-Rückfahrscheinwerfer weiß (3,40 A, DT-Pin 8). Kappe zu = AUS. Mitte = Rangieren: an, solange R eingelegt ist. Oben = dauerhaft AN. Typ B hat keine LED, Anzeige im Display. Zulassung mit TÜV klären.' },
     { id: 'rundum', type: 'A', led: RED, label: 'Rundum', sub: 'orange', pos: ['AUS', 'AN'], illegal: true, info: 'Orange Rundumleuchte. Zulassung mit dem TÜV klären. ' + ILLEGAL },
-    { id: 'ledant', type: 'A', led: RED, label: 'LED-Antennen', pos: ['AUS', 'AN'], illegal: true, info: 'LED-Antennen hinten, im Fahrbetrieb nicht erlaubt. ' + ILLEGAL },
-    { id: 'warn', type: 'A', led: AMBER, label: 'Warnblinker', pos: ['AUS', 'AN'], blink: true, info: 'Warnblinker, eigene Steuerleitung direkt zum hinteren Controller (Kl. 30), weckt ihn auch bei Zündung aus. Vorschrift „bei Zündung aus“ noch mit TÜV klären.' },
-    { id: 'offV', type: 'reserve', label: 'Offroad vorn', sub: 'Reserve', info: 'Offroad vorn ist noch nicht vorhanden. Platz für einen weiteren Typ A mit Kappe.' },
+    { id: 'nebel', type: 'B', cover: true, label: 'Nebel', pos: ['AUS', 'VORN', 'V+SCHL'], info: 'Aus / Nebelscheinwerfer vorn / vorn + Nebelschlussleuchte. Wirkt nur mit Stand- oder Abblendlicht. Beleuchtung der Nebelschluss-Stellung: Idee vom User, noch offen.' },
+    { id: 'rueck', type: 'B', cover: true, label: 'Rückfahr', sub: 'Zusatz weiß', pos: ['AUS', 'R-AUTO', 'AN'], info: 'Zusatz-Rückfahrscheinwerfer weiß (3,40 A, DT-Pin 8). Kappe zu = AUS. Mitte = Rangieren: an, solange R eingelegt ist. Oben = dauerhaft AN. Typ B hat keine LED, Anzeige im Display. Zulassung mit TÜV klären.' },
+    { id: 'offH', type: 'A', cover: true, led: RED, label: 'Offroad', sub: 'Heck', pos: ['AUS', 'AN'], illegal: true, info: 'Offroad Heck (2,70 A, DT-Pin 7). ' + ILLEGAL },
+    { id: 'nahfeld', type: 'A', led: RED, label: 'Nahfeld', sub: 'Unterboden weiß', pos: ['AUS', 'AN'], illegal: true, info: 'Nahfeldbeleuchtung: helle weiße LEDs unter dem Fahrzeug (Unterboden-Idee, wegen der Bodenfreiheit als Nahfeld). Zulassung mit TÜV klären. ' + ILLEGAL },
   ] },
-  { id: 'motor', title: 'Motorpanel', x: 1090, y: 190, cols: 3, items: [
+  { id: 'motor', title: 'Motorpanel', x: 1150, y: 190, cols: 3, items: [
     { id: 'zuendung', type: 'A', led: GREEN, label: 'Zündung', sub: 'Kl. 15', pos: ['AUS', 'AN'], info: 'Rastender Kippschalter, nur freigegeben bei gültigem Lenkrad-Code. LED leuchtet nur, wenn Kl. 15 wirklich anliegt.' },
     { id: 'start', type: 'T', cover: true, label: 'Start', sub: 'Kl. 50', pos: ['', 'START'], info: 'Tastend (EIN)-AUS mit Kappe. Wirkt nur bei BEREIT (N oder Kupplung getreten, Selbsttest ok).' },
     { id: 'kompressor', type: 'B', cover: true, label: 'Kompressor', pos: ['AUTO', 'AUS', 'AN'], info: 'Kappe zu = AUTO (läuft erst bei laufendem Motor). Mitte = AUS. Oben = AN: übergeht nur „Motor läuft“, der Druckschalter schaltet immer ab.' },
     { id: 'luefter', type: 'A', led: BLUE, label: 'Lüfter', sub: 'Auto / Manuell', pos: ['AUTO', 'MAN'], info: 'Auto = Speeduino (CLT, Pin 47). Manuell = Tastgrad vom Poti daneben. Typ A oder C noch offen.' },
     { id: 'luefterPoti', type: 'pot', label: 'Lüfter', sub: 'Tastgrad', info: 'Tastgrad im Modus Manuell.' },
   ] },
-  { id: 'komfort', title: 'Komfort / Zubehör', x: 1420, y: 190, cols: 3, unlit: false, items: [
+  { id: 'komfort', title: 'Komfort / Zubehör', x: 1480, y: 190, cols: 3, unlit: false, items: [
     { id: 'sitz', type: 'C', label: 'Sitzheizung', pos: ['AUS', 'AN'], info: 'Einstufig, normaler Kippschalter (Typ C).' },
     { id: 'carplay', type: 'C', label: 'CarPlay-Pi', pos: ['AUS', 'AN'], info: 'Sound-/CarPlay-Pi zuschalten (Typ C).' },
     { id: 'windeFrei', type: 'A', cover: true, led: YELLOW, label: 'Winde', sub: 'Freigabe', pos: ['AUS', 'FREI'], info: 'Freigabe für die Winde am Wischerhebel (herziehen = ein, wegdrücken = aus). Signal an den Controller, der die Winden-Relais schaltet. Vorschlag: zusätzlich in Reihe zur Spulenversorgung der Winden-Relais. Fernbedienung der Winde bleibt.' },
@@ -33,11 +32,11 @@ const PANELS = [
     { id: 'a12Sitz', type: 'A', led: BLUE, label: '12 V Sitz', sub: 'hinter Fahrer', pos: ['AUS', 'AN'], info: '12-V-Abnahmepunkt hinter dem Fahrersitz.' },
     { id: 'a12Heck', type: 'A', led: BLUE, label: '12 V Heck', pos: ['AUS', 'AN'], info: '12-V-Abnahmepunkt außen am Heck.' },
   ] },
-  { id: 'such', title: 'Suchscheinwerfer', x: 1090, y: 620, cols: 3, items: [
+  { id: 'such', title: 'Suchscheinwerfer', x: 1150, y: 620, cols: 3, items: [
     { id: 'suchAn', type: 'A', cover: true, led: RED, label: 'Suchlicht', pos: ['AUS', 'AN'], illegal: true, info: 'Suchscheinwerfer an/aus (Last-Ebene). Im Straßenverkehr nicht zulässig (mit TÜV klären). ' + ILLEGAL },
     { id: 'joy', type: 'joy', label: 'Joystick', sub: 'Pan / Tilt', info: 'Joystick X/Y als Ratenbefehl: Auslenkung = Drehgeschwindigkeit, loslassen = stehen bleiben. Wirkt nur, wenn das Suchlicht an ist. Presets/Home später.' },
   ] },
-  { id: 'audio', title: 'Audio & Helligkeit', x: 1090, y: 850, cols: 5, items: [
+  { id: 'audio', title: 'Audio & Helligkeit', x: 1150, y: 850, cols: 5, items: [
     { id: 'volCar', type: 'pot', label: 'CarPlay-Pi', sub: 'Kopfhörer', info: 'Lautstärke Musik/Telefon im Kopfhörer.' },
     { id: 'volIc', type: 'pot', label: 'Intercom', sub: 'Kopfhörer', info: 'Lautstärke Beifahrer (Sena/Cardo) im Kopfhörer.' },
     { id: 'volFunk', type: 'pot', label: 'Funk', sub: 'CB / PMR', info: 'Lautstärke Funk im Kopfhörer. Sendepegel (CarPlay, Intercom, Funk, Megafon) im Pi-Menü (Vorschlag).' },
@@ -48,11 +47,11 @@ const PANELS = [
 
 const WHEEL = [
   { id: 'hupe', x: 340, y: 300, r: 36, fill: '#444', text: 'HUPE', fn: 'Hupe', info: 'Hupe (GP8, Bit 2). Festgelegt.' },
-  { id: 'gelb', x: 278, y: 350, r: 16, fill: '#e6c200', fn: 'Spiegelhzg.', below: true, info: 'Gelb (GP11): Spiegelheizung mit Timer – drücken = 10 min an, nochmal drücken = aus. Liegt weit innen, passt zu einer seltenen Funktion.' },
+  { id: 'gelb', x: 278, y: 350, r: 16, fill: '#e6c200', fn: 'Warnblinker', below: true, info: 'Gelb (GP11): Warnblinker ein/aus (Toggle). Kontrolle über die Blinkpfeile im Display. Hinweis: geht nur, solange das Lenkrad steckt und Kl. 30 + LIN-Kette wach sind.' },
   { id: 'blau', x: 236, y: 262, r: 16, fill: '#1e64d8', fn: 'PTT Funk', info: 'Blau (GP10): außen, beim Fahren gut erreichbar. Tendenz: Push-to-Talk Funk (CB/PMR).' },
   { id: 'minus', paddle: 'L', fn: 'runter', info: 'Große Schaltwippe links = Minus (GP12): runterschalten 5→…→1→R. Festgelegt.' },
   { id: 'gruen', x: 444, y: 262, r: 16, fill: '#1faa3a', fn: 'offen (PTT?)', info: 'Grün (GP5): außen, beim Fahren gut erreichbar. Wahrscheinlich ein zweites Push-to-Talk, Ziel noch offen.' },
-  { id: 'rot', x: 402, y: 350, r: 16, fill: '#d42020', fn: 'offen', below: true, info: 'Rot (GP6): liegt weit innen, beim Fahren schwer erreichbar → für seltene Funktionen. Offen.' },
+  { id: 'rot', x: 402, y: 350, r: 16, fill: '#d42020', fn: 'Spiegelhzg.', below: true, info: 'Rot (GP6): Spiegelheizung mit Timer – drücken = 10 min an, nochmal drücken = aus.' },
   { id: 'plus', paddle: 'R', fn: 'hoch', info: 'Große Schaltwippe rechts = Plus (GP7): hochschalten R→1→…→5. Festgelegt.' },
   { id: 'schwarz', x: 340, y: 392, r: 16, fill: '#111', text: 'N', fn: 'Neutral', info: 'Schwarz (GP9), unten mittig: Gang N. Festgelegt 2026-10-22. Position am Lenkrad bestätigt der User noch.' },
 ];
@@ -61,7 +60,7 @@ const WHEEL_POTS = [
   { id: 'potR', x: 454, y: 410, fn: 'Lautstärke', info: 'Lenkrad-Poti: Gesamtlautstärke (Tendenz).' },
 ];
 
-const s = { gear: 'N', winch: null, pan: 0, tilt: 0, blinkL: false, blinkR: false, fern: false, flash: false, spiegelUntil: 0, phase: false, log: [] };
+const s = { gear: 'N', warn: false, winch: null, pan: 0, tilt: 0, blinkL: false, blinkR: false, fern: false, flash: false, spiegelUntil: 0, phase: false, log: [] };
 const controls = {};
 const dash = document.getElementById('dash');
 dash.style.width = W + 'px';
@@ -359,7 +358,7 @@ function draggable(el, handle, key) {
 function buildWheel() {
   const wrap = document.createElement('div');
   wrap.id = 'wheelWrap';
-  const pos = saved.wheel || { x: 390, y: 180 };
+  const pos = saved.wheel || { x: 450, y: 180 };
   wrap.style.left = pos.x + 'px';
   wrap.style.top = pos.y + 'px';
   const cx = 340, cy = 300, r = 210;
@@ -490,7 +489,8 @@ function wheelPress(b) {
     log(`Gang ${s.gear}`);
   } else if (b.id === 'schwarz') { s.gear = 'N'; log('Gang N'); }
   else if (b.id === 'hupe') log('HUPE');
-  else if (b.id === 'gelb') {
+  else if (b.id === 'gelb') { s.warn = !s.warn; log(`Warnblinker ${s.warn ? 'AN' : 'AUS'}`); }
+  else if (b.id === 'rot') {
     if (Date.now() < s.spiegelUntil) { s.spiegelUntil = 0; log('Spiegelheizung aus'); }
     else { s.spiegelUntil = Date.now() + 10 * 60 * 1000; log('Spiegelheizung 10 min'); }
   }
@@ -528,7 +528,7 @@ const fernActive = () => (s.fern && controls.licht.st.pos === 'up') || s.flash;
 
 function updateStatus() {
   document.getElementById('gear').textContent = s.gear;
-  const warn = on('warn');
+  const warn = s.warn;
   document.getElementById('arrL').classList.toggle('on', (s.blinkL || warn) && s.phase);
   document.getElementById('arrR').classList.toggle('on', (s.blinkR || warn) && s.phase);
   document.getElementById('tells').innerHTML = TELLS.map(([t, col, f], i) => {
