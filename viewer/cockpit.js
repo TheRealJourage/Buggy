@@ -19,22 +19,20 @@ const PANELS = [
     { id: 'nahfeld', type: 'A', led: RED, label: 'Nahfeld', sub: 'Unterboden weiß', pos: ['AUS', 'AN'], illegal: true, info: 'Nahfeldbeleuchtung: helle weiße LEDs unter dem Fahrzeug (Unterboden-Idee, wegen der Bodenfreiheit als Nahfeld). Zulassung mit TÜV klären. ' + ILLEGAL },
     { id: 'joy', type: 'joy', label: 'Joystick', sub: 'Pan / Tilt', info: 'Gamepad-Daumenstick X/Y als Ratenbefehl: Auslenkung = Drehgeschwindigkeit, loslassen = stehen bleiben. Wirkt nur, wenn das Suchlicht an ist. Presets/Home später.' },
   ] },
-  { id: 'motor', title: 'Motorpanel', x: 1250, y: 190, cols: 3, items: [
+  { id: 'motor', title: 'Motor & Zubehör', x: 1250, y: 190, cols: 5, items: [
     { id: 'zuendung', type: 'A', led: GREEN, label: 'Zündung', sub: 'Kl. 15', pos: ['AUS', 'AN'], info: 'Rastender Kippschalter, nur freigegeben bei gültigem Lenkrad-Code. LED leuchtet nur, wenn Kl. 15 wirklich anliegt.' },
     { id: 'start', type: 'T', cover: true, label: 'Start', sub: 'Kl. 50', pos: ['', 'START'], info: 'Tastend (EIN)-AUS mit Kappe. Wirkt nur bei BEREIT (N oder Kupplung getreten, Selbsttest ok).' },
     { id: 'kompressor', type: 'B', cover: true, label: 'Kompressor', pos: ['AUTO', 'AUS', 'AN'], info: 'Kappe zu = AUTO (läuft erst bei laufendem Motor). Mitte = AUS. Oben = AN: übergeht nur „Motor läuft“, der Druckschalter schaltet immer ab.' },
+    { id: 'windeFrei', type: 'A', cover: true, led: YELLOW, label: 'Winde', sub: 'Freigabe', pos: ['AUS', 'FREI'], info: 'Freigabe für die Winde am Wischerhebel (herziehen = ein, wegdrücken = aus). Signal an den Controller, der die Winden-Relais schaltet. Vorschlag: zusätzlich in Reihe zur Spulenversorgung der Winden-Relais. Fernbedienung der Winde bleibt.' },
+    { id: 'sitz', type: 'C', label: 'Sitzheizung', pos: ['AUS', 'AN'], info: 'Einstufig, normaler Kippschalter (Typ C).' },
     { id: 'luefter', type: 'A', led: BLUE, label: 'Lüfter', sub: 'Auto / Manuell', pos: ['AUTO', 'MAN'], info: 'Auto = Speeduino (CLT, Pin 47). Manuell = Tastgrad vom Poti daneben. Typ A oder C noch offen.' },
     { id: 'luefterPoti', type: 'pot', label: 'Lüfter', sub: 'Tastgrad', info: 'Tastgrad im Modus Manuell.' },
-  ] },
-  { id: 'komfort', title: 'Komfort / Zubehör', x: 1580, y: 190, cols: 3, unlit: false, items: [
-    { id: 'sitz', type: 'C', label: 'Sitzheizung', pos: ['AUS', 'AN'], info: 'Einstufig, normaler Kippschalter (Typ C).' },
-    { id: 'carplay', type: 'C', label: 'CarPlay-Pi', pos: ['AUS', 'AN'], info: 'Sound-/CarPlay-Pi zuschalten (Typ C).' },
-    { id: 'windeFrei', type: 'A', cover: true, led: YELLOW, label: 'Winde', sub: 'Freigabe', pos: ['AUS', 'FREI'], info: 'Freigabe für die Winde am Wischerhebel (herziehen = ein, wegdrücken = aus). Signal an den Controller, der die Winden-Relais schaltet. Vorschlag: zusätzlich in Reihe zur Spulenversorgung der Winden-Relais. Fernbedienung der Winde bleibt.' },
     { id: 'a12Front', type: 'A', led: BLUE, label: '12 V Front', pos: ['AUS', 'AN'], info: '12-V-Abnahmepunkt außen an der Front.' },
     { id: 'a12Sitz', type: 'A', led: BLUE, label: '12 V Sitz', sub: 'hinter Fahrer', pos: ['AUS', 'AN'], info: '12-V-Abnahmepunkt hinter dem Fahrersitz.' },
     { id: 'a12Heck', type: 'A', led: BLUE, label: '12 V Heck', pos: ['AUS', 'AN'], info: '12-V-Abnahmepunkt außen am Heck.' },
   ] },
-  { id: 'audio', title: 'Audio & Helligkeit', x: 1250, y: 630, cols: 5, items: [
+  { id: 'audio', title: 'Entertainment, Audio & Helligkeit', x: 1250, y: 630, cols: 6, items: [
+    { id: 'carplay', type: 'C', label: 'CarPlay-Pi', pos: ['AUS', 'AN'], info: 'Sound-/CarPlay-Pi an/aus (Typ C). Ohne den Pi läuft kein Audio: Musik, Telefon, Intercom und Funk gehen alle über ihn, deshalb sitzt der Schalter vorne bei den Lautstärkereglern.' },
     { id: 'volCar', type: 'pot', label: 'CarPlay-Pi', sub: 'Kopfhörer', info: 'Lautstärke Musik/Telefon im Kopfhörer.' },
     { id: 'volIc', type: 'pot', label: 'Intercom', sub: 'Kopfhörer', info: 'Lautstärke Beifahrer (Sena/Cardo) im Kopfhörer.' },
     { id: 'volFunk', type: 'pot', label: 'Funk', sub: 'CB / PMR', info: 'Lautstärke Funk im Kopfhörer. Sendepegel (CarPlay, Intercom, Funk, Megafon) im Pi-Menü (Vorschlag).' },
@@ -502,7 +500,7 @@ function buildStatus() {
   dash.appendChild(el);
   const i = document.createElement('div');
   i.id = 'info';
-  i.innerHTML = '<b>Fahrersicht</b> – Lenkrad mittig, Lichtpanel links, Motor/Komfort/Suchlicht/Audio rechts (Anordnung frei verschiebbar). Maus über ein Bedienelement zeigt Funktion und Status aus Bordnetz-Konzept.md.';
+  i.innerHTML = '<b>Fahrersicht</b> – Lenkrad mittig, Lichtpanel links, Motor &amp; Zubehör und Entertainment/Audio rechts (Anordnung frei verschiebbar). Maus über ein Bedienelement zeigt Funktion und Status aus Bordnetz-Konzept.md.';
   dash.appendChild(i);
 }
 
