@@ -45,8 +45,8 @@ JOY_DAM = (WALL, 15.0)          # wall around the module so the silicone stays o
 # (label, has_cap, led_under_cap); None = empty place
 CELLS = [
     [("SUCHLICHT", True, False), "JOY"],
-    [("RUNDUM", False, False), ("NAHFELD", False, False)],
     [("OFFROAD MITTE", True, False), ("OFFROAD HECK", True, False)],
+    [("RUNDUM", False, False), ("NAHFELD", False, False)],
     [("ZUSATZ-FERN", True, False), ("RÜCKFAHR", True, True)],
     [("LICHT", False, False), ("NEBEL", True, True)],
 ]
@@ -77,6 +77,27 @@ def outline():
     return w, top - bottom, (top + bottom) / 2
 
 
+def cut_switch(x, y, cap, led):
+    """Hole with key nose, foot pocket, cover recess and LED hole; call inside BuildPart."""
+    # thread hole with key nose at the bottom
+    with Locations((x, y, PLATE_T / 2)):
+        Cylinder(HOLE_D / 2, PLATE_T + 1, mode=Mode.SUBTRACT)
+    nose_top = PLATE_T - (CAP_T if cap else 0)
+    nose_h = nose_top - FOOT_POCKET
+    with Locations((x, y - HOLE_D / 2 + KEY_D / 2, FOOT_POCKET + nose_h / 2)):
+        Box(KEY_W, KEY_D + 0.4, nose_h)
+    # switch foot pocket in the back face
+    with Locations((x, y, FOOT_POCKET / 2)):
+        Box(FOOT_W, FOOT_H, FOOT_POCKET, mode=Mode.SUBTRACT)
+    if cap:
+        cap_cy = y + CAP_TOP - CAP_H / 2
+        with Locations((x, cap_cy, PLATE_T - CAP_T / 2)):
+            Box(CAP_W, CAP_H, CAP_T, mode=Mode.SUBTRACT)
+    if led:
+        with Locations((x, y + LED_UP, PLATE_T / 2)):
+            Cylinder(LED_D / 2, PLATE_T + 1, mode=Mode.SUBTRACT)
+
+
 def build(labels=True):
     w, h, yc = outline()
     with BuildPart() as p:
@@ -91,23 +112,7 @@ def build(labels=True):
         extrude(amount=RIM_H, mode=Mode.SUBTRACT)
 
         for x, y, (label, cap, led) in centres():
-            # thread hole with key nose at the bottom
-            with Locations((x, y, PLATE_T / 2)):
-                Cylinder(HOLE_D / 2, PLATE_T + 1, mode=Mode.SUBTRACT)
-            nose_top = PLATE_T - (CAP_T if cap else 0)
-            nose_h = nose_top - FOOT_POCKET
-            with Locations((x, y - HOLE_D / 2 + KEY_D / 2, FOOT_POCKET + nose_h / 2)):
-                Box(KEY_W, KEY_D + 0.4, nose_h)
-            # switch foot pocket in the back face
-            with Locations((x, y, FOOT_POCKET / 2)):
-                Box(FOOT_W, FOOT_H, FOOT_POCKET, mode=Mode.SUBTRACT)
-            if cap:
-                cap_cy = y + CAP_TOP - CAP_H / 2
-                with Locations((x, cap_cy, PLATE_T - CAP_T / 2)):
-                    Box(CAP_W, CAP_H, CAP_T, mode=Mode.SUBTRACT)
-            if led:
-                with Locations((x, y + LED_UP, PLATE_T / 2)):
-                    Cylinder(LED_D / 2, PLATE_T + 1, mode=Mode.SUBTRACT)
+            cut_switch(x, y, cap, led)
             if not labels:
                 continue
             # engraved label
@@ -150,6 +155,18 @@ def build(labels=True):
     return p.part, (w, h)
 
 
+def build_coupon():
+    """Fit test: one place with cover + LED, one plain place, same plate thickness."""
+    w = PITCH_X + CAP_W + 2 * 8
+    top, bottom = CAP_TOP + 6, -FOOT_H / 2 - 6
+    with BuildPart() as p:
+        with Locations((0, (top + bottom) / 2, PLATE_T / 2)):
+            Box(w, top - bottom, PLATE_T)
+        cut_switch(-PITCH_X / 2, 0, True, True)
+        cut_switch(PITCH_X / 2, 0, False, False)
+    return p.part
+
+
 if __name__ == '__main__':
     out = Path(__file__).resolve().parent.parent / 'viewer' / 'downloads' / 'panels'
     out.mkdir(parents=True, exist_ok=True)
@@ -157,6 +174,11 @@ if __name__ == '__main__':
     export_step(plain, str(out / 'lichtpanel_ohne_schrift.step'))
     export_stl(plain, str(out / 'lichtpanel_ohne_schrift.stl'))
     part, (w, h) = build()
+    coupon = build_coupon()
+    export_stl(coupon, str(out / 'probestueck.stl'))
+    export_step(coupon, str(out / 'probestueck.step'))
+    cb = coupon.bounding_box()
+    print(f'coupon {cb.size.X:.1f} x {cb.size.Y:.1f} x {cb.size.Z:.1f} mm, {coupon.volume / 1000:.1f} cm³')
     export_step(part, str(out / 'lichtpanel.step'))
     export_stl(part, str(out / 'lichtpanel.stl'))
     meta = {'plateT': PLATE_T, 'capTop': CAP_TOP, 'capW': CAP_W - 0.3, 'capH': CAP_H - 0.3, 'capT': CAP_T,
