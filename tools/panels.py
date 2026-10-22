@@ -219,14 +219,17 @@ def build(panel, labels=True):
 
 
 def build_coupon():
-    """Fit test: one place with cover + LED, one plain place, same plate thickness."""
-    w = PITCH_X + CAP_W + 2 * 8
-    top, bottom = CAP_TOP + 6, -FOOT_H / 2 - 6
+    """Fit test: one place with cover + LED, one plain place, one pot with its dam."""
+    pot_hw, _, pot_bottom = extent(pot(''))
+    left, right = -PITCH_X - CAP_W / 2 - 8, PITCH_X + pot_hw + 6
+    top, bottom = CAP_TOP + 6, -pot_bottom - 4
     with BuildPart() as p:
-        with Locations((0, (top + bottom) / 2, PLATE_T / 2)):
-            Box(w, top - bottom, PLATE_T)
-        cut_switch(-PITCH_X / 2, 0, True, True)
-        cut_switch(PITCH_X / 2, 0, False, False)
+        with Locations(((left + right) / 2, (top + bottom) / 2, PLATE_T / 2)):
+            Box(right - left, top - bottom, PLATE_T)
+        cut_switch(-PITCH_X, 0, True, True)
+        cut_switch(0, 0, False, False)
+        cut_pot(PITCH_X, 0)
+    assert len(p.part.solids()) == 1
     return p.part
 
 
