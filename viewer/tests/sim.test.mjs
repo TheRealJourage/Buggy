@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createSim, SEQUENCE, GEARS } from '../sim.js';
+import { createSim, SEQUENCE, SHIFT_ORDER, GEARS } from '../sim.js';
 
 const DT = 0.0005;
 
@@ -60,7 +60,7 @@ test('too fast G overshoots 4 times, then faults to neutral', () => {
   assert.equal(sim.rowOf(), 'neutral');
 });
 
-test('plus/minus follow R N 1..5', () => {
+test('plus/minus follow R 1..5, N only via neutral()', () => {
   const sim = createSim();
   const seen = [];
   for (let i = 0; i < 6; i++) {
@@ -69,12 +69,23 @@ test('plus/minus follow R N 1..5', () => {
     seen.push(sim.state.gear);
   }
   assert.deepEqual(seen, ['1', '2', '3', '4', '5', '5']);
+  const down = [];
   for (let i = 0; i < 6; i++) {
     sim.minus();
     runUntilIdle(sim);
+    down.push(sim.state.gear);
   }
+  assert.deepEqual(down, ['4', '3', '2', '1', 'R', 'R']);
+  sim.plus();
+  runUntilIdle(sim);
+  assert.equal(sim.state.gear, '1');
+  sim.neutral();
+  runUntilIdle(sim);
+  assert.equal(sim.state.gear, 'N');
+  sim.minus();
+  runUntilIdle(sim);
   assert.equal(sim.state.gear, 'R');
-  assert.deepEqual(SEQUENCE, ['R', 'N', '1', '2', '3', '4', '5']);
+  assert.deepEqual(SHIFT_ORDER, ['R', '1', '2', '3', '4', '5']);
 });
 
 test('layout R 1 3 5 top, 2 4 bottom, R and 5 at G end positions', () => {

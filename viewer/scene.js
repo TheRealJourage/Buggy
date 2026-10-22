@@ -411,6 +411,7 @@ for (const g of SEQUENCE) {
 }
 $('plus').onclick = () => sim.plus();
 $('minus').onclick = () => sim.minus();
+$('neutral').onclick = () => sim.neutral();
 window.addEventListener('keydown', (e) => {
   if (e.key === '+' || e.key === 'ArrowUp') sim.plus();
   if (e.key === '-' || e.key === 'ArrowDown') sim.minus();

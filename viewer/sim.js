@@ -22,6 +22,8 @@ export const GEARS = {
   5: { gate: 3, row: 'top' },
 };
 export const SEQUENCE = ['R', 'N', '1', '2', '3', '4', '5'];
+// Plus/minus skip N so R <-> 1 is one click when manoeuvring; N has its own button.
+export const SHIFT_ORDER = ['R', '1', '2', '3', '4', '5'];
 export const STATES = ['IDLE', 'CLUTCH_OPEN', 'TO_NEUTRAL', 'GATE_MOVE', 'ROW_ENGAGE', 'CORRECT', 'DONE', 'CLUTCH_CLOSE', 'FAULT'];
 export const CLUTCH_TRAVEL = 50; // mm pedal travel (notes)
 const SHIFTING = ['TO_NEUTRAL', 'GATE_MOVE', 'ROW_ENGAGE', 'CORRECT'];
@@ -288,9 +290,10 @@ export function createSim(opts = {}) {
   }
 
   function shift(dir) {
-    const i = SEQUENCE.indexOf(s.gear);
-    const j = clamp(i + dir, 0, SEQUENCE.length - 1);
-    return j !== i && request(SEQUENCE[j]);
+    if (s.gear === 'N') return request(dir > 0 ? '1' : 'R');
+    const i = SHIFT_ORDER.indexOf(s.gear);
+    const j = clamp(i + dir, 0, SHIFT_ORDER.length - 1);
+    return j !== i && request(SHIFT_ORDER[j]);
   }
 
   return {
@@ -300,6 +303,7 @@ export function createSim(opts = {}) {
     request,
     plus: () => shift(1),
     minus: () => shift(-1),
+    neutral: () => request('N'),
     poti,
     win,
     clutch,
