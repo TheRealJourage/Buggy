@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Cockpit / Schaltpanels</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0c0c0d; color: #ddd; font-family: system-ui, sans-serif; overflow: hidden; }
+  #top { position: fixed; top: 0; left: 0; right: 0; height: 40px; display: flex; align-items: center; gap: 14px; padding: 0 12px; background: #151517; border-bottom: 1px solid #2a2a2e; z-index: 10; font-size: 14px; }
+  #top b { font-size: 15px; }
+  #top button { background: #222; color: #eee; border: 1px solid #444; border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+  #top .hint { color: #888; }
+  #stage { position: absolute; top: 40px; left: 0; right: 0; bottom: 0; }
+  #dash { position: absolute; left: 0; top: 0; width: 1720px; height: 960px; transform-origin: 0 0;
+    background: radial-gradient(ellipse at 50% 30%, #26262a 0%, #151517 60%, #0e0e10 100%); }
+
+  .panel { position: absolute; padding: 0 14px 14px; border-radius: 10px;
+    background: repeating-linear-gradient(90deg, #1b1c1e 0 2px, #1e1f21 2px 4px);
+    box-shadow: 0 8px 24px #000a, inset 0 1px 0 #ffffff14, inset 0 -2px 6px #0008; border: 1px solid #000; }
+  .panel.unlit { background: repeating-linear-gradient(90deg, #26272a 0 2px, #2a2b2e 2px 4px); }
+  .panel h2 { margin: 0 -14px 10px; padding: 7px 14px; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: #9a9ca2;
+    cursor: grab; border-bottom: 1px solid #000; background: #ffffff06; border-radius: 10px 10px 0 0; user-select: none; }
+  .panel h2:active { cursor: grabbing; }
+  .screw { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #bbb, #444 70%); box-shadow: 0 1px 1px #000; }
+  .screw::after { content: ''; position: absolute; left: 1px; right: 1px; top: 4px; height: 2px; background: #222; transform: rotate(35deg); }
+  .grid { display: grid; gap: 10px 8px; }
+  .cell { width: 92px; display: flex; flex-direction: column; align-items: center; }
+  .cell svg { display: block; cursor: pointer; touch-action: none; }
+  .plate { margin-top: 4px; width: 88px; min-height: 30px; padding: 3px 2px; box-sizing: border-box; border-radius: 3px; text-align: center;
+    background: linear-gradient(#cfd1d4, #a9acb0); color: #111; font-size: 10.5px; font-weight: 700; letter-spacing: .02em; line-height: 1.15;
+    box-shadow: inset 0 1px 0 #fff8, 0 1px 2px #000; text-transform: uppercase; }
+  .plate small { display: block; font-weight: 500; font-size: 9px; color: #333; text-transform: none; }
+  .cell.reserve .plate { background: #2a2b2e; color: #777; box-shadow: none; border: 1px dashed #555; }
+  .type { font-size: 9px; color: #6d7076; margin-top: 2px; }
+
+  #status { position: absolute; left: 470px; top: 18px; width: 520px; height: 150px; border-radius: 14px; background: #050506; border: 2px solid #2b2c30;
+    box-shadow: inset 0 0 20px #000, 0 6px 18px #0009; font-family: ui-monospace, monospace; }
+  #gear { position: absolute; left: 50%; top: 18px; transform: translateX(-50%); font-size: 70px; font-weight: 700; color: #f2f2f2; text-shadow: 0 0 12px #fff4; }
+  .arrow { position: absolute; top: 40px; font-size: 40px; color: #1d3a1d; }
+  .arrow.on { color: #3f3; text-shadow: 0 0 10px #3f3; }
+  #arrL { left: 150px; } #arrR { right: 150px; }
+  .tell { position: absolute; bottom: 10px; font-size: 11px; padding: 2px 6px; border-radius: 4px; color: #333; border: 1px solid #222; }
+  .tell.on { color: #000; }
+  #road { position: absolute; left: 12px; top: 10px; width: 130px; font-size: 11px; line-height: 1.3; color: #3f3; }
+  #road.bad { color: #ff5a3c; }
+  #events { position: absolute; right: 12px; top: 10px; width: 120px; font-size: 11px; color: #aaa; text-align: right; line-height: 1.35; }
+
+  #info { position: absolute; left: 20px; bottom: 16px; width: 640px; min-height: 64px; padding: 10px 14px; border-radius: 8px; background: #000c; border-left: 4px solid #8cf; font-size: 13px; line-height: 1.4; color: #ccc; }
+  #info b { color: #fff; }
+  #wheelWrap { position: absolute; left: 390px; top: 180px; width: 680px; height: 600px; }
+  #wheelWrap svg text { font-family: system-ui, sans-serif; }
+  .wbtn { cursor: pointer; }
+  .wbtn:active circle { transform-box: fill-box; transform-origin: center; transform: scale(.92); }
+  .stalkbtn { cursor: pointer; }
+  .stalkbtn rect { fill: #2a2b2e; stroke: #555; }
+  .stalkbtn.on rect { fill: #8cf; }
+  .stalkbtn.on text { fill: #111 !important; }
+</style>
+</head>
+<body>
+<div id="top">
+  <b>Buggy – Cockpit-Ansicht (Fahrersicht)</b>
+  <span class="hint">Schalter anklicken · Kappe zuerst aufklappen · Potis ziehen (hoch/runter) · Panels an der Titelleiste verschieben</span>
+  <button id="reset">Layout zurücksetzen</button>
+</div>
+<div id="stage"><div id="dash"></div></div>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="chrome" x1="0" x2="1">
+      <stop offset="0" stop-color="#6b6e73"/><stop offset=".35" stop-color="#f4f5f7"/><stop offset=".6" stop-color="#9da1a7"/><stop offset="1" stop-color="#4a4d52"/>
+    </linearGradient>
+    <radialGradient id="nut" cx=".4" cy=".35" r=".7">
+      <stop offset="0" stop-color="#e9eaec"/><stop offset=".6" stop-color="#9a9da2"/><stop offset="1" stop-color="#55585c"/>
+    </radialGradient>
+    <radialGradient id="knob" cx=".4" cy=".3" r=".8">
+      <stop offset="0" stop-color="#d9dbde"/><stop offset=".5" stop-color="#8d9095"/><stop offset="1" stop-color="#3c3e42"/>
+    </radialGradient>
+    <linearGradient id="cover" x1="0" x2="1">
+      <stop offset="0" stop-color="#a5100c" stop-opacity=".85"/><stop offset=".4" stop-color="#ff3a2e" stop-opacity=".7"/><stop offset="1" stop-color="#8a0c08" stop-opacity=".88"/>
+    </linearGradient>
+    <linearGradient id="carbon" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2a2b2e"/><stop offset="1" stop-color="#141516"/>
+    </linearGradient>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+</svg>
+
+<script type="module" src="./cockpit.js"></script>
+</body>
+</html>
