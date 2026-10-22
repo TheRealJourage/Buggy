@@ -11,30 +11,23 @@
   {
    "x": -72.0,
    "y": 36.0,
-   "label": "LICHT",
-   "cap": false,
-   "led": false
-  },
-  {
-   "x": -72.0,
-   "y": -36.0,
-   "label": "NEBEL",
+   "label": "SUCHLICHT",
    "cap": true,
-   "led": true
+   "led": false
   },
   {
    "x": -36.0,
    "y": 36.0,
-   "label": "ZUSATZ-FERN",
-   "cap": true,
+   "label": "RUNDUM",
+   "cap": false,
    "led": false
   },
   {
    "x": -36.0,
    "y": -36.0,
-   "label": "RÜCKFAHR",
-   "cap": true,
-   "led": true
+   "label": "NAHFELD",
+   "cap": false,
+   "led": false
   },
   {
    "x": 0.0,
@@ -53,23 +46,30 @@
   {
    "x": 36.0,
    "y": 36.0,
-   "label": "RUNDUM",
-   "cap": false,
+   "label": "ZUSATZ-FERN",
+   "cap": true,
    "led": false
   },
   {
    "x": 36.0,
    "y": -36.0,
-   "label": "NAHFELD",
+   "label": "RÜCKFAHR",
+   "cap": true,
+   "led": true
+  },
+  {
+   "x": 72.0,
+   "y": 36.0,
+   "label": "LICHT",
    "cap": false,
    "led": false
   },
   {
    "x": 72.0,
-   "y": 36.0,
-   "label": "SUCHLICHT",
+   "y": -36.0,
+   "label": "NEBEL",
    "cap": true,
-   "led": false
+   "led": true
   }
  ]
 }

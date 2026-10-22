@@ -7,17 +7,17 @@ const ILLEGAL = 'Kann im Straßenverkehr illegal sein → beleuchteter Schalter 
 
 const PANELS = [
   { id: 'licht', title: 'Lichtpanel', x: 20, y: 190, cols: 5, items: [
-    // column = function pair (top/bottom); left column is farthest from the driver = used most
-    { id: 'licht', type: 'B', label: 'Licht', pos: ['AUS', 'STAND', 'ABBLEND'], info: 'Aus / Standlicht / Abblendlicht inkl. Rücklicht + Kennzeichen. Standlicht-Stellung wird beim Abstellen im Parkmodus gehalten.' },
-    { id: 'zusatz', type: 'C', cover: true, label: 'Zusatz-Fern', sub: 'Freigabe', pos: ['AUS', 'FREI'], info: 'Freigabe Zusatz-Fernlicht. Brennt nur zusammen mit dem Fernlicht (Lichthebel). Typ C, unbeleuchtet.' },
-    { id: 'offM', type: 'A', cover: true, led: RED, label: 'Offroad', sub: 'Mitte', pos: ['AUS', 'AN'], illegal: true, info: 'Offroad-Scheinwerfer Mitte (2,85 A, Last-Ebene). ' + ILLEGAL },
-    { id: 'rundum', type: 'A', led: RED, label: 'Rundum', sub: 'orange', pos: ['AUS', 'AN'], illegal: true, info: 'Orange Rundumleuchte. Zulassung mit dem TÜV klären. ' + ILLEGAL },
+    // mirrored 2026-10-22: light/fog is the rightmost column
     { id: 'suchAn', type: 'A', cover: true, led: RED, label: 'Suchlicht', pos: ['AUS', 'AN'], illegal: true, info: 'Suchscheinwerfer an/aus (Last-Ebene). Im Straßenverkehr nicht zulässig (mit TÜV klären). ' + ILLEGAL },
-    { id: 'nebel', type: 'B', cover: true, clearCap: true, capGlow: () => controls.nebel.st.pos === 'up' && controls.licht.st.pos !== 'down', label: 'Nebel', pos: ['AUS', 'VORN', 'V+SCHL'], info: 'Aus / Nebelscheinwerfer vorn / vorn + Nebelschlussleuchte. Wirkt nur mit Stand- oder Abblendlicht. Durchsichtige rote Kappe: leuchtet von unten (LED durch die Kappen-Platte), sobald die Nebelschlussleuchte an ist.' },
-    { id: 'rueck', type: 'B', cover: true, clearCap: true, capGlow: () => controls.rueck.st.pos === 'up', label: 'Rückfahr', sub: 'Zusatz weiß', pos: ['AUS', 'R-AUTO', 'AN'], info: 'Zusatz-Rückfahrscheinwerfer weiß (3,40 A, DT-Pin 8). Kappe zu = AUS. Mitte = Rangieren: an, solange R eingelegt ist. Oben = dauerhaft AN. Durchsichtige rote Kappe leuchtet bei AN (bei R-AUTO nicht, das ist straßenlegal). Zulassung mit TÜV klären.' },
-    { id: 'offH', type: 'A', cover: true, led: RED, label: 'Offroad', sub: 'Heck', pos: ['AUS', 'AN'], illegal: true, info: 'Offroad Heck (2,70 A, DT-Pin 7). ' + ILLEGAL },
-    { id: 'nahfeld', type: 'A', led: RED, label: 'Nahfeld', sub: 'Unterboden weiß', pos: ['AUS', 'AN'], illegal: true, info: 'Nahfeldbeleuchtung: helle weiße LEDs unter dem Fahrzeug (Unterboden-Idee, wegen der Bodenfreiheit als Nahfeld). Zulassung mit TÜV klären. ' + ILLEGAL },
+    { id: 'rundum', type: 'A', led: RED, label: 'Rundum', sub: 'orange', pos: ['AUS', 'AN'], illegal: true, info: 'Orange Rundumleuchte. Zulassung mit dem TÜV klären. ' + ILLEGAL },
+    { id: 'offM', type: 'A', cover: true, led: RED, label: 'Offroad', sub: 'Mitte', pos: ['AUS', 'AN'], illegal: true, info: 'Offroad-Scheinwerfer Mitte (2,85 A, Last-Ebene). ' + ILLEGAL },
+    { id: 'zusatz', type: 'C', cover: true, label: 'Zusatz-Fern', sub: 'Freigabe', pos: ['AUS', 'FREI'], info: 'Freigabe Zusatz-Fernlicht. Brennt nur zusammen mit dem Fernlicht (Lichthebel). Typ C, unbeleuchtet.' },
+    { id: 'licht', type: 'B', label: 'Licht', pos: ['AUS', 'STAND', 'ABBLEND'], info: 'Aus / Standlicht / Abblendlicht inkl. Rücklicht + Kennzeichen. Standlicht-Stellung wird beim Abstellen im Parkmodus gehalten.' },
     { id: 'joy', type: 'joy', label: 'Joystick', sub: 'Pan / Tilt', info: 'Gamepad-Daumenstick X/Y als Ratenbefehl: Auslenkung = Drehgeschwindigkeit, loslassen = stehen bleiben. Wirkt nur, wenn das Suchlicht an ist. Presets/Home später.' },
+    { id: 'nahfeld', type: 'A', led: RED, label: 'Nahfeld', sub: 'Unterboden weiß', pos: ['AUS', 'AN'], illegal: true, info: 'Nahfeldbeleuchtung: helle weiße LEDs unter dem Fahrzeug (Unterboden-Idee, wegen der Bodenfreiheit als Nahfeld). Zulassung mit TÜV klären. ' + ILLEGAL },
+    { id: 'offH', type: 'A', cover: true, led: RED, label: 'Offroad', sub: 'Heck', pos: ['AUS', 'AN'], illegal: true, info: 'Offroad Heck (2,70 A, DT-Pin 7). ' + ILLEGAL },
+    { id: 'rueck', type: 'B', cover: true, clearCap: true, capGlow: () => controls.rueck.st.pos === 'up', label: 'Rückfahr', sub: 'Zusatz weiß', pos: ['AUS', 'R-AUTO', 'AN'], info: 'Zusatz-Rückfahrscheinwerfer weiß (3,40 A, DT-Pin 8). Kappe zu = AUS. Mitte = Rangieren: an, solange R eingelegt ist. Oben = dauerhaft AN. Durchsichtige rote Kappe leuchtet bei AN (bei R-AUTO nicht, das ist straßenlegal). Zulassung mit TÜV klären.' },
+    { id: 'nebel', type: 'B', cover: true, clearCap: true, capGlow: () => controls.nebel.st.pos === 'up' && controls.licht.st.pos !== 'down', label: 'Nebel', pos: ['AUS', 'VORN', 'V+SCHL'], info: 'Aus / Nebelscheinwerfer vorn / vorn + Nebelschlussleuchte. Wirkt nur mit Stand- oder Abblendlicht. Durchsichtige rote Kappe: leuchtet von unten (LED durch die Kappen-Platte), sobald die Nebelschlussleuchte an ist.' },
   ] },
   { id: 'motor', title: 'Motor & Zubehör', x: 1250, y: 190, cols: 5, items: [
     { id: 'zuendung', type: 'A', led: GREEN, label: 'Zündung', sub: 'Kl. 15', pos: ['AUS', 'AN'], info: 'Rastender Kippschalter, nur freigegeben bei gültigem Lenkrad-Code. LED leuchtet nur, wenn Kl. 15 wirklich anliegt.' },

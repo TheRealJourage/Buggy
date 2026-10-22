@@ -20,9 +20,10 @@
   <label><input type="checkbox" id="parts" checked> Schalter + Kappen zeigen</label>
   <label><input type="checkbox" id="open"> Kappen offen</label>
   <label><input type="checkbox" id="back"> Rückseite</label>
+  <label><input type="checkbox" id="labels" checked> Schrift</label>
   <span id="dims" class="hint"></span>
-  <a href="downloads/panels/lichtpanel.stl" download>STL</a>
-  <a href="downloads/panels/lichtpanel.step" download>STEP</a>
+  <span>mit Schrift: <a href="downloads/panels/lichtpanel.stl" download>STL</a> · <a href="downloads/panels/lichtpanel.step" download>STEP</a></span>
+  <span>ohne: <a href="downloads/panels/lichtpanel_ohne_schrift.stl" download>STL</a> · <a href="downloads/panels/lichtpanel_ohne_schrift.step" download>STEP</a></span>
   <span class="hint">Maus: drehen · Rad: zoomen · rechts: verschieben</span>
 </div>
 <script type="module">
@@ -112,6 +113,10 @@ for (const c of meta.cells) {
 root.add(parts);
 
 const $ = (id) => document.getElementById(id);
+$('labels').onchange = async (e) => {
+  const f = e.target.checked ? 'lichtpanel.stl' : 'lichtpanel_ohne_schrift.stl';
+  panel.geometry = parseStl(await fetch('downloads/panels/' + f).then((r) => r.arrayBuffer()));
+};
 $('parts').onchange = (e) => { parts.visible = e.target.checked; };
 $('open').onchange = (e) => covers.forEach((h) => { h.rotation.x = e.target.checked ? -Math.PI / 2 : 0; });
 $('back').onchange = (e) => {

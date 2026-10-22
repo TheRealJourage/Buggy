@@ -27,20 +27,21 @@ PLATE_T = 8.0          # 8 - 2 pocket = 6 mm in the thread, leaves 6 mm for nut 
 PITCH_X, PITCH_Y = 36.0, 72.0   # glove-friendly spacing
 LABEL_Y = -22.0        # label centre below the hole
 LABEL_SIZE, LABEL_DEPTH = 4.2, 0.6
+INNER_R = 0.5
 MARGIN = 10.0
 WALL, RIM_H = 3.0, 45.0
-CORNER_R = 6.0
+CORNER_R = 1.0         # angular box, only a small edge break
 CABLE_D = 7.0          # 4 wires, exit towards the steering wheel (right side)
 GROOVE = (1.0, 1.5, 5.0)  # silicone key groove in the inner wall: depth, height, distance behind plate
 
-# column-wise pairs (top, bottom); col 1 is farthest from the driver
+# column-wise pairs (top, bottom), mirrored 2026-10-22: light/fog is the rightmost column
 # (label, has_cap, led_under_cap); None = empty place
 CELLS = [
-    [("LICHT", False, False), ("NEBEL", True, True)],
-    [("ZUSATZ-FERN", True, False), ("RÜCKFAHR", True, True)],
-    [("OFFROAD MITTE", True, False), ("OFFROAD HECK", True, False)],
-    [("RUNDUM", False, False), ("NAHFELD", False, False)],
     [("SUCHLICHT", True, False), None],  # gamepad stick later
+    [("RUNDUM", False, False), ("NAHFELD", False, False)],
+    [("OFFROAD MITTE", True, False), ("OFFROAD HECK", True, False)],
+    [("ZUSATZ-FERN", True, False), ("RÜCKFAHR", True, True)],
+    [("LICHT", False, False), ("NEBEL", True, True)],
 ]
 
 
@@ -62,7 +63,7 @@ def outline():
     return w, top - bottom, (top + bottom) / 2
 
 
-def build():
+def build(labels=True):
     w, h, yc = outline()
     with BuildPart() as p:
         # plate + rim, rounded outside corners
@@ -72,7 +73,7 @@ def build():
         extrude(amount=RIM_H + PLATE_T)
         with BuildSketch(Plane.XY.offset(-RIM_H)):
             with Locations((0, yc)):
-                RectangleRounded(w - 2 * WALL, h - 2 * WALL, CORNER_R - WALL)
+                RectangleRounded(w - 2 * WALL, h - 2 * WALL, INNER_R)
         extrude(amount=RIM_H, mode=Mode.SUBTRACT)
 
         for x, y, (label, cap, led) in centres():
@@ -93,6 +94,8 @@ def build():
             if led:
                 with Locations((x, y + LED_UP, PLATE_T / 2)):
                     Cylinder(LED_D / 2, PLATE_T + 1, mode=Mode.SUBTRACT)
+            if not labels:
+                continue
             # engraved label
             with BuildSketch(Plane.XY.offset(PLATE_T)) as sk:
                 with Locations((x, y + LABEL_Y)):
@@ -104,7 +107,7 @@ def build():
         gd, gh, gz = GROOVE
         with BuildSketch(Plane.XY.offset(-gz - gh / 2)):
             with Locations((0, yc)):
-                RectangleRounded(w - 2 * WALL + 2 * gd, h - 2 * WALL + 2 * gd, CORNER_R - WALL + gd)
+                RectangleRounded(w - 2 * WALL + 2 * gd, h - 2 * WALL + 2 * gd, INNER_R + gd)
         extrude(amount=gh, mode=Mode.SUBTRACT)
 
         # cable exit towards the steering wheel (+X wall), mid depth
@@ -116,6 +119,9 @@ def build():
 if __name__ == '__main__':
     out = Path(__file__).resolve().parent.parent / 'viewer' / 'downloads' / 'panels'
     out.mkdir(parents=True, exist_ok=True)
+    plain, _ = build(labels=False)
+    export_step(plain, str(out / 'lichtpanel_ohne_schrift.step'))
+    export_stl(plain, str(out / 'lichtpanel_ohne_schrift.stl'))
     part, (w, h) = build()
     export_step(part, str(out / 'lichtpanel.step'))
     export_stl(part, str(out / 'lichtpanel.stl'))
