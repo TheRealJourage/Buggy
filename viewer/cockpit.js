@@ -148,26 +148,26 @@ function renderPot(c) {
   for (let i = 0; i <= 10; i++) {
     const t = ((a0 + i * 27) - 90) * Math.PI / 180;
     const r1 = 33, r2 = i % 5 === 0 ? 40 : 37;
-    ticks += `<line x1="${CX + r1 * Math.cos(t)}" y1="${46 + r1 * Math.sin(t)}" x2="${CX + r2 * Math.cos(t)}" y2="${46 + r2 * Math.sin(t)}" stroke="#bbb" stroke-width="${i % 5 === 0 ? 2 : 1}"/>`;
+    ticks += `<line x1="${CX + r1 * Math.cos(t)}" y1="${CY + r1 * Math.sin(t)}" x2="${CX + r2 * Math.cos(t)}" y2="${CY + r2 * Math.sin(t)}" stroke="#bbb" stroke-width="${i % 5 === 0 ? 2 : 1}"/>`;
   }
   c.svg.innerHTML = `${ticks}
-    <circle cx="${CX}" cy="49" r="27" fill="#0007"/>
-    <circle cx="${CX}" cy="46" r="26" fill="url(#knob)" stroke="#222"/>
-    <circle cx="${CX}" cy="46" r="24.5" fill="none" stroke="#3a3c40" stroke-width="3" stroke-dasharray="1.5 1.8"/>
-    <circle cx="${CX}" cy="46" r="17" fill="#2b2d31" stroke="#555"/>
-    <g transform="rotate(${a} ${CX} 46)"><rect x="${CX - 1.6}" y="31" width="3.2" height="12" rx="1.5" fill="#fff"/></g>
-    <text x="${CX}" y="90" text-anchor="middle" font-size="10" fill="#9a9a9a">${Math.round(v * 100)} %</text>`;
+    <circle cx="${CX}" cy="${CY + 3}" r="27" fill="#0007"/>
+    <circle cx="${CX}" cy="${CY}" r="26" fill="url(#knob)" stroke="#222"/>
+    <circle cx="${CX}" cy="${CY}" r="24.5" fill="none" stroke="#3a3c40" stroke-width="3" stroke-dasharray="1.5 1.8"/>
+    <circle cx="${CX}" cy="${CY}" r="17" fill="#2b2d31" stroke="#555"/>
+    <g transform="rotate(${a} ${CX} ${CY})"><rect x="${CX - 1.6}" y="${CY - 15}" width="3.2" height="12" rx="1.5" fill="#fff"/></g>
+    <text x="${CX}" y="${CY + 50}" text-anchor="middle" font-size="10" fill="#9a9a9a">${Math.round(v * 100)} %</text>`;
 }
 
 function renderPush(c) {
   const lit = isLit(c.def, c.st);
   const left = Math.max(0, s.spiegelUntil - Date.now());
   const mm = Math.floor(left / 60000), ss = String(Math.floor(left / 1000) % 60).padStart(2, '0');
-  c.svg.innerHTML = `<circle cx="${CX}" cy="49" r="27" fill="#0006"/>
-    <circle cx="${CX}" cy="46" r="26" fill="url(#nut)" stroke="#222"/>
-    <circle cx="${CX}" cy="46" r="20" fill="none" stroke="${lit ? c.def.led : shade(c.def.led)}" stroke-width="4"${lit ? ' filter="url(#glow)"' : ''}/>
-    <circle cx="${CX}" cy="46" r="16" fill="url(#knob)" stroke="#333"/>
-    <text x="${CX}" y="90" text-anchor="middle" font-size="10" fill="#9a9a9a">${lit ? `${mm}:${ss}` : 'aus'}</text>`;
+  c.svg.innerHTML = `<circle cx="${CX}" cy="${CY + 3}" r="27" fill="#0006"/>
+    <circle cx="${CX}" cy="${CY}" r="26" fill="url(#nut)" stroke="#222"/>
+    <circle cx="${CX}" cy="${CY}" r="20" fill="none" stroke="${lit ? c.def.led : shade(c.def.led)}" stroke-width="4"${lit ? ' filter="url(#glow)"' : ''}/>
+    <circle cx="${CX}" cy="${CY}" r="16" fill="url(#knob)" stroke="#333"/>
+    <text x="${CX}" y="${CY + 50}" text-anchor="middle" font-size="10" fill="#9a9a9a">${lit ? `${mm}:${ss}` : 'aus'}</text>`;
 }
 
 function renderJoy(c) {
@@ -296,7 +296,7 @@ function buildPanel(p) {
   for (const def of p.items) {
     const cell = document.createElement('div');
     cell.className = 'cell' + (def.type === 'reserve' ? ' reserve' : '');
-    const h = def.type === 'pot' || def.type === 'push' ? 96 : 130;
+    const h = 130;
     const w = 92;
     const svg = document.createElementNS(NS, 'svg');
     svg.setAttribute('width', w);
