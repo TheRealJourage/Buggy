@@ -12,10 +12,11 @@ const PANELS = [
     { id: 'zusatz', type: 'C', cover: true, label: 'Zusatz-Fern', sub: 'Freigabe', pos: ['AUS', 'FREI'], info: 'Freigabe Zusatz-Fernlicht. Brennt nur zusammen mit dem Fernlicht (Lichthebel). Typ C, unbeleuchtet.' },
     { id: 'offM', type: 'A', cover: true, led: RED, label: 'Offroad', sub: 'Mitte', pos: ['AUS', 'AN'], illegal: true, info: 'Offroad-Scheinwerfer Mitte (2,85 A, Last-Ebene). ' + ILLEGAL },
     { id: 'offH', type: 'A', cover: true, led: RED, label: 'Offroad', sub: 'Heck', pos: ['AUS', 'AN'], illegal: true, info: 'Offroad Heck (2,70 A, DT-Pin 7). ' + ILLEGAL },
-    { id: 'offV', type: 'reserve', label: 'Offroad vorn', sub: 'Reserve', info: 'Offroad vorn ist noch nicht vorhanden. Platz für einen weiteren Typ A mit Kappe.' },
+    { id: 'rueck', type: 'B', cover: true, label: 'Rückfahr', sub: 'Zusatz weiß', pos: ['AUS', 'R-AUTO', 'AN'], info: 'Zusatz-Rückfahrscheinwerfer weiß (3,40 A, DT-Pin 8). Kappe zu = AUS. Mitte = Rangieren: an, solange R eingelegt ist. Oben = dauerhaft AN. Typ B hat keine LED, Anzeige im Display. Zulassung mit TÜV klären.' },
     { id: 'rundum', type: 'A', led: RED, label: 'Rundum', sub: 'orange', pos: ['AUS', 'AN'], illegal: true, info: 'Orange Rundumleuchte. Zulassung mit dem TÜV klären. ' + ILLEGAL },
     { id: 'ledant', type: 'A', led: RED, label: 'LED-Antennen', pos: ['AUS', 'AN'], illegal: true, info: 'LED-Antennen hinten, im Fahrbetrieb nicht erlaubt. ' + ILLEGAL },
     { id: 'warn', type: 'A', led: AMBER, label: 'Warnblinker', pos: ['AUS', 'AN'], blink: true, info: 'Warnblinker, eigene Steuerleitung direkt zum hinteren Controller (Kl. 30), weckt ihn auch bei Zündung aus. Vorschrift „bei Zündung aus“ noch mit TÜV klären.' },
+    { id: 'offV', type: 'reserve', label: 'Offroad vorn', sub: 'Reserve', info: 'Offroad vorn ist noch nicht vorhanden. Platz für einen weiteren Typ A mit Kappe.' },
   ] },
   { id: 'motor', title: 'Motorpanel', x: 1090, y: 190, cols: 3, items: [
     { id: 'zuendung', type: 'A', led: GREEN, label: 'Zündung', sub: 'Kl. 15', pos: ['AUS', 'AN'], info: 'Rastender Kippschalter, nur freigegeben bei gültigem Lenkrad-Code. LED leuchtet nur, wenn Kl. 15 wirklich anliegt.' },
@@ -129,13 +130,13 @@ function posText(def) {
   const [down, mid, up] = def.type === 'B' || def.type === 'T2' ? def.pos : [def.pos[0], '', def.pos[1]];
   return `<text x="${CX}" y="11" text-anchor="middle" font-size="9.5" font-weight="700" fill="#d8d8d8">${up || ''}</text>
     <text x="${CX}" y="128" text-anchor="middle" font-size="9.5" font-weight="700" fill="#d8d8d8">${down || ''}</text>
-    ${mid ? `<text x="90" y="${CY - 22}" text-anchor="end" font-size="8.5" font-weight="700" fill="#aaa">${mid}</text>` : ''}`;
+    ${mid ? `<text x="91" y="${CY - 22}" text-anchor="end" font-size="8.5" font-weight="700" fill="#ddd" stroke="#000" stroke-width="2.5" paint-order="stroke">${mid}</text>` : ''}`;
 }
 
 function renderToggle(c) {
   const { def, st } = c;
   const lit = def.led && isLit(def, st);
-  c.svg.innerHTML = posText(def) + nut() + lever(st.pos, def, lit) + (def.cover ? cover(st.open) : '');
+  c.svg.innerHTML = nut() + lever(st.pos, def, lit) + (def.cover ? cover(st.open) : '') + posText(def);
 }
 
 function isLit(def, st) {
@@ -520,7 +521,9 @@ const TELLS = [
   ['KOMPR', YELLOW, () => controls.kompressor.st.pos !== 'mid'],
   ['WINDE', YELLOW, () => on('windeFrei')],
   ['SPIEGEL', AMBER, () => Date.now() < s.spiegelUntil],
+  ['RÜCKF', RED, () => rueckActive()],
 ];
+const rueckActive = () => { const p = controls.rueck.st.pos; return p === 'up' || (p === 'mid' && s.gear === 'R'); };
 const fernActive = () => (s.fern && controls.licht.st.pos === 'up') || s.flash;
 
 function updateStatus() {
@@ -530,9 +533,10 @@ function updateStatus() {
   document.getElementById('arrR').classList.toggle('on', (s.blinkR || warn) && s.phase);
   document.getElementById('tells').innerHTML = TELLS.map(([t, col, f], i) => {
     const lit = f();
-    return `<span class="tell${lit ? ' on' : ''}" style="left:${8 + i * 56}px;${lit ? `background:${col};box-shadow:0 0 8px ${col}` : ''}">${t}</span>`;
+    return `<span class="tell${lit ? ' on' : ''}" style="left:${6 + i * 51}px;${lit ? `background:${col};box-shadow:0 0 8px ${col}` : ''}">${t}</span>`;
   }).join('');
   const bad = PANELS.flatMap((p) => p.items).filter((d) => d.illegal && on(d.id)).map((d) => `${d.label} ${d.sub || ''}`.trim());
+  if (rueckActive()) bad.push(controls.rueck.st.pos === 'up' ? 'Rückfahr weiß AN' : 'Rückfahr weiß (R-Auto, R drin)');
   const road = document.getElementById('road');
   road.classList.toggle('bad', bad.length > 0);
   road.innerHTML = bad.length ? `<b>Vor der Straße aus:</b><br>${bad.join('<br>')}` : '<b>Straße: ok</b><br>kein Offroad-/Sonderlicht an';
