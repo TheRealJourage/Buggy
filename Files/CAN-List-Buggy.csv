@@ -1,4 +1,5 @@
 Category,Input,Type,Description,CAN_Topic,CAN_ID_hex,KeyCode_hex,Payload_Spec,Notes
+Vehicle,Kill-Switch / Not-Aus,Switch(NC),Sicherheitsunterbrechung,SAFETY.IN,0x100,0x0001,"{ key:u16, level:u8, ts:u16 }",level: 0/1 aktueller Zustand; niedrigste ID = hoechste CAN-Prioritaet
 Lighting,Standlicht,Button/Toggle,Positions-/Rücklicht toggeln,LIGHT.IN,0x110,0x0101,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }","edge: 0=level,1=press,2=release; value optional (z.B. encoder delta)"
 Lighting,Abblendlicht,Button/Toggle,Hauptfahrlicht,LIGHT.IN,0x110,0x0102,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }","edge: 0=level,1=press,2=release; value optional (z.B. encoder delta)"
 Lighting,Fernlicht,Button/Toggle,Dauer-Fernlicht umschalten,LIGHT.IN,0x110,0x0103,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }","edge: 0=level,1=press,2=release; value optional (z.B. encoder delta)"
@@ -11,6 +12,10 @@ Lighting,Warnblinker,Button/Toggle,Beide Blinker,LIGHT.IN,0x110,0x0109,"{ key:u1
 Lighting,Rückfahr-Arbeitslicht (manuell),Button/Toggle,Licht beim Rangieren,LIGHT.IN,0x110,0x010A,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }","edge: 0=level,1=press,2=release; value optional (z.B. encoder delta)"
 Lighting,RGB/Innen/Ambient Mode,Button,Nächster Modus/Farbe,LIGHT.IN,0x110,0x010B,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }","edge: 0=level,1=press,2=release; value optional (z.B. encoder delta)"
 Lighting,RGB/Innen/Ambient Helligkeit,Encoder,Dimmen,LIGHT.IN,0x110,0x010C,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }","edge: 0=level,1=press,2=release; value optional (z.B. encoder delta)"
+Lighting,Blinker links,Switch,Blinker links dauerhaft (Hebel eingerastet),LIGHT.IN,0x110,0x010D,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",edge 0 = Pegel: value 1 an / 0 aus
+Lighting,Blinker rechts,Switch,Blinker rechts dauerhaft (Hebel eingerastet),LIGHT.IN,0x110,0x010E,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",edge 0 = Pegel: value 1 an / 0 aus
+Lighting,Spurwechsel links (Komfort),Momentary,"3x blinken, Empfaenger schaltet selbst ab",LIGHT.IN,0x110,0x010F,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",edge 1 = press; Hebel < 400 ms angetippt
+Lighting,Spurwechsel rechts (Komfort),Momentary,"3x blinken, Empfaenger schaltet selbst ab",LIGHT.IN,0x110,0x0110,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",edge 1 = press; Hebel < 400 ms angetippt
 Searchlight,Searchlight Ein/Aus,Button/Toggle,Suchscheinwerfer aktivieren,SEARCHLIGHT.IN,0x120,0x0201,"{ key:u16, edge:u8, value:u16/axis, ts:u16 }",
 Searchlight,Searchlight Spot/Flood,Button,Optik umstellen (falls motorisch),SEARCHLIGHT.IN,0x120,0x0202,"{ key:u16, edge:u8, value:u16/axis, ts:u16 }",
 Searchlight,Searchlight Speed/Feinmodus,Button,Bewegungsgeschwindigkeit umschalten,SEARCHLIGHT.IN,0x120,0x0203,"{ key:u16, edge:u8, value:u16/axis, ts:u16 }",
@@ -28,12 +33,12 @@ Audio,Headset-Pairing,Button,BT-Headsets koppeln (optional),AUDIO.IN,0x130,0x030
 Audio,Intercom Lautstärke,Encoder/Pot,Pegelregelung,AUDIO.IN,0x130,0x0307,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",value z.B. Encoder-Delta oder Zielindex
 Vehicle,Zündung (IGN),Switch,System aktivieren,VEH.IN,0x140,0x0401,"{ key:u16, level:u8, ts:u16 }",level: 0/1 aktueller Zustand
 Vehicle,Start,Momentary,Starterrelais,VEH.IN,0x140,0x0402,"{ key:u16, level:u8, ts:u16 }",level: 0/1 aktueller Zustand
-Vehicle,Kill-Switch / Not-Aus,Switch(NC),Sicherheitsunterbrechung,VEH.IN,0x140,0x0403,"{ key:u16, level:u8, ts:u16 }",level: 0/1 aktueller Zustand
 Vehicle,Parkbremse,Switch,Handbremse aktiv,VEH.IN,0x140,0x0404,"{ key:u16, level:u8, ts:u16 }",level: 0/1 aktueller Zustand
 Vehicle,Bremsschalter,Switch,Pedal betätigt,VEH.IN,0x140,0x0405,"{ key:u16, level:u8, ts:u16 }",level: 0/1 aktueller Zustand
 Vehicle,Rückwärtsgang-Schalter,Switch,am Getriebe,VEH.IN,0x140,0x0406,"{ key:u16, level:u8, ts:u16 }",level: 0/1 aktueller Zustand
 Vehicle,Fahrmodus,Rotary/Switch,Road/Offroad/Service,VEH.IN,0x140,0x0407,"{ key:u16, level:u8, ts:u16 }",level: 0/1 aktueller Zustand
 Vehicle,Kupplungsschalter,Switch,Start-/Schaltfreigabe,VEH.IN,0x140,0x0408,"{ key:u16, level:u8, ts:u16 }",level: 0/1 aktueller Zustand
+Vehicle,Hupe,Momentary,Signalhorn,VEH.IN,0x140,0x0409,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }","edge: 0=level,1=press,2=release; value optional (z.B. encoder delta)"
 Pneumatic/Shift,Gang R,Button/Switch,Direktwahl Gang R,SHIFT.SELECT,0x150,0x0501,"{ gear:u8(enum R=1,N=2,1=3..5=7), request_edge:u8, clutch:u8, ts:u16 }",clutch: 1=Kupplung gezogen (falls vorhanden)
 Pneumatic/Shift,Gang N,Button/Switch,Direktwahl Gang N,SHIFT.SELECT,0x150,0x0502,"{ gear:u8(enum R=1,N=2,1=3..5=7), request_edge:u8, clutch:u8, ts:u16 }",clutch: 1=Kupplung gezogen (falls vorhanden)
 Pneumatic/Shift,Gang 1,Button/Switch,Direktwahl Gang 1,SHIFT.SELECT,0x150,0x0503,"{ gear:u8(enum R=1,N=2,1=3..5=7), request_edge:u8, clutch:u8, ts:u16 }",clutch: 1=Kupplung gezogen (falls vorhanden)
@@ -41,16 +46,6 @@ Pneumatic/Shift,Gang 2,Button/Switch,Direktwahl Gang 2,SHIFT.SELECT,0x150,0x0504
 Pneumatic/Shift,Gang 3,Button/Switch,Direktwahl Gang 3,SHIFT.SELECT,0x150,0x0505,"{ gear:u8(enum R=1,N=2,1=3..5=7), request_edge:u8, clutch:u8, ts:u16 }",clutch: 1=Kupplung gezogen (falls vorhanden)
 Pneumatic/Shift,Gang 4,Button/Switch,Direktwahl Gang 4,SHIFT.SELECT,0x150,0x0506,"{ gear:u8(enum R=1,N=2,1=3..5=7), request_edge:u8, clutch:u8, ts:u16 }",clutch: 1=Kupplung gezogen (falls vorhanden)
 Pneumatic/Shift,Gang 5,Button/Switch,Direktwahl Gang 5,SHIFT.SELECT,0x150,0x0507,"{ gear:u8(enum R=1,N=2,1=3..5=7), request_edge:u8, clutch:u8, ts:u16 }",clutch: 1=Kupplung gezogen (falls vorhanden)
-Pneumatic/Shift,Kompressor Ein/Aus,Button/Toggle,Pneumatiksystem schalten,PNEU.IN,0x150,0x0508,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",
-Pneumatic/Shift,Drucksensor Tank,Analog,Luftdruckmessung (Input),PNEU.IN,0x150,0x0509,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",
-Pneumatic/Shift,Sperre vorn,Button/Toggle,Differentialsperre vorn,PNEU.IN,0x150,0x050A,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",
-Pneumatic/Shift,Sperre hinten,Button/Toggle,Differentialsperre hinten,PNEU.IN,0x150,0x050B,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",
-Pneumatic/Shift,Ventil Heben,Momentary,Hubsteuerung,PNEU.IN,0x150,0x050C,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",
-Pneumatic/Shift,Ventil Senken,Momentary,Hubsteuerung,PNEU.IN,0x150,0x050D,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",
-Pneumatic/Shift,Endlagensensor Oben,Switch,Limit oben,PNEU.IN,0x150,0x050E,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",
-Pneumatic/Shift,Endlagensensor Unten,Switch,Limit unten,PNEU.IN,0x150,0x050F,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",
-Pneumatic/Shift,Entlüften,Momentary,Luft ablassen,PNEU.IN,0x150,0x0510,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",
-Pneumatic/Shift,Pneumatik-Profilwahl,Rotary/Switch,Fahren/Heben/Absenken,PNEU.IN,0x150,0x0511,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",
 Offroad/Accessory,Winde Einziehen,Momentary,Richtung IN,OFFROAD.IN,0x160,0x0601,"{ key:u16, edge:u8, ts:u16 }",
 Offroad/Accessory,Winde Auslassen,Momentary,Richtung OUT,OFFROAD.IN,0x160,0x0602,"{ key:u16, edge:u8, ts:u16 }",
 Offroad/Accessory,Winden-Freigabe,Switch,Sicherheits-Enable,OFFROAD.IN,0x160,0x0603,"{ key:u16, edge:u8, ts:u16 }",
@@ -69,3 +64,13 @@ Sensors,ECU-Temperatur,Analog/Digital,Elektronikschutz,SENS.IN,0x180,0x0803,"{ k
 Sensors,IMU Roll/Pitch,I2C/SPI,Offroad-Assist/Logging,SENS.IN,0x180,0x0804,"{ key:u16, value_i16:u16 or scaled, ts:u16 }",Publiziert periodisch oder bei Änderung
 Sensors,Geschwindigkeit,Digital/Hall,Logging / Logik,SENS.IN,0x180,0x0805,"{ key:u16, value_i16:u16 or scaled, ts:u16 }",Publiziert periodisch oder bei Änderung
 Sensors,Joystick Health,Computed,Dead-Zone/Drift Status,SENS.IN,0x180,0x0806,"{ key:u16, value_i16:u16 or scaled, ts:u16 }",Publiziert periodisch oder bei Änderung
+Pneumatic/Shift,Kompressor Ein/Aus,Button/Toggle,Pneumatiksystem schalten,PNEU.IN,0x190,0x0901,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",
+Pneumatic/Shift,Drucksensor Tank,Analog,Luftdruckmessung (Input),PNEU.IN,0x190,0x0902,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",
+Pneumatic/Shift,Sperre vorn,Button/Toggle,Differentialsperre vorn,PNEU.IN,0x190,0x0903,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",
+Pneumatic/Shift,Sperre hinten,Button/Toggle,Differentialsperre hinten,PNEU.IN,0x190,0x0904,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",
+Pneumatic/Shift,Ventil Heben,Momentary,Hubsteuerung,PNEU.IN,0x190,0x0905,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",
+Pneumatic/Shift,Ventil Senken,Momentary,Hubsteuerung,PNEU.IN,0x190,0x0906,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",
+Pneumatic/Shift,Endlagensensor Oben,Switch,Limit oben,PNEU.IN,0x190,0x0907,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",
+Pneumatic/Shift,Endlagensensor Unten,Switch,Limit unten,PNEU.IN,0x190,0x0908,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",
+Pneumatic/Shift,Entlüften,Momentary,Luft ablassen,PNEU.IN,0x190,0x0909,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",
+Pneumatic/Shift,Pneumatik-Profilwahl,Rotary/Switch,Fahren/Heben/Absenken,PNEU.IN,0x190,0x090A,"{ key:u16, edge:u8, value:u16(opt), ts:u16 }",

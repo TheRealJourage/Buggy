@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "author": "Buggy",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 0, "left": 0, "attrs": {} },
+
+    { "type": "chip-mcp2003", "id": "lin2", "top": 330, "left": 120, "attrs": { "vbb": "12", "node": "2" } },
+    { "type": "wokwi-resistor", "id": "r_rxd2", "top": 280, "left": 20, "rotate": 90, "attrs": { "value": "4700" } },
+    { "type": "wokwi-resistor", "id": "r_lin_master", "top": 430, "left": 300, "rotate": 90, "attrs": { "value": "1000" } },
+    { "type": "wokwi-vcc", "id": "vbb_rail", "top": 380, "left": 330, "attrs": {} },
+
+    { "type": "chip-mcp2003", "id": "lin1", "top": 330, "left": 460, "attrs": { "vbb": "12", "node": "1" } },
+    { "type": "wokwi-resistor", "id": "r_rxd1", "top": 280, "left": 400, "rotate": 90, "attrs": { "value": "4700" } },
+    { "type": "wokwi-vcc", "id": "vcc_3v3", "top": 240, "left": 420, "attrs": {} },
+    { "type": "chip-lin-slave", "id": "slave", "top": 330, "left": 640, "attrs": { "buttons": "5", "pot1": "1024", "pot2": "3000" } },
+
+    { "type": "wokwi-led", "id": "led_status", "top": -90, "left": 330, "attrs": { "color": "green", "label": "D12 status" } },
+    { "type": "wokwi-resistor", "id": "r_status", "top": -20, "left": 300, "rotate": 90, "attrs": { "value": "220" } },
+    { "type": "wokwi-led", "id": "led_error", "top": -90, "left": 400, "attrs": { "color": "red", "label": "D13 error" } },
+    { "type": "wokwi-resistor", "id": "r_error", "top": -20, "left": 370, "rotate": 90, "attrs": { "value": "220" } },
+
+    { "type": "wokwi-gnd", "id": "gnd1", "top": 480, "left": 200, "attrs": {} },
+    { "type": "wokwi-gnd", "id": "gnd2", "top": 480, "left": 560, "attrs": {} },
+    { "type": "wokwi-gnd", "id": "gnd3", "top": 60, "left": 470, "attrs": {} }
+  ],
+  "connections": [
+    [ "uno:1", "lin2:TXD", "green", [] ],
+    [ "uno:0", "lin2:RXD", "blue", [] ],
+    [ "lin2:RXD", "r_rxd2:2", "blue", [] ],
+    [ "r_rxd2:1", "uno:5V", "red", [] ],
+    [ "uno:2", "lin2:CS", "orange", [] ],
+    [ "uno:GND.2", "lin2:VSS", "black", [] ],
+    [ "lin2:VSS", "gnd1:GND", "black", [] ],
+    [ "lin2:VBB", "vbb_rail:VCC", "red", [] ],
+
+    [ "lin2:LBUS", "lin1:LBUS", "yellow", [] ],
+    [ "lin2:LBUS", "r_lin_master:2", "yellow", [] ],
+    [ "r_lin_master:1", "vbb_rail:VCC", "red", [] ],
+
+    [ "slave:TX", "lin1:TXD", "green", [] ],
+    [ "slave:RX", "lin1:RXD", "blue", [] ],
+    [ "lin1:RXD", "r_rxd1:2", "blue", [] ],
+    [ "r_rxd1:1", "vcc_3v3:VCC", "red", [] ],
+    [ "slave:CS", "lin1:CS", "orange", [] ],
+    [ "slave:GND", "gnd2:GND", "black", [] ],
+    [ "lin1:VSS", "gnd2:GND", "black", [] ],
+    [ "lin1:VBB", "vbb_rail:VCC", "red", [] ],
+
+    [ "uno:12", "r_status:1", "green", [] ],
+    [ "r_status:2", "led_status:A", "green", [] ],
+    [ "led_status:C", "gnd3:GND", "black", [] ],
+    [ "uno:13", "r_error:1", "red", [] ],
+    [ "r_error:2", "led_error:A", "red", [] ],
+    [ "led_error:C", "gnd3:GND", "black", [] ]
+  ],
+  "dependencies": {}
+}
