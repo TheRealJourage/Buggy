@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Auslegung Schaltzylinder (Neuberechnung 2026-10-24)</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 12px; background: #111; color: #eee; font-size: 16px; line-height: 1.4; max-width: 1000px; }
+  h1 { font-size: 21px; margin: 4px 0 6px; }
+  h2 { font-size: 18px; margin: 24px 0 8px; color: #8cf; border-bottom: 1px solid #333; padding-bottom: 4px; }
+  .hint { color: #aaa; font-size: 14px; }
+  .hyp { color: #e8c547; }
+  .bad { color: #ff7b7b; }
+  .ok { color: #7bdc7b; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; margin: 6px 0; }
+  th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid #2a2a2a; vertical-align: top; }
+  th { color: #8cf; font-weight: 600; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; }
+  a { color: #8cf; }
+  li { margin: 3px 0; }
+</style>
+</head>
+<body>
+<h1>Schaltzylinder – Neuberechnung aus den Messwerten</h1>
+<p class="hint">Stand 2026-10-24. <b>Vorschlag von Claude, vom User nicht freigegeben.</b> Quellen: Tafel 2026-10-15 (Wege), Kofferwaage 2026-10-21/23 (Kräfte), Airtec-Datenblatt Baureihe HM (Stand 18.09.2025). <span class="hyp">Gelb = Annahme.</span> Zurück zum <a href="index.html">3D-Viewer</a>.</p>
+
+<h2>1. Annahmen</h2>
+<ul>
+  <li class="hyp">Die Tafelwerte sind Wege <b>am Seilauge</b>, also dort, wo der Zylinder angreift. Falls sie an einem Hebel mit anderer Übersetzung gemessen sind, ändern sich alle Hübe im selben Verhältnis.</li>
+  <li class="hyp">Die Kräfte der Kofferwaage gelten ebenfalls am Seilauge. Ausgelegt wird auf den größten Wert: Gasse 9 kg ≈ 88 N, Reihe/Gang 8 kg ≈ 78 N.</li>
+  <li>Zylinderkräfte aus dem Airtec-Katalog. Die Katalogwerte enthalten schon die Reibung (Ø 20 bei 6 bar: 170 N statt rechnerisch 188 N).</li>
+</ul>
+
+<h2>2. Wege</h2>
+<table>
+  <tr><th>Achse</th><th>gemessen</th><th>Folgerung</th></tr>
+  <tr><td>Gasse G</td><td>R 13,7 · 1/2 18,0 · 3/4 27,5 · 5 40,7 mm → <b>27,0 mm</b> (Schritte 4,3 / 9,5 / 13,2)</td><td>Hub ≥ 27. R und 5 enden am Gassenanschlag im Getriebe, das Poti erkennt sie.</td></tr>
+  <tr><td>Reihe unten (2, 4)</td><td>8,9 / 9,1 mm</td><td>Fast gleich → „A und B eingefahren“ = Gang 2/4.</td></tr>
+  <tr><td>Neutral</td><td>R 37,4 · 1/2 36,7 · 3/4 38,3 · 5 34,8 mm (Mittel 36,8)</td><td>Hub A = 36,8 − 9,0 ≈ <b>28 mm</b>. Abweichung je Gasse +1,3 … −2,2 mm.</td></tr>
+  <tr><td>Reihe oben (R, 1, 3, 5)</td><td>59,5 / 58,8 / 65,1 / 62,2 mm → ab Neutral 22,5 / 21,8 / 28,1 / 25,2 mm</td><td>Hub B ≥ 28,1 → <b>30 mm</b>. Der Gang endet am Getriebe, nicht am Zylinder.</td></tr>
+  <tr><td>Kupplungspedal</td><td>55–60 mm an der Spitze, 50 kg ≈ 490 N an der Pedalplatte</td><td>siehe Abschnitt 5</td></tr>
+</table>
+
+<h2>3. Kräfte (Airtec-Katalog, ein- / ausfahrend)</h2>
+<table>
+  <tr><th>Zylinder</th><th class="n">6 bar</th><th class="n">7 bar*</th><th class="n">Last</th><th class="n">Reserve bei 7 bar</th></tr>
+  <tr><td>HM-16</td><td class="n">109 / 93 N</td><td class="n">127 / 109 N</td><td class="n">88 N</td><td class="n bad">1,4 / 1,2</td></tr>
+  <tr><td>HM-20</td><td class="n">170 / 142 N</td><td class="n">198 / 166 N</td><td class="n">88 N (G)</td><td class="n">2,3 / 1,9</td></tr>
+  <tr><td>HM-20</td><td class="n">170 / 142 N</td><td class="n">198 / 166 N</td><td class="n">78 N (B)</td><td class="n ok">2,5 / 2,1</td></tr>
+  <tr><td>HM-25</td><td class="n">265 / 223 N</td><td class="n">309 / 260 N</td><td class="n">78 N (A)</td><td class="n ok">4,0 / 3,3</td></tr>
+</table>
+<p class="hint">* 7 bar linear aus den 6-bar-Katalogwerten hochgerechnet. Ø 16 ist zu schwach.</p>
+<p><b>Warum A größer als B:</b> In den oberen Gängen drückt B gegen den Anschlag im Getriebe. Die Gegenkraft geht über die Kupplung FK in die Kolbenstange von A. Bei gleichem Ø hält A nur gleich stark dagegen und kann nachgeben. Dann fällt Sensor „A aus“ ab. Mit A = Ø 25 hält A mit 265 N gegen 170 N (6 bar).</p>
+
+<h2>4. Vorschlag</h2>
+<table>
+  <tr><th>Teil</th><th>bisher (Annahme 14.10.)</th><th>neu</th></tr>
+  <tr><td>G</td><td>HM-20, Hub 96</td><td><b>HM-20-040</b> (Standardhub, je 6,5 mm Reserve an R und 5)</td></tr>
+  <tr><td>A</td><td>HM-20, Hub 14</td><td><b>HM-25-028</b> (Sonderhub, legt Neutral fest)</td></tr>
+  <tr><td>B</td><td>HM-20, Hub 34</td><td><b>HM-20-030</b> (Sonderhub) – oder Standard 040, dann Box +20 mm</td></tr>
+  <tr><td>Kupplung A → B</td><td>FK-20 (M8, 57 mm)</td><td><b>FK-32</b> (M10 × 1,25, 71,5 mm), Mutter RL-25 statt RL-20</td></tr>
+  <tr><td>Füße</td><td>RA-25</td><td>RA-25 (passt für Ø 20 und 25, gleiche Achshöhe)</td></tr>
+  <tr><td>Gabelköpfe</td><td>RD-20 an G und B</td><td>unverändert (A hängt nicht am Seil)</td></tr>
+  <tr><td>Schaltdruck (FRY)</td><td>offen</td><td><b>7 bar</b>: Tank 8,3–10,3 bar (Pressostat 120/150 psi), Ventile/Zylinder max. 10 bar</td></tr>
+  <tr><td>Drossel G</td><td>250 mm/s</td><td><b>~100 mm/s</b> (Simulation: ab 160 mm/s Überschwingen, siehe 6)</td></tr>
+  <tr><td>Poti-Fenster</td><td>R &lt; 10 %, 1/2 und 3/4 ± 5 %, 5 &gt; 90 %</td><td>in mm: R bis Gassenmitte + 1 mm, 1/2 und 3/4 je Gassenmitte ± 1,5 mm, 5 ab Gassenmitte − 1 mm</td></tr>
+  <tr><td>Sensor B „aus“</td><td>Hubende</td><td><b>bei ~21 mm</b> (unter dem kürzesten Gang 1 = 21,8 mm); danach 50 ms Druck halten</td></tr>
+  <tr><td>Zylinderbox</td><td>~562 × 152 × 82 mm</td><td><b>~610 × 152 × 83 mm</b> (Schaltseil-Spur: 130 + 10 + 22 + 58 + 24 + 125 + 71,5 + 28 + 132 + 5)</td></tr>
+</table>
+
+<h2>5. Kupplung K (Option)</h2>
+<p>Das Pedal braucht ~490 N über 55–60 mm. Ein HM-25 schafft bei 7 bar ~310 N. <b class="bad">Mit ISO 6432 (Baureihe HM) geht K nicht.</b></p>
+<table>
+  <tr><th>Variante</th><th>Kraft am Zylinder</th><th>Hub</th><th>Zylinder (Airtec)</th></tr>
+  <tr><td>direkt an der Pedalspitze</td><td>~490 N, mit Reserve 2 ~980 N</td><td>≥ 60 → 80</td><td>Ø 50 (XL, ISO 15552) ≈ 1200 N bei 7 bar</td></tr>
+  <tr><td>Zug über lose Rolle (Idee User)</td><td>~245 N, mit Reserve 2 ~490 N</td><td>≥ 120 → 125</td><td>Ø 32 (XL oder Kompakt NYD) ≈ 500 N bei 7 bar</td></tr>
+</table>
+<p class="hint">Kraft rechnerisch mit Faktor 0,9 für Reibung. Die Kupplung bleibt vorerst manuell, deshalb keine Bestellung nötig.</p>
+
+<h2>6. Simulation (sim.js)</h2>
+<ul>
+  <li>Alle Gänge mit den neuen Maßen: 12/12 Tests bestanden.</li>
+  <li>Fliegendes Einlegen in 1/2 und 3/4: Das Fenster ist nur noch ± 1,5 mm breit (vorher ± 4,8 mm). Bis 140 mm/s läuft es ohne Überschwingen, ab 160 mm/s schwingt G über, ab 200 mm/s scheitert jeder zweite Wechsel. Ventil-Schaltzeit 15 ms angenommen.</li>
+  <li>Gassenwechsel R → 5 dauert bei 100 mm/s ~0,3 s.</li>
+</ul>
+
+<h2>7. Luftverbrauch (Abschätzung)</h2>
+<p>Ein Gassenwechsel (z. B. 2 → 3) braucht A, G und B je einmal: zusammen ~0,25 Nl in den Zylindern (Katalog, 7 bar) plus die Schläuche (<span class="hyp">angenommen je 1 m 6 × 4 mm, ~0,1 Nl pro Füllung</span>) → <b>~0,5 Nl pro Schaltung</b>. Der 10-L-Tank gibt zwischen 10,3 und 8,3 bar ~20 Nl her → <b>~40 Schaltungen</b>, bevor der Kompressor anläuft.</p>
+
+<h2>8. Am Fahrzeug prüfen</h2>
+<ul>
+  <li>Wurden die Tafelwerte am Seilauge gemessen (Abschnitt 1)?</li>
+  <li>Lässt sich in Neutral bei 37,0 mm jede Gasse frei anwählen? Gasse 5 hatte Neutral bei 34,8 mm (−2,2 mm).</li>
+  <li>Seilauge ≤ 8 mm dick (Schlitz RD-20)?</li>
+</ul>
+</body>
+</html>

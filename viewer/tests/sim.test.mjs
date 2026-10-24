@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createSim, SEQUENCE, SHIFT_ORDER, GEARS } from '../sim.js';
+import { createSim, SEQUENCE, SHIFT_ORDER, GEARS, ROW_TOP, B_STROKE } from '../sim.js';
 
 const DT = 0.0005;
 
@@ -92,10 +92,10 @@ test('layout R 1 3 5 top, 2 4 bottom, R and 5 at G end positions', () => {
   assert.deepEqual(Object.entries(GEARS).filter(([, v]) => v.row === 'top').map(([k]) => k).sort(), ['1', '3', '5', 'R']);
   const sim = createSim();
   shiftTo(sim, 'R');
-  assert.ok(sim.poti() < 5);
+  assert.ok(sim.poti() < sim.params.P_END_LO);
   shiftTo(sim, '1');
   shiftTo(sim, '5');
-  assert.ok(sim.poti() > 95);
+  assert.ok(sim.poti() > sim.params.P_END_HI);
   assert.equal(sim.rowOf(), 'top');
 });
 
@@ -154,4 +154,15 @@ test('manual clutch released mid-shift -> fault to neutral', () => {
   runUntilIdle(sim);
   assert.equal(sim.state.gear, 'N');
   assert.match(sim.state.message, /Kupplung/);
+});
+
+test('top gears end on the gearbox stop (measured travel), B keeps stroke reserve', () => {
+  const sim = createSim();
+  for (const g of ['R', '1', '3', '5']) {
+    shiftTo(sim, g);
+    assert.equal(sim.state.gear, g);
+    const top = ROW_TOP[GEARS[g].gate];
+    assert.ok(Math.abs(sim.state.b - top) < 0.01, `${g}: b ${sim.state.b} vs ${top}`);
+    assert.ok(top < B_STROKE);
+  }
 });

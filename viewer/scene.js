@@ -1,13 +1,17 @@
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
-import { createSim, GATE_X, GATE_TRAVEL, GATE_NAMES, A_STROKE, B_STROKE, SEQUENCE, STATES, CLUTCH_TRAVEL } from './sim.js';
+import { createSim, GATE_X, GATE_TRAVEL, GATE_NAMES, A_STROKE, B_STROKE, ROW_TOP, SEQUENCE, STATES, CLUTCH_TRAVEL } from './sim.js';
 
-// ---- geometry constants (mm), HM-20 per Airtec catalog: body = 95 + stroke, WF 24, Ø27 / rod Ø8
+// ---- geometry constants (mm), Airtec HM data sheet (18.09.2025): body L1 + stroke, WF, head Ø, rod Ø
+// G and B = HM-20 (L1 95, WF 24, Ø27, rod 8), A = HM-25 (L1 104, WF 28, Ø30, rod 10) so A holds B at the top stop
 const CYL_R = 13.5;
 const ROD_R = 4;
 const WF = 24;
+const A_CYL_R = 15;
+const A_ROD_R = 5;
+const A_WF = 28;
 const G_BODY = 95 + GATE_TRAVEL;
-const A_BODY = 95 + A_STROKE;
+const A_BODY = 104 + A_STROKE;
 const B_BODY = 95 + B_STROKE;
 
 // ---- renderer / scene
@@ -118,10 +122,10 @@ const RIGID = { G: 70, R: 130 };
 const HOLE_D = { G: 25, R: 15 };
 const EYE_CLEAR = 10;            // assumed gap eye -> rigid part at full extension
 const CLEVIS = 22;               // rod end -> cable eye pin (RD-20 + Ø8 pin)
-const RO20 = 57;                 // Airtec FK-20 compensating coupling A -> B
+const RO20 = 71.5;               // Airtec FK-32 compensating coupling A (M10x1.25) -> B
 const FOOT_W = 54;               // RA-25 foot width = lane pitch driver
 const GAP = 6;
-const AX_Y = FLOOR_T + 40;       // common axis height (B on MGN12 carriage, A/G on RA-25 + spacer)
+const AX_Y = FLOOR_T + 40;       // common axis height (B on MGN12 carriage, A/G on RA-25 + spacer; RA-25 fits Ø20 and Ø25)
 const CB_Z1 = 50;
 const ROW_Z = CB_Z1 - WALL_T - GAP - FOOT_W / 2;
 const G_Z = ROW_Z - FOOT_W - GAP;
@@ -131,8 +135,8 @@ const G_X0 = G_ROD_END0 - WF - G_BODY;
 const B_ROD_END0 = WALL_X - RIGID.R - EYE_CLEAR - CLEVIS - A_STROKE - B_STROKE;    // B rod end at a = b = 0
 const B_OFFSET = RO20;
 const A_ROD_END0 = B_ROD_END0 - WF - B_BODY - B_OFFSET;
-const A_X0 = A_ROD_END0 - WF - A_BODY;
-const CB = { x0: A_X0 - 5 - WALL_T, x1: WALL_X + WALL_T, z0: POTI_Z - 8 - GAP - WALL_T, z1: CB_Z1, h: Math.ceil(AX_Y + CYL_R + 20) };
+const A_X0 = A_ROD_END0 - A_WF - A_BODY;
+const CB = { x0: A_X0 - 5 - WALL_T, x1: WALL_X + WALL_T, z0: POTI_Z - 8 - GAP - WALL_T, z1: CB_Z1, h: Math.ceil(AX_Y + A_CYL_R + 20) };
 const VB = { x0: -280, x1: 50, z0: 72, z1: 235, h: 110 };    // valve + electronics box
 const HOSE_Y = 72;
 const BULK = { y: AX_Y + 8, z0: CB.z0 + 12, dz: 12 };       // rear-wall bulkheads behind G
@@ -175,7 +179,7 @@ world.add(info(cyl(7, CB.x0 - 10, CB.x0 + 2, mat.dark, 'x', BULK.y + 22, BULK.z0
 function foot(x, z) { world.add(info(box(20, AX_Y - CYL_R - FLOOR_T, FOOT_W, mat.dark, x, (AX_Y - CYL_R + FLOOR_T) / 2, z), 'Fußbefestigung + Distanzplatte', 'Airtec RA-25 (für Ø 20/25) + Distanz auf Achshöhe 40 mm', 'Je Zylinder vorne + hinten, mit M6 auf die Grundplatte. Steif befestigt, weil die Seilkraft über den Zylinder läuft.')); }
 
 // G cylinder (gate / Wählseil)
-world.add(info(cyl(CYL_R, G_X0, G_X0 + G_BODY, mat.alu, 'x', AX_Y, G_Z), 'Zylinder G (Gasse → Wählseil)', `Airtec HM-20 (vorläufig), Hub ~${GATE_TRAVEL} mm`, 'Wählt die Gasse R · 1/2 · 3/4 · 5. R und 5 = Endlagen, 1/2 und 3/4 werden „fliegend“ eingelegt. Position über Linear-Poti.'));
+world.add(info(cyl(CYL_R, G_X0, G_X0 + G_BODY, mat.alu, 'x', AX_Y, G_Z), 'Zylinder G (Gasse → Wählseil)', `Airtec HM-20-0${GATE_TRAVEL} (Vorschlag 2026-10-24, Standardhub)`, `Wählt die Gasse R · 1/2 · 3/4 · 5. Gemessener Gassenweg R → 5 = 27 mm, Hub ${GATE_TRAVEL} mm lässt je 6,5 mm Reserve: R und 5 enden am Gassenanschlag im Getriebe, nicht am Zylinder. 1/2 und 3/4 werden „fliegend“ eingelegt. Kraft gemessen 9 kg ≈ 88 N, HM-20 bei 7 bar ≈ 198 N aus / 166 N ein (Katalog).`));
 foot(G_X0 + 10, G_Z); foot(G_X0 + G_BODY - 10, G_Z);
 const gRod = cyl(ROD_R, 0, 80, mat.steel, 'x', AX_Y, G_Z);
 world.add(gRod);
@@ -187,9 +191,9 @@ for (const p of [gPortCap, gPortRod]) {
 world.add(label('G – Gasse', G_X0 + G_BODY / 2, AX_Y + 40, G_Z - 10));
 
 // A cylinder (fixed) + B cylinder (on linear guide, pushed by A) → Schaltseil
-world.add(info(cyl(CYL_R, A_X0, A_X0 + A_BODY, mat.alu, 'x', AX_Y, ROW_Z), 'Zylinder A (Reihe, Kaskade hinten)', 'Airtec HM-20 (vorläufig), Hub ~14 mm', 'Unten → Neutral. A aus + B ein = Neutral. Fest auf der Grundplatte.'));
+world.add(info(cyl(A_CYL_R, A_X0, A_X0 + A_BODY, mat.alu, 'x', AX_Y, ROW_Z), 'Zylinder A (Reihe, Kaskade hinten)', `Airtec HM-25-0${A_STROKE} (Vorschlag 2026-10-24, Sonderhub)`, `Unten → Neutral, Hub ${A_STROKE} mm = gemessener Weg 2/4 (9,0) → Neutral (Mittel 36,8). Der Hub legt Neutral fest, deshalb genau. Ø 25, weil A beim Einlegen oben die volle Kraft von B abstützen muss (265 > 170 N bei 6 bar).`));
 foot(A_X0 + 10, ROW_Z); foot(A_X0 + A_BODY - 10, ROW_Z);
-const aRod = cyl(ROD_R, 0, 80, mat.steel, 'x', AX_Y, ROW_Z);
+const aRod = cyl(A_ROD_R, 0, 80, mat.steel, 'x', AX_Y, ROW_Z);
 world.add(aRod);
 world.add(label('A', A_X0 + A_BODY / 2, AX_Y + 26, ROW_Z + 32));
 const guideLen = B_BODY + A_STROKE + 40;
@@ -197,8 +201,8 @@ world.add(info(box(guideLen, 8, 20, mat.steel, A_ROD_END0 + B_OFFSET + guideLen 
 
 const bGroup = new THREE.Group();
 world.add(bGroup);
-bGroup.add(info(cyl(9, A_ROD_END0, A_ROD_END0 + RO20, mat.dark, 'x', AX_Y, ROW_Z), 'Ausgleichskupplung A → B', 'Airtec FK-20 (M8, 57 mm)', 'Verbindet Kolbenstange A mit dem Schlitten von B. Gleicht Winkel- und Parallelversatz aus, damit nichts klemmt.'));
-bGroup.add(info(cyl(CYL_R, A_ROD_END0 + B_OFFSET, A_ROD_END0 + B_OFFSET + B_BODY, mat.alu, 'x', AX_Y, ROW_Z), 'Zylinder B (Reihe, Kaskade vorn)', 'Airtec HM-20 (vorläufig), Hub ~34 mm', 'Neutral → oben. Wird mit der Kolbenstange A mitgeschoben.'));
+bGroup.add(info(cyl(9, A_ROD_END0, A_ROD_END0 + RO20, mat.dark, 'x', AX_Y, ROW_Z), 'Ausgleichskupplung A → B', 'Airtec FK-32 (M10 × 1,25, 71,5 mm)', 'Verbindet Kolbenstange A mit dem Schlitten von B. Gleicht Winkel- und Parallelversatz aus, damit nichts klemmt.'));
+bGroup.add(info(cyl(CYL_R, A_ROD_END0 + B_OFFSET, A_ROD_END0 + B_OFFSET + B_BODY, mat.alu, 'x', AX_Y, ROW_Z), 'Zylinder B (Reihe, Kaskade vorn)', `Airtec HM-20-0${B_STROKE} (Vorschlag 2026-10-24, Sonderhub)`, `Neutral → oben. Gemessen bis zum Gang: R 22,5 · 1 21,8 · 3 28,1 · 5 25,2 mm → Gang endet am Anschlag im Getriebe, B hat Reserve. Sensor „aus“ bei ~21 mm. Kraft gemessen 6–8 kg ≈ 78 N, HM-20 bei 7 bar ≈ 198 / 166 N.`));
 bGroup.add(box(B_BODY, AX_Y - CYL_R - 14, 30, mat.dark, A_ROD_END0 + B_OFFSET + B_BODY / 2, (AX_Y - CYL_R + 14) / 2, ROW_Z)); // carriage on guide
 const bRod = cyl(ROD_R, 0, 80, mat.steel, 'x', AX_Y, ROW_Z);
 bGroup.add(bRod);
@@ -245,26 +249,26 @@ for (const [z, name, k] of [[G_Z, 'Wählseil', 'G'], [ROW_Z, 'Schaltseil', 'R']]
 }
 
 // poti on G rod end
-world.add(info(box(GATE_TRAVEL + 70, 16, 16, mat.dark, G_ROD_END0 + CLEVIS + GATE_TRAVEL / 2, AX_Y, POTI_Z), 'Linear-Poti G', `noch auswählen (nicht Airtec), ≥ ${GATE_TRAVEL} mm`, 'Misst die Gassenposition 0–100 %: < 10 % = R, 1/2 und 3/4 je Mitte ± 5 %, > 90 % = 5.'));
+world.add(info(box(185, 16, 16, mat.dark, G_ROD_END0 + CLEVIS + GATE_TRAVEL / 2 - 40, AX_Y, POTI_Z), 'Linear-Poti G', 'KPZ 125 mm, Output R (AliExpress)', `Misst die Gassenposition über ${GATE_TRAVEL} mm Hub (nutzt ~1/3 des Poti-Wegs): R < ${Math.round(GATE_X[0] / GATE_TRAVEL * 100 + 2.5)} %, 1/2 und 3/4 je Gassenmitte ± 1,5 mm, 5 > ${Math.round(GATE_X[3] / GATE_TRAVEL * 100 - 2.5)} %.`));
 const potiArm = box(6, 6, G_Z - POTI_Z, mat.red, 0, AX_Y + 12, (G_Z + POTI_Z) / 2);
 world.add(potiArm);
 world.add(label('Poti', G_ROD_END0 + CLEVIS + GATE_TRAVEL / 2, AX_Y + 35, POTI_Z, 11));
 
 // sensors (ZS-6701 on NT-550 strap), along X
-function sensor(parent, x, z, title) {
+function sensor(parent, x, z, title, r = CYL_R) {
   const m = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, emissive: 0x000000 });
-  parent.add(info(box(30, 5, 6, m, x, AX_Y + CYL_R + 3, z), title, 'Airtec ZS-6701 + NT-550 + KA-31-01', 'PNP 12 V → Spannungsteiler zum Mikrocontroller. Leuchtet grün, wenn der Kolben in dieser Endlage ist.'));
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(CYL_R + 1, 1.2, 8, 24), mat.dark);
+  parent.add(info(box(30, 5, 6, m, x, AX_Y + r + 3, z), title, 'Airtec ZS-6701 + NT-550 + KA-31-01', 'PNP 12 V → Spannungsteiler zum Mikrocontroller. Leuchtet grün, wenn der Kolben in dieser Endlage ist.'));
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(r + 1, 1.2, 8, 24), mat.dark);
   ring.rotation.y = Math.PI / 2;
   ring.position.set(x, AX_Y, z);
   parent.add(ring);
   return m;
 }
 const sensorMats = {
-  Ain: sensor(world, A_X0 + 20, ROW_Z, 'Sensor A eingefahren'),
-  Aout: sensor(world, A_X0 + A_BODY - 20, ROW_Z, 'Sensor A ausgefahren'),
+  Ain: sensor(world, A_X0 + 20, ROW_Z, 'Sensor A eingefahren', A_CYL_R),
+  Aout: sensor(world, A_X0 + A_BODY - 20, ROW_Z, 'Sensor A ausgefahren', A_CYL_R),
   Bin: sensor(bGroup, A_ROD_END0 + B_OFFSET + 20, ROW_Z, 'Sensor B eingefahren'),
-  Bout: sensor(bGroup, A_ROD_END0 + B_OFFSET + B_BODY - 20, ROW_Z, 'Sensor B ausgefahren'),
+  Bout: sensor(bGroup, A_ROD_END0 + B_OFFSET + B_BODY - 20 - (B_STROKE - 21), ROW_Z, 'Sensor B ausgefahren (bei ~21 mm)'),
 };
 
 // valves on manifold (long axis along Z)
@@ -289,7 +293,7 @@ const PEDAL = { x: 60, pivotY: 270, pivotZ: -360, arm: 220 }; // behind the box,
 const pedal = new THREE.Group();
 pedal.position.set(PEDAL.x, PEDAL.pivotY, PEDAL.pivotZ);
 pedal.add(cyl(8, -20, 20, mat.steel, 'x', 0, 0));
-pedal.add(info(box(14, PEDAL.arm, 10, mat.dark, 0, -PEDAL.arm / 2, 0), 'Kupplungspedal', 'Original, Weg ~5 cm (Notiz)', 'Manuell: Fuß tritt vor Plus/Minus. Automatisiert: Zylinder K drückt das Pedal.'));
+pedal.add(info(box(14, PEDAL.arm, 10, mat.dark, 0, -PEDAL.arm / 2, 0), 'Kupplungspedal', 'Original, 50 kg ≈ 490 N an der Pedalplatte, Weg 55–60 mm an der Spitze', 'Manuell: Fuß tritt vor Plus/Minus. Automatisiert: Zylinder K drückt das Pedal.'));
 pedal.add(box(60, 40, 8, mat.knob, 0, -PEDAL.arm, -2));
 world.add(pedal);
 world.add(box(60, 20, 60, mat.frame, PEDAL.x, 10, PEDAL.pivotZ - 40));
@@ -301,8 +305,8 @@ world.add(kGroup);
 const K_Y = PEDAL.pivotY - PEDAL.arm + 15;
 const K_ROD0 = PEDAL.pivotZ + 6;            // rod end touches the pad at c = 0
 const K_BODY0 = K_ROD0 + WF;
-const K_BODY = 95 + CLUTCH_TRAVEL;
-kGroup.add(info(cyl(CYL_R, K_BODY0, K_BODY0 + K_BODY, mat.alu, 'z', PEDAL.x, K_Y), 'Kupplungszylinder K (Option)', `Airtec HM-20, Hub ${CLUTCH_TRAVEL} mm (vorläufig)`, 'Drückt das Pedal. Trennen schnell, Einkuppeln über Drossel langsam (Regler fehlt noch, fest 150 mm/s).'));
+const K_BODY = 120 + CLUTCH_TRAVEL; // larger cylinder than HM, length estimated
+kGroup.add(info(cyl(20, K_BODY0, K_BODY0 + K_BODY, mat.alu, 'z', PEDAL.x, K_Y), 'Kupplungszylinder K (Option, offen)', 'kein HM: Ø 50 direkt (Hub 80) oder Ø 32 + lose Rolle (Hub 125), Airtec XL/NYD', `Pedal braucht ~490 N über ${CLUTCH_TRAVEL} mm. HM-25 schafft bei 7 bar nur ~310 N. Trennen schnell, Einkuppeln über Drossel langsam (fest 150 mm/s).`));
 kGroup.add(box(36, K_Y - CYL_R, 20, mat.dark, PEDAL.x, (K_Y - CYL_R) / 2, K_BODY0 + K_BODY - 10));
 const kRod = cyl(ROD_R, 0, 80, mat.steel, 'z', PEDAL.x, K_Y);
 kGroup.add(kRod);
@@ -366,7 +370,7 @@ const gauge = new THREE.Mesh(new THREE.CylinderGeometry(30, 30, 10, 32), new THR
 gauge.rotation.z = Math.PI / 2;
 gauge.position.set(8, 85, -430);
 supply.add(info(gauge, 'Manometer analog', '—', 'Am Tank, zusätzlich digital im Cockpit.'));
-supply.add(info(box(50, 60, 50, mat.alu, -500, 95, -250), 'Filterregler', 'Airtec Baureihe FRY (Größe offen)', 'Begrenzt den Schaltdruck (Ventile/Zylinder max. 10 bar, Kompressor 10,3 bar) und scheidet Wasser ab.'));
+supply.add(info(box(50, 60, 50, mat.alu, -500, 95, -250), 'Filterregler', 'Airtec Baureihe FRY (Größe offen)', 'Schaltdruck 7 bar (Vorschlag 2026-10-24): Tank 8,3–10,3 bar (Pressostat), Ventile/Zylinder max. 10 bar. Scheidet Wasser ab.'));
 supply.add(cyl(18, 30, 65, new THREE.MeshStandardMaterial({ color: 0xaad4ff, transparent: true, opacity: 0.5 }), 'y', -500, -250));
 const fryGauge = new THREE.Mesh(new THREE.CylinderGeometry(16, 16, 6, 24), new THREE.MeshStandardMaterial({ color: 0xf0f0f0 }));
 fryGauge.rotation.x = Math.PI / 2;
@@ -498,7 +502,12 @@ function drawPotiBar(pt) {
     marks.push(Math.round(wn.lo), Math.round(wn.hi));
   }
   ctx.fillStyle = '#aaa'; ctx.font = '10px system-ui';
-  for (const v of marks) ctx.fillText(v, X(v) - 6, 42);
+  let lastX = -99, row = 0;
+  for (const v of marks.sort((a, b) => a - b)) {
+    row = X(v) - lastX < 16 ? 1 - row : 0;
+    lastX = X(v);
+    ctx.fillText(v, X(v) - 6, 42 + row * 10);
+  }
   GATE_X.forEach((gx, i) => ctx.fillText(GATE_NAMES[i], Math.min(X((gx / GATE_TRAVEL) * 100) - 6, x0 + w - 14), 9));
   ctx.fillStyle = '#ff5050';
   ctx.beginPath(); ctx.moveTo(X(pt), 28); ctx.lineTo(X(pt) - 5, 35); ctx.lineTo(X(pt) + 5, 35); ctx.fill();
@@ -509,16 +518,16 @@ function drawH(s) {
   const c = $('hPattern'), ctx = c.getContext('2d');
   const W = c.width, H = c.height;
   const px = (x) => 40 + (x / GATE_TRAVEL) * (W - 90);
-  const pz = (z) => H - 22 - (z / (A_STROKE + B_STROKE)) * (H - 44); // z = a + b, top row up
+  const pz = (z) => H - 22 - (z / (A_STROKE + B_STROKE)) * (H - 44); // z = a + b, top row up, top ends at the gearbox stop
   ctx.clearRect(0, 0, W, H);
   ctx.strokeStyle = '#555'; ctx.lineWidth = 8; ctx.lineCap = 'round';
   ctx.beginPath();
-  GATE_X.forEach((gx, i) => { ctx.moveTo(px(gx), pz(botGears[i] ? 0 : A_STROKE)); ctx.lineTo(px(gx), pz(A_STROKE + B_STROKE)); });
-  ctx.moveTo(px(0), pz(A_STROKE)); ctx.lineTo(px(GATE_TRAVEL), pz(A_STROKE));
+  GATE_X.forEach((gx, i) => { ctx.moveTo(px(gx), pz(botGears[i] ? 0 : A_STROKE)); ctx.lineTo(px(gx), pz(A_STROKE + ROW_TOP[i])); });
+  ctx.moveTo(px(GATE_X[0]), pz(A_STROKE)); ctx.lineTo(px(GATE_X[3]), pz(A_STROKE));
   ctx.stroke();
   ctx.font = 'bold 12px system-ui';
   GATE_X.forEach((gx, i) => {
-    for (const [g, z, dy] of [[topGears[i], A_STROKE + B_STROKE, -8], [botGears[i], 0, 18]]) {
+    for (const [g, z, dy] of [[topGears[i], A_STROKE + ROW_TOP[i], -8], [botGears[i], 0, 18]]) {
       if (!g) continue;
       ctx.fillStyle = g === s.target ? '#ffd27a' : g === s.gear ? '#5f5' : '#aaa';
       ctx.fillText(g, px(gx) - 4, pz(z) + dy);
@@ -602,7 +611,7 @@ function updateScene() {
 
   const ports = {
     G: { cap: gPortCap.clone().add(V(0, 12, 0)), rod: gPortRod.clone().add(V(0, 12, 0)) },
-    A: { cap: V(A_X0 + 14, AX_Y + CYL_R, ROW_Z), rod: V(A_X0 + A_BODY - 14, AX_Y + CYL_R, ROW_Z) },
+    A: { cap: V(A_X0 + 14, AX_Y + A_CYL_R, ROW_Z), rod: V(A_X0 + A_BODY - 14, AX_Y + A_CYL_R, ROW_Z) },
     B: { cap: V(A_ROD_END0 + B_OFFSET + 14 + s.a, AX_Y + CYL_R, ROW_Z), rod: V(A_ROD_END0 + B_OFFSET + B_BODY - 14 + s.a, AX_Y + CYL_R, ROW_Z) },
   };
   for (const k of ['G', 'A', 'B']) {

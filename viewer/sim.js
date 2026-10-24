@@ -1,15 +1,19 @@
 // Shift controller state machine + simple cylinder physics.
 // Model from Vault: Buggy/Druckluftanlage.md (4 gates R | 1/2 | 3/4 | 5; cascade A+B for rows).
-// R and 5 sit at the G end positions and only have a top row; 1/2 and 3/4 are engaged on the fly.
-// Units: mm, s.
+// R and 5 sit at the outer gate stops of the gearbox and only have a top row; 1/2 and 3/4 are engaged on the fly.
+// Units: mm, s. Travel = measured at the cable eye (Tafel 2026-10-15), sizing: "Neuberechnung 2026-10-24".
 
-export const GATE_PITCH = 32; // assumed, notes say ~3-3.4 cm per gate
-export const GATE_X = [0, 1, 2, 3].map((i) => i * GATE_PITCH);
-export const GATE_TRAVEL = GATE_X[3];
+export const G_STROKE = 40; // standard stroke, gate range is 27 mm
+const GATE_ABS = [13.7, 18.0, 27.5, 40.7]; // measured gate positions R, 1/2, 3/4, 5
+const G_ZERO = (GATE_ABS[0] + GATE_ABS[3]) / 2 - G_STROKE / 2; // stroke centered, 6.5 mm reserve at R and 5
+export const GATE_X = GATE_ABS.map((v) => Math.round((v - G_ZERO) * 10) / 10); // gearbox gate stops, not cylinder ends
+export const GATE_TRAVEL = G_STROKE;
 export const LAST_GATE = GATE_X.length - 1;
 export const GATE_NAMES = ['R', '1/2', '3/4', '5'];
-export const A_STROKE = 14; // bottom row -> neutral
-export const B_STROKE = 34; // neutral -> top row
+export const A_STROKE = 28; // bottom row (2/4 at 9.0 mm) -> neutral (mean 36.8 mm)
+export const B_STROKE = 30; // neutral -> top row, top is stopped by the gearbox before B ends
+export const ROW_TOP = [22.5, 21.8, 28.1, 25.2]; // B travel neutral -> engaged top gear per gate
+export const BOUT_AT = 20.8; // sensor B "out" sits below the shortest top travel
 export const NEUTRAL_Z = A_STROKE;
 
 export const GEARS = {
@@ -25,24 +29,27 @@ export const SEQUENCE = ['R', 'N', '1', '2', '3', '4', '5'];
 // Plus/minus skip N so R <-> 1 is one click when manoeuvring; N has its own button.
 export const SHIFT_ORDER = ['R', '1', '2', '3', '4', '5'];
 export const STATES = ['IDLE', 'CLUTCH_OPEN', 'TO_NEUTRAL', 'GATE_MOVE', 'ROW_ENGAGE', 'CORRECT', 'DONE', 'CLUTCH_CLOSE', 'FAULT'];
-export const CLUTCH_TRAVEL = 50; // mm pedal travel (notes)
+export const CLUTCH_TRAVEL = 58; // mm at the pedal tip (55-60, Halle 2026-10-23)
 const SHIFTING = ['TO_NEUTRAL', 'GATE_MOVE', 'ROW_ENGAGE', 'CORRECT'];
 
+const pct = (x) => Math.round((x / G_STROKE) * 1000) / 10;
+
 export const DEFAULTS = {
-  P_END_LO: 10,      // poti % below = gate R reached
-  P_END_HI: 90,      // poti % above = gate 5 reached
-  WIN_HALF: 5,       // middle gates: window = center ± 5 %
+  P_END_LO: pct(GATE_X[0] + 1),          // poti % below = gate R reached
+  P_END_HI: pct(GATE_X[LAST_GATE] - 1),  // poti % above = gate 5 reached
+  WIN_HALF: pct(1.5),                    // middle gates: window = center ± 1.5 mm
   ventOffset: 0,     // % past the window edge before G is vented
   MAX_FAILS: 4,
-  gSpeed: 250,       // mm/s, set by flow control on G
+  gSpeed: 100,       // mm/s, set by flow control on G
   gAccel: 8000,      // mm/s^2 while pressurized
   gDecel: 5000,      // mm/s^2 while vented (friction)
   rowSpeed: 300,     // mm/s for A and B
   valveDelay: 0.015, // s, M-04-533 switching time
   timeout: 1.0,      // s per state
-  captureTol: 2.5,   // mm: row can leave neutral only this close to a gate
+  captureTol: 2.0,   // mm: row can leave neutral only this close to a gate (assumed)
   neutralTol: 1.5,   // mm: G can move only this close to neutral
   sensorTol: 0.5,    // mm
+  holdTime: 0.05,    // s: keep row pressure after the sensor, top gears end on the gearbox stop
   autoClutch: true,  // false: driver presses the pedal, controller only checks it
   kSpeed: 400,       // mm/s clutch cylinder K pressing the pedal
   kRelease: 150,     // mm/s pedal return, throttled (engagement speed)
@@ -63,7 +70,7 @@ export function createSim(opts = {}) {
   const p = { ...DEFAULTS, ...opts };
   const s = {
     t: 0, state: 'IDLE', stateT: 0, gear: 'N', target: null, fails: 0, message: '',
-    x: GATE_X[1], vx: 0, a: A_STROKE, b: 0, c: 0, foot: false, next: null,
+    x: GATE_X[1], vx: 0, a: A_STROKE, b: 0, c: 0, foot: false, next: null, engagedAt: null,
     cmd: { G: 'vent', A: 'vent', B: 'vent', K: 'vent' },
     valve: { G: 'vent', A: 'vent', B: 'vent', K: 'vent' },
     pending: [], approach: 0, log: [],
@@ -77,7 +84,7 @@ export function createSim(opts = {}) {
   const gateOf = () => GATE_X.findIndex((g) => Math.abs(s.x - g) <= p.captureTol);
   const sensors = () => ({
     Ain: s.a <= p.sensorTol, Aout: s.a >= A_STROKE - p.sensorTol,
-    Bin: s.b <= p.sensorTol, Bout: s.b >= B_STROKE - p.sensorTol,
+    Bin: s.b <= p.sensorTol, Bout: s.b >= BOUT_AT,
   });
   const clutch = () => ({
     pct: (s.c / CLUTCH_TRAVEL) * 100,
@@ -109,6 +116,7 @@ export function createSim(opts = {}) {
   const enter = (st, note = '') => {
     s.state = st;
     s.stateT = 0;
+    s.engagedAt = null;
     log(st + (note ? ` (${note})` : ''));
   };
   const fault = (why) => {
@@ -201,7 +209,9 @@ export function createSim(opts = {}) {
             break;
           }
         }
-        if (engaged) enter('DONE');
+        if (!engaged) s.engagedAt = null;
+        else if (s.engagedAt === null) s.engagedAt = s.t;
+        else if (s.t - s.engagedAt >= p.holdTime) enter('DONE');
         break;
       }
       case 'CORRECT': {
@@ -256,8 +266,8 @@ export function createSim(opts = {}) {
       else s.vx = Math.sign(s.vx) * Math.max(0, Math.abs(s.vx) - p.gDecel * dt);
     }
     s.x += s.vx * dt;
-    if (s.x <= 0 || s.x >= GATE_TRAVEL) {
-      s.x = clamp(s.x, 0, GATE_TRAVEL);
+    if (s.x <= GATE_X[0] || s.x >= GATE_X[LAST_GATE]) {
+      s.x = clamp(s.x, GATE_X[0], GATE_X[LAST_GATE]);
       s.vx = 0;
     }
 
@@ -270,9 +280,10 @@ export function createSim(opts = {}) {
 
     const vel = (k) => (s.valve[k] === 'ext' ? p.rowSpeed : s.valve[k] === 'ret' ? -p.rowSpeed : 0);
     const na = clamp(s.a + vel('A') * dt, 0, A_STROKE);
-    const nb = clamp(s.b + vel('B') * dt, 0, B_STROKE);
-    const dNew = Math.abs(na + nb - NEUTRAL_Z);
     const g = gateOf();
+    const top = g === -1 ? B_STROKE : ROW_TOP[g];
+    const nb = clamp(s.b + vel('B') * dt, 0, Math.min(B_STROKE, top + NEUTRAL_Z - na));
+    const dNew = Math.abs(na + nb - NEUTRAL_Z);
     const away = dNew > p.neutralTol && dNew > Math.abs(z - NEUTRAL_Z);
     const noBottom = (g === 0 || g === LAST_GATE) && na + nb < NEUTRAL_Z - p.neutralTol; // R and 5 have no bottom row
     const blocked = (g === -1 && away) || (noBottom && away);
