@@ -10,8 +10,11 @@ export const GATE_X = GATE_ABS.map((v) => Math.round((v - G_ZERO) * 10) / 10); /
 export const GATE_TRAVEL = G_STROKE;
 export const LAST_GATE = GATE_X.length - 1;
 export const GATE_NAMES = ['R', '1/2', '3/4', '5'];
-export const A_STROKE = 28; // bottom row (2/4 at 9.0 mm) -> neutral (mean 36.8 mm)
-export const B_STROKE = 30; // neutral -> top row, top is stopped by the gearbox before B ends
+// Standard strokes only (User 2026-10-24): A HM-25-040 limited to 28 mm by a stop sleeve on the rod.
+export const A_CYL_STROKE = 40;
+export const A_STOP = 12; // stop sleeve takes 12 mm of the retraction
+export const A_STROKE = A_CYL_STROKE - A_STOP; // bottom row (2/4 at 9.0 mm) -> neutral (mean 36.8 mm)
+export const B_STROKE = 40; // neutral -> top row, top is stopped by the gearbox before B ends
 export const ROW_TOP = [22.5, 21.8, 28.1, 25.2]; // B travel neutral -> engaged top gear per gate
 export const BOUT_AT = 20.8; // sensor B "out" sits below the shortest top travel
 export const NEUTRAL_Z = A_STROKE;

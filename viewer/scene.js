@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
-import { createSim, GATE_X, GATE_TRAVEL, GATE_NAMES, A_STROKE, B_STROKE, ROW_TOP, SEQUENCE, STATES, CLUTCH_TRAVEL } from './sim.js';
+import { createSim, GATE_X, GATE_TRAVEL, GATE_NAMES, A_STROKE, A_CYL_STROKE, A_STOP, B_STROKE, ROW_TOP, SEQUENCE, STATES, CLUTCH_TRAVEL } from './sim.js';
 
 // ---- geometry constants (mm), Airtec HM data sheet (18.09.2025): body L1 + stroke, WF, head Ø, rod Ø
 // G and B = HM-20 (L1 95, WF 24, Ø27, rod 8), A = HM-25 (L1 104, WF 28, Ø30, rod 10) so A holds B at the top stop
@@ -11,7 +11,7 @@ const A_CYL_R = 15;
 const A_ROD_R = 5;
 const A_WF = 28;
 const G_BODY = 95 + GATE_TRAVEL;
-const A_BODY = 104 + A_STROKE;
+const A_BODY = 104 + A_CYL_STROKE;
 const B_BODY = 95 + B_STROKE;
 
 // ---- renderer / scene
@@ -132,10 +132,11 @@ const G_Z = ROW_Z - FOOT_W - GAP;
 const POTI_Z = G_Z - FOOT_W / 2 - GAP - 8;
 const G_ROD_END0 = WALL_X - RIGID.G - EYE_CLEAR - CLEVIS - GATE_TRAVEL;            // G rod end at x = 0
 const G_X0 = G_ROD_END0 - WF - G_BODY;
-const B_ROD_END0 = WALL_X - RIGID.R - EYE_CLEAR - CLEVIS - A_STROKE - B_STROKE;    // B rod end at a = b = 0
+const ROW_TRAVEL = A_STROKE + Math.max(...ROW_TOP);                                  // bottom -> highest top gear
+const B_ROD_END0 = WALL_X - RIGID.R - EYE_CLEAR - CLEVIS - ROW_TRAVEL;               // B rod end at a = b = 0
 const B_OFFSET = RO20;
 const A_ROD_END0 = B_ROD_END0 - WF - B_BODY - B_OFFSET;
-const A_X0 = A_ROD_END0 - A_WF - A_BODY;
+const A_X0 = A_ROD_END0 - A_WF - A_STOP - A_BODY; // stop sleeve keeps the rod 12 mm out
 const CB = { x0: A_X0 - 5 - WALL_T, x1: WALL_X + WALL_T, z0: POTI_Z - 8 - GAP - WALL_T, z1: CB_Z1, h: Math.ceil(AX_Y + A_CYL_R + 20) };
 const VB = { x0: -280, x1: 50, z0: 72, z1: 235, h: 110 };    // valve + electronics box
 const HOSE_Y = 72;
@@ -179,7 +180,7 @@ world.add(info(cyl(7, CB.x0 - 10, CB.x0 + 2, mat.dark, 'x', BULK.y + 22, BULK.z0
 function foot(x, z) { world.add(info(box(20, AX_Y - CYL_R - FLOOR_T, FOOT_W, mat.dark, x, (AX_Y - CYL_R + FLOOR_T) / 2, z), 'Fußbefestigung + Distanzplatte', 'Airtec RA-25 (für Ø 20/25) + Distanz auf Achshöhe 40 mm', 'Je Zylinder vorne + hinten, mit M6 auf die Grundplatte. Steif befestigt, weil die Seilkraft über den Zylinder läuft.')); }
 
 // G cylinder (gate / Wählseil)
-world.add(info(cyl(CYL_R, G_X0, G_X0 + G_BODY, mat.alu, 'x', AX_Y, G_Z), 'Zylinder G (Gasse → Wählseil)', `Airtec HM-20-0${GATE_TRAVEL} (Vorschlag 2026-10-24, Standardhub)`, `Wählt die Gasse R · 1/2 · 3/4 · 5. Gemessener Gassenweg R → 5 = 27 mm, Hub ${GATE_TRAVEL} mm lässt je 6,5 mm Reserve: R und 5 enden am Gassenanschlag im Getriebe, nicht am Zylinder. 1/2 und 3/4 werden „fliegend“ eingelegt. Kraft gemessen 9 kg ≈ 88 N, HM-20 bei 7 bar ≈ 198 N aus / 166 N ein (Katalog).`));
+world.add(info(cyl(CYL_R, G_X0, G_X0 + G_BODY, mat.alu, 'x', AX_Y, G_Z), 'Zylinder G (Gasse → Wählseil)', `Airtec HM-20-0${GATE_TRAVEL} (Standardhub, nicht begrenzt)`, `Wählt die Gasse R · 1/2 · 3/4 · 5. Gemessener Gassenweg R → 5 = 27 mm, Hub ${GATE_TRAVEL} mm lässt je 6,5 mm Reserve: R und 5 enden am Gassenanschlag im Getriebe, nicht am Zylinder. 1/2 und 3/4 werden „fliegend“ eingelegt. Kraft gemessen 9 kg ≈ 88 N, HM-20 bei 7 bar ≈ 198 N aus / 166 N ein (Katalog).`));
 foot(G_X0 + 10, G_Z); foot(G_X0 + G_BODY - 10, G_Z);
 const gRod = cyl(ROD_R, 0, 80, mat.steel, 'x', AX_Y, G_Z);
 world.add(gRod);
@@ -191,7 +192,7 @@ for (const p of [gPortCap, gPortRod]) {
 world.add(label('G – Gasse', G_X0 + G_BODY / 2, AX_Y + 40, G_Z - 10));
 
 // A cylinder (fixed) + B cylinder (on linear guide, pushed by A) → Schaltseil
-world.add(info(cyl(A_CYL_R, A_X0, A_X0 + A_BODY, mat.alu, 'x', AX_Y, ROW_Z), 'Zylinder A (Reihe, Kaskade hinten)', `Airtec HM-25-0${A_STROKE} (Vorschlag 2026-10-24, Sonderhub)`, `Unten → Neutral, Hub ${A_STROKE} mm = gemessener Weg 2/4 (9,0) → Neutral (Mittel 36,8). Der Hub legt Neutral fest, deshalb genau. Ø 25, weil A beim Einlegen oben die volle Kraft von B abstützen muss (265 > 170 N bei 6 bar).`));
+world.add(info(cyl(A_CYL_R, A_X0, A_X0 + A_BODY, mat.alu, 'x', AX_Y, ROW_Z), 'Zylinder A (Reihe, Kaskade hinten)', `Airtec HM-25-0${A_CYL_STROKE}, mit Anschlaghülse auf ${A_STROKE} mm begrenzt`, `Unten → Neutral, ${A_STROKE} mm = gemessener Weg 2/4 (9,0) → Neutral (Mittel 36,8). Die Hülse auf der Kolbenstange nimmt ${A_STOP} mm vom Einfahren weg; mit Passscheiben lässt sich Neutral genau einstellen. Ø 25, weil A beim Einlegen oben die volle Kraft von B abstützen muss (265 > 170 N bei 6 bar).`));
 foot(A_X0 + 10, ROW_Z); foot(A_X0 + A_BODY - 10, ROW_Z);
 const aRod = cyl(A_ROD_R, 0, 80, mat.steel, 'x', AX_Y, ROW_Z);
 world.add(aRod);
@@ -201,8 +202,9 @@ world.add(info(box(guideLen, 8, 20, mat.steel, A_ROD_END0 + B_OFFSET + guideLen 
 
 const bGroup = new THREE.Group();
 world.add(bGroup);
+bGroup.add(info(cyl(8, A_ROD_END0 - A_WF - A_STOP, A_ROD_END0, mat.red, 'x', AX_Y, ROW_Z), 'Anschlaghülse A (Hubbegrenzung)', `Hülse Ø 10,5 innen, ${A_WF + A_STOP} mm lang, + Passscheiben`, `Sitzt auf der Kolbenstange zwischen Zylinderkopf und FK-32. Begrenzt den Standardhub 40 auf ${A_STROKE} mm: eingefahren liegt sie am Kopf an (= Reihe unten 2/4). Mit Passscheiben Neutral auf die gemessenen 36,8 mm einstellen.`));
 bGroup.add(info(cyl(9, A_ROD_END0, A_ROD_END0 + RO20, mat.dark, 'x', AX_Y, ROW_Z), 'Ausgleichskupplung A → B', 'Airtec FK-32 (M10 × 1,25, 71,5 mm)', 'Verbindet Kolbenstange A mit dem Schlitten von B. Gleicht Winkel- und Parallelversatz aus, damit nichts klemmt.'));
-bGroup.add(info(cyl(CYL_R, A_ROD_END0 + B_OFFSET, A_ROD_END0 + B_OFFSET + B_BODY, mat.alu, 'x', AX_Y, ROW_Z), 'Zylinder B (Reihe, Kaskade vorn)', `Airtec HM-20-0${B_STROKE} (Vorschlag 2026-10-24, Sonderhub)`, `Neutral → oben. Gemessen bis zum Gang: R 22,5 · 1 21,8 · 3 28,1 · 5 25,2 mm → Gang endet am Anschlag im Getriebe, B hat Reserve. Sensor „aus“ bei ~21 mm. Kraft gemessen 6–8 kg ≈ 78 N, HM-20 bei 7 bar ≈ 198 / 166 N.`));
+bGroup.add(info(cyl(CYL_R, A_ROD_END0 + B_OFFSET, A_ROD_END0 + B_OFFSET + B_BODY, mat.alu, 'x', AX_Y, ROW_Z), 'Zylinder B (Reihe, Kaskade vorn)', `Airtec HM-20-0${B_STROKE} (Standardhub, nicht begrenzt)`, `Neutral → oben. Gemessen bis zum Gang: R 22,5 · 1 21,8 · 3 28,1 · 5 25,2 mm → Gang endet am Anschlag im Getriebe, B erreicht sein Hubende nie. Sensor „aus“ bei ~21 mm. Kraft gemessen 6–8 kg ≈ 78 N, HM-20 bei 7 bar ≈ 198 / 166 N.`));
 bGroup.add(box(B_BODY, AX_Y - CYL_R - 14, 30, mat.dark, A_ROD_END0 + B_OFFSET + B_BODY / 2, (AX_Y - CYL_R + 14) / 2, ROW_Z)); // carriage on guide
 const bRod = cyl(ROD_R, 0, 80, mat.steel, 'x', AX_Y, ROW_Z);
 bGroup.add(bRod);

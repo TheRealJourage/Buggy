@@ -22,7 +22,7 @@
 </head>
 <body>
 <h1>Schaltzylinder – Neuberechnung aus den Messwerten</h1>
-<p class="hint">Stand 2026-10-24. <b>Vorschlag von Claude, vom User nicht freigegeben.</b> Quellen: Tafel 2026-10-15 (Wege), Kofferwaage 2026-10-21/23 (Kräfte), Airtec-Datenblatt Baureihe HM (Stand 18.09.2025). <span class="hyp">Gelb = Annahme.</span> Zurück zum <a href="index.html">3D-Viewer</a>.</p>
+<p class="hint">Stand 2026-10-24. <b>Vorschlag von Claude, vom User nicht freigegeben.</b> Quellen: Tafel 2026-10-15 (Wege), Kofferwaage 2026-10-21/23 (Kräfte), Airtec-Datenblatt Baureihe HM (Stand 18.09.2025). <span class="hyp">Gelb = Annahme.</span> Zurück zum <a href="index.html">3D-Viewer</a>. <b>Nur Standardhübe (User 2026-10-24)</b>, nötige Begrenzung über Anschlaghülse.</p>
 
 <h2>1. Annahmen</h2>
 <ul>
@@ -36,8 +36,8 @@
   <tr><th>Achse</th><th>gemessen</th><th>Folgerung</th></tr>
   <tr><td>Gasse G</td><td>R 13,7 · 1/2 18,0 · 3/4 27,5 · 5 40,7 mm → <b>27,0 mm</b> (Schritte 4,3 / 9,5 / 13,2)</td><td>Hub ≥ 27. R und 5 enden am Gassenanschlag im Getriebe, das Poti erkennt sie.</td></tr>
   <tr><td>Reihe unten (2, 4)</td><td>8,9 / 9,1 mm</td><td>Fast gleich → „A und B eingefahren“ = Gang 2/4.</td></tr>
-  <tr><td>Neutral</td><td>R 37,4 · 1/2 36,7 · 3/4 38,3 · 5 34,8 mm (Mittel 36,8)</td><td>Hub A = 36,8 − 9,0 ≈ <b>28 mm</b>. Abweichung je Gasse +1,3 … −2,2 mm.</td></tr>
-  <tr><td>Reihe oben (R, 1, 3, 5)</td><td>59,5 / 58,8 / 65,1 / 62,2 mm → ab Neutral 22,5 / 21,8 / 28,1 / 25,2 mm</td><td>Hub B ≥ 28,1 → <b>30 mm</b>. Der Gang endet am Getriebe, nicht am Zylinder.</td></tr>
+  <tr><td>Neutral</td><td>R 37,4 · 1/2 36,7 · 3/4 38,3 · 5 34,8 mm (Mittel 36,8)</td><td>Weg A = 36,8 − 9,0 ≈ <b>28 mm</b>. Abweichung je Gasse +1,3 … −2,2 mm.</td></tr>
+  <tr><td>Reihe oben (R, 1, 3, 5)</td><td>59,5 / 58,8 / 65,1 / 62,2 mm → ab Neutral 22,5 / 21,8 / 28,1 / 25,2 mm</td><td>Hub B ≥ 28,1 → Standardhub <b>40 mm</b>. Der Gang endet am Getriebe, nicht am Zylinder.</td></tr>
   <tr><td>Kupplungspedal</td><td>55–60 mm an der Spitze, 50 kg ≈ 490 N an der Pedalplatte</td><td>siehe Abschnitt 5</td></tr>
 </table>
 
@@ -56,8 +56,8 @@
 <table>
   <tr><th>Teil</th><th>bisher (Annahme 14.10.)</th><th>neu</th></tr>
   <tr><td>G</td><td>HM-20, Hub 96</td><td><b>HM-20-040</b> (Standardhub, je 6,5 mm Reserve an R und 5)</td></tr>
-  <tr><td>A</td><td>HM-20, Hub 14</td><td><b>HM-25-028</b> (Sonderhub, legt Neutral fest)</td></tr>
-  <tr><td>B</td><td>HM-20, Hub 34</td><td><b>HM-20-030</b> (Sonderhub) – oder Standard 040, dann Box +20 mm</td></tr>
+  <tr><td>A</td><td>HM-20, Hub 14</td><td><b>HM-25-040</b> (Standardhub), mit <b>Anschlaghülse</b> auf 28 mm begrenzt: Hülse auf der Kolbenstange zwischen Zylinderkopf und FK-32, 40 mm lang (WF 28 + 12), Ø 10,5 innen. Eingefahren liegt sie am Kopf an = Reihe unten. Mit Passscheiben Neutral genau einstellen</td></tr>
+  <tr><td>B</td><td>HM-20, Hub 34</td><td><b>HM-20-040</b> (Standardhub, nicht begrenzt: die Gänge enden am Getriebe bei 21,8–28,1 mm)</td></tr>
   <tr><td>Kupplung A → B</td><td>FK-20 (M8, 57 mm)</td><td><b>FK-32</b> (M10 × 1,25, 71,5 mm), Mutter RL-25 statt RL-20</td></tr>
   <tr><td>Füße</td><td>RA-25</td><td>RA-25 (passt für Ø 20 und 25, gleiche Achshöhe)</td></tr>
   <tr><td>Gabelköpfe</td><td>RD-20 an G und B</td><td>unverändert (A hängt nicht am Seil)</td></tr>
@@ -65,7 +65,7 @@
   <tr><td>Drossel G</td><td>250 mm/s</td><td><b>~100 mm/s</b> (Simulation: ab 160 mm/s Überschwingen, siehe 6)</td></tr>
   <tr><td>Poti-Fenster</td><td>R &lt; 10 %, 1/2 und 3/4 ± 5 %, 5 &gt; 90 %</td><td>in mm: R bis Gassenmitte + 1 mm, 1/2 und 3/4 je Gassenmitte ± 1,5 mm, 5 ab Gassenmitte − 1 mm</td></tr>
   <tr><td>Sensor B „aus“</td><td>Hubende</td><td><b>bei ~21 mm</b> (unter dem kürzesten Gang 1 = 21,8 mm); danach 50 ms Druck halten</td></tr>
-  <tr><td>Zylinderbox</td><td>~562 × 152 × 82 mm</td><td><b>~610 × 152 × 83 mm</b> (Schaltseil-Spur: 130 + 10 + 22 + 58 + 24 + 125 + 71,5 + 28 + 132 + 5)</td></tr>
+  <tr><td>Zylinderbox</td><td>~562 × 152 × 82 mm</td><td><b>~642 × 152 × 83 mm</b> (Schaltseil-Spur: 130 + 10 + 22 + 56 Weg + 24 + 135 B + 71,5 FK + 40 Hülse + 144 A + 5)</td></tr>
 </table>
 
 <h2>5. Kupplung K (Option)</h2>
