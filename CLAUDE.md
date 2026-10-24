@@ -6,7 +6,8 @@ Hintergrund und Begründung aller Regeln: Vault `Buggy/Audit-2026-10-24.md`.
 
 ## Doku-Quelle (eine Datei je Thema)
 
-Vault `/srv/data/obsidian/vault/Buggy/` (synct auf alle Geräte, keine Massen-Edits). Zahlen stehen nur in der
+Vault `/srv/data/obsidian/vault/Buggy/` auf core, am Windows-PC `C:\Users\ft-kr\Documents\ObsidianVault\Buggy\`
+(synct auf alle Geräte, keine Massen-Edits). Zahlen stehen nur in der
 genannten Datei; andere Notizen und Memory verlinken, statt zu wiederholen.
 
 | Thema | Datei |
