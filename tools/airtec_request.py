@@ -16,14 +16,14 @@ small = ParagraphStyle("s", parent=base, fontSize=8, leading=10)
 cell = ParagraphStyle("c", parent=base, fontSize=8, leading=10)
 cellb = ParagraphStyle("cb", parent=cell, fontName="DVB")
 h1 = ParagraphStyle("h1", parent=base, fontName="DVB", fontSize=15, leading=19, spaceAfter=4)
-h2 = ParagraphStyle("h2", parent=base, fontName="DVB", fontSize=11, leading=14, spaceBefore=8, spaceAfter=4)
+h2 = ParagraphStyle("h2", parent=base, fontName="DVB", fontSize=11, leading=14, spaceBefore=8, spaceAfter=4, keepWithNext=1)
 
 P = lambda t, s=cell: Paragraph(t, s)
 
 SECTIONS = [
-    ("A – Zylinder und Befestigung", [
-        ("HM-20-040", "Rundzylinder ISO 6432, Ø 20, doppeltwirkend, Positionserkennung, Hub 40 mm", "2", "Standardhub", "A"),
-        ("HM-25-040", "Rundzylinder ISO 6432, Ø 25, doppeltwirkend, Positionserkennung, Hub 40 mm", "1", "Standardhub", "A"),
+    ("Zylinderbox", [
+        ("HM-20-040", "Rundzylinder ISO 6432, Ø 20, doppeltwirkend, Positionserkennung, Hub 40 mm", "2", "Standardhub; Gasse G und Reihe B", "A"),
+        ("HM-25-040", "Rundzylinder ISO 6432, Ø 25, doppeltwirkend, Positionserkennung, Hub 40 mm", "1", "Standardhub; Reihe A, intern auf 28 mm begrenzt", "A"),
         ("RA-25", "Fußbefestigung für Ø 20/25", "4", "Ersatz: Eigenbau-Winkel + RM-25", "C"),
         ("RB-25", "Flanschplatte für Ø 20/25", "1", "Ersatz: Eigenbau-Platte + RM-25", "C"),
         ("FK-32", "Ausgleichskupplung M10 × 1,25 (für Ø 25)", "1", "", "A"),
@@ -33,45 +33,51 @@ SECTIONS = [
         ("ZS-6701", "Zylinderschalter 3-Leiter PNP, 0,3 m mit M8-Stecker", "4", "", "A"),
         ("NT-550", "Spannbandhalterung für Zylinderschalter (Baureihe HM)", "4", "2 × an Ø 20, 2 × an Ø 25", "A"),
         ("KA-10-01", "Anschlusskabel M8, Buchse gerade, 3-polig, 1 m", "4", "", "B"),
-        ("44-XSCF-60", "Drosselrückschlagventil, 2 × Steckanschluss 6 mm", "2", "", "A"),
+        ("44-XSCF-60", "Drosselrückschlagventil, 2 × Steckanschluss 6 mm", "2", "Geschwindigkeit G", "A"),
     ]),
-    ("B – Ventile", [
+    ("Ventilbox", [
         ("M-04-533-HN-441", "5/3-Wegeventil, Mittelstellung entlüftet, G1/8, 12 V DC 4,2 W", "3", "", "A"),
         ("28-ST-01", "Steckdose Form B Industrienorm", "6", "", "A"),
         ("Reihenleiste M-04", "Reihenleiste für Baureihe M-04, 3-fach", "1", "Bitte passenden Typ angeben (Katalog S. 4-10); Ventile auch einzeln montierbar", "C"),
         ("40-501-18", "Schalldämpfer G1/8", "6", "entfällt ggf. bei Reihenleiste mit Sammelabluft", "B"),
     ]),
-    ("C – Verschlauchung (blue C-line)", [
+    ("Schläuche", [
         ("blue C-line", "Steckverschraubung gerade, G1/8 auf Schlauch 6 mm", "12", "Bitte passenden Typ angeben", "B"),
         ("blue C-line", "Schottverschraubung Schlauch 6 mm", "12", "Ersatz: Kabelverschraubung mit Mehrfach-Dichteinsatz", "D"),
         ("blue C-line", "Schottverschraubung Schlauch 8 mm", "1", "Bitte passenden Typ angeben", "D"),
         ("—", "PU-Schlauch 6 × 4 mm", "6 m", "falls im Programm", "B"),
         ("—", "PU-Schlauch 8 × 6 mm", "3 m", "falls im Programm", "B"),
     ]),
-    ("D – Druckluftaufbereitung und Versorgung", [
+    ("Versorgung", [
         ("FRY", "Filterregler mit Manometer, Anschluss G1/4, Regelbereich bis 10 bar", "1", "Bitte passenden Typ angeben", "B"),
         ("44-XCVPU-80", "Rückschlagventil, Steckanschluss 8 mm", "1", "", "B"),
-        ("PE-14-01", "Druckschalter 1–12 bar, Wechsler, G1/4", "1", "Pressostat vorhanden", "D"),
+        ("PE-14-01", "Druckschalter 1–12 bar, Wechsler, G1/4", "1", "Pressostat bereits vorhanden", "D"),
     ]),
-    ("E – Ergänzung", [
+    ("Zylinderbox", [
         ("RM-25", "Befestigungsmutter M22 × 1,5 für Ø 20/25", "3", "nur falls beim HM keine beiliegt; ersetzt RA-25/RB-25", "A"),
     ]),
 ]
 
 PRIO = {
-    "A": "A – nötig",
-    "B": "B – nötig, auch anderswo",
-    "C": "C – optional",
-    "D": "D – entfällt",
+    "A": "A – nötig (bitte von Airtec)",
+    "B": "B – nötig, kann auch aus dem Fachhandel kommen",
+    "C": "C – optional (Eigenbau möglich)",
+    "D": "D – entfällt voraussichtlich (nur zum Preisvergleich)",
 }
+
+# list ordered by priority, numbered through; area kept as a column
+ITEMS = [(pr, area, nr, desc, qty, note)
+         for pr in PRIO for area, rows in SECTIONS for nr, desc, qty, note, p in rows if p == pr]
+POS = {(nr, desc): i for i, (_, _, nr, desc, _, _) in enumerate(ITEMS, 1)}
+RM25 = next(i for (nr, _), i in POS.items() if nr == "RM-25")
 
 QUESTIONS = [
     "Sind HM-20-040 und HM-25-040 ab Lager lieferbar?",
     "Passt die Spannbandhalterung NT-550 für Ø 20 und Ø 25, oder braucht Ø 25 eine andere Ausführung?",
     "Ist bei RD-20 ein Bolzen (Ø 8 mm) im Lieferumfang?",
-    "Liegt beim HM-20/HM-25 eine Befestigungsmutter (RM-25) bei? Dann entfällt Pos. 25.",
+    f"Liegt beim HM-20/HM-25 eine Befestigungsmutter (RM-25) bei? Dann entfällt Pos. {RM25}.",
     "Welche Reihenleiste passt für 3 Ventile M-04 (gemeinsame Versorgung, ggf. Sammelabluft)?",
-    "Welche Typen der blue C-line passen für die Positionen in Abschnitt C?",
+    "Welche Typen der blue C-line passen für die Steck- und Schottverschraubungen?",
     "Welcher Filterregler der Baureihe FRY mit Manometer passt für G1/4 und bis 10 bar?",
     "Lieferzeit, Versandkosten und Mindestbestellwert für Privat-/Einzelbestellung?",
 ]
@@ -79,10 +85,10 @@ QUESTIONS = [
 
 def section_table(title, rows, start):
     data = [[P("#", cellb), P("Bestell-Nr.", cellb), P("Bezeichnung", cellb), P("St.", cellb),
-             P("Anmerkung", cellb), P("Priorität", cellb), P("Preis", cellb), P("Gesamt", cellb)]]
-    for i, (nr, desc, qty, note, pr) in enumerate(rows):
-        data.append([P(str(start + i)), P(nr, cellb), P(desc), P(qty), P(note, small), P(PRIO[pr], small), "", ""])
-    widths = [9*mm, 32*mm, 38*mm, 10*mm, 29*mm, 22*mm, 17*mm, 17*mm]
+             P("Anmerkung", cellb), P("Einsatz", cellb), P("Preis", cellb), P("Gesamt", cellb)]]
+    for i, (area, nr, desc, qty, note) in enumerate(rows):
+        data.append([P(str(start + i)), P(nr, cellb), P(desc), P(qty), P(note, small), P(area, small), "", ""])
+    widths = [9*mm, 32*mm, 35*mm, 10*mm, 29*mm, 25*mm, 17*mm, 17*mm]
     t = Table(data, colWidths=widths, repeatRows=1)
     t.setStyle(TableStyle([
         ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#999999")),
@@ -119,12 +125,13 @@ def build(out):
         "für ein Einzelprojekt (pneumatische Gangschaltung, Prototyp) bitte ich um ein Angebot für die unten aufgeführten "
         "Artikel aus Ihrem Katalog. Bitte tragen Sie Einzel- und Gesamtpreise ein bzw. senden Sie ein separates Angebot. "
         "Wo „Bitte passenden Typ angeben“ steht, bin ich für einen Vorschlag mit Bestellnummer dankbar.<br/><br/>"
-        "<b>Priorität:</b> A = wird gebraucht, bitte von Airtec · B = wird gebraucht, kann auch aus dem Fachhandel kommen "
-        "(bitte trotzdem anbieten) · C = optional, kann durch Eigenbau ersetzt werden · D = entfällt voraussichtlich, "
-        "nur zum Vergleich anbieten.", base))
+        "Die Liste ist nach Priorität geordnet: A = wird gebraucht, bitte von Airtec · B = wird gebraucht, kann auch aus "
+        "dem Fachhandel kommen (bitte trotzdem anbieten) · C = optional, kann durch Eigenbau ersetzt werden · "
+        "D = entfällt voraussichtlich, nur zum Vergleich anbieten.", base))
     s.append(Spacer(1, 3*mm))
     pos = 1
-    for title, rows in SECTIONS:
+    for pr, title in PRIO.items():
+        rows = [it[1:] for it in ITEMS if it[0] == pr]
         block, pos = section_table(title, rows, pos)
         s += block if len(rows) > 8 else [KeepTogether(block)]
 
@@ -142,5 +149,19 @@ def build(out):
     doc.build(s, onFirstPage=footer, onLaterPages=footer)
 
 
+def markdown():
+    out = []
+    for pr, title in PRIO.items():
+        out += [f"**{title}**", "", "| # | Teil | Airtec-Nr. | Menge | Einsatz | Anmerkung |", "|---|---|---|---|---|---|"]
+        for p, area, nr, desc, qty, note in ITEMS:
+            if p == pr:
+                out.append(f"| {POS[(nr, desc)]} | {desc} | {nr} | {qty} | {area} | {note} |")
+        out.append("")
+    return "\n".join(out)
+
+
 if __name__ == "__main__":
-    build(sys.argv[1])
+    if sys.argv[1] == "--md":
+        print(markdown())
+    else:
+        build(sys.argv[1])
