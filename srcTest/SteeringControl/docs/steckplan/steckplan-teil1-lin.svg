@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="1500" height="780" viewBox="0 0 1500 780" role="img" aria-label="Verkabelung der LIN-Strecke: Uno, zwei MCP2003, RP2040-Tiny, 12-V-Netzteil" xmlns="http://www.w3.org/2000/svg"><style>svg{  --bg: #e9eeec;  --panel: #fbfcfc;  --ink: #16201c;  --muted: #5d6c66;  --faint: #d5ddda;  --accent: #0f6b62;  --board-uno: #d8ebee;  --board-uno-s: #2f7d8c;  --board-tiny: #dde4f4; --board-tiny-s: #3b5aa3;  --board-psu: #f1e3e1;  --board-psu-s: #9b4a3f;  --chip: #262b2a; --chip-ink: #eef2f1;  --w12: #d42a1e; --wg: #161616; --w5: #f07c00; --w33: #f07c00;  --wrx: #1f5fd1; --wtx: #1f9d3a; --wcs: #ffffff; --wlin: #f2c200;  --wsig: #ffffff; --wbtn: #f2c200; --wpot: #1f9d3a;  --casing: #7d8a85;  --led-g: #36b24a; --led-r: #e0413a;  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;  --sans: "Segoe UI", system-ui, sans-serif;}.c12 { --c: var(--w12); } .cg { --c: var(--wg); } .c5 { --c: var(--w5); } .c33 { --c: var(--w33); }
+<svg width="1500" height="780" viewBox="0 0 1500 780" role="img" aria-label="Verkabelung der LIN-Strecke: Uno, zwei MCP2003, RP2040-Tiny, 12-V-Netzteil" xmlns="http://www.w3.org/2000/svg"><style>svg{  --bg: #e9eeec;  --panel: #fbfcfc;  --ink: #16201c;  --muted: #5d6c66;  --faint: #d5ddda;  --accent: #0f6b62;  --board-uno: #d8ebee;  --board-uno-s: #2f7d8c;  --board-tiny: #dde4f4; --board-tiny-s: #3b5aa3;  --board-psu: #f1e3e1;  --board-psu-s: #9b4a3f;  --chip: #262b2a; --chip-ink: #eef2f1;  --w12: #d42a1e; --wg: #161616; --w5: #f07c00; --w33: #f07c00;  --wrx: #1f5fd1; --wtx: #1f9d3a; --wcs: #ffffff; --wlin: #f2c200;  --wsig: #ffffff; --wbtn: #f2c200; --wpot: #1f9d3a;  --wbrown: #8b5a2b; --wpurple: #8e44ad; --wgrey: #9aa0a6; --wpink: #e84393;  --casing: #7d8a85;  --led-g: #36b24a; --led-r: #e0413a;  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;  --sans: "Segoe UI", system-ui, sans-serif;}.c12 { --c: var(--w12); } .cg { --c: var(--wg); } .c5 { --c: var(--w5); } .c33 { --c: var(--w33); }
 .crx { --c: var(--wrx); } .ctx { --c: var(--wtx); } .ccs { --c: var(--wcs); } .clin { --c: var(--wlin); }
 .csig { --c: var(--wsig); } .cbtn { --c: var(--wbtn); } .cpot { --c: var(--wpot); }
+.cbrown { --c: var(--wbrown); } .cpurple { --c: var(--wpurple); } .cgrey { --c: var(--wgrey); } .cblue { --c: var(--wrx); } .cwhite { --c: var(--wsig); } .cpink { --c: var(--wpink); }
 .clin.num, .cbtn.num, .c5.num, .c33.num, .ccs.num, .csig.num { color: #161616; }
 svg text { font-family: var(--mono); fill: var(--ink); }
 svg .wc.later, svg .w.later { stroke-dasharray: 7 6; opacity: .45; }
@@ -187,8 +188,6 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <text x="1131" y="424" class="lbl" text-anchor="end">GP7</text>
 <rect x="1135.5" y="435.5" width="9" height="9" class="pad"/>
 <text x="1131" y="444" class="lbl" text-anchor="end">GP8</text>
-<rect x="1135.5" y="455.5" width="9" height="9" class="pad"/>
-<text x="1131" y="464" class="lbl" text-anchor="end">GP9</text>
 <rect x="975.5" y="275.5" width="9" height="9" class="pad"/>
 <text x="989" y="284" class="lbl" text-anchor="start">5V</text>
 <rect x="975.5" y="295.5" width="9" height="9" class="pad used"/>
@@ -207,14 +206,16 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }</style><rect wi
 <text x="989" y="424" class="lbl" text-anchor="start">GP15</text>
 <rect x="975.5" y="435.5" width="9" height="9" class="pad"/>
 <text x="989" y="444" class="lbl" text-anchor="start">GP14</text>
-<rect x="1015.5" y="495.5" width="9" height="9" class="pad"/>
-<text x="1020" y="490" class="lbl" text-anchor="middle">13</text>
-<rect x="1040.5" y="495.5" width="9" height="9" class="pad"/>
-<text x="1045" y="490" class="lbl" text-anchor="middle">12</text>
-<rect x="1065.5" y="495.5" width="9" height="9" class="pad"/>
-<text x="1070" y="490" class="lbl" text-anchor="middle">11</text>
-<rect x="1090.5" y="495.5" width="9" height="9" class="pad"/>
-<text x="1095" y="490" class="lbl" text-anchor="middle">10</text>
+<rect x="1005.5" y="495.5" width="9" height="9" class="pad"/>
+<text x="1010" y="490" class="lbl" text-anchor="middle">13</text>
+<rect x="1030.5" y="495.5" width="9" height="9" class="pad"/>
+<text x="1035" y="490" class="lbl" text-anchor="middle">12</text>
+<rect x="1055.5" y="495.5" width="9" height="9" class="pad"/>
+<text x="1060" y="490" class="lbl" text-anchor="middle">11</text>
+<rect x="1080.5" y="495.5" width="9" height="9" class="pad"/>
+<text x="1085" y="490" class="lbl" text-anchor="middle">10</text>
+<rect x="1105.5" y="495.5" width="9" height="9" class="pad"/>
+<text x="1110" y="490" class="lbl" text-anchor="middle">9</text>
 <rect x="451.0" y="576.0" width="38" height="12" rx="3" class="part rbody"/>
 <rect x="455.6" y="576.9" width="2.8" height="10.2" fill="#1f9d3a"/>
 <rect x="460.6" y="576.9" width="2.8" height="10.2" fill="#7a4a1f"/>

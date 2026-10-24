@@ -10,6 +10,7 @@ src_map = {
     "uno_master_debug": "master",
     "uno_bus_test": "test_uno",
     "rp2040_bus_test": "test_rp2040",
+    "rp2040_io_test": "test_io",
 }
 
 if env_name in src_map:

@@ -6,13 +6,14 @@
  * Power: RP2040 via USB, MCP2003 VBB = 12V lab supply
  *
  * DESCRIPTION:
- * LIN bus slave/responder that reads 7 buttons and 2 potentiometers, then
- * responds to master requests with current input states via LIN protocol.
+ * LIN bus slave/responder that reads 7 buttons, the horn button, 2 potentiometers and 2 Hall
+ * clutch paddles, then responds to master requests with current input states
+ * via LIN protocol.
  *
  * LIN PROTOCOL BASICS:
  * ┌─────────────────────────────────────────────────────────────────────┐
  * │ Break Field  │ Sync │ PID  │ Data Bytes (1-8)        │ Checksum    │
- * │ 13+ bits LOW │ 0x55 │ 0x3C │ Button + ADC0 + ADC1    │ Modular Sum │
+ * │ 13+ bits LOW │ 0x55 │ 0x3C │ Button + ADC0..ADC3     │ Modular Sum │
  * └─────────────────────────────────────────────────────────────────────┘
  *
  * TIMING DIAGRAM:
@@ -20,8 +21,8 @@
  *          |_________________|0x55|0x3C|
  *          └─ min 676µs low
  *
- * Slave:                              |BTN|ADC0_H|ADC0_L|ADC1_H|ADC1_L|CHK|
- *                                     └─ Response frame (6 bytes)
+ * Slave:                              |BTN| ADC0+ADC1 (3) | ADC2+ADC3 (3) |CHK|
+ *                                     └─ Response frame (8 bytes)
  *
  * MCP2003 LIN TRANSCEIVER CONNECTIONS (see README, rev. 3.0):
  * ┌─────────────────────────────────────────────────────────────────────┐
@@ -38,11 +39,15 @@
  * └─────────────┴──────────┴────────────────────────────────────────────┘
  *
  * INPUT HARDWARE:
- * - 7 buttons (GPIO6-12): Active LOW, internal pull-ups enabled in code
+ * - 8 buttons (GPIO5-12, meaning in steering_buttons.h): Active LOW, internal pull-ups enabled in code
  * - 2x 10kΩ potentiometers:
  *   * POT1: Left→GND, Center→GPIO26 (ADC0), Right→3.3V, 100nF filter cap
  *   * POT2: Left→GND, Center→GPIO27 (ADC1), Right→3.3V, 100nF filter cap
  *   * Note: 10kΩ is ideal impedance for RP2040 ADC (better than 20kΩ)
+ * - 2x Hall clutch paddles (Simube, measured 2026-09-24 on 3.3V):
+ *   * HALL1: red→3.3V (never 5V), black→GND, blue→GPIO28 (ADC2)
+ *   * HALL2: red→3.3V (never 5V), black→GND, blue→GPIO29 (ADC3)
+ *   * Output ~0.71V released (~876) to ~2.67V fully pulled (~3310), sent raw
  *
  * STATUS LED:
  * - GPIO14 (external LED + 220Ω): short flash per answered frame,
@@ -54,14 +59,24 @@
  * - MCP2003 VBB = 12V lab supply (the MCP2003 stays in POR below 5.5V)
  *
  * FRAME DETECTION:
- * The bus only carries master headers and our own responses. The response
- * echo is read back right after sending, so a SYNC (0x55) directly followed
- * by PID 0x3C is always a request. The break byte (0x00) is ignored.
+ * The bus only carries master headers, the master's challenge data and our own
+ * responses. The response echo is read back right after sending, and challenge
+ * data is consumed by the RX state machine, so a SYNC (0x55) directly followed
+ * by one of our PIDs is always a header. The break byte (0x00) is ignored.
+ *
+ * KEY (challenge-response, lib/steering_key):
+ *   PID 0x50 (ID 0x10): master publishes 8 random bytes + checksum
+ *   PID 0x11 (ID 0x11): we answer HMAC-SHA256(secret, challenge)[0..7] + checksum,
+ *                       only once per challenge, silent without a valid one
+ * The master decides everything else (when to ask, what unlocking means).
  *
  * Author: Claude Code
  * Date: 2026-09-19
- * Version: 3.0 (echo handling, non-blocking LED, robust frame detection, 12V wiring)
+ * Version: 3.4 (button bits as built, shared table in steering_buttons.h)
  ******************************************************************************/
+
+#include <steering_key.h>
+#include <steering_buttons.h>
 
 // ============================================================================
 // PIN DEFINITIONS
@@ -71,18 +86,13 @@
 #define LIN_CS_PIN        2     // Chip Select → MCP2003 Pin 2 (CS)
 #define STATUS_LED_PIN    14    // External status LED
 
-// Button pins (active LOW with internal pull-ups)
-#define BUTTON_1_PIN      6
-#define BUTTON_2_PIN      7
-#define BUTTON_3_PIN      8
-#define BUTTON_4_PIN      9
-#define BUTTON_5_PIN      10
-#define BUTTON_6_PIN      11
-#define BUTTON_7_PIN      12
+// Button pins and bit order: lib/steering_buttons/steering_buttons.h
 
 // Potentiometer pins (10kΩ, ideal for RP2040 ADC)
 #define POT_1_PIN         26    // ADC0 (GPIO26)
 #define POT_2_PIN         27    // ADC1 (GPIO27)
+#define HALL_1_PIN        28    // ADC2 (GPIO28)
+#define HALL_2_PIN        29    // ADC3 (GPIO29)
 
 // ============================================================================
 // LIN PROTOCOL CONSTANTS
@@ -90,34 +100,46 @@
 #define LIN_BAUD_RATE     19200           // Standard LIN baud rate
 #define LIN_FRAME_ID      0x3C            // Protected ID for input request
 #define LIN_SYNC_BYTE     0x55            // Standard LIN sync byte
+#define LIN_PID_KEY_CHALLENGE 0x50        // ID 0x10, master -> wheel
+#define LIN_PID_KEY_RESPONSE  0x11        // ID 0x11, wheel -> master
+#define CHALLENGE_TIMEOUT 20              // Give up on a half-received challenge after 20ms
 #define ECHO_TIMEOUT_US   2000            // Own response echo must be back within 2ms after flush
 
 // ============================================================================
 // TIMING CONSTANTS
 // ============================================================================
 #define DEBOUNCE_DELAY    50              // Button debounce: 50ms
-#define ADC_SAMPLES       4               // ADC averaging: 4 samples
+#define ADC_SAMPLES       16              // ADC averaging: 16 samples
 #define LED_BLINK_TIME    20              // Status LED flash per answered frame
 #define HEARTBEAT_AFTER   1000            // Heartbeat when no frame for this long
 
 // ============================================================================
 // GLOBAL VARIABLES
 // ============================================================================
-const uint8_t buttonPins[] = {BUTTON_1_PIN, BUTTON_2_PIN, BUTTON_3_PIN,
-                               BUTTON_4_PIN, BUTTON_5_PIN, BUTTON_6_PIN, BUTTON_7_PIN};
+#define BUTTON_COUNT      STEERING_BUTTON_COUNT
+const uint8_t adcPins[] = {POT_1_PIN, POT_2_PIN, HALL_1_PIN, HALL_2_PIN};
+#define ADC_CHANNELS      4
+#define RESPONSE_LEN      8               // Buttons + 4x 12 bit packed (6) + checksum
 
 // Button state tracking
-uint8_t buttonStates = 0;                 // Packed button states (bit 0-6 = buttons 1-7)
-uint8_t lastButtonReading[7] = {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH};
-unsigned long lastDebounceTime[7] = {0, 0, 0, 0, 0, 0, 0};
+uint8_t buttonStates = 0;                 // Packed button states, bit = SteeringButton
+uint8_t lastButtonReading[BUTTON_COUNT] = {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH, HIGH};
+unsigned long lastDebounceTime[BUTTON_COUNT] = {0, 0, 0, 0, 0, 0, 0, 0};
 
-// ADC values (12-bit: 0-4095)
-uint16_t adc0Value = 0;
-uint16_t adc1Value = 0;
+// ADC values (12-bit: 0-4095): POT1, POT2, HALL1, HALL2
+uint16_t adcValues[ADC_CHANNELS] = {0, 0, 0, 0};
 
 // LIN frame detection
-bool gotSync = false;
+enum RxState { RX_IDLE, RX_SYNC, RX_CHALLENGE };
+RxState rxState = RX_IDLE;
 unsigned long lastFrameTime = 0;
+
+// Key challenge-response
+uint8_t challengeBuf[STEERING_KEY_LEN + 1];   // challenge + checksum
+uint8_t challengeCount = 0;
+unsigned long challengeStart = 0;
+uint8_t keyResponse[STEERING_KEY_LEN];
+bool keyResponseReady = false;
 
 /*******************************************************************************
  * SETUP - Initialize hardware and peripherals
@@ -137,14 +159,15 @@ void setup() {
   digitalWrite(STATUS_LED_PIN, LOW);
 
   // Configure button pins with internal pull-ups (active LOW)
-  for (int i = 0; i < 7; i++) {
-    pinMode(buttonPins[i], INPUT_PULLUP);
+  for (int i = 0; i < BUTTON_COUNT; i++) {
+    pinMode(STEERING_BUTTON_GPIO[i], INPUT_PULLUP);
   }
 
   // Configure ADC for 12-bit resolution (0-4095)
   analogReadResolution(12);
-  pinMode(POT_1_PIN, INPUT);
-  pinMode(POT_2_PIN, INPUT);
+  for (int i = 0; i < ADC_CHANNELS; i++) {
+    pinMode(adcPins[i], INPUT);
+  }
 
   // Startup LED sequence: 3 quick blinks
   for (int i = 0; i < 3; i++) {
@@ -184,15 +207,13 @@ void updateStatusLED() {
 }
 
 /*******************************************************************************
- * UPDATE BUTTONS - Read all 7 buttons with debouncing
+ * UPDATE BUTTONS - Read all 8 buttons with debouncing
  *
- * Button byte format:
- * Bit 7: Reserved (0)
- * Bit 6-0: Buttons 7-1 (1=pressed, 0=released)
+ * Button byte: bit = SteeringButton (steering_buttons.h), 1 = pressed
  ******************************************************************************/
 void updateButtons() {
-  for (int i = 0; i < 7; i++) {
-    uint8_t reading = digitalRead(buttonPins[i]);
+  for (int i = 0; i < BUTTON_COUNT; i++) {
+    uint8_t reading = digitalRead(STEERING_BUTTON_GPIO[i]);
 
     // Detect button state change
     if (reading != lastButtonReading[i]) {
@@ -214,28 +235,29 @@ void updateButtons() {
 }
 
 /*******************************************************************************
- * UPDATE ADC - Read potentiometers with averaging
+ * UPDATE ADC - Read potentiometers and Hall paddles with averaging
  *
  * 10kΩ potentiometers are ideal for RP2040 ADC:
  * - Low enough impedance for fast settling
  * - High enough to minimize current draw
  * - No special timing adjustments needed
  *
- * ADC averaging: 4 samples for stable readings with 100nF filter caps
+ * ADC averaging: 16 samples, also smooths switching-regulator ripple on 3V3
+ * (~1ms per pass, the UART buffers LIN bytes meanwhile)
  ******************************************************************************/
 void updateADC() {
-  uint32_t sum0 = 0;
-  uint32_t sum1 = 0;
+  uint32_t sums[ADC_CHANNELS] = {0, 0, 0, 0};
 
-  // Take multiple samples and average
   for (int i = 0; i < ADC_SAMPLES; i++) {
-    sum0 += analogRead(POT_1_PIN);
-    sum1 += analogRead(POT_2_PIN);
-    delayMicroseconds(100);  // Small delay between samples
+    for (int ch = 0; ch < ADC_CHANNELS; ch++) {
+      sums[ch] += analogRead(adcPins[ch]);
+    }
+    delayMicroseconds(50);
   }
 
-  adc0Value = sum0 / ADC_SAMPLES;
-  adc1Value = sum1 / ADC_SAMPLES;
+  for (int ch = 0; ch < ADC_CHANNELS; ch++) {
+    adcValues[ch] = sums[ch] / ADC_SAMPLES;
+  }
 }
 
 /*******************************************************************************
@@ -246,15 +268,41 @@ void updateADC() {
  * new bytes had already arrived, which could throw away the SYNC byte.
  ******************************************************************************/
 void handleLINRequest() {
+  if (rxState == RX_CHALLENGE && millis() - challengeStart > CHALLENGE_TIMEOUT) {
+    rxState = RX_IDLE;
+  }
+
   while (Serial1.available()) {
     uint8_t receivedByte = Serial1.read();
 
-    if (gotSync && receivedByte == LIN_FRAME_ID) {
-      gotSync = false;
+    if (rxState == RX_CHALLENGE) {
+      challengeBuf[challengeCount++] = receivedByte;
+      if (challengeCount == STEERING_KEY_LEN + 1) {
+        rxState = RX_IDLE;
+        if (calculateChecksum(challengeBuf, STEERING_KEY_LEN) == challengeBuf[STEERING_KEY_LEN]) {
+          steeringKeyResponse(challengeBuf, keyResponse);
+          keyResponseReady = true;
+        }
+      }
+    } else if (rxState == RX_SYNC && receivedByte == LIN_FRAME_ID) {
+      rxState = RX_IDLE;
       sendLINResponse();
       lastFrameTime = millis();
+    } else if (rxState == RX_SYNC && receivedByte == LIN_PID_KEY_CHALLENGE) {
+      rxState = RX_CHALLENGE;
+      challengeCount = 0;
+      challengeStart = millis();
+      keyResponseReady = false;
+      lastFrameTime = millis();
+    } else if (rxState == RX_SYNC && receivedByte == LIN_PID_KEY_RESPONSE) {
+      rxState = RX_IDLE;
+      if (keyResponseReady) {
+        sendKeyResponse();
+        keyResponseReady = false;   // one answer per challenge
+      }
+      lastFrameTime = millis();
     } else {
-      gotSync = (receivedByte == LIN_SYNC_BYTE);
+      rxState = (receivedByte == LIN_SYNC_BYTE) ? RX_SYNC : RX_IDLE;
     }
   }
 }
@@ -262,42 +310,50 @@ void handleLINRequest() {
 /*******************************************************************************
  * SEND LIN RESPONSE - Transmit button states and ADC values
  *
- * Frame format (6 bytes):
- * ┌─────────┬──────────┬──────────┬──────────┬──────────┬──────────┐
- * │ Byte 0  │ Byte 1   │ Byte 2   │ Byte 3   │ Byte 4   │ Byte 5   │
- * │ Buttons │ ADC0_MSB │ ADC0_LSB │ ADC1_MSB │ ADC1_LSB │ Checksum │
- * └─────────┴──────────┴──────────┴──────────┴──────────┴──────────┘
+ * Frame format (8 bytes, the LIN maximum is 8 data bytes):
+ * ┌─────────┬───────────────────────┬───────────────────────┬──────────┐
+ * │ Byte 0  │ Byte 1-3              │ Byte 4-6              │ Byte 7   │
+ * │ Buttons │ POT1 + POT2 (2x12 bit)│ HALL1 + HALL2         │ Checksum │
+ * └─────────┴───────────────────────┴───────────────────────┴──────────┘
  *
- * Button byte: Bits 0-6 = Buttons 1-7 (1=pressed)
- * ADC values: 12-bit (0-4095) split into MSB (8 bits) + LSB (4 bits)
+ * Button byte: Bits 0-6 = Buttons 1-7, bit 7 = horn (1=pressed)
+ * Two 12-bit values A, B packed into 3 bytes:
+ *   b0 = A[11:4], b1 = A[3:0] << 4 | B[11:8], b2 = B[7:0]
  * Checksum: Simple modular sum of all data bytes % 256
  ******************************************************************************/
+void packPair(uint8_t* out, uint16_t a, uint16_t b) {
+  out[0] = (a >> 4) & 0xFF;
+  out[1] = ((a & 0x0F) << 4) | ((b >> 8) & 0x0F);
+  out[2] = b & 0xFF;
+}
+
 void sendLINResponse() {
-  uint8_t dataFrame[6];
+  uint8_t dataFrame[RESPONSE_LEN];
 
-  // Byte 0: Button states (bits 0-6)
-  dataFrame[0] = buttonStates & 0x7F;  // Mask to 7 bits
+  dataFrame[0] = buttonStates;
+  packPair(&dataFrame[1], adcValues[0], adcValues[1]);
+  packPair(&dataFrame[4], adcValues[2], adcValues[3]);
+  dataFrame[7] = calculateChecksum(dataFrame, RESPONSE_LEN - 1);
 
-  // Bytes 1-2: ADC0 (12-bit → MSB + LSB)
-  dataFrame[1] = (adc0Value >> 4) & 0xFF;      // Upper 8 bits
-  dataFrame[2] = (adc0Value & 0x0F) << 4;      // Lower 4 bits in upper nibble
+  sendFrame(dataFrame, RESPONSE_LEN);
+}
 
-  // Bytes 3-4: ADC1 (12-bit → MSB + LSB)
-  dataFrame[3] = (adc1Value >> 4) & 0xFF;      // Upper 8 bits
-  dataFrame[4] = (adc1Value & 0x0F) << 4;      // Lower 4 bits in upper nibble
+void sendKeyResponse() {
+  uint8_t frame[STEERING_KEY_LEN + 1];
+  memcpy(frame, keyResponse, STEERING_KEY_LEN);
+  frame[STEERING_KEY_LEN] = calculateChecksum(frame, STEERING_KEY_LEN);
+  sendFrame(frame, sizeof frame);
+}
 
-  // Byte 5: Checksum (modular sum)
-  dataFrame[5] = calculateChecksum(dataFrame, 5);
-
-  // Transmit frame
-  Serial1.write(dataFrame, 6);
+void sendFrame(const uint8_t* frame, uint8_t len) {
+  Serial1.write(frame, len);
   Serial1.flush();  // Wait for transmission complete
 
-  // The transceiver mirrors the bus on RXD: read our own 6 bytes back so they
-  // are never mistaken for a new request (e.g. buttons 0x55 + ADC0_MSB 0x3C).
+  // The transceiver mirrors the bus on RXD: read our own bytes back so they
+  // are never mistaken for a new request (e.g. buttons 0x55 + next byte 0x3C).
   uint8_t echoed = 0;
   unsigned long start = micros();
-  while (echoed < 6 && micros() - start < ECHO_TIMEOUT_US) {
+  while (echoed < len && micros() - start < ECHO_TIMEOUT_US) {
     if (Serial1.available()) {
       Serial1.read();
       echoed++;

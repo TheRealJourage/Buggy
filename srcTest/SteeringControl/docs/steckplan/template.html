@@ -17,6 +17,7 @@
   --w12: #d42a1e; --wg: #161616; --w5: #f07c00; --w33: #f07c00;
   --wrx: #1f5fd1; --wtx: #1f9d3a; --wcs: #ffffff; --wlin: #f2c200;
   --wsig: #ffffff; --wbtn: #f2c200; --wpot: #1f9d3a;
+  --wbrown: #8b5a2b; --wpurple: #8e44ad; --wgrey: #9aa0a6; --wpink: #e84393;
   --casing: #7d8a85;
   --led-g: #36b24a; --led-r: #e0413a;
   --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
@@ -91,6 +92,7 @@ a:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline
 .c12 { --c: var(--w12); } .cg { --c: var(--wg); } .c5 { --c: var(--w5); } .c33 { --c: var(--w33); }
 .crx { --c: var(--wrx); } .ctx { --c: var(--wtx); } .ccs { --c: var(--wcs); } .clin { --c: var(--wlin); }
 .csig { --c: var(--wsig); } .cbtn { --c: var(--wbtn); } .cpot { --c: var(--wpot); }
+.cbrown { --c: var(--wbrown); } .cpurple { --c: var(--wpurple); } .cgrey { --c: var(--wgrey); } .cblue { --c: var(--wrx); } .cwhite { --c: var(--wsig); } .cpink { --c: var(--wpink); }
 .num, .legend i { background: var(--c); box-shadow: inset 0 0 0 1px var(--casing); }
 .clin.num, .cbtn.num, .c5.num, .c33.num, .ccs.num, .csig.num { color: #161616; }
 .rc { display: inline-flex; align-items: center; gap: 3px; height: 16px; padding: 0 6px; margin-left: 6px; border-radius: 8px; background: #e6d3a8; border: 1px solid #8a7550; vertical-align: -3px; }
@@ -277,12 +279,40 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
       <thead><tr><th></th><th>Nr.</th><th>Von</th><th>Nach</th><th>Hinweis</th></tr></thead>
       <tbody>
         <tr><td class="check"><input type="checkbox" id="t1" aria-label="Taster 1 gesteckt"></td><td class="n"><span class="num cbtn">T1–T4</span></td><td>Tiny <b>GP6 · GP7 · GP8 · GP9</b> (rechte Kante, Pin 7–10)</td><td>Taster 1–4 → GND</td><td></td></tr>
+        <tr><td class="check"><input type="checkbox" id="h" aria-label="Hupe gesteckt"></td><td class="n"><span class="num cbtn">H</span></td><td>Tiny <b>GP5</b> (rechte Kante, 6. Pin)</td><td>Hupentaster → GND</td><td>wie die anderen Taster, interner Pull-up</td></tr>
         <tr><td class="check"><input type="checkbox" id="t5" aria-label="Taster 5 bis 7 gesteckt"></td><td class="n"><span class="num cbtn">T5–T7</span></td><td>Tiny <b>GP10 · GP11 · GP12</b> (Unterkante)</td><td>Taster 5–7 → GND</td><td><b>Erst mal weglassen</b>, GP10–12 offen lassen (nicht auf GND, sonst „dauernd gedrückt“). Unterkante von rechts nach links: 10, 11, 12, 13</td></tr>
         <tr><td class="check"><input type="checkbox" id="p1" aria-label="Poti 1 gesteckt"></td><td class="n"><span class="num cpot">P1</span></td><td>POT 1 Schleifer (Mitte)</td><td>Tiny <b>GP26</b></td><td>Poti-Enden: 3,3 V und GND</td></tr>
         <tr><td class="check"><input type="checkbox" id="p2" aria-label="Poti 2 gesteckt"></td><td class="n"><span class="num cpot">P2</span></td><td>POT 2 Schleifer (Mitte)</td><td>Tiny <b>GP27</b></td><td>Poti-Enden: 3,3 V und GND</td></tr>
         <tr><td class="check"><input type="checkbox" id="v" aria-label="3,3 V gesteckt"></td><td class="n"><span class="num c33">V</span></td><td>Tiny <b>3V3</b> (linke Kante, 3. Pin)</td><td>beide Poti-Enden oben</td><td></td></tr>
         <tr><td class="check"><input type="checkbox" id="g" aria-label="GND gesteckt"></td><td class="n"><span class="num cg">G</span></td><td>Tiny <b>GND</b> (linke Kante, 2. Pin)</td><td>alle Taster, Poti-Enden unten, LED</td><td></td></tr>
         <tr><td class="check"><input type="checkbox" id="l" aria-label="LED gesteckt"></td><td class="n"><span class="num csig">L</span></td><td>Tiny <b>GP14</b> (linke Kante, unterster Pin)</td><td>220 Ω → LED → GND</td><td>blitzt 10×/s, wenn der Master anfragt. LED: <b>langes Bein (+)</b> zum Widerstand, <b>kurzes Bein (−)</b> bzw. abgeflachte Seite nach GND</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section class="sheet">
+    <h2>Teil 3 · Lenkrad-Versorgung testen (12 V → 3,3 V)</h2>
+    <div class="legend" aria-label="Farblegende Teil 3">
+      <span class="c12"><i></i>+12 V · rot</span>
+      <span class="c33"><i></i>3,3 V · orange</span>
+      <span class="cg"><i></i>GND · schwarz</span>
+    </div>
+    <figure class="scroll small" style="margin:0">
+      {{FIG3}}
+    </figure>
+    <figcaption>Teil 1 bleibt komplett stehen. Der Tiny bekommt seinen Strom jetzt nur noch aus dem Wandler, das USB-Kabel am Adapter ist ab.
+      Elkos: Minus-Streifen nach GND. Sicherung und TVS kommen erst im Fahrzeug dazu, am Labornetzteil übernimmt das Strom-Limit.</figcaption>
+    <div class="scroll">
+    <table>
+      <thead><tr><th></th><th>Nr.</th><th>Von</th><th>Nach</th><th>Hinweis</th></tr></thead>
+      <tbody>
+        <tr><td class="check"><input type="checkbox" id="s1" aria-label="S1 gesteckt"></td><td class="n"><span class="num c12">S1</span></td><td>+12-V-Schiene</td><td>1N5819 → Wandler <b>Pin 1</b></td><td>Ring der Diode zeigt zum Wandler</td></tr>
+        <tr><td class="check"><input type="checkbox" id="s2" aria-label="S2 gesteckt"></td><td class="n"><span class="num cg">S2</span></td><td>C1 <b>10 µF / 50 V</b> (+)</td><td>Pin 1 ↔ GND</td><td>Minus-Streifen an GND</td></tr>
+        <tr><td class="check"><input type="checkbox" id="s3" aria-label="S3 gesteckt"></td><td class="n"><span class="num cg">S3</span></td><td>Wandler <b>Pin 2</b></td><td>GND-Schiene</td><td></td></tr>
+        <tr><td class="check"><input type="checkbox" id="s5" aria-label="S5 gesteckt"></td><td class="n"><span class="num cg">S5</span></td><td>C2 <b>100 µF / 16 V</b> (+)</td><td>Pin 3 ↔ GND</td><td>Minus-Streifen an GND (Datenblatt: 22 µF, bis 680 µF erlaubt)</td></tr>
+        <tr><td class="check"><input type="checkbox" id="m" aria-label="M gemessen"></td><td class="n"><span class="num c33">M</span></td><td>Pin 3 gegen GND messen</td><td>—</td><td><b>Soll 3,17–3,43 V</b>, noch ohne Tiny. Über 3,5 V: S4 nicht stecken</td></tr>
+        <tr><td class="check"><input type="checkbox" id="s4" aria-label="S4 gesteckt"></td><td class="n"><span class="num c33">S4</span></td><td>Wandler <b>Pin 3</b></td><td>Tiny <b>3V3</b> (linke Kante, 3. Pin)</td><td>Netzteil dabei aus. Tiny-<b>5V</b> bleibt frei</td></tr>
       </tbody>
     </table>
     </div>
@@ -295,7 +325,7 @@ svg .nc { font-size: 11px; fill: var(--w12); font-weight: 600; }
         <li><b>Pin 8 VREN</b> ist ein Ausgang, der auf VBB-Pegel (12 V) geht. Er darf nirgends dran.</li>
         <li><b>Pin 3 WAKE</b> bleibt frei (interner Pull-up).</li>
         <li>Kein Pull-up an <b>CS</b>, kein Widerstand von LBUS nach GND.</li>
-        <li>Tiny-<b>5V</b> bleibt frei, der Tiny wird über USB am Adapter versorgt.</li>
+        <li>Tiny-<b>5V</b> bleibt immer frei. Teil 1/2: Tiny über USB am Adapter, Teil 3: über den Wandler an 3V3 (dann USB ab).</li>
       </ul>
     </div>
     <div class="note">

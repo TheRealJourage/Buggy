@@ -6,13 +6,13 @@
  *
  * DESCRIPTION:
  * LIN bus master/commander that polls the RP2040 slave every 100ms for
- * steering wheel button and potentiometer data. Validates received data
+ * steering wheel buttons, potentiometers and Hall paddles. Validates received data
  * and displays decoded values via Serial Monitor and status LEDs.
  *
  * LIN PROTOCOL BASICS:
  * ┌─────────────────────────────────────────────────────────────────────┐
  * │ Break Field  │ Sync │ PID  │ Data Bytes (1-8)        │ Checksum    │
- * │ 13+ bits LOW │ 0x55 │ 0x3C │ Button + ADC0 + ADC1    │ Modular Sum │
+ * │ 13+ bits LOW │ 0x55 │ 0x3C │ Button + ADC0..ADC3     │ Modular Sum │
  * └─────────────────────────────────────────────────────────────────────┘
  *
  * TIMING DIAGRAM:
@@ -20,7 +20,7 @@
  *          |_________________|0x55|0x3C|
  *          └─ 13 bits = 676µs min @ 19200 baud
  *
- * Slave:                              |BTN|ADC0_H|ADC0_L|ADC1_H|ADC1_L|CHK|
+ * Slave:                              |BTN| ADC0+ADC1 (3) | ADC2+ADC3 (3) |CHK|
  *
  * MCP2003 LIN TRANSCEIVER CONNECTIONS (see README, rev. 3.0):
  * ┌─────────────────────────────────────────────────────────────────────┐
@@ -40,16 +40,29 @@
  *
  * ECHO: the transceiver mirrors the bus on RXD, so the master receives its
  * own SYNC and PID before the slave response. They are read and checked
- * before the 6 response bytes.
+ * before the 8 response bytes.
+ *
+ * KEY (challenge-response, lib/steering_key):
+ *   While locked, every KEY_RETRY_INTERVAL one poll slot is used for:
+ *   PID 0x50: we send 8 random bytes + checksum (challenge)
+ *   PID 0x11: the wheel answers HMAC-SHA256(secret, challenge)[0..7] + checksum
+ *   Match -> unlocked, ECU_ENABLE_PIN high. No valid input frame for
+ *   KEY_LOST_TIMEOUT (wheel pulled off) -> locked again.
+ *   Test master only: random() is seeded from floating analog pins, the STM32
+ *   hub uses its hardware RNG. Relocking while driving is still an open decision.
+ *
+ * HALL HOLD: a pull beyond HALL_ACTIVE_PERCENT starts a new setpoint, the
+ *   highest travel of that pull is kept after the paddle is released.
  *
  * STATUS INDICATORS:
  * - Pin 12 (Status LED): Toggles on each valid frame received
  * - Pin 13 (Error LED): Blinks on LIN errors (timeout, checksum fail)
  *
  * SERIAL OUTPUT (115200 baud when USB connected):
- * - Button states: "BTN: [1][2][3][4][5][6][7]"
+ * - Button states: names of the pressed buttons, e.g. "BTN: hupe gelb"
  * - ADC0: Raw value (0-4095) and percentage (0-100%)
  * - ADC1: Raw value (0-4095) and percentage (0-100%)
+ * - HALL1/HALL2: Raw value and percentage of the calibrated travel
  *
  * NOTE: Serial debugging conflicts with LIN on pins 0/1!
  * - For initial testing WITH USB: Serial output works but LIN may be unreliable
@@ -57,8 +70,11 @@
  *
  * Author: Claude Code
  * Date: 2026-09-19
- * Version: 3.0 (echo handling, non-blocking error LED, 12V wiring)
+ * Version: 3.4 (button bits as built, shared table in steering_buttons.h)
  ******************************************************************************/
+
+#include <steering_key.h>
+#include <steering_buttons.h>
 
 // ============================================================================
 // PIN DEFINITIONS
@@ -66,6 +82,7 @@
 #define LIN_CS_PIN        2     // Chip Select → MCP2003 Pin 2 (CS)
 #define STATUS_LED_PIN    12    // Status LED (toggles on valid frames)
 #define ERROR_LED_PIN     13    // Error LED (blinks on errors)
+#define ECU_ENABLE_PIN    3     // HIGH while unlocked (placeholder for the ECU supply)
 
 // Note: Pins 0 and 1 are used by hardware Serial for LIN communication
 // Pin 0 (RX) ← MCP2003 Pin 1 (RXD)
@@ -77,6 +94,8 @@
 #define LIN_BAUD_RATE     19200           // Standard LIN baud rate
 #define LIN_FRAME_ID      0x3C            // Protected ID for input request
 #define LIN_SYNC_BYTE     0x55            // Standard LIN sync byte
+#define LIN_PID_KEY_CHALLENGE 0x50        // ID 0x10, master -> wheel
+#define LIN_PID_KEY_RESPONSE  0x11        // ID 0x11, wheel -> master
 #define LIN_BREAK_BITS    13              // Break field duration (bits)
 
 // ============================================================================
@@ -87,18 +106,31 @@
 #define ECHO_TIMEOUT      5               // Own SYNC+PID echo must be back within 5ms
 #define ERROR_BLINK_MS    50              // Error LED: 3 blinks of 50ms on / 50ms off
 #define BREAK_DURATION    700             // Break field: 700µs (13 bits @ 19200 = 677µs)
+#define RESPONSE_LEN      8               // Buttons + 4x 12 bit packed (6) + checksum
+#define CHALLENGE_ECHO_TIMEOUT 15         // SYNC+PID+9 bytes echo (~5.7ms at 19200)
+#define KEY_RETRY_INTERVAL 500            // While locked: new challenge every 500ms
+#define KEY_LOST_TIMEOUT  1000            // No valid input frame this long -> locked
+
+// Hall clutch paddles (Simube, measured 2026-09-24 on 3.3V): released ~876,
+// fully pulled ~3310. The deadband makes both end positions read exactly 0/100%.
+#define HALL_RELEASED     876
+#define HALL_FULL         3310
+#define HALL_DEADBAND     30
+#define HALL_ACTIVE_PERCENT 5             // Above this a pull starts a new setpoint
 
 // ============================================================================
 // DATA STRUCTURE
 // ============================================================================
 struct SteeringData {
-  uint8_t buttons;                        // 7 button states (bits 0-6)
+  uint8_t buttons;                        // Bit = SteeringButton (steering_buttons.h)
   uint16_t pot1;                          // 12-bit ADC value (0-4095)
   uint16_t pot2;                          // 12-bit ADC value (0-4095)
+  uint16_t hall1;                         // 12-bit ADC value (0-4095)
+  uint16_t hall2;                         // 12-bit ADC value (0-4095)
   bool valid;                             // Data validity flag
 };
 
-SteeringData currentData = {0, 0, 0, false};
+SteeringData currentData = {0, 0, 0, 0, 0, false};
 
 // ============================================================================
 // GLOBAL VARIABLES
@@ -107,6 +139,13 @@ unsigned long lastPollTime = 0;
 bool statusLedState = false;
 unsigned long errorBlinkStart = 0;
 bool errorBlinkActive = false;
+
+bool unlocked = false;
+unsigned long lastKeyTry = 0;
+unsigned long lastValidFrame = 0;
+
+uint8_t hallHold[2] = {0, 0};             // Held setpoint per paddle (0-100%)
+bool hallPulling[2] = {false, false};
 
 /*******************************************************************************
  * SETUP - Initialize hardware and peripherals
@@ -124,6 +163,10 @@ void setup() {
   pinMode(ERROR_LED_PIN, OUTPUT);
   digitalWrite(STATUS_LED_PIN, LOW);
   digitalWrite(ERROR_LED_PIN, LOW);
+  pinMode(ECU_ENABLE_PIN, OUTPUT);
+  digitalWrite(ECU_ENABLE_PIN, LOW);
+
+  seedRandom();
 
   // Startup sequence: Blink both LEDs 3 times
   for (int i = 0; i < 3; i++) {
@@ -144,6 +187,10 @@ void setup() {
   // Serial.println(F("=== LIN BUS MASTER ==="));
   // Serial.println(F("Arduino Uno @ 5V Lab Supply"));
   // Serial.println(F("Polling RP2040 slave every 100ms..."));
+
+#ifdef LIN_DEBUG_PRINT
+  Serial.println(steeringKeySelfTest() ? F("SELFTEST OK") : F("SELFTEST FAIL"));
+#endif
 }
 
 /*******************************************************************************
@@ -154,8 +201,16 @@ void loop() {
   if (millis() - lastPollTime >= POLL_INTERVAL) {
     lastPollTime = millis();
 
-    // Request data from slave
-    if (requestSlaveData()) {
+    if (!unlocked && millis() - lastKeyTry >= KEY_RETRY_INTERVAL) {
+      lastKeyTry = millis();
+      unlocked = checkKey();
+      digitalWrite(ECU_ENABLE_PIN, unlocked);
+      printKeyResult();
+      if (unlocked) lastValidFrame = millis();
+    } else if (requestSlaveData()) {
+      lastValidFrame = millis();
+      updateHallHold();
+
       // Data received successfully - toggle status LED
       statusLedState = !statusLedState;
       digitalWrite(STATUS_LED_PIN, statusLedState);
@@ -168,6 +223,11 @@ void loop() {
     }
   }
 
+  if (unlocked && millis() - lastValidFrame > KEY_LOST_TIMEOUT) {
+    unlocked = false;
+    digitalWrite(ECU_ENABLE_PIN, LOW);
+  }
+
   updateErrorLED();
 }
 
@@ -178,42 +238,29 @@ void loop() {
  * 1. Send BREAK field (13 bits LOW = 676µs minimum)
  * 2. Send SYNC byte (0x55)
  * 3. Send PID (0x3C)
- * 4. Wait for slave response (6 bytes)
+ * 4. Wait for slave response (8 bytes)
  * 5. Validate checksum
  * 6. Parse data
  *
  * Returns: true if valid data received, false on error
  ******************************************************************************/
 bool requestSlaveData() {
-  // Step 1: Send LIN BREAK field (its echo is discarded by Serial.end())
-  sendBreakField();
-
-  // Clear anything that arrived around the baud rate switch
-  while (Serial.available()) {
-    Serial.read();
-  }
-
-  // Step 2+3: Send SYNC byte and PID
-  Serial.write(LIN_SYNC_BYTE);
-  Serial.write(LIN_FRAME_ID);
-
-  // Our own header comes back through the transceiver first
-  uint8_t echo[2];
-  if (!readBytes(echo, 2, ECHO_TIMEOUT) || echo[0] != LIN_SYNC_BYTE || echo[1] != LIN_FRAME_ID) {
+  // Steps 1-3: BREAK, SYNC, PID
+  if (!sendHeader(LIN_FRAME_ID)) {
     currentData.valid = false;
     return false;  // Own header not seen on the bus: transceiver/wiring or bus collision
   }
 
-  // Step 4: Wait for slave response (6 bytes expected)
-  uint8_t response[6];
-  if (!readBytes(response, 6, RESPONSE_TIMEOUT)) {
+  // Step 4: Wait for slave response
+  uint8_t response[RESPONSE_LEN];
+  if (!readBytes(response, RESPONSE_LEN, RESPONSE_TIMEOUT)) {
     currentData.valid = false;
     return false;  // Timeout error
   }
 
   // Step 5: Validate checksum
-  uint8_t calculatedChecksum = calculateChecksum(response, 5);
-  if (response[5] != calculatedChecksum) {
+  uint8_t calculatedChecksum = calculateChecksum(response, RESPONSE_LEN - 1);
+  if (response[RESPONSE_LEN - 1] != calculatedChecksum) {
     currentData.valid = false;
     return false;  // Checksum error
   }
@@ -223,6 +270,77 @@ bool requestSlaveData() {
   currentData.valid = true;
 
   return true;
+}
+
+/*******************************************************************************
+ * SEND HEADER - BREAK + SYNC + PID, true if our own header echoed back
+ ******************************************************************************/
+bool sendHeader(uint8_t pid) {
+  sendBreakField();  // its echo is discarded by Serial.end()
+
+  // Clear anything that arrived around the baud rate switch
+  while (Serial.available()) {
+    Serial.read();
+  }
+
+  Serial.write(LIN_SYNC_BYTE);
+  Serial.write(pid);
+
+  uint8_t echo[2];
+  return readBytes(echo, 2, ECHO_TIMEOUT) && echo[0] == LIN_SYNC_BYTE && echo[1] == pid;
+}
+
+/*******************************************************************************
+ * CHECK KEY - Challenge the wheel, true if its answer matches our own HMAC
+ ******************************************************************************/
+bool checkKey() {
+  uint8_t frame[STEERING_KEY_LEN + 1];
+  for (uint8_t i = 0; i < STEERING_KEY_LEN; i++) {
+    frame[i] = random(256);
+  }
+  frame[STEERING_KEY_LEN] = calculateChecksum(frame, STEERING_KEY_LEN);
+
+  // Challenge frame: we publish the data ourselves
+  if (!sendHeader(LIN_PID_KEY_CHALLENGE)) return false;
+  Serial.write(frame, sizeof frame);
+  uint8_t echo[sizeof frame];
+  if (!readBytes(echo, sizeof echo, CHALLENGE_ECHO_TIMEOUT) || memcmp(echo, frame, sizeof frame) != 0) {
+    return false;  // Collision or wiring fault
+  }
+
+  // Computed before the response header, the wheel has its answer ready by then
+  uint8_t expected[STEERING_KEY_LEN];
+  steeringKeyResponse(frame, expected);
+
+  if (!sendHeader(LIN_PID_KEY_RESPONSE)) return false;
+  uint8_t answer[STEERING_KEY_LEN + 1];
+  if (!readBytes(answer, sizeof answer, RESPONSE_TIMEOUT)) return false;
+  if (answer[STEERING_KEY_LEN] != calculateChecksum(answer, STEERING_KEY_LEN)) return false;
+  return memcmp(answer, expected, STEERING_KEY_LEN) == 0;
+}
+
+// Test-grade entropy: LSBs of the floating analog inputs A0-A5
+void seedRandom() {
+  uint32_t seed = 0;
+  for (uint8_t i = 0; i < 32; i++) {
+    seed = (seed << 1) ^ analogRead(A0 + i % 6) ^ micros();
+  }
+  randomSeed(seed);
+}
+
+/*******************************************************************************
+ * HALL HOLD - Keep the highest travel of the last pull as setpoint
+ ******************************************************************************/
+void updateHallHold() {
+  for (uint8_t i = 0; i < 2; i++) {
+    uint8_t percent = getHallPercent(i + 1);
+    if (percent > HALL_ACTIVE_PERCENT) {
+      hallHold[i] = hallPulling[i] ? max(hallHold[i], percent) : percent;
+      hallPulling[i] = true;
+    } else {
+      hallPulling[i] = false;
+    }
+  }
 }
 
 /*******************************************************************************
@@ -267,24 +385,25 @@ void sendBreakField() {
 /*******************************************************************************
  * PARSE RESPONSE - Extract button states and ADC values
  *
- * Frame format (6 bytes):
- * ┌─────────┬──────────┬──────────┬──────────┬──────────┬──────────┐
- * │ Byte 0  │ Byte 1   │ Byte 2   │ Byte 3   │ Byte 4   │ Byte 5   │
- * │ Buttons │ ADC0_MSB │ ADC0_LSB │ ADC1_MSB │ ADC1_LSB │ Checksum │
- * └─────────┴──────────┴──────────┴──────────┴──────────┴──────────┘
+ * Frame format (8 bytes):
+ * ┌─────────┬───────────────────────┬───────────────────────┬──────────┐
+ * │ Byte 0  │ Byte 1-3              │ Byte 4-6              │ Byte 7   │
+ * │ Buttons │ POT1 + POT2 (2x12 bit)│ HALL1 + HALL2         │ Checksum │
+ * └─────────┴───────────────────────┴───────────────────────┴──────────┘
  *
- * Button byte: Bits 0-6 = Buttons 1-7 (1=pressed, 0=released)
- * ADC values: 12-bit (0-4095) split into MSB (8 bits) + LSB (4 bits)
+ * Button byte: bit = SteeringButton (steering_buttons.h), 1 = pressed
+ * Two 12-bit values A, B packed into 3 bytes:
+ *   b0 = A[11:4], b1 = A[3:0] << 4 | B[11:8], b2 = B[7:0]
  ******************************************************************************/
+void unpackPair(uint8_t* in, uint16_t* a, uint16_t* b) {
+  *a = ((uint16_t)in[0] << 4) | (in[1] >> 4);
+  *b = ((uint16_t)(in[1] & 0x0F) << 8) | in[2];
+}
+
 void parseResponse(uint8_t* data) {
-  // Extract button states (7 bits)
-  currentData.buttons = data[0] & 0x7F;
-
-  // Reconstruct ADC0 (12-bit: MSB + LSB)
-  currentData.pot1 = ((uint16_t)data[1] << 4) | ((data[2] >> 4) & 0x0F);
-
-  // Reconstruct ADC1 (12-bit: MSB + LSB)
-  currentData.pot2 = ((uint16_t)data[3] << 4) | ((data[4] >> 4) & 0x0F);
+  currentData.buttons = data[0];
+  unpackPair(&data[1], &currentData.pot1, &currentData.pot2);
+  unpackPair(&data[4], &currentData.hall1, &currentData.hall2);
 }
 
 /*******************************************************************************
@@ -304,22 +423,19 @@ uint8_t calculateChecksum(uint8_t* data, uint8_t length) {
 /*******************************************************************************
  * PRINT STEERING DATA - Output decoded values to Serial Monitor
  *
- * NOTE: This function uses Serial which conflicts with LIN on pins 0/1!
- * - Comment out this function for production (LIN-only operation)
- * - Uncomment for initial testing with USB connected
+ * Only built with -DLIN_DEBUG_PRINT (env uno_master_debug). The text also goes
+ * onto the LIN bus via D1; it contains no 'U' (0x55 = SYNC), so the slave
+ * never sees a header in it. Keep it that way when changing the labels.
  ******************************************************************************/
 void printSteeringData() {
-  // Uncomment the following lines for Serial debugging:
-  /*
+#ifdef LIN_DEBUG_PRINT
   // Print button states
-  Serial.print(F("BTN: "));
-  for (int i = 0; i < 7; i++) {
-    if (currentData.buttons & (1 << i)) {
-      Serial.print(F("["));
-      Serial.print(i + 1);
-      Serial.print(F("]"));
-    } else {
-      Serial.print(F("[ ]"));
+  Serial.print(F("BTN:"));
+  if (currentData.buttons == 0) Serial.print(F(" -"));
+  for (uint8_t i = 0; i < STEERING_BUTTON_COUNT; i++) {
+    if (isButtonPressed((SteeringButton)i)) {
+      Serial.print(' ');
+      Serial.print(STEERING_BUTTON_NAME[i]);
     }
   }
 
@@ -335,8 +451,28 @@ void printSteeringData() {
   Serial.print(currentData.pot2);
   Serial.print(F(" ("));
   Serial.print(map(currentData.pot2, 0, 4095, 0, 100));
-  Serial.println(F("%)"));
-  */
+  Serial.print(F("%)"));
+
+  Serial.print(F(" | H1: "));
+  Serial.print(currentData.hall1);
+  Serial.print(F(" ("));
+  Serial.print(getHallPercent(1));
+  Serial.print(F("%) | H2: "));
+  Serial.print(currentData.hall2);
+  Serial.print(F(" ("));
+  Serial.print(getHallPercent(2));
+  Serial.print(F("%) | HOLD: "));
+  Serial.print(hallHold[0]);
+  Serial.print(F("% "));
+  Serial.print(hallHold[1]);
+  Serial.println(unlocked ? F("% | KEY OK") : F("% | KEY --"));
+#endif
+}
+
+void printKeyResult() {
+#ifdef LIN_DEBUG_PRINT
+  Serial.println(unlocked ? F("KEY: OK, ECU on") : F("KEY: no valid answer"));
+#endif
 }
 
 /*******************************************************************************
@@ -369,10 +505,12 @@ void updateErrorLED() {
  * UTILITY FUNCTIONS - Access current data
  ******************************************************************************/
 
-// Check if specific button is pressed (1-7)
-bool isButtonPressed(uint8_t buttonNum) {
-  if (buttonNum < 1 || buttonNum > 7) return false;
-  return (currentData.buttons & (1 << (buttonNum - 1))) != 0;
+bool isButtonPressed(SteeringButton button) {
+  return (currentData.buttons & (1 << button)) != 0;
+}
+
+bool isHornPressed() {
+  return isButtonPressed(BTN_HORN);
 }
 
 // Get potentiometer value (0-4095)
@@ -386,6 +524,14 @@ uint16_t getPotValue(uint8_t potNum) {
 uint8_t getPotPercent(uint8_t potNum) {
   uint16_t value = getPotValue(potNum);
   return map(value, 0, 4095, 0, 100);
+}
+
+// Get Hall paddle travel (0-100%), clamped with a deadband at both ends
+uint8_t getHallPercent(uint8_t hallNum) {
+  uint16_t value = (hallNum == 1) ? currentData.hall1 : currentData.hall2;
+  if (value <= HALL_RELEASED + HALL_DEADBAND) return 0;
+  if (value >= HALL_FULL - HALL_DEADBAND) return 100;
+  return map(value, HALL_RELEASED + HALL_DEADBAND, HALL_FULL - HALL_DEADBAND, 0, 100);
 }
 
 // Check if data is valid
