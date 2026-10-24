@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Speeduino Verkabelung</title>
+<style>
+  :root { --fix:#8a8a8a; --keep:#6bbf6b; --ext:#e8c547; --new:#ff8a3d; --later:#6ab0ff; }
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 12px; background: #111; color: #eee; font-size: 16px; line-height: 1.4; max-width: 1000px; }
+  h1 { font-size: 21px; margin: 4px 0 6px; }
+  h2 { font-size: 18px; margin: 26px 0 8px; color: #8cf; border-bottom: 1px solid #333; padding-bottom: 4px; }
+  h3 { font-size: 16px; margin: 16px 0 4px; }
+  p, li { color: #ddd; }
+  .hint { color: #aaa; font-size: 14px; }
+  .warn { background: #3a2a10; border-left: 4px solid #e8a33d; padding: 8px 10px; margin: 10px 0; font-size: 15px; }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 13px; font-weight: 600; color: #111; }
+  .b-fix { background: var(--fix); } .b-keep { background: var(--keep); } .b-ext { background: var(--ext); } .b-new { background: var(--new); } .b-later { background: var(--later); }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; margin: 6px 0; }
+  th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid #2a2a2a; vertical-align: top; }
+  th { color: #8cf; font-weight: 600; }
+  tr.new td { background: #2e1d0e; }
+  tr.new td:first-child { border-left: 4px solid var(--new); }
+  td input[type=checkbox] { width: 22px; height: 22px; }
+  .svgwrap { overflow-x: auto; background: #181818; border-radius: 8px; padding: 6px; }
+  svg text { font-family: system-ui, sans-serif; }
+  svg [data-c] { transition: opacity .15s; cursor: pointer; }
+  svg.focus [data-c] { opacity: .15; }
+  svg.focus [data-c].on { opacity: 1; }
+  label.chk { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; }
+  label.chk input { width: 22px; height: 22px; flex: none; margin-top: 1px; }
+  .legend span { margin-right: 10px; white-space: nowrap; }
+  .tabs button { font-size: 16px; padding: 8px 14px; border-radius: 8px; border: 1px solid #444; background: #222; color: #ddd; margin-right: 6px; }
+  .tabs button.on { background: #2a6; color: #fff; border-color: #2a6; }
+  ul { padding-left: 20px; }
+</style>
+</head>
+<body>
+<h1>Speeduino: Verkabelung (Plan)</h1>
+<p class="hint">Stand 2026-10-18. Grundlage: IDC40-Pinout Speeduino v0.4.3d, Speeduino-Handbuch, deine Angaben zu Steckern und Sensoren (ECU-Seite 13.10., Kurbelsensor 16./17.10., Motorseite 17.10.). <b>Pins und Farben sind abgelesen, nicht durchgemessen.</b> Annahmen sind als „Hypothese" markiert.</p>
+<div class="warn"><b>Vor dem Anschließen:</b> Nie 12 V auf einen Speeduino-Eingang oder auf einen unbekannten Sensor. Pinbelegung jedes Sensors erst klären. Batterie ab beim Umlöten.</div>
+
+<h2>0. Abgleich: Motorseite (fertig) ↔ ECU-Seite (änderst du jetzt)</h2>
+<p class="hint">Links das, was am Motor jetzt als eigener Strang herauskommt. Rechts, was dafür am 40-Pin-Adapter liegen muss. Die Motorseite ist gesetzt, die ECU-Seite wird daran angepasst.</p>
+<table>
+<tr><th>Strang am Motor (Stand 17.10.)</th><th>ECU-Seite: Adapter-Pin · Ader</th><th>Passt?</th></tr>
+<tr><td><b>TPS</b> · Superseal 3-pol direkt am Poti</td><td>38 grün (Schleifer) · 25 rot 1 (+5 V) · 17 schwarz 1 (Masse)</td><td><span class="badge b-keep">JA</span> 3 Adern auf Gegenstecker Superseal 3-pol. Welcher Poti-Pin Schleifer ist, vorher messen</td></tr>
+<tr><td><b>Kurbelsensor G28</b> · Superseal 3-pol direkt am Sensor, induktiv, 815 Ω zwischen Pin 2 und 3</td><td>32 gelb (Sensor-Pin 2) · 28 grün (Sensor-Pin 3) · 36 schwarz (Sensor-Pin 1, Schirm)</td><td><span class="badge b-fix">FERTIG</span> seit 17.10. Offen: VR-Modul (bestellt) in IC3, JP2 auf VR</td></tr>
+<tr><td><b>Nockensensor G40</b> · Superseal 3-pol am grünen Schrumpfschlauch, Hall</td><td>34 grün (Signal) · <b>26 rot 2 (+5 V)</b> · <b>Masse: zweite Ader an Pin 36</b></td><td><span class="badge b-later">SPÄTER</span> Bisher stand hier „Versorgung aus dem Kabelbaum", das stimmt nicht mehr: der Strang ist einzeln, die ECU muss 5 V und Masse liefern. Erst nach dem ersten Start anschließen</td></tr>
+<tr><td><b>Lambda</b> · offene Enden rot/grün/schwarz am Wideband-Controller</td><td>40 blau ↔ Controller grün · rot → +12 V geschaltet, Sicherung · schwarz → Masse</td><td><span class="badge b-keep">JA</span> Controller-Masse am selben Punkt wie Pin 36 (Motorblock), sonst Offset im Analogsignal</td></tr>
+<tr><td><b>MAP</b> · kein Sensor am Motor, Unterdruck-Sammler vorhanden</td><td>On-Board-MAP, Schlauch vom Sammler (T-Stück, Restriktor nur im MAP-Zweig). <b>Pin 21 grau bleibt frei.</b> 19 und 26 werden frei</td><td><span class="badge b-ext">GEÄNDERT</span> Der externe MAP-Strang aus dem alten Plan entfällt. 19 → Ansaugluft-NTC, 26 → Nocke (siehe unten)</td></tr>
+<tr><td><b>Kühlmittel-NTC</b> · noch nichts am Motor</td><td>37 lila (Signal) · 23 schwarz 3 (Masse)</td><td><span class="badge b-keep">JA</span> 2-pol, kein Y mehr nötig</td></tr>
+<tr><td><b>Ansaugluft-NTC</b> · noch nichts am Motor</td><td>39 weiß (Signal) · <b>19 schwarz 2 (Masse, bisher MAP)</b></td><td><span class="badge b-ext">GEÄNDERT</span> eigene Masse statt Y vom Pin-23-Kabel</td></tr>
+<tr><td><b>Injection-Kabelbaum</b> · 2 Injector-Stecker + rote Ader = 12 V</td><td>Injection 1 (1/3/5), Injection 2 (2/4/7)</td><td><span class="badge b-fix">FERTIG</span> Quelle der 12 V (Kl. 15, Relais, Sicherung) offen</td></tr>
+<tr><td><b>Ignition-Kabelbaum</b> · DT 3-pol + 2 dicke Adern (lila/schwarz, braun)</td><td>Ignition 13/14/16</td><td><span class="badge b-fix">FERTIG</span> dicke Adern = Spulen-Plus und Masse (Hypothese), Quelle offen</td></tr>
+<tr><td><b>Nicht am Motor:</b> Kupplungsschalter, Lüfter/Pumpe-Relais, N205</td><td>35 gelb · 29/31 (2-Pin-Stecker) · 6 (HC-2)</td><td><span class="badge b-later">OFFEN</span> Adern beschriften und parken</td></tr>
+</table>
+<p><b>Ergebnis:</b> Die ECU-Seite passt zur Motorseite, mit drei Änderungen gegenüber dem Plan vom 16.10.: (1) kein MAP-Strang mehr, (2) Pin 19 geht an den Ansaugluft-NTC statt Y, (3) der Nockensensor braucht später 5 V von Pin 26 und Masse von Pin 36. Beides ist Vorschlag, nicht festgelegt.</p>
+
+<h2>1. Lötliste: das änderst du jetzt</h2>
+<p class="hint">Von oben nach unten abarbeiten, alles stromlos und Batterie ab. <b>Injection 1/2, Ignition, der 2-Pin-Stecker und der Kurbelsensor werden nicht geöffnet.</b> Häkchen werden im Browser gespeichert. Adapter-Pin-Zählweise wie in der Zeichnung unten.</p>
+
+<h3>A. Neue Lötstellen am 40-Pin-Adapter</h3>
+<label class="chk"><input type="checkbox" data-k="a2"><span><b>Pin 36 (GND):</b> zweite Ader neben dem Kurbel-Schirm anlöten, beschriften „Common-GND". Führt zum Motorblock (Ringöse an blanker Stelle).</span></label>
+<label class="chk"><input type="checkbox" data-k="a4"><span><b>Pin 36, später:</b> dritte Ader „Nocke GND" für den Nockensensor. Kann jetzt schon mit angelötet und geparkt werden.</span></label>
+<label class="chk"><input type="checkbox" data-k="a3"><span><b>Pin 6 (HC-2), später:</b> neue Ader, beschriften „Ventil N205".</span></label>
+<p class="hint">Erledigt am 17.10.: Pin 28 (grün, Kurbel Spule B) und Pin 36 (schwarz, Kurbel-Schirm). Vorher prüfen: Nachbarn 35/37 und 5/7 nicht überbrückt.</p>
+
+<h3>B. Sammelstecker öffnen: Ader bleibt am Adapter-Pin, bekommt ein neues Ziel</h3>
+<table>
+<tr><th></th><th>Ader</th><th>Adapter-Pin</th><th>bisher</th><th>geht jetzt zu</th></tr>
+<tr><td><input type="checkbox" data-k="b1"></td><td>schwarz 1</td><td>17</td><td>GND-Stecker</td><td>TPS, Masse</td></tr>
+<tr class="new"><td><input type="checkbox" data-k="b2"></td><td>schwarz 2</td><td>19</td><td>GND-Stecker</td><td>Ansaugluft-NTC, Masse (alter Plan: MAP)</td></tr>
+<tr><td><input type="checkbox" data-k="b3"></td><td>schwarz 3</td><td>23</td><td>GND-Stecker</td><td>Kühlmittel-NTC, Masse</td></tr>
+<tr><td><input type="checkbox" data-k="b4"></td><td>rot 1</td><td>25</td><td>5-V-Stecker</td><td>TPS, +5 V</td></tr>
+<tr class="new"><td><input type="checkbox" data-k="b5"></td><td>rot 2</td><td>26</td><td>5-V-Stecker</td><td>Nockensensor, +5 V (später; beschriften, isolieren, parken; alter Plan: MAP)</td></tr>
+<tr><td><input type="checkbox" data-k="b6"></td><td>grün</td><td>38</td><td>DT6 Pin 1</td><td>TPS, Schleifer</td></tr>
+<tr class="new"><td><input type="checkbox" data-k="b7"></td><td>grau</td><td>21</td><td>DT6 Pin 6</td><td>bleibt frei (MAP On-Board); beschriften „MAP ext", Ende isolieren</td></tr>
+<tr><td><input type="checkbox" data-k="b8"></td><td>lila</td><td>37</td><td>DT6 Pin 4</td><td>Kühlmittel-NTC, Signal</td></tr>
+<tr><td><input type="checkbox" data-k="b9"></td><td>weiß</td><td>39</td><td>DT6 Pin 3</td><td>Ansaugluft-NTC, Signal</td></tr>
+<tr><td><input type="checkbox" data-k="b10"></td><td>gelb</td><td>35</td><td>DT6 Pin 5</td><td>Kupplungsschalter (offen; beschriften, parken)</td></tr>
+<tr><td><input type="checkbox" data-k="b11"></td><td>blau</td><td>40</td><td>DT6 Pin 2</td><td>Wideband-Controller, grüne Ader</td></tr>
+<tr><td><input type="checkbox" data-k="b13"></td><td>grün (offenes Ende)</td><td>34</td><td>kein Stecker</td><td>Nockensensor, Signal (später; mit 26 und Nocke-GND auf einen Superseal 3-pol)</td></tr>
+</table>
+<p class="hint">Jede Ader vor dem Trennen mit Pin und Funktion beschriften. Die Kontakte aus Superseal und Deutsch lassen sich auspinnen oder die Ader wird abgeschnitten und verlängert.</p>
+
+<h3>C. Pro Strang: was am Sensorstecker ankommt</h3>
+<table>
+<tr><th></th><th>Strang, Stecker</th><th>Adern (Farbe · Adapter-Pin → Funktion)</th></tr>
+<tr><td><input type="checkbox" data-k="c2"></td><td><b>TPS</b>, Gegenstecker Superseal 3-pol</td><td>grün · 38 → Schleifer · rot 1 · 25 → +5 V (Außenpin) · schwarz 1 · 17 → Masse (Außenpin). Pins am Poti vorher durchmessen</td></tr>
+<tr><td><input type="checkbox" data-k="c4"></td><td><b>Kühlmittel-NTC</b>, Stecker 2-pol (Sensor fehlt noch)</td><td>lila · 37 → Signal · schwarz 3 · 23 → Masse</td></tr>
+<tr class="new"><td><input type="checkbox" data-k="c5"></td><td><b>Ansaugluft-NTC</b>, Stecker 2-pol (Sensor fehlt noch)</td><td>weiß · 39 → Signal · schwarz 2 · 19 → Masse (eigene Ader, kein Y)</td></tr>
+<tr><td><input type="checkbox" data-k="c7"></td><td><b>Wideband-Controller</b>, offene Enden</td><td>blau · 40 → Controller grün (Analogausgang) · Controller rot → +12 V geschaltet, Sicherung · Controller schwarz → Masse am selben Punkt wie Pin 36</td></tr>
+<tr class="new"><td><input type="checkbox" data-k="c8"></td><td><b>Common-GND</b></td><td>neue Ader · 36 → Motorblock (Ringöse an blanker Stelle)</td></tr>
+<tr><td><input type="checkbox" data-k="c11"></td><td><b>MAP</b> (On-Board)</td><td>kein Kabel: Schlauch vom Unterdruck-Sammler per T-Stück zum Board-Nippel, Restriktor nur im MAP-Zweig, ECU höher als der Sammler (Kondensat). TunerStudio: Sensortyp = Board-Sensor (v0.4 meist MPX4250)</td></tr>
+<tr><td><input type="checkbox" data-k="c6"></td><td><b>Kupplungsschalter</b> (offen)</td><td>gelb · 35 → Signal · zweiter Pol: Fahrzeugmasse (Hypothese: Schalter nach Masse)</td></tr>
+<tr class="new"><td><input type="checkbox" data-k="c10"></td><td><b>Nockensensor G40</b> (später), Gegenstecker Superseal 3-pol</td><td>grün · 34 → Signal · rot 2 · 26 → +5 V · neue Ader · 36 → Masse. Stromlaufplan AUE 8/4: G40 hängt an T121/98 (li/ro), T121/86 (li/br, Signal) und Gebermasse 220 (br/bl); dass Pin 98 die 5-V-Versorgung der Hallgeber ist, ist Hypothese aus der Recherche. Welcher Superseal-Pin was ist: erst klären, nie 12 V</td></tr>
+<tr class="new"><td><input type="checkbox" data-k="c9"></td><td><b>Nockenversteller-Ventil N205</b> (später), Kabel fest, 2-pol</td><td>neue Ader · 6 → Ader A (Ausgang HC-2) · Ader B → +12 V geschaltet mit Sicherung (Hypothese, weil die HC-Ausgänge gegen Masse schalten) · 13,4 Ω, ca. 0,9 A, Freilaufdiode prüfen</td></tr>
+<tr><td><input type="checkbox" data-k="c1"></td><td><b>Kurbelsensor G28</b>, Superseal 3-pol, <b>fertig</b></td><td>gelb · 32 → Sensor-Pin 2 (Spule A) · grün · 28 → Sensor-Pin 3 (Spule B) · schwarz · 36 → Sensor-Pin 1 (Schirm, nur ECU-Seite). Nur noch kontrollieren</td></tr>
+</table>
+
+<h3>D. Beim Löten beachten</h3>
+<ul>
+<li>Schrumpfschlauch vor dem Löten aufschieben, jede Verlängerung isolieren, Zugentlastung am Stecker.</li>
+<li>Nach jedem Block mit dem Multimeter prüfen: 5 V (25/26) gegen Masse (17/19/23/36) darf <b>keinen Durchgang</b> haben, Nachbarpins nicht verbunden.</li>
+<li>Zum Schluss alles durchklingeln: Adapter-Pin ↔ Sensorstecker, jede Ader einzeln.</li>
+<li>Kein Ohmmeter am Hall-Nockensensor. Nie 12 V auf einen Speeduino-Eingang.</li>
+<li>Kabel: dünn reicht für Signale, z. B. 0,35–0,5 mm² (Empfehlung, nicht aus dem Handbuch).</li>
+</ul>
+
+<h3>E. Material</h3>
+<ul>
+<li>Kabel (mehrere Farben), Schrumpfschlauch, Kabelbinder, Ringöse für die Motormasse</li>
+<li>Gegenstecker Superseal 3-pol: TPS (jetzt), Nocke (später) · 2-pol-Stecker für Kühlmittel- und Ansaugluft-NTC (plus die Sensoren selbst)</li>
+<li>MAP: Unterdruckschlauch, T-Stück, Restriktor</li>
+<li>Für später: Relais/Sicherung und Freilaufdiode für das N205-Ventil</li>
+</ul>
+
+<h2>2. Das ändert sich</h2>
+<p><b>Die drei Sammelstecker (Sensor-Stecker DT 6-pol, roter 5-V-Stecker, schwarzer GND-Stecker) fallen weg.</b> Ihre Adern bleiben an ihren Adapter-Pins, gehen aber einzeln zu den Sensoren, so wie die Sensoren am Motor jetzt auch einzeln herauskommen. Injection 1, Injection 2, Ignition, der 2-Pin-Stecker und der Kurbelsensor bleiben, wie sie sind.</p>
+
+<h3>NEU: diese Kabel und Teile musst du neu machen</h3>
+<table>
+<tr><th>#</th><th>Was</th><th>Von → nach</th></tr>
+<tr class="new"><td>1</td><td><b>Ader Common-GND</b></td><td>Adapter-Pin <b>36</b> → Motorblock/Fahrzeugmasse (neben dem Kurbel-Schirm, der schon auf Pin 36 liegt)</td></tr>
+<tr class="new"><td>2</td><td><b>Masse Wideband</b></td><td>Controller schwarz → Masse am selben Punkt wie Pin 36</td></tr>
+<tr class="new"><td>3</td><td><b>Stecker</b></td><td>Superseal 3-pol Gegenstecker: TPS · 2-pol: Kühlmittel-NTC, Ansaugluft-NTC</td></tr>
+<tr class="new"><td>4</td><td><b>Später: Nocke</b></td><td>Ader „Nocke GND" an Pin 36, zusammen mit 26 (+5 V) und 34 (Signal) auf einen Superseal 3-pol</td></tr>
+</table>
+
+<h3>UMGEHÄNGT oder verlängert (Ader bleibt am Adapter-Pin)</h3>
+<table>
+<tr><th>Ader (bisher)</th><th>Adapter-Pin</th><th>geht jetzt zu</th></tr>
+<tr><td>schwarz 1 (GND-Stecker)</td><td>17</td><td>TPS, Masse</td></tr>
+<tr><td>schwarz 2</td><td>19</td><td>Ansaugluft-NTC, Masse</td></tr>
+<tr><td>schwarz 3</td><td>23</td><td>Kühlmittel-NTC, Masse</td></tr>
+<tr><td>rot 1 (5-V-Stecker)</td><td>25</td><td>TPS, +5 V</td></tr>
+<tr><td>rot 2</td><td>26</td><td>Nockensensor, +5 V (später, parken)</td></tr>
+<tr><td>DT6 grün · lila · weiß · blau</td><td>38 · 37 · 39 · 40</td><td>TPS · Kühlmittel · Ansaugluft · Wideband</td></tr>
+<tr><td>DT6 grau · gelb</td><td>21 · 35</td><td>frei (MAP On-Board) · Kupplungsschalter offen, beide parken</td></tr>
+<tr><td>offenes Ende grün</td><td>34</td><td>Nockensensor, Signal (später)</td></tr>
+</table>
+
+<h3>Unverändert</h3>
+<p>Injection 1 (Pins 1/3/5), Injection 2 (2/4/7), Ignition (13/14/16), 2-Pin-Stecker weiß/grau (29/31, Lüfter/Pumpe als Hypothese), Kurbelsensor (32/28/36, fertig seit 17.10.).</p>
+
+<h2>3. Plan als Zeichnung: Speeduino in der Mitte</h2>
+<p class="tabs">
+  <button id="bSoll" class="on">Soll-Plan (neu)</button><button id="bIst">Ist-Zustand (jetzt)</button>
+</p>
+<p class="hint">Mitte: die 40 Pins des Adapters im Originallayout (2 × 20, links die ungeraden, rechts die geraden Pins). Links und rechts davon die Stecker mit ihren Adern. Adern, die vom anderen Pin-Streifen kommen, laufen oben oder unten um den Adapter herum. Linienfarbe = Aderfarbe, dick gestrichelt mit „NEU" = neue Ader. Tippen oder mit der Maus über einen Stecker oder Pin hebt seine Adern hervor. Auf dem Handy seitlich wischen.</p>
+<p class="hint"><b>Zählweise der Pins:</b> Die Zeichnung zählt wie der Schaltplan und dein Adapter (ungerade/gerade, Pin 1 und 2 nebeneinander). Das Handbuch nennt „IDC Pin" in anderer Zählweise (gegen den Uhrzeigersinn). Umrechnung Handbuch → Adapter: bis 20 gilt 2h−1, ab 21 gilt 2×(41−h). Beispiel: Handbuch „VVT IDC 38" ist Adapter-Pin 6. Das passt bei allen sieben Funktionen, die ich verglichen habe (Boost, VVT, Idle 1 und 2, Pumpe, Lüfter, Tacho).</p>
+<p class="legend">
+  <span><span class="badge b-fix">FERTIG</span> nicht anfassen</span>
+  <span><span class="badge b-keep">BLEIBT</span> so lassen</span>
+  <span><span class="badge b-ext">UMGEHÄNGT</span> Ader bleibt, anderes Ziel/länger</span>
+  <span><span class="badge b-new">NEU</span> neu</span>
+  <span><span class="badge b-later">SPÄTER</span> noch nicht</span>
+</p>
+<div class="svgwrap"><svg id="plan" xmlns="http://www.w3.org/2000/svg"></svg></div>
+
+<h2>4. Wie ich Masse und 5 V verteile</h2>
+<ul>
+<li><b>Der Adapter hat vier Masse-Pins</b> (17, 19, 23, 36) und zwei 5-V-Pins (25, 26). Weil der MAP On-Board ist, reicht das jetzt für eine eigene Masse je Sensor: <b>17 → TPS, 19 → Ansaugluft-NTC, 23 → Kühlmittel-NTC, 36 → Common-GND am Motorblock</b> (plus Kurbel-Schirm, plus später Nocke-Masse). Das Y vom Pin-23-Kabel aus dem alten Plan entfällt.</li>
+<li><b>5 V: Pin 25 → TPS, Pin 26 → Nockensensor (später).</b> Das Handbuch nennt etwa 80 mA für einen 5-V-Referenzausgang und warnt, damit fremde Verbraucher zu speisen (Tabelle gilt für ein Board, bei deinem nicht geprüft). Nur Sensoren dranhängen.</li>
+<li><b>Pin 36 = Common-GND:</b> direkt an den Motorblock (gemeinsames Bezugspotenzial, wie du es vorgeschlagen hast). Der Kurbel-Schirm liegt schon dort, nur auf der ECU-Seite. Hypothese: Wenn Störungen auftreten (Masseschleife), die Motorblock-Ader wieder abklemmen.</li>
+<li><b>Wideband-Controller:</b> Masse an denselben Punkt wie Pin 36 (Motorblock), damit Analogsignal und ECU-Masse dasselbe Bezugspotenzial haben. 12 V (geschaltet, Sicherung) vom Fahrzeug, nicht vom Speeduino.</li>
+<li><b>Kupplungsschalter:</b> Masse lokal an Fahrzeugmasse, braucht keinen Adapter-Pin. Noch nicht vorhanden.</li>
+<li><b>Nockensensor (Hall, eigener Strang):</b> Versorgung muss von der ECU kommen, 5 V von Pin 26 (Hypothese, siehe Abgleich oben), Masse an Pin 36. Nie mehr als 5 V auf Pin 34.</li>
+<li><b>Nockenversteller-Ventil (N205), später:</b> 13,4 Ω gemessen, also etwa 0,9 A bei 12 V. Ausgang: Pin 6 (HC-2), Standard-Ausgang für VVT (Arduino-Pin 4); aus Handbuch und Schaltplan abgeleitet, nicht am Board geprüft. Die HC-Ausgänge schalten gegen Masse (Hypothese), die andere Ader des Ventils braucht dann +12 V (geschaltet, abgesichert). Strombelastbarkeit und Freilaufdiode nicht geprüft. Für den ersten Start nicht anschließen, in TunerStudio VVT aus.</li>
+</ul>
+
+<h2>5. Sensor für Sensor</h2>
+
+<h3>Kurbelsensor (G28) – induktiv, Superseal 3-pol, fertig</h3>
+<ul>
+<li>AC-Test 16.10.: Sensor induziert Spannung, also induktiv. Spule zwischen Sensor-Pin 2 und 3, 815 Ω. Pin 1 ohne Durchgang zu 2/3, vermutlich Schirm (Hypothese).</li>
+<li>Verdrahtet 17.10.: gelb Pin 2 → Adapter 32 (CRANK-IN), grün Pin 3 → Adapter 28 (VR1−), schwarz Pin 1 → Adapter 36 (Schirm, nur ECU-Seite).</li>
+<li>Polarität unbekannt: Wenn das Signal falsch herum kommt, Trigger-Flanke in TunerStudio ändern oder A/B tauschen.</li>
+<li><b>VR-Modul:</b> der v0.4 hat keinen VR-Wandler an Bord. WTMtronics Mini MAX A2 (MAX9926, jbperf-Pinreihenfolge) ist bestellt (17.10.). Einbau: Stiftleisten löten, Pin-1-Lage gegen Sockel IC3 prüfen, JP2 auf VR, JP4 aus, Trigger-Flanke RISING (Modul invertiert). Handbuchseiten: <a href="handbuch.html">handbuch.html</a>.</li>
+<li>TunerStudio: Missing Tooth, 60 Zähne, 2 fehlend; Trigger-Winkel mit Zündlicht einstellen. Der Kurbelsensor war früher als Hall konfiguriert, das muss auf VR umgestellt werden.</li>
+</ul>
+
+<h3>Kühlmittel-NTC und Ansaugluft-NTC – je 2-polig, Sensoren fehlen noch</h3>
+<ul>
+<li>Signal: Kühlmittel → Pin 37 (lila), Ansaugluft → Pin 39 (weiß). Masse: Kühlmittel → Pin 23, Ansaugluft → Pin 19, je eigene Ader.</li>
+<li>Kennlinie in TunerStudio aus Widerstandsmessungen kalibrieren (Raumtemperatur, Eiswasser, heißes Wasser).</li>
+<li>Du hast noch einen dritten Temperatursensor erwähnt („Dings-Temperatur"). Der Speeduino hat nur Eingänge für Kühlmittel und Ansaugluft, welcher das ist, ist offen.</li>
+</ul>
+
+<h3>Drosselklappen-Poti (TPS) – Superseal 3-pol am Poti</h3>
+<ul>
+<li>Schleifer → Pin 38 (grün). Außenpin A → +5 V von Pin 25 (rot 1). Außenpin B → Masse von Pin 17 (schwarz 1). Welcher Superseal-Pin was ist: Widerstand zwischen den Außenpins ist konstant, der Schleifer ändert sich beim Drehen.</li>
+<li>Drehrichtung falsch (voll offen zeigt wenig)? Dann +5 V und Masse am Poti tauschen. Danach in TunerStudio TPS kalibrieren (geschlossen und Vollgas).</li>
+</ul>
+
+<h3>MAP – On-Board-Sensor</h3>
+<ul>
+<li>Entscheidung 17.10.: zum Testen der Board-Sensor. Schlauch per T-Stück vom vorhandenen Unterdruck-Sammler (versorgt auch den Kraftstoffdruckregler), Restriktor nur im MAP-Zweig, ECU höher als der Sammler.</li>
+<li>Erster Start mit Alpha-N über das TPS, MAP nur mitloggen. Später prüfen, ob die Firmware den Lastmodus „ITB" anbietet. Pin 21 (graue Ader) bleibt frei.</li>
+</ul>
+
+<h3>Nockensensor (G40) – Hall, Superseal 3-pol, später</h3>
+<ul>
+<li>Signal → Pin 34 (grün). Versorgung +5 V → Pin 26 (rot 2). Masse → Pin 36 (neue Ader). Laut Stromlaufplan AUE 8/4 hat der G40 Versorgung, Signal und Gebermasse; die 5 V sind Hypothese, vor dem Anschluss gegen ME7-Pin 98 prüfen.</li>
+<li>Erst nach dem ersten Start anschließen. Kein Ohmmeter am Sensor.</li>
+</ul>
+
+<h3>Wideband und Kupplungsschalter</h3>
+<ul>
+<li>Wideband: Controller grün ↔ blau → Pin 40. Controller rot → +12 V geschaltet mit Sicherung, Controller schwarz → Masse am Motorblock (Punkt von Pin 36). Controller-Typ offen, die TunerStudio-Kalibrierung muss dazu passen.</li>
+<li>Kupplungsschalter: Signal → Pin 35 (gelb), zweiter Pol an Fahrzeugmasse (Hypothese: Schalter nach Masse). Noch nicht vorhanden, Ader parken.</li>
+</ul>
+
+<h2>6. Reihenfolge beim Umbau</h2>
+<ol>
+<li>Batterie ab, ECU abstecken.</li>
+<li>Pin 36: Ader zum Motorblock anlöten (Kurbel-Schirm liegt schon dort), optional gleich die Nocke-GND-Ader mit.</li>
+<li>Die drei Sammelstecker auflösen, Adern beschriften und auf die Stränge verteilen: TPS (17/25/38), Kühlmittel (23/37), Ansaugluft (19/39), Wideband (40). 21, 26, 34, 35 parken.</li>
+<li>Gegenstecker montieren: Superseal 3-pol an den TPS, 2-pol für die NTCs. Alles <b>stromlos durchklingeln</b> (5 V gegen Masse: kein Durchgang).</li>
+<li>MAP-Schlauch vom Sammler legen.</li>
+<li>Erst dann Speeduino mit 12 V an, in TunerStudio Sensorwerte prüfen (TPS, MAP, später Kühlmittel und Ansaugluft). Drehzahl erst, wenn das VR-Modul drin ist.</li>
+</ol>
+
+<h2>7. Abhak-Liste (wird im Browser gespeichert)</h2>
+<div id="checks"></div>
+
+<h2>8. Noch unbekannt</h2>
+<ul>
+<li>Board-Revision (0.4.3d oder 0.4.4d), Pin-1-Lage von Sockel IC3, Stellung JP2/JP4</li>
+<li>TPS: welcher Superseal-Pin ist Schleifer, welche Außenpins</li>
+<li>Nockensensor: Pinbelegung des Superseal, 5-V-Versorgung bestätigen</li>
+<li>Wideband-Controller: Typ; Kupplungsschalter: noch keiner; 12 V für Injectors, Zündspulen und das Board: Quelle (Kl. 15, Relais, Sicherung)</li>
+<li>Dritter Temperatursensor („Dings-Temperatur"); Kühlmittel- und Ansaugluft-Sensor selbst</li>
+<li>Nockenversteller-Ventil: Strombelastbarkeit des HC-2-Ausgangs und Freilaufdiode</li>
+</ul>
+
+<script>
+const WC = {lila:'#c08cf0', braun:'#b07a45', orange:'#ff9a3c', blau:'#4da3ff', grau:'#b5b5b5', gelb:'#f2d13d',
+            gruen:'#4ccf6a', weiss:'#f4f4f4', rot:'#ff5a5a', schwarz:'#8a8a8a', neu:'#ff8a3d', spaeter:'#6ab0ff'};
+const ST = {fix:{c:'#8a8a8a', t:'FERTIG'}, keep:{c:'#6bbf6b', t:'BLEIBT'}, ext:{c:'#e8c547', t:'UMGEHÄNGT'},
+            new:{c:'#ff8a3d', t:'NEU'}, later:{c:'#6ab0ff', t:'SPÄTER'}};
+const PIN = {1:'INJ-1',2:'INJ-1',3:'INJ-2',4:'INJ-2',5:'INJ-3',6:'HC-2',7:'INJ-3',8:'IDLE',9:'INJ-4',10:'HC-1',11:'INJ-4',12:'BOOST',
+ 13:'IGN-1',14:'IGN-2',15:'IGN-4',16:'IGN-3',17:'GND',18:'STEP-A2',19:'GND',20:'STEP-A1',21:'MAP ext · frei',22:'STEP-B1',23:'GND',24:'STEP-B2',
+ 25:'5 V (VDDA)',26:'5 V (VDDA)',27:'PROTO-1 Flex',28:'VR1−',29:'PROTO-2 Fan',30:'VR2−',31:'PROTO-3 Pumpe',32:'CRANK-IN',
+ 33:'PROTO-4 Tacho',34:'CAM-IN',35:'PROTO-5 Kupplung',36:'GND',37:'CLT',38:'TPS',39:'IAT',40:'O2'};
+
+const FIXED = [
+ {id:'inj1', side:'L', st:'fix', name:'Injection 1', sub:'Deutsch 3-pol · fertig, teilgetestet', rows:[
+   {pin:1, lab:'C · orange', c:'orange'}, {pin:3, lab:'A · lila', c:'lila'}, {pin:5, lab:'B · braun', c:'braun'}]},
+ {id:'ign', side:'R', st:'fix', name:'Ignition', sub:'Deutsch 3-pol · fertig, getestet', rows:[
+   {pin:13, lab:'A · blau', c:'blau'}, {pin:14, lab:'B · grau', c:'grau'}, {pin:16, lab:'C · gelb', c:'gelb'}]},
+ {id:'two', side:'L', st:'fix', name:'2-Pin-Stecker', sub:'schwarz, klein · Funktion: Vermutung', rows:[
+   {pin:29, lab:'weiß → Lüfter?', c:'weiss'}, {pin:31, lab:'grau → Benzinpumpe?', c:'grau'}]},
+ {id:'inj2', side:'R', st:'fix', name:'Injection 2', sub:'Deutsch 3-pol · fertig', rows:[
+   {pin:2, lab:'C · orange', c:'orange'}, {pin:4, lab:'A · lila', c:'lila'}, {pin:7, lab:'B · braun', c:'braun'}]}
+];
+const IST = FIXED.concat([
+ {id:'gnd', side:'L', st:'keep', name:'Ground', sub:'Superseal schwarz · 3 Adern zusammengefasst', rows:[
+   {pin:17, lab:'schwarz 1', c:'schwarz'}, {pin:19, lab:'schwarz 2', c:'schwarz'}, {pin:23, lab:'schwarz 3', c:'schwarz'}]},
+ {id:'v5', side:'L', st:'keep', name:'5 V', sub:'Superseal rot · 2 Adern zusammengefasst', rows:[
+   {pin:25, lab:'rot 1', c:'rot'}, {pin:26, lab:'rot 2', c:'rot'}]},
+ {id:'dt6', side:'L', st:'keep', name:'Sensor-Stecker', sub:'Deutsch 6-pol', rows:[
+   {pin:21, lab:'DT6 · grau · MAP', c:'grau'}, {pin:35, lab:'DT5 · gelb · Kupplung', c:'gelb'},
+   {pin:37, lab:'DT4 · lila · CLT', c:'lila'}, {pin:38, lab:'DT1 · grün · TPS', c:'gruen'},
+   {pin:39, lab:'DT3 · weiß · IAT', c:'weiss'}, {pin:40, lab:'DT2 · blau · O2', c:'blau'}],
+   notes:['kein GND und kein 5 V im Stecker']},
+ {id:'crank', side:'R', st:'fix', name:'Kurbelsensor (G28)', sub:'Superseal 3-pol · verdrahtet 17.10.', rows:[
+   {pin:28, lab:'grün · Sensor 3', c:'gruen'}, {pin:32, lab:'gelb · Sensor 2', c:'gelb'},
+   {pin:36, lab:'schwarz · Sensor 1, Schirm', c:'schwarz'}]},
+ {id:'cam', side:'R', st:'later', name:'Nocke (offenes Ende)', sub:'grün, kein Stecker', rows:[
+   {pin:34, lab:'grün · CAM-IN', c:'gruen', later:true}]}
+]);
+const SOLL = FIXED.concat([
+ {id:'tps', side:'L', st:'ext', name:'TPS-Poti', sub:'Superseal 3-pol am Poti · Gegenstecker', rows:[
+   {pin:17, lab:'Masse · schwarz 1', c:'schwarz'}, {pin:25, lab:'+5 V · rot 1', c:'rot'}, {pin:38, lab:'Schleifer · grün', c:'gruen'}]},
+ {id:'vvt', side:'R', st:'later', name:'Verstell-Ventil N205', sub:'2-pol, Kabel fest · 13,4 Ω · später', rows:[
+   {pin:6, lab:'Ader A · HC-2 (Low-Side)', c:'spaeter', later:true}],
+   notes:['andere Ader: +12 V geschaltet (Hypothese)', 'Strom ca. 0,9 A, Freilaufdiode prüfen']},
+ {id:'cgnd', side:'R', st:'new', name:'Common-GND', sub:'NEU · Pin 36 → Motorblock', rows:[
+   {pin:36, lab:'neue Ader → Motorblock', c:'neu', isnew:true}],
+   notes:['Kurbel-Schirm liegt schon auf Pin 36', 'Wideband-Masse an denselben Punkt']},
+ {id:'clt', side:'L', st:'ext', name:'Kühlmittel-NTC', sub:'2-pol · Sensor fehlt noch', rows:[
+   {pin:23, lab:'Masse · schwarz 3', c:'schwarz'}, {pin:37, lab:'Signal · lila', c:'lila'}]},
+ {id:'iat', side:'L', st:'ext', name:'Ansaugluft-NTC', sub:'2-pol · Sensor fehlt noch', rows:[
+   {pin:19, lab:'Masse · schwarz 2', c:'schwarz'}, {pin:39, lab:'Signal · weiß', c:'weiss'}]},
+ {id:'crank', side:'R', st:'fix', name:'Kurbelsensor (G28)', sub:'Superseal 3-pol · induktiv · fertig 17.10.', rows:[
+   {pin:28, lab:'Spule B · grün (Sensor 3)', c:'gruen'}, {pin:32, lab:'Spule A · gelb (Sensor 2)', c:'gelb'},
+   {pin:36, lab:'Schirm · schwarz (Sensor 1)', c:'schwarz'}], notes:['Schirm nur ECU-Seite', 'VR-Modul bestellt: IC3, JP2 auf VR']},
+ {id:'cam', side:'R', st:'later', name:'Nockensensor (G40)', sub:'Superseal 3-pol, grüner Schrumpf · Hall', rows:[
+   {pin:26, lab:'+5 V · rot 2 (Hypothese)', c:'rot', later:true}, {pin:34, lab:'Signal · grün', c:'gruen', later:true},
+   {pin:36, lab:'Masse · NEUE Ader', c:'spaeter', later:true}], notes:['Pins am Superseal klären, nie 12 V']},
+ {id:'clutch', side:'L', st:'later', name:'Kupplungsschalter', sub:'nicht am Motor · offen', rows:[
+   {pin:35, lab:'Signal · gelb (parken)', c:'gelb', later:true}], notes:['zweiter Pol an Fahrzeugmasse (Hypothese)']},
+ {id:'wide', side:'R', st:'ext', name:'Wideband-Controller', sub:'offene Enden rot/grün/schwarz', rows:[
+   {pin:40, lab:'Analog · blau ↔ grün', c:'blau'}], notes:['rot → +12 V geschaltet, Sicherung', 'schwarz → Masse wie Pin 36']}
+]);
+
+const NS = 'http://www.w3.org/2000/svg';
+const svg = document.getElementById('plan');
+function el(tag, attrs, text, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text !== undefined && text !== null) e.textContent = text;
+  (parent || svg).appendChild(e);
+  return e;
+}
+const ROW = 34, TOP = 96, LCX = 320, RCX = 490, PW = 150, LBX = 10, BW = 240, RBX = 710;
+const pinCol = n => (n % 2 ? 'L' : 'R');
+const pinRow = n => Math.ceil(n / 2) - 1;
+const pinY = n => TOP + pinRow(n) * ROW + ROW / 2;
+const pinEdge = n => (n % 2 ? LCX : RCX + PW);
+let pinned = null;
+
+function render(conns) {
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  pinned = null; svg.classList.remove('focus');
+  const owners = {};
+  conns.forEach(c => { c.rows.sort((a, b) => a.pin - b.pin); c.rows.forEach(r => (owners[r.pin] = owners[r.pin] || []).push(c)); });
+  conns.forEach(c => { c.h = 42 + c.rows.length * 20 + (c.notes ? c.notes.length * 14 + 6 : 0); });
+  ['L', 'R'].forEach(side => {
+    const list = conns.filter(c => c.side === side);
+    list.forEach(c => { c.want = c.rows.reduce((s, r) => s + pinY(r.pin), 0) / c.rows.length - c.h / 2; });
+    list.sort((a, b) => a.want - b.want);
+    let bottom = TOP - 10;
+    list.forEach(c => { c.y = Math.max(c.want, bottom + 12); bottom = c.y + c.h; c.x = side === 'L' ? LBX : RBX; });
+  });
+  const headBottom = TOP + 20 * ROW;
+  let topLane = 0, botLane = 0;
+  const wires = [];
+  conns.forEach(c => {
+    c.rows.forEach((r, i) => {
+      const x1 = pinEdge(r.pin), y1 = pinY(r.pin);
+      const x2 = c.side === 'L' ? c.x + BW : c.x, y2 = c.y + 42 + i * 20 + 10;
+      const w = {c, r, x1, y1, x2, y2, cross: pinCol(r.pin) !== c.side};
+      if (w.cross) {
+        const up = pinRow(r.pin) < 10;
+        const k = up ? topLane++ : botLane++;
+        w.lane = up ? TOP - 18 - 9 * k : headBottom + 14 + 9 * k;
+        w.o1 = pinCol(r.pin) === 'L' ? LCX - 12 - 8 * k : RCX + PW + 12 + 8 * k;
+        w.o2 = c.side === 'L' ? LCX - 12 - 8 * k : RCX + PW + 12 + 8 * k;
+      }
+      wires.push(w);
+    });
+  });
+  const H = Math.max(headBottom + 14 + 9 * botLane + 20, ...conns.map(c => c.y + c.h)) + 20;
+  el('text', {x: (LCX + RCX + PW) / 2, y: 28, fill: '#eee', 'font-size': 16, 'font-weight': 700, 'text-anchor': 'middle'}, 'Speeduino');
+  el('text', {x: (LCX + RCX + PW) / 2, y: 46, fill: '#999', 'font-size': 12, 'text-anchor': 'middle'}, 'IDC40-Adapter (2 × 20)');
+  el('text', {x: LCX + PW / 2, y: TOP - 4, fill: '#888', 'font-size': 11, 'text-anchor': 'middle'}, 'ungerade: 1, 3 … 39');
+  el('text', {x: RCX + PW / 2, y: TOP - 4, fill: '#888', 'font-size': 11, 'text-anchor': 'middle'}, 'gerade: 2, 4 … 40');
+  wires.forEach(w => {
+    const r = w.r, d = w.cross
+      ? `M${w.x1} ${w.y1} L${w.o1} ${w.y1} L${w.o1} ${w.lane} L${w.o2} ${w.lane} L${w.o2} ${w.y2} L${w.x2} ${w.y2}`
+      : `M${w.x1} ${w.y1} C${(w.x1 + w.x2) / 2} ${w.y1} ${(w.x1 + w.x2) / 2} ${w.y2} ${w.x2} ${w.y2}`;
+    el('path', {d, fill: 'none', stroke: WC[r.c], 'stroke-linejoin': 'round', 'stroke-width': r.isnew ? 4.5 : 2.5,
+      'stroke-dasharray': (r.isnew || r.later) ? '9 5' : '0', 'data-c': w.c.id});
+    if (r.isnew) {
+      const mx = w.cross ? (w.o2 + w.x2) / 2 : (w.x1 + w.x2) / 2, my = w.cross ? w.y2 : (w.y1 + w.y2) / 2;
+      const g = el('g', {'data-c': w.c.id});
+      el('rect', {x: mx - 17, y: my - 9, width: 34, height: 18, rx: 9, fill: '#ff8a3d'}, null, g);
+      el('text', {x: mx, y: my + 4, fill: '#111', 'font-size': 11, 'font-weight': 800, 'text-anchor': 'middle'}, 'NEU', g);
+    }
+  });
+  for (let n = 1; n <= 40; n++) {
+    const os = owners[n], px = n % 2 ? LCX : RCX, y = TOP + pinRow(n) * ROW + 2;
+    const g = el('g', os ? {'data-c': os.map(o => o.id).join(' ')} : {});
+    const stc = os ? ST[os.length > 1 ? 'ext' : os[0].st].c : '#2c2c2c';
+    el('rect', {x: px, y, width: PW, height: ROW - 4, rx: 5, fill: os ? '#222' : '#161616', stroke: stc, 'stroke-width': os ? 2 : 1}, null, g);
+    el('text', {x: px + 9, y: y + 19, fill: os ? '#fff' : '#555', 'font-size': 13, 'font-weight': 700}, n, g);
+    el('text', {x: px + 36, y: y + 19, fill: os ? '#ddd' : '#555', 'font-size': 11.5}, PIN[n], g);
+  }
+  conns.forEach(c => {
+    const g = el('g', {'data-c': c.id});
+    el('rect', {x: c.x, y: c.y, width: BW, height: c.h, rx: 8, fill: '#1e1e1e', stroke: ST[c.st].c, 'stroke-width': c.st === 'new' ? 3 : 2}, null, g);
+    el('text', {x: c.x + 10, y: c.y + 17, fill: '#fff', 'font-size': 14, 'font-weight': 700}, c.name, g);
+    const bw = c.st === 'ext' ? 72 : 54, bx = c.x + BW - bw - 8;
+    el('rect', {x: bx, y: c.y + 5, width: bw, height: 16, rx: 8, fill: ST[c.st].c}, null, g);
+    el('text', {x: bx + bw / 2, y: c.y + 17, fill: '#111', 'font-size': 10, 'font-weight': 700, 'text-anchor': 'middle'}, ST[c.st].t, g);
+    el('text', {x: c.x + 10, y: c.y + 33, fill: '#aaa', 'font-size': 11}, c.sub, g);
+    c.rows.forEach((r, i) => {
+      const ry = c.y + 42 + i * 20;
+      el('circle', {cx: c.x + 16, cy: ry + 10, r: 5, fill: WC[r.c]}, null, g);
+      el('text', {x: c.x + 28, y: ry + 14, fill: r.isnew ? '#ffb27a' : '#eee', 'font-size': 12, 'font-weight': r.isnew ? 700 : 400},
+         r.lab + '  (Pin ' + r.pin + ')', g);
+    });
+    (c.notes || []).forEach((t, i) => el('text', {x: c.x + 10, y: c.y + 42 + c.rows.length * 20 + 14 + i * 14, fill: '#999', 'font-size': 11}, t, g));
+  });
+  svg.setAttribute('viewBox', '0 0 960 ' + H);
+  svg.style.minWidth = '820px';
+  svg.style.width = '100%';
+  svg.style.height = 'auto';
+}
+function focusOn(ids) {
+  svg.classList.add('focus');
+  svg.querySelectorAll('[data-c]').forEach(e => {
+    const toks = e.getAttribute('data-c').split(' ');
+    e.classList.toggle('on', toks.some(t => ids.includes(t)));
+  });
+}
+function focusOff() { svg.classList.remove('focus'); svg.querySelectorAll('.on').forEach(e => e.classList.remove('on')); }
+function idsOf(ev) { const t = ev.target.closest('[data-c]'); return t ? t.getAttribute('data-c').split(' ') : null; }
+svg.addEventListener('mouseover', ev => { const ids = idsOf(ev); if (ids && !pinned) focusOn(ids); });
+svg.addEventListener('mouseout', () => { if (!pinned) focusOff(); });
+svg.addEventListener('click', ev => {
+  const ids = idsOf(ev);
+  if (!ids || ids.join() === pinned) { pinned = null; focusOff(); } else { pinned = ids.join(); focusOn(ids); }
+});
+const bSoll = document.getElementById('bSoll'), bIst = document.getElementById('bIst');
+function show(mode) {
+  bSoll.classList.toggle('on', mode === 'soll'); bIst.classList.toggle('on', mode === 'ist');
+  render(mode === 'ist' ? IST : SOLL);
+  history.replaceState(null, '', mode === 'ist' ? '#ist' : '#soll');
+}
+bSoll.addEventListener('click', () => show('soll'));
+bIst.addEventListener('click', () => show('ist'));
+show(location.hash === '#ist' ? 'ist' : 'soll');
+
+document.querySelectorAll('input[data-k]').forEach(cb => {
+  const key = 'loetliste_' + cb.dataset.k;
+  cb.checked = localStorage.getItem(key) === '1';
+  cb.addEventListener('change', () => localStorage.setItem(key, cb.checked ? '1' : '0'));
+});
+const CHECKS = [
+ 'Kurbelsensor kontrolliert: 32 gelb, 28 grün, 36 schwarz (Schirm nur ECU-Seite)',
+ 'Pin 36: Ader zum Motorblock angelötet (Ringöse), Nocke-GND-Ader geparkt',
+ 'Masse: 17 → TPS, 19 → Ansaugluft, 23 → Kühlmittel',
+ '5 V: Pin 25 → TPS, Pin 26 geparkt für Nocke',
+ 'TPS: Schleifer/Außenpins am Superseal gemessen, Gegenstecker montiert (17/25/38)',
+ 'NTC-Stecker 2-pol vorbereitet (23/37 und 19/39)',
+ 'Wideband: blau 40 ↔ grün, rot an 12 V geschaltet, schwarz an Motorblock',
+ 'Geparkt und isoliert: 21 (MAP ext), 26, 34, 35',
+ 'Sammelstecker (DT6, rot, schwarz) aufgelöst',
+ 'Alles stromlos durchgeklingelt, 5 V gegen Masse ohne Durchgang',
+ 'MAP-Schlauch vom Sammler mit T-Stück und Restriktor, ECU höher als Sammler',
+ 'TunerStudio: TPS kalibriert, MAP plausibel, Sensortyp = Board-Sensor',
+ 'VR-Modul eingebaut: Pin 1 zu IC3 geprüft, JP2 auf VR, JP4 aus, Flanke RISING',
+ 'TunerStudio: Drehzahl beim Durchdrehen sichtbar, Trigger-Winkel mit Zündlicht geprüft',
+ 'Nockensensor: Pinbelegung und 5 V geklärt (später anschließen: 34/26/36)'
+];
+const box = document.getElementById('checks');
+CHECKS.forEach((t, i) => {
+  const key = 'verkabelung3_chk_' + i;
+  const lab = document.createElement('label');
+  lab.className = 'chk';
+  const cb = document.createElement('input');
+  cb.type = 'checkbox';
+  cb.checked = localStorage.getItem(key) === '1';
+  cb.addEventListener('change', () => localStorage.setItem(key, cb.checked ? '1' : '0'));
+  const sp = document.createElement('span');
+  sp.textContent = t;
+  lab.append(cb, sp);
+  box.appendChild(lab);
+});
+</script>
+</body>
+</html>

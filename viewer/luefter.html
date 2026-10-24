@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Lüftermodul J293 (Prüfstand)</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 12px; background: #111; color: #eee; font-size: 16px; line-height: 1.4; max-width: 1100px; }
+  h1 { font-size: 21px; margin: 4px 0 6px; }
+  h2 { font-size: 18px; margin: 26px 0 8px; color: #8cf; border-bottom: 1px solid #333; padding-bottom: 4px; }
+  p, li { color: #ddd; }
+  a { color: #8cf; }
+  code, pre { background: #1d1d1d; border-radius: 4px; font-size: 14px; }
+  code { padding: 1px 4px; }
+  pre { padding: 10px; overflow-x: auto; }
+  .hint { color: #aaa; font-size: 14px; }
+  .hyp { color: #e8c547; }
+  .warn { background: #3a2a10; border-left: 4px solid #e8a33d; padding: 8px 10px; margin: 10px 0; font-size: 15px; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; margin: 6px 0; }
+  th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid #2a2a2a; vertical-align: top; }
+  th { color: #8cf; font-weight: 600; }
+  .svgwrap { overflow-x: auto; background: #181818; border-radius: 8px; padding: 6px; }
+  svg text { font-family: system-ui, sans-serif; fill: #ddd; font-size: 14px; }
+  svg .small { font-size: 12px; fill: #aaa; }
+  svg .title { font-weight: 700; fill: #fff; font-size: 15px; }
+  svg .y { fill: #e8c547; }
+  .legend span { margin-right: 14px; white-space: nowrap; font-size: 14px; }
+  .sw { display: inline-block; width: 22px; height: 6px; border-radius: 3px; vertical-align: middle; margin-right: 4px; }
+  .ok { color: #7fe07f; }
+  ol li, ul li { margin: 3px 0; }
+  input[type=checkbox] { transform: scale(1.2); margin-right: 6px; }
+</style>
+</head>
+<body>
+<h1>Lüftermodul Audi TT 8J 2.0 TDI (J293) – Prüfstand</h1>
+<p class="hint">Stand 2026-10-22. Ziel: Lüfter mit integriertem Steuergerät J293 (PQ35-Plattform, wie Golf 5 / A3 8P) ohne Motorsteuergerät selbst ansteuern. Keine offizielle VW-Spezifikation gefunden – alle Werte aus Foren/Händlern, Konfidenz je Zeile. <span class="hyp">Gelb = Hypothese, am Teil prüfen.</span></p>
+
+<div class="warn"><b>Wichtig:</b> Liegt Kl. 15 an und kommt <b>10 s lang kein gültiges PWM</b>, läuft der Lüfter im Notlauf auf <b>Vollgas</b> – ohne Vorwarnung. Lüfter vor dem ersten Einschalten fest einspannen, Schutzbrille, Kabel und Finger weg vom Flügel.</div>
+
+<h2>1. Teil</h2>
+<table>
+<tr><th>Punkt</th><th>Wert</th><th>Konfidenz</th></tr>
+<tr><td>Fahrzeug / Motor</td><td>Audi TT 8J 2.0 TDI quattro, 125 kW, Motorcode CBBB (ab 06/2008)</td><td>Teilekataloge</td></tr>
+<tr><td>Teilenummer</td><td>1K0 959 455 xx (Lüfter mit integriertem J293). Suffix bestimmt Ø/Leistung, z. B. DH/ET 295 mm 180–220 W, EA 360 mm 220–300 W, ES 360 W. <span class="hyp">Typschild am eigenen Motor ablesen und hier eintragen.</span></td><td>mehrere Händler</td></tr>
+<tr><td>Hersteller</td><td>VDO/Continental belegt (A2C59511339 = 1K0 959 455 DL); Bosch/Brose-Varianten unklar</td><td>einzelne Quelle</td></tr>
+<tr><td>Doppellüfter</td><td>Beim Golf 5 regelt das J293 im großen Lüfter den kleinen (V177) mit – auf dem Foto zwei Leistungstransistoren, <span class="hyp">passt vermutlich zu zwei Kanälen</span></td><td>einzelne Quelle</td></tr>
+<tr><td>Platine (Foto)</td><td>2 Leistungstransistoren auf Kühlblech, SSOP-28-IC (vermutlich µC), 1× 220 µF 50 V, 5× 470 µF 35 V, Drossel</td><td>eigenes Foto</td></tr>
+</table>
+
+<h2>2. Stecker (4-polig, fahrzeugseitig)</h2>
+<table>
+<tr><th>Funktion</th><th>Leitung</th><th>Pin-Nr. (Forum)</th><th>Konfidenz</th></tr>
+<tr><td><b>Kl. 30</b> Dauerplus</td><td>dick, ca. 4–6 mm²</td><td>1</td><td>Funktion bestätigt, Pin einzelne Quelle</td></tr>
+<tr><td><b>Kl. 31</b> Masse</td><td>dick, ca. 4–6 mm²</td><td>2</td><td>Funktion bestätigt, Pin einzelne Quelle</td></tr>
+<tr><td><b>Kl. 15</b> Zündungsplus</td><td>dünn, 0,5 mm²</td><td>3</td><td>Funktion bestätigt, Pin einzelne Quelle</td></tr>
+<tr><td><b>PWM</b> vom Motorsteuergerät J623</td><td>dünn, 0,5 mm²</td><td>4 <span class="hyp">(motor-talk nennt Pin 3)</span></td><td>Funktion bestätigt, Pin widersprüchlich</td></tr>
+</table>
+<p class="hyp">Pin-Nummern widersprechen sich. Zuordnung am Teil klären: dicke Adern = 30/31 (Masse = Durchgang zum Motorgehäuse? Leiterbahn zu den Elkos-Minus verfolgen), dünne Adern = 15/PWM. Zwischen 15 und PWM im Zweifel: Durchgang/Widerstand zu den Elkos messen, Kl. 15 geht meist über eine Diode/Spannungsregler, PWM über einen Widerstand zum Eingang des ICs.</p>
+
+<h2>3. Signal</h2>
+<table>
+<tr><th>Parameter</th><th>Wert</th><th>Konfidenz</th></tr>
+<tr><td>Frequenz</td><td><b>25 Hz</b> (Periode 40 ms)</td><td>mehrere Foren</td></tr>
+<tr><td>Pegel</td><td>12-V-Logik, Low ≈ 0 V. 5 V reicht nicht, unter ca. 4,2 V flackert der Lüfter; ein Fahrzeug maß ca. 8 V High</td><td>einzelne Quellen</td></tr>
+<tr><td>Tastgrad → Drehzahl</td><td>&lt; ca. 10–15 % = aus · 15–95 % = steigend · ≥ 95 % = Vollgas</td><td>2 Foren, Grenzen leicht unterschiedlich</td></tr>
+<tr><td>Notlauf</td><td>kein gültiges PWM innerhalb 10 s nach Kl. 15 → Vollgas</td><td>mehrere Foren + Werkstatt-TSB</td></tr>
+<tr><td>Polarität</td><td class="hyp">unbekannt, ob „High-Zeit“ oder „Low-Zeit“ zählt → im Test beide Richtungen probieren</td><td>unklar</td></tr>
+<tr><td>Rückmeldung</td><td class="hyp">evtl. Diagnose auf der Signalleitung (P0480/P1946 im Fahrzeug) – für uns nicht nötig</td><td>unklar</td></tr>
+<tr><td>Nachlauf</td><td class="hyp">vermutlich vom Motorsteuergerät gesteuert (PWM weiter nach Zündung aus, Kl. 30 bleibt) – nicht belegt</td><td>unklar</td></tr>
+</table>
+<p class="hint">Deckt sich mit dem CAN-Entwurf <code>FAN.CMD 0x190</code> in <code>Files/CAN-List-Buggy.csv</code> („15–95 % PWM 25 Hz 12 V“).</p>
+
+<h2>4. Verkabelung Prüfstand</h2>
+<div class="legend">
+  <span><i class="sw" style="background:#ff5a5a"></i>Kl. 30 dick (6 mm²)</span>
+  <span><i class="sw" style="background:#888"></i>Masse</span>
+  <span><i class="sw" style="background:#ff9a3c"></i>Kl. 15 / 12 V Signalseite (0,5 mm²)</span>
+  <span><i class="sw" style="background:#7fe07f"></i>PWM</span>
+  <span><i class="sw" style="background:#5ab4ff"></i>3,3-V-Logik</span>
+</div>
+<div class="svgwrap">
+<svg viewBox="0 0 1060 600" width="1060" height="600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="dot" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6"><circle cx="5" cy="5" r="4" fill="#fff"/></marker>
+  </defs>
+
+  <!-- Battery -->
+  <rect x="20" y="70" width="150" height="110" rx="8" fill="#222" stroke="#666"/>
+  <text x="95" y="100" text-anchor="middle" class="title">Autobatterie</text>
+  <text x="95" y="120" text-anchor="middle" class="small">12 V, ≥ 60 Ah</text>
+  <text x="95" y="136" text-anchor="middle" class="small">+ Ladegerät</text>
+  <text x="155" y="92" fill="#ff5a5a" style="fill:#ff5a5a;font-weight:700">+</text>
+  <text x="155" y="172" style="fill:#aaa;font-weight:700">−</text>
+
+  <!-- Main fuse -->
+  <rect x="230" y="70" width="80" height="34" rx="5" fill="#2a1a1a" stroke="#ff5a5a"/>
+  <text x="270" y="92" text-anchor="middle">60 A</text>
+  <text x="270" y="62" text-anchor="middle" class="small">MIDI/Streifen, direkt an Batterie</text>
+  <line x1="170" y1="87" x2="230" y2="87" stroke="#ff5a5a" stroke-width="7"/>
+
+  <!-- Kl30 thick to module -->
+  <polyline points="310,87 820,87 820,190" fill="none" stroke="#ff5a5a" stroke-width="7" stroke-linejoin="round"/>
+  <text x="560" y="78" text-anchor="middle">Kl. 30 · 6 mm²</text>
+  <!-- clamp meter -->
+  <circle cx="700" cy="87" r="18" fill="none" stroke="#e8c547" stroke-width="2" stroke-dasharray="4 3"/>
+  <text x="700" y="125" text-anchor="middle" class="small y">Strommesszange</text>
+
+  <!-- Ground thick -->
+  <polyline points="170,165 210,165 210,560 860,560 860,350" fill="none" stroke="#888" stroke-width="7" stroke-linejoin="round"/>
+  <text x="560" y="582" text-anchor="middle">Kl. 31 Masse · 6 mm² (Sternpunkt am Batterie-Minus)</text>
+
+  <!-- Kl15 fuse + switch -->
+  <polyline points="190,87 190,240 240,240" fill="none" stroke="#ff9a3c" stroke-width="3"/>
+  <circle cx="190" cy="87" r="4" fill="#fff"/>
+  <rect x="240" y="226" width="60" height="28" rx="5" fill="#2a1f10" stroke="#ff9a3c"/>
+  <text x="270" y="245" text-anchor="middle">5 A</text>
+  <line x1="300" y1="240" x2="340" y2="240" stroke="#ff9a3c" stroke-width="3"/>
+  <circle cx="345" cy="240" r="4" fill="#ff9a3c"/>
+  <line x1="349" y1="238" x2="385" y2="222" stroke="#ff9a3c" stroke-width="3"/>
+  <circle cx="390" cy="240" r="4" fill="#ff9a3c"/>
+  <text x="367" y="212" text-anchor="middle" class="small">Schalter „Kl. 15“</text>
+  <polyline points="394,240 790,240" fill="none" stroke="#ff9a3c" stroke-width="3"/>
+  <text x="600" y="232" text-anchor="middle">Kl. 15 · 0,5 mm²</text>
+  <circle cx="520" cy="240" r="4" fill="#fff"/>
+
+  <!-- Pull-up -->
+  <line x1="520" y1="240" x2="520" y2="280" stroke="#ff9a3c" stroke-width="3"/>
+  <rect x="508" y="280" width="24" height="50" fill="#222" stroke="#ff9a3c"/>
+  <text x="540" y="302" class="small">R_pu 1 kΩ</text>
+  <text x="540" y="318" class="small">0,5 W</text>
+  <line x1="520" y1="330" x2="520" y2="380" stroke="#7fe07f" stroke-width="3"/>
+  <circle cx="520" cy="380" r="4" fill="#fff"/>
+
+  <!-- NPN transistor -->
+  <line x1="520" y1="380" x2="520" y2="420" stroke="#7fe07f" stroke-width="3"/>
+  <rect x="470" y="420" width="100" height="70" rx="6" fill="#1a2a1a" stroke="#7fe07f"/>
+  <text x="520" y="445" text-anchor="middle" class="title">BC337</text>
+  <text x="520" y="463" text-anchor="middle" class="small">NPN (o. BC547)</text>
+  <text x="575" y="432" class="small">C</text>
+  <text x="575" y="488" class="small">E</text>
+  <text x="458" y="452" class="small">B</text>
+  <line x1="520" y1="490" x2="520" y2="560" stroke="#888" stroke-width="3"/>
+  <circle cx="520" cy="560" r="4" fill="#fff"/>
+
+  <!-- Gate network -->
+  <line x1="400" y1="455" x2="470" y2="455" stroke="#5ab4ff" stroke-width="3"/>
+  <rect x="372" y="445" width="40" height="20" fill="#222" stroke="#5ab4ff"/>
+  <text x="392" y="438" text-anchor="middle" class="small">1 kΩ</text>
+  <line x1="440" y1="455" x2="440" y2="500" stroke="#5ab4ff" stroke-width="2"/>
+  <rect x="430" y="500" width="20" height="36" fill="#222" stroke="#5ab4ff"/>
+  <text x="400" y="525" text-anchor="end" class="small">10 kΩ</text>
+  <line x1="440" y1="536" x2="440" y2="560" stroke="#888" stroke-width="2"/>
+  <circle cx="440" cy="455" r="3" fill="#fff"/>
+
+  <!-- Nucleo -->
+  <rect x="230" y="400" width="130" height="110" rx="8" fill="#1a2030" stroke="#5ab4ff"/>
+  <text x="295" y="422" text-anchor="middle" class="title">Nucleo-F091RC</text>
+  <text x="295" y="438" text-anchor="middle" class="small">USB vom Laptop</text>
+  <text x="352" y="462" text-anchor="end">D9 (PC7)</text>
+  <text x="352" y="496" text-anchor="end">GND</text>
+  <line x1="360" y1="455" x2="372" y2="455" stroke="#5ab4ff" stroke-width="3"/>
+  <polyline points="360,492 380,492 380,560" fill="none" stroke="#888" stroke-width="3"/>
+  <circle cx="380" cy="560" r="4" fill="#fff"/>
+  <text x="295" y="530" text-anchor="middle" class="small y">gemeinsame Masse!</text>
+
+  <!-- PWM line to module -->
+  <line x1="520" y1="380" x2="640" y2="380" stroke="#7fe07f" stroke-width="3"/>
+  <rect x="640" y="370" width="40" height="20" fill="#222" stroke="#7fe07f"/>
+  <text x="660" y="364" text-anchor="middle" class="small">100 Ω</text>
+  <polyline points="680,380 790,380" fill="none" stroke="#7fe07f" stroke-width="3"/>
+  <text x="735" y="372" text-anchor="middle">PWM</text>
+  <!-- TVS -->
+  <circle cx="720" cy="380" r="4" fill="#fff"/>
+  <line x1="720" y1="380" x2="720" y2="455" stroke="#7fe07f" stroke-width="2"/>
+  <polygon points="708,470 732,470 720,455" fill="none" stroke="#e8c547" stroke-width="2"/>
+  <line x1="706" y1="455" x2="734" y2="455" stroke="#e8c547" stroke-width="2"/>
+  <line x1="720" y1="470" x2="720" y2="560" stroke="#888" stroke-width="2"/>
+  <circle cx="720" cy="560" r="4" fill="#fff"/>
+  <text x="742" y="468" class="small">TVS SMBJ15A</text>
+
+  <!-- Module -->
+  <rect x="790" y="190" width="240" height="190" rx="10" fill="#222" stroke="#aaa" stroke-width="2"/>
+  <text x="940" y="222" text-anchor="middle" class="title">Lüfter + J293</text>
+  <text x="940" y="240" text-anchor="middle" class="small">1K0 959 455 xx</text>
+  <text x="840" y="215" class="small" style="fill:#ff5a5a">Kl.30</text>
+  <text x="810" y="245" class="small" style="fill:#ff9a3c">Kl.15</text>
+  <text x="810" y="372" class="small" style="fill:#7fe07f">PWM</text>
+  <text x="868" y="344" class="small">Kl.31</text>
+  <polyline points="790,240 800,240" stroke="#ff9a3c" stroke-width="3"/>
+  <text x="910" y="280" text-anchor="middle" class="small y">Pin-Nr. am Teil bestimmen</text>
+  <text x="910" y="298" text-anchor="middle" class="small y">(Forum: 1=30, 2=31, 3=15, 4=PWM)</text>
+
+  <!-- notes -->
+  <text x="20" y="300" class="small">Reihenfolge Anklemmen:</text>
+  <text x="20" y="318" class="small">1. Masse</text>
+  <text x="20" y="336" class="small">2. Signalseite + Nucleo</text>
+  <text x="20" y="354" class="small">3. Kl. 30 zuletzt (Funken)</text>
+  <text x="20" y="372" class="small">4. Kl. 15 schalten</text>
+</svg>
+</div>
+<ul>
+  <li><b>Signalstufe invertiert:</b> Nucleo-Pin High → Transistor leitet → Leitung 0 V. Leitung ist also High, solange der Nucleo Low ist. Die Firmware schreibt deshalb <code>100 − Soll</code>.</li>
+  <li>R_pu 1 kΩ an 12 V: 144 mW, wenn der FET leitet → 0,5-W-Widerstand. Ergibt sauber 0/12 V, egal ob das Modul intern einen Pull-up hat.</li>
+  <li>BC337/BC547: 1 kΩ an der Basis ergibt ca. 2,6 mA Basisstrom bei 3,3 V, reicht locker für 12 mA Kollektorstrom; 10 kΩ nach Masse hält ihn beim Reset sicher aus. Alternativ Logic-Level-N-MOSFET (z. B. BS170, IRLZ44N) mit 100 Ω am Gate.</li>
+  <li>TVS + 100 Ω schützen gegen Spitzen vom Modul. Schaltung nach golf2lin-Prinzip, <span class="hyp">nicht aufgebaut/gemessen</span>.</li>
+  <li>Für den Buggy später: Kl. 30 über Last-Relais/Sicherung laut Bordnetz-Konzept (Vault), Kl. 15 von der Freigabe-Kette.</li>
+</ul>
+
+<h2>5. Einkaufs-/Material-Liste</h2>
+<table>
+<tr><th>✓</th><th>Teil</th><th>Notiz</th></tr>
+<tr><td><input type="checkbox"></td><td>Autobatterie ≥ 60 Ah + Ladegerät</td><td>Labornetzteil nur, wenn &gt; 60 A</td></tr>
+<tr><td><input type="checkbox"></td><td>MIDI- oder Streifensicherung 60 A + Halter</td><td>direkt an Batterie-Plus</td></tr>
+<tr><td><input type="checkbox"></td><td>Leitung 6 mm² rot + schwarz, Ringösen M6/M8</td><td>so kurz wie möglich</td></tr>
+<tr><td><input type="checkbox"></td><td>Flachsicherung 5 A + Halter, Kippschalter</td><td>Kl. 15</td></tr>
+<tr><td><input type="checkbox"></td><td>Gegenstecker 4-polig (Golf 5 Lüfter) oder Flachstecker auf die Pins</td><td>Teilenummer am Stecker ablesen</td></tr>
+<tr><td><input type="checkbox"></td><td>NPN BC337 oder BC547, 1 kΩ 0,5 W (Pull-up), 1 kΩ (Basis), 100 Ω, 10 kΩ, TVS SMBJ15A (oder P6KE18A), Lochraster</td><td>alles noch kaufen, Centbeträge</td></tr>
+<tr><td><input type="checkbox"></td><td>Nucleo-F091RC (frei), USB-Kabel</td><td>Zuordnung erst nach OK</td></tr>
+<tr><td><input type="checkbox"></td><td>Multimeter, DC-Strommesszange; ideal Oszilloskop</td><td>Pin-Zuordnung + PWM prüfen</td></tr>
+<tr><td><input type="checkbox"></td><td>Schraubzwingen/Halter, Schutzbrille</td><td>Lüfter fest einspannen</td></tr>
+</table>
+
+<h2>6. Testablauf (ca. 1 h)</h2>
+<ol>
+  <li><b>Pins klären</b> (stromlos): dicke/dünne Adern, Durchgang zu Elko-Minus, Ergebnis in Tabelle 2 eintragen.</li>
+  <li><b>Signalstufe allein</b>: Modul nicht angeschlossen, Kl. 15 an, Nucleo 25 Hz / 50 % → am PWM-Ausgang 0 / ~12 V messen (Multimeter zeigt ~6 V Mittelwert).</li>
+  <li><b>Notlauf</b>: Modul dran, Nucleo aus, Kl. 15 an → nach ~10 s Vollgas erwartet. Strom notieren. Kl. 15 aus.</li>
+  <li><b>Regelung</b>: Nucleo an, erst 20 %, dann 30 / 50 / 70 / 90 % (je 20 s), dann Kl. 15 an. Strom + Eindruck Drehzahl notieren.</li>
+  <li><b>Grenzen</b>: 0 %, 10 %, 15 %, 95 %, 100 % testen – wo ist aus, wo Vollgas, wo Notlauf?</li>
+  <li><b>Polarität</b>: Verhält sich alles umgekehrt (20 % = fast Vollgas)? → <code>INVERT</code> im Sketch umschalten, Schritt 4 wiederholen.</li>
+  <li><b>Signalverlust</b>: im Betrieb Nucleo abziehen → reagiert das Modul sofort/nach 10 s mit Vollgas?</li>
+</ol>
+
+<table>
+<tr><th>Soll %</th><th>Strom A</th><th>Drehzahl / Eindruck</th></tr>
+<tr><td>Notlauf</td><td></td><td></td></tr>
+<tr><td>0</td><td></td><td></td></tr><tr><td>10</td><td></td><td></td></tr><tr><td>15</td><td></td><td></td></tr>
+<tr><td>20</td><td></td><td></td></tr><tr><td>30</td><td></td><td></td></tr><tr><td>50</td><td></td><td></td></tr>
+<tr><td>70</td><td></td><td></td></tr><tr><td>90</td><td></td><td></td></tr><tr><td>95</td><td></td><td></td></tr><tr><td>100</td><td></td><td></td></tr>
+</table>
+
+<h2>7. Test-Sketch (Nucleo-F091RC, PlatformIO/Arduino)</h2>
+<p class="hint">Entwurf, nicht kompiliert. Sollwert per Serial-Monitor (115200) als Zahl 0–100 eingeben.</p>
+<pre>#include &lt;Arduino.h&gt;
+
+const uint32_t PWM_PIN = D9;   // PC7, TIM3_CH2
+const bool INVERT = true;      // transistor stage inverts: pin high = line 0 V
+int duty = 20;
+
+void apply() {
+  int pin = INVERT ? 100 - duty : duty;
+  analogWrite(PWM_PIN, pin * 4095 / 100);
+  Serial.printf("Soll %d %% (Pin %d %%)\n", duty, pin);
+}
+
+void setup() {
+  Serial.begin(115200);
+  analogWriteResolution(12);
+  analogWriteFrequency(25);
+  apply();
+}
+
+void loop() {
+  if (Serial.available()) {
+    int v = Serial.parseInt();
+    if (v &gt;= 0 &amp;&amp; v &lt;= 100) { duty = v; apply(); }
+  }
+}</pre>
+
+<h2>8. Offen</h2>
+<ul>
+  <li class="hyp">Typschild/Suffix der Teilenummer ablesen</li>
+  <li class="hyp">Pin-Nummern am Teil bestätigen</li>
+  <li class="hyp">Polarität und Tastgrad-Grenzen messen (Tabelle oben)</li>
+  <li class="hyp">Optional: Signal an einem laufenden Golf 5 / A3 8P / TT 8J mit Oszi messen</li>
+  <li>Danach: CAN-Entwurf <code>FAN.CMD/FAN.STATUS</code> mit Messwerten bestätigen, Controller für den Buggy festlegen</li>
+</ul>
+
+<h2>Quellen</h2>
+<ul class="hint">
+  <li><a href="https://golf2lin.wordpress.com/features/radiator-fan-control/">golf2lin – Radiator fan control (Mk5 J293 im Golf 2, 25 Hz, 15–95 %, Notlauf 10 s, Schutzbeschaltung)</a></li>
+  <li><a href="https://www.vehicleservicepros.com/home/article/53093936/fixing-volkswagen-cooling-fans">VehicleServicePros – Fixing Volkswagen cooling fans (Kl. 30/15/31/PWM, Notlauf)</a></li>
+  <li><a href="https://www.wolfsburg-edition.info/wbb5/thread/73687-golf-5-k%C3%BChlerl%C3%BCfteransteuerung/">wolfsburg-edition – Golf 5 Kühlerlüfteransteuerung (Pin 1–4)</a></li>
+  <li><a href="https://www.meingolf.de/thread/215883">meingolf – Leitungsquerschnitte</a></li>
+  <li><a href="https://www.eos-forum.de/index.php?thread%2F13014-k%C3%BChll%C3%BCfteransteuerung%2F=">eos-forum – VDO A2C59511339</a></li>
+  <li><a href="https://www.teile-direkt.at/oenumber/1k0959455et.html">teile-direkt – 1K0 959 455 ET</a> · <a href="https://www.autoteiledirekt.de/oenumber/1k0959455ea.html">autoteiledirekt – 1K0 959 455 EA</a></li>
+  <li><a href="https://hpacademy.com/forum/practical-harness-construction-club-level/show/vw-amarok-audi-pwm-radiator-fan-brose-850w-pwm-frequency">HPAcademy – Brose 850 W (100 Hz ging nicht)</a> · <a href="https://www.msextra.com/forums/viewtopic.php?t=70814">msextra – Mercedes 100 Hz zum Vergleich</a></li>
+</ul>
+</body>
+</html>

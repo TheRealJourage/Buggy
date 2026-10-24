@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Kupplungspedal: 2 Mikroschalter (Vorschlag)</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 12px; background: #111; color: #eee; font-size: 16px; line-height: 1.4; max-width: 1100px; }
+  h1 { font-size: 21px; margin: 4px 0 6px; }
+  h2 { font-size: 18px; margin: 26px 0 8px; color: #8cf; border-bottom: 1px solid #333; padding-bottom: 4px; }
+  p, li { color: #ddd; }
+  .hint { color: #aaa; font-size: 14px; }
+  .hyp { color: #e8c547; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; margin: 6px 0; }
+  th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid #2a2a2a; vertical-align: top; }
+  th { color: #8cf; font-weight: 600; }
+  .svgwrap { overflow-x: auto; background: #181818; border-radius: 8px; padding: 6px; }
+  svg text { font-family: system-ui, sans-serif; fill: #ddd; font-size: 14px; }
+  svg .small { font-size: 12px; fill: #aaa; }
+  svg .y { fill: #e8c547; }
+  .ctrl { margin: 10px 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .ctrl input[type=range] { width: 260px; }
+  .led { display: inline-block; padding: 2px 8px; border-radius: 10px; background: #333; color: #888; font-size: 14px; }
+  .led.on { background: #1f5f1f; color: #bfffbf; }
+  ol li, ul li { margin: 3px 0; }
+</style>
+</head>
+<body>
+<h1>Kupplungspedal – 2 Mikroschalter (Vorschlag)</h1>
+<p class="hint">Stand 2026-10-23, nach Foto aus der Halle. Seitenansicht, Fahrer links, Fahrzeugfront rechts. Skizze, <b>nicht maßstäblich</b> – Maße folgen nach der Messung. <span class="hyp">Gelb = Annahme.</span></p>
+
+<div class="ctrl">
+  <label for="t">Pedal:</label>
+  <input id="t" type="range" min="0" max="100" value="0">
+  <span id="s2" class="led">S2 „oben“</span>
+  <span id="s1" class="led">S1 „getreten“</span>
+</div>
+
+<div class="svgwrap">
+<svg id="sv" viewBox="0 0 720 470" width="100%" style="min-width:560px">
+  <!-- floor -->
+  <line x1="20" y1="425" x2="700" y2="425" stroke="#555" stroke-width="3"/>
+  <text x="24" y="448" class="small">Boden</text>
+
+  <!-- frame tube -->
+  <rect x="440" y="40" width="22" height="385" fill="#5a4a3a" stroke="#7a6a5a"/>
+  <text x="470" y="60">Rahmenrohr</text>
+  <text x="470" y="78" class="small">(senkrecht, direkt hinter dem Pedal)</text>
+
+  <!-- master cylinder -->
+  <rect x="392" y="236" width="48" height="28" rx="4" fill="#444" stroke="#777"/>
+  <text x="470" y="256">Geberzylinder</text>
+  <text x="470" y="274" class="small">Gelenkkopf ca. auf halber Höhe</text>
+  <line id="rod" x1="0" y1="250" x2="392" y2="250" stroke="#aaa" stroke-width="5"/>
+
+  <!-- pedal (rotates around pivot) -->
+  <g id="pedal">
+    <rect x="292" y="95" width="16" height="320" fill="#6a5a4a" stroke="#8a7a6a"/>
+    <rect x="276" y="95" width="48" height="12" rx="3" fill="#777"/>
+    <!-- flag/cam on the pedal -->
+    <rect x="300" y="186" width="10" height="16" fill="#e8c547"/>
+    <circle cx="300" cy="250" r="6" fill="#ccc"/>
+  </g>
+  <!-- bracket (lateral, beside the pedal) -->
+  <rect x="232" y="176" width="208" height="12" fill="#2f5f8f" opacity="0.85"/>
+  <rect x="440" y="168" width="22" height="28" fill="none" stroke="#8cf" stroke-width="2"/>
+  <text x="470" y="176" style="fill:#8cf">Halteblech + Rohrschelle</text>
+  <text x="470" y="194" class="small">seitlich neben dem Pedal, Langlöcher</text>
+
+  <!-- switch S2 (rest) -->
+  <g>
+    <rect x="216" y="150" width="26" height="26" rx="3" fill="#333" stroke="#999"/>
+    <line x1="242" y1="160" x2="252" y2="196" stroke="#bbb" stroke-width="2"/>
+    <circle id="r2" cx="252" cy="198" r="5" fill="#bbb"/>
+    <text x="150" y="140">S2 „oben“</text>
+    <text x="118" y="122" class="small">= eingekuppelt</text>
+  </g>
+  <!-- switch S1 (pressed) -->
+  <g>
+    <rect x="368" y="150" width="26" height="26" rx="3" fill="#333" stroke="#999"/>
+    <line x1="368" y1="160" x2="358" y2="196" stroke="#bbb" stroke-width="2"/>
+    <circle id="r1" cx="358" cy="198" r="5" fill="#bbb"/>
+    <text x="340" y="140">S1 „getreten“</text>
+    <text x="340" y="122" class="small">= getrennt, auch → Speeduino D51</text>
+  </g>
+
+  <text x="196" y="100" class="small">Pedalplatte</text>
+  <text x="40" y="214" class="y">Nocke/Blech per Schelle</text>
+  <text x="40" y="230" class="y">am Pedalrohr (gelb)</text>
+
+  <!-- pivot -->
+  <circle cx="300" cy="410" r="9" fill="#999"/>
+  <line x1="200" y1="410" x2="420" y2="410" stroke="#999" stroke-width="3" stroke-dasharray="6 4"/>
+  <text x="96" y="400" class="small">Drehpunkt: Gewindestange</text>
+
+  <!-- arc hint -->
+  <path d="M 252 108 A 305 305 0 0 1 348 108" fill="none" stroke="#666" stroke-dasharray="4 4"/>
+  <text x="270" y="40" class="small">Pedalweg</text>
+</svg>
+</div>
+
+<h2>Wie es funktioniert</h2>
+<ol>
+  <li>Ein <b>Halteblech</b> sitzt mit Rohrschelle am senkrechten Rahmenrohr und läuft <b>seitlich neben dem Pedal</b> parallel zum Pedalweg nach hinten.</li>
+  <li>Auf dem Blech zwei <b>Rollenhebel-Mikroschalter</b>: S2 am hinteren Ende (Pedal oben), S1 am vorderen Ende (Pedal ganz getreten).</li>
+  <li>Am Pedalrohr eine <b>Nocke</b> (kleines Blech mit Schelle), die in der jeweiligen Endlage auf die Rolle drückt. Dazwischen sind beide Schalter offen = „Kupplung in Bewegung“.</li>
+  <li>Höhe: etwa auf Höhe des Gelenkkopfs oder darüber. Unten am Drehpunkt bewegt sich das Pedal zu wenig, die Schaltpunkte wären ungenau.</li>
+  <li>Langlöcher im Blech → beide Schaltpunkte am Fahrzeug einstellbar.</li>
+</ol>
+
+<h2>Signale</h2>
+<table>
+<tr><th>Pedal</th><th>S2 „oben“</th><th>S1 „getreten“</th><th>Bedeutung</th></tr>
+<tr><td>oben (Ruhe)</td><td>geschlossen</td><td>offen</td><td>eingekuppelt</td></tr>
+<tr><td>dazwischen</td><td>offen</td><td>offen</td><td>Kupplung in Bewegung</td></tr>
+<tr><td>ganz getreten</td><td>offen</td><td>geschlossen</td><td>getrennt → Schaltbox darf schalten, Speeduino D51</td></tr>
+</table>
+<p>Verkabelung: <b>3 Adern</b> (Masse + 2 Signale), Schalter gegen Masse. S1 zusätzlich zum Speeduino D51 abzweigen (siehe Funktionsliste Block 5).</p>
+
+<h2>Maße am Fahrzeug (User 2026-10-23)</h2>
+<table>
+<tr><th>Maß</th><th>Wert</th><th>Deutung</th></tr>
+<tr><td>Gesamtbreite</td><td>300 mm</td><td class="hyp">Breite des Pedalbereichs (Annahme)</td></tr>
+<tr><td>Pedal</td><td>25 mm</td><td>Breite des Kupplungspedalrohrs</td></tr>
+<tr><td>Links</td><td>25 mm</td><td class="hyp">Freiraum links neben dem Pedal (Annahme)</td></tr>
+<tr><td>Rechts</td><td>90 mm</td><td class="hyp">Freiraum rechts neben dem Pedal → Halteblech + Schalter hier (Annahme)</td></tr>
+<tr><td>Höhe</td><td>210 mm</td><td>Höhe des Pedals</td></tr>
+<tr><td>Zum Boden</td><td>30 mm</td><td>Abstand Pedal ↔ Boden</td></tr>
+<tr><td>Pedalweg Spitze</td><td>55–60 mm</td><td>oben → ganz getreten</td></tr>
+<tr><td>Pedalweg auf 150 / 120 mm Höhe</td><td>ca. 40 / 32 mm</td><td class="hyp">gerechnet, Drehpunkt am Pedalfuß angenommen → Abstand der Schalter</td></tr>
+</table>
+
+<h2>Noch offen</h2>
+<ul>
+  <li>Abstand Pedalrohr ↔ Rahmenrohr auf Höhe des Gelenkkopfs, <b>Pedal oben</b> und <b>ganz getreten</b> → Länge des Blechs und Lage der Schalter</li>
+  <li class="hyp">Linkes Pedal = Kupplung (Annahme aus dem Foto, Geberzylinder mit Vorratsschlauch)</li>
+  <li class="hyp">Schaltertyp: Rollenhebel, IP67 (Fußraum wird nass) – noch nicht ausgewählt</li>
+</ul>
+
+<script>
+const PIVOT = [300, 410], A_REST = -12, A_PRESS = 12;
+const t = document.getElementById('t');
+const pedal = document.getElementById('pedal');
+const rod = document.getElementById('rod');
+const s1 = document.getElementById('s1'), s2 = document.getElementById('s2');
+function rot(x, y, deg) {
+  const r = deg * Math.PI / 180, dx = x - PIVOT[0], dy = y - PIVOT[1];
+  return [PIVOT[0] + dx * Math.cos(r) - dy * Math.sin(r), PIVOT[1] + dx * Math.sin(r) + dy * Math.cos(r)];
+}
+function update() {
+  const f = t.value / 100, a = A_REST + (A_PRESS - A_REST) * f;
+  pedal.setAttribute('transform', `rotate(${a} ${PIVOT[0]} ${PIVOT[1]})`);
+  const [rx, ry] = rot(300, 250, a);
+  rod.setAttribute('x1', rx); rod.setAttribute('y1', ry);
+  s2.classList.toggle('on', f < 0.08);
+  s1.classList.toggle('on', f > 0.92);
+}
+t.addEventListener('input', update);
+update();
+</script>
+</body>
+</html>

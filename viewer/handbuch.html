@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Speeduino-Handbuch: VR-Modul</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 12px; background: #111; color: #eee; font-size: 16px; line-height: 1.4; max-width: 1000px; }
+  h1 { font-size: 21px; margin: 4px 0 6px; }
+  h2 { font-size: 18px; margin: 26px 0 8px; color: #8cf; border-bottom: 1px solid #333; padding-bottom: 4px; }
+  p, li { color: #ddd; }
+  a { color: #8cf; }
+  .hint { color: #aaa; font-size: 14px; }
+  .warn { background: #3a1414; border-left: 4px solid #e85a5a; padding: 8px 10px; margin: 10px 0; font-size: 15px; }
+  .note { background: #1a2a3a; border-left: 4px solid #6ab0ff; padding: 8px 10px; margin: 10px 0; font-size: 15px; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; margin: 6px 0; }
+  th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid #2a2a2a; vertical-align: top; }
+  th { color: #8cf; font-weight: 600; }
+  tr.me td { background: #1e2d1e; }
+  .btn { display: inline-block; background: #2a6; color: #fff; padding: 10px 14px; border-radius: 8px; text-decoration: none; margin: 4px 6px 4px 0; }
+  figure { margin: 12px 0 18px; }
+  figure img { width: 100%; height: auto; border-radius: 6px; background: #fff; }
+  figcaption { color: #aaa; font-size: 14px; margin-top: 4px; }
+  ul { padding-left: 20px; }
+</style>
+</head>
+<body>
+<h1>Speeduino-Handbuch: das VR-Modul für den Kurbelsensor</h1>
+<p class="hint">Quelle: Speeduino Manual, Stand 08/04/25 (<a href="https://speeduino.com/Speeduino_manual.pdf">speeduino.com/Speeduino_manual.pdf</a>). Die Seiten unten sind direkt aus dem PDF gerendert. <b>Seitenzahlen:</b> „PDF-Seite" ist die Seite im PDF-Reader, die gedruckte Zahl im Handbuch ist um 1 kleiner.</p>
+
+<p>
+  <a class="btn" href="downloads/Speeduino_Manual_2025-08-04.pdf">Ganzes Handbuch (PDF, lokale Kopie)</a>
+  <a class="btn" href="downloads/Speeduino_Manual_2025-08-04.pdf#page=150">Direkt zu den Jumpern (PDF-Seite 150)</a>
+</p>
+
+<h2>Das Wichtigste auf Deutsch</h2>
+<ul>
+<li><b>Der VR-Wandler ist beim v0.4 optional und nicht auf dem Board fest eingebaut.</b> Das Board hat nur einen Steckplatz („Optional VR conditioner mount on crank and cam inputs"). Bei einem VR-Kurbelsensor braucht das Board einen zusätzlichen VR-Wandler. Passend ist laut Handbuch das Dual-VR-Modul von JBPerf (nicht mehr erhältlich, aus der Teileliste nachbaubar) oder das offizielle VR-Board aus dem Speeduino-Shop. Andere Wandler funktionieren vermutlich, sind aber nicht alle geprüft (PDF-Seite 149 und 150).</li>
+<li><b>Der Wandler gehört in den Sockel „IC3" (Trig Cond Socket).</b> Das ist meine Lesart des Schaltplans v0.4.3d, im Handbuch steht der Name nicht. Ob bei dir ein Modul steckt, ist nicht bekannt.</li>
+<li><b>Jumper für einen VR-Kurbelsensor:</b> JP2 auf <b>VR/TSC</b>, JP4 <b>aus</b> (kein 1-kΩ-Pullup). JP3 und JP5 gehören zur Nocke (PDF-Seite 150 und 151).</li>
+<li class="warn" style="list-style:none;margin-left:-20px"><b>Gefahr laut Handbuch:</b> Ein VR-Sensor mit geschlossenem „Direct"-Jumper (JP2 oder JP3) kann den Mikroprozessor beschädigen. Wenn du den Sensortyp nicht sicher kennst, nicht anschließen.</li>
+<li><b>Trigger-Flanke in TunerStudio:</b> Wandler auf Basis MAX9926 oder LM-Chips (auch Dropbear-Einheiten): <b>RISING</b>. DSC-Wandler: <b>FALLING</b> (PDF-Seite 42).</li>
+<li><b>Missing Tooth in TunerStudio:</b> Primary base teeth = Zahl der Zähne ohne Lücke (60), Missing teeth = 2, Trigger-Winkel = Winkel in Grad nach OT, bei dem der erste Zahn nach der Lücke am Sensor steht. Mit einem Zündlicht kontrollieren (PDF-Seiten 42, 120, 121).</li>
+<li><b>12 V ist nicht im 40-Pin-Stecker:</b> Der v0.4 hat einen Stecker für alle Ein- und Ausgänge, „excluding 12 V power". Die Versorgung läuft über einen eigenen Anschluss (PDF-Seite 144).</li>
+</ul>
+
+<h2>Jumper für deinen Fall</h2>
+<table>
+<tr><th>Kurbel</th><th>Nocke</th><th>JP2</th><th>JP3</th><th>JP4</th><th>JP5</th></tr>
+<tr class="me"><td><b>VR (deiner)</b></td><td>keine</td><td><b>VR/TSC</b></td><td>Off</td><td><b>Off</b></td><td>Off</td></tr>
+<tr class="me"><td><b>VR (deiner)</b></td><td>Hall (später)</td><td><b>VR/TSC</b></td><td>Hall/Direct</td><td><b>Off</b></td><td>On</td></tr>
+<tr><td>Hall</td><td>keine</td><td>Hall/Direct</td><td>Off</td><td>On</td><td>Off</td></tr>
+<tr><td>Hall</td><td>Hall</td><td>Hall/Direct</td><td>Hall/Direct</td><td>On</td><td>On</td></tr>
+</table>
+<p class="hint">Aus der Jumper-Tabelle auf PDF-Seite 150 und 151. Grün hinterlegt sind die Zeilen für deinen induktiven Kurbelsensor. Welche Jumperstellung auf deinem Board „VR/TSC" entspricht, muss am Board nachgesehen werden (Beschriftung), das ist im Handbuch nicht geklärt.</p>
+
+<div class="note"><b>Beachte beim Umrechnen der Pins:</b> Das Handbuch zählt die IDC-Pins gegen den Uhrzeigersinn, dein Adapter und der Schaltplan zählen ungerade/gerade. Die Kurbelpins heißen im Handbuch also anders (Adapter-Pin 32 = Handbuch 25, Pin 28 = 27, Pin 36 = 23). Umrechnung steht auf der <a href="verkabelung.html">Verkabelungsseite</a>.</div>
+
+<h2>Die passenden Handbuchseiten</h2>
+
+<figure>
+  <a href="downloads/Speeduino_Manual_2025-08-04.pdf#page=144"><img src="handbuch/seite-144-144.png" alt="Handbuch PDF-Seite 144" loading="lazy"></a>
+  <figcaption>PDF-Seite 144: v0.4 Board, Überblick (ein 40-Pin-Stecker für alle IO ohne 12 V, optionaler VR-Wandler an Kurbel und Nocke)</figcaption>
+</figure>
+
+<figure>
+  <a href="downloads/Speeduino_Manual_2025-08-04.pdf#page=149"><img src="handbuch/seite-149-149.png" alt="Handbuch PDF-Seite 149" loading="lazy"></a>
+  <figcaption>PDF-Seite 149: Standardbelegung der Ausgänge und „Optional Components": Ein VR-Kurbelsensor braucht einen VR-Wandler</figcaption>
+</figure>
+
+<figure>
+  <a href="downloads/Speeduino_Manual_2025-08-04.pdf#page=150"><img src="handbuch/seite-150-150.png" alt="Handbuch PDF-Seite 150" loading="lazy"></a>
+  <figcaption>PDF-Seite 150: Jumper JP1 bis JP5, Warnung zum „Direct"-Jumper, Beginn der Jumper-Tabelle</figcaption>
+</figure>
+
+<figure>
+  <a href="downloads/Speeduino_Manual_2025-08-04.pdf#page=151"><img src="handbuch/seite-151-151.png" alt="Handbuch PDF-Seite 151" loading="lazy"></a>
+  <figcaption>PDF-Seite 151: Rest der Jumper-Tabelle, Hinweis zum 40-Pin-Anschluss (kein 80-adriges Kabel verwenden) und Board-Revisionen</figcaption>
+</figure>
+
+<figure>
+  <a href="downloads/Speeduino_Manual_2025-08-04.pdf#page=42"><img src="handbuch/seite-42-042.png" alt="Handbuch PDF-Seite 42" loading="lazy"></a>
+  <figcaption>PDF-Seite 42: Trigger-Einstellungen in TunerStudio (Trigger-Winkel, Trigger-Flanke je nach VR-Wandler, Trigger-Filter, Re-sync every cycle)</figcaption>
+</figure>
+
+<figure>
+  <a href="downloads/Speeduino_Manual_2025-08-04.pdf#page=120"><img src="handbuch/seite-120-120.png" alt="Handbuch PDF-Seite 120" loading="lazy"></a>
+  <figcaption>PDF-Seite 120: Missing-Tooth-Muster in TunerStudio (Primary base teeth, Missing teeth, Trigger angle)</figcaption>
+</figure>
+
+<figure>
+  <a href="downloads/Speeduino_Manual_2025-08-04.pdf#page=121"><img src="handbuch/seite-121-121.png" alt="Handbuch PDF-Seite 121" loading="lazy"></a>
+  <figcaption>PDF-Seite 121: Trigger-Winkel bestimmen in drei Schritten, Sequential-Betrieb mit Nockensignal</figcaption>
+</figure>
+
+<p class="hint">Das Handbuch ist ein Open-Source-Dokument des Speeduino-Projekts. Die Kopie auf dieser Seite liegt nur lokal im Heimnetz zum Nachschlagen.</p>
+</body>
+</html>
