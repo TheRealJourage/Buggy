@@ -44,6 +44,8 @@ genannten Datei; andere Notizen und Memory verlinken, statt zu wiederholen.
   - Lüfter RIDEX 508R0028, PWM vom Relaisbox-Controller (Speeduino-Mega kann kein PWM, D47 nur Ein/Aus).
   - Ausgleichsbehälter nur am Kühlernippel. Front-Lampen LED außer Zusatz-Fernlicht. X1-Belegung wie gecrimpt 2026-10-19.
   - Pi ist die Brücke Speeduino ↔ CAN (Variante A). Heck-Controller = Relaisbox-Controller.
+  - ABS an Kl. 15 (X2). Hub vorn über die kleine 5-V-Leitung aus dem Heck (große Schiene nur per Dioden-ODER parallel), X1/8 nicht für den Hub.
+  - Hupe = Drucklufthorn, Megafon zusätzlich; R28-Horn für die Abnahme offen. Hauptschalter-Seite (Plus/Minus) bewusst offen, nicht nachfragen.
 - Eigene Vorschläge heißen **Vorschlag Claude** und kommen nicht in „Offen"-Listen, solange der User sie nicht aufgreift.
 - Unsicheres heißt **Hypothese**. Sicherheitsrelevante Zahlen (Querschnitt, Sicherung, Druck, Kraft, Strom) nur mit Quelle.
 - Beim Durchsprechen von Funktionen nur fragen, was Leitung, Stecker, Sicherung oder Controller ändert. Software-Belegungen nicht neu diskutieren.
