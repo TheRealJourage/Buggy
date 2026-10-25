@@ -3,3 +3,5 @@ __pycache__/
 viewer/downloads/
 viewer/handbuch/
 .immich-key
+# io_check run logs
+srcTest/SteeringControl/tools/logs/
