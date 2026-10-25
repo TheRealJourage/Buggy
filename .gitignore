@@ -2,3 +2,4 @@ __pycache__/
 # Third-party manual (PDF + page renders) and generated harness copies, served by the viewer only
 viewer/downloads/
 viewer/handbuch/
+.immich-key
