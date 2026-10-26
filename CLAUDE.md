@@ -21,6 +21,7 @@ genannten Datei; andere Notizen und Memory verlinken, statt zu wiederholen.
 | Pneumatik: Logik, Messwerte, Airtec-Liste | `Druckluftanlage.md`; Mechanik/Beschaffung `Zylinderbox.md` |
 | Kühlung K1–K14, L1–L5 | `Kühlkreislauf.md` |
 | Speeduino-Pins | `Speeduino/Verkabelung.md` + `viewer/verkabelung.html` |
+| Speeduino-Tune (TunerStudio, Startversuch) | `Speeduino/Start-Tune.md`; Tune-Dateien `Speeduino/BuggyVR6/` |
 | Lenkrad (LIN, Versorgung, Schlüssel) | `SteeringControl/SteeringControl.md` |
 | Vorhandene Teile / Controller | `Teile-Bestand.md` / `Controller-Inventar.md` |
 | Golf-3-Elektrik (verbaut) | `ABS.md`, `Aussenspiegel.md` |
