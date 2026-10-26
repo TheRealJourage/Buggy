@@ -147,7 +147,7 @@
 <p class="tabs">
   <button id="bSoll" class="on">Soll-Plan (neu)</button><button id="bIst">Ist-Zustand (jetzt)</button>
 </p>
-<p class="hint">Mitte: die 40 Pins des Adapters im Originallayout (2 × 20, links die ungeraden, rechts die geraden Pins). Links und rechts davon die Stecker mit ihren Adern. Adern, die vom anderen Pin-Streifen kommen, laufen oben oder unten um den Adapter herum. Linienfarbe = Aderfarbe, dick gestrichelt mit „NEU" = neue Ader. Tippen oder mit der Maus über einen Stecker oder Pin hebt seine Adern hervor. Auf dem Handy seitlich wischen.</p>
+<p class="hint">Mitte: die 40 Pins des Adapters im Originallayout (2 × 20, links die ungeraden, rechts die geraden Pins). Links und rechts davon die Stecker mit ihren Adern. Adern, die vom anderen Pin-Streifen kommen, laufen oben oder unten um den Adapter herum. Linienfarbe = Aderfarbe, dick gestrichelt mit „NEU" = neue Ader. Tippen oder mit der Maus über einen Stecker oder Pin hebt seine Adern hervor. Auf dem Handy seitlich wischen. Unter dem Adapter: Stiftleiste J5 auf dem Board (nicht am Adapter) für den Geschwindigkeitsgeber.</p>
 <p class="hint"><b>Zählweise der Pins:</b> Die Zeichnung zählt wie der Schaltplan und dein Adapter (ungerade/gerade, Pin 1 und 2 nebeneinander). Das Handbuch nennt „IDC Pin" in anderer Zählweise (gegen den Uhrzeigersinn). Umrechnung Handbuch → Adapter: bis 20 gilt 2h−1, ab 21 gilt 2×(41−h). Beispiel: Handbuch „VVT IDC 38" ist Adapter-Pin 6. Das passt bei allen sieben Funktionen, die ich verglichen habe (Boost, VVT, Idle 1 und 2, Pumpe, Lüfter, Tacho).</p>
 <p class="legend">
   <span><span class="badge b-fix">FERTIG</span> nicht anfassen</span>
@@ -211,6 +211,16 @@
 <li>Kupplungsschalter: Signal → Pin 35 (gelb), zweiter Pol an Fahrzeugmasse (Hypothese: Schalter nach Masse). Noch nicht vorhanden, Ader parken.</li>
 </ul>
 
+<h3>Geschwindigkeitsgeber (G22) – Hall, 3-pol, am Getriebe, NEU</h3>
+<ul>
+<li><b>Nicht am 40-Pin-Adapter.</b> Der Geschwindigkeitseingang (VSS) ist Mega D20, die Firmware nimmt beim v0.4 standardmäßig Pin 20 (<code>pinMapping.cpp</code>, <code>pinVSS = 20</code>). Im v0.4.3d-Schaltplan (<code>proto.sch</code>) liegt D20 auf der <b>4-poligen Stiftleiste J5</b> (2,54 mm) im Proto-Bereich, zusammen mit D21, A9 und A10. Auf dem Board sitzen schon 1 kΩ Pull-up nach 5 V und 100 nF gegen Masse, aber kein Vorwiderstand und keine Schutzdiode.</li>
+<li>Am Board prüfen: Revision v0.4.3d? J5 bestückt? Welcher J5-Pin ist VSS (mit dem Durchgangsprüfer von D20 am Mega aus suchen)?</li>
+<li>Leitungen, Vorschlag: G22 Pin 2 (Signal) → <b>neue Ader zu J5/VSS</b>. G22 Pin 1 → +12 V Kl. 15 mit Sicherung (bei VW Zünd-Plus). G22 Pin 3 → Masse am Motorblock, gleicher Punkt wie Pin 36. Belegung aus dem VW-Stromlaufplan Golf 3 VR6, am Geber nicht geprüft.</li>
+<li><b>5 V als Versorgung:</b> nicht belegt, VW versorgt mit 12 V. Die 5 V von Pin 25/26 bleiben für die Sensoren.</li>
+<li><b>Vor dem Anschließen messen:</b> Pin 1 an 12 V, Pin 3 an Masse, Rad drehen, Pin 2 gegen Masse, ohne und mit 4,7 kΩ nach 5 V. Open Collector → direkt an J5, <b>ohne Vorwiderstand</b> (mit dem 1-kΩ-Pull-up auf dem Board würde Low auf etwa 2,5 V steigen). Liefert Pin 2 selbst 12 V → <b>nicht direkt</b>, dann Pegelwandler (Transistor oder Optokoppler), nach der Messung festlegen.</li>
+<li>TunerStudio: <code>vssMode</code> = Pulses per KM, <code>vssPin</code> = Board Default (ältere Firmware hat das Feld evtl. nicht, D20 bleibt trotzdem Standard), <code>vssPulsesPerKm</code> Startwert ≈ 6769 / Abrollumfang in m (Annahme 4 Impulse je Geberumdrehung), dann auf bekannter Strecke einmessen, <code>vssSmoothing</code> 50.</li>
+</ul>
+
 <h2>6. Reihenfolge beim Umbau</h2>
 <ol>
 <li>Batterie ab, ECU abstecken.</li>
@@ -232,6 +242,7 @@
 <li>Wideband-Controller: Typ; Kupplungsschalter: noch keiner; 12 V für Injectors, Zündspulen und das Board: Quelle (Kl. 15, Relais, Sicherung)</li>
 <li>Dritter Temperatursensor („Dings-Temperatur"); Kühlmittel- und Ansaugluft-Sensor selbst</li>
 <li>Nockenversteller-Ventil: Strombelastbarkeit des HC-2-Ausgangs und Freilaufdiode</li>
+<li>Geschwindigkeitsgeber G22: Ausgangsstufe (Open Collector oder 12 V), J5 bestückt und welcher J5-Pin VSS ist, Impulse/km</li>
 </ul>
 
 <script>
@@ -292,8 +303,14 @@ const SOLL = FIXED.concat([
  {id:'clutch', side:'L', st:'later', name:'Kupplungsschalter', sub:'nicht am Motor · offen', rows:[
    {pin:35, lab:'Signal · gelb (parken)', c:'gelb', later:true}], notes:['zweiter Pol an Fahrzeugmasse (Hypothese)']},
  {id:'wide', side:'R', st:'ext', name:'Wideband-Controller', sub:'offene Enden rot/grün/schwarz', rows:[
-   {pin:40, lab:'Analog · blau ↔ grün', c:'blau'}], notes:['rot → +12 V geschaltet, Sicherung', 'schwarz → Masse wie Pin 36']}
+   {pin:40, lab:'Analog · blau ↔ grün', c:'blau'}], notes:['rot → +12 V geschaltet, Sicherung', 'schwarz → Masse wie Pin 36']},
+ {id:'vss', side:'R', st:'new', name:'Geschwindigkeit G22', sub:'Hall, 3-pol · 191 919 149 E · am Getriebe', rows:[
+   {pin:'J5-VSS', lab:'G22 Pin 2 · Signal', c:'neu', isnew:true}],
+   notes:['Pin 1 → +12 V Kl. 15, Sicherung', 'Pin 3 → Masse Motorblock (wie Pin 36)',
+          'J5 am Board, nicht am Adapter', 'erst messen: nur Open Collector direkt', 'kein Vorwiderstand, nie 12 V an J5']}
 ]);
+// Pins outside the IDC40: header J5 in the proto area of v0.4.3d (proto.sch). Pin order on the header not verified.
+const J5 = {'J5-VSS':{i:0, t:'VSS = D20 (1 kΩ ↑5 V, 100 nF)'}, 'J5-D21':{i:1, t:'D21'}, 'J5-A9':{i:2, t:'A9 (470 Ω, 100 nF)'}, 'J5-A10':{i:3, t:'A10 (470 Ω, 100 nF)'}};
 
 const NS = 'http://www.w3.org/2000/svg';
 const svg = document.getElementById('plan');
@@ -305,10 +322,12 @@ function el(tag, attrs, text, parent) {
   return e;
 }
 const ROW = 34, TOP = 96, LCX = 320, RCX = 490, PW = 150, LBX = 10, BW = 240, RBX = 710;
-const pinCol = n => (n % 2 ? 'L' : 'R');
+let j5Top = 0;
+const isJ5 = n => typeof n === 'string';
+const pinCol = n => (isJ5(n) ? 'R' : n % 2 ? 'L' : 'R');
 const pinRow = n => Math.ceil(n / 2) - 1;
-const pinY = n => TOP + pinRow(n) * ROW + ROW / 2;
-const pinEdge = n => (n % 2 ? LCX : RCX + PW);
+const pinY = n => (isJ5(n) ? j5Top + J5[n].i * ROW + ROW / 2 : TOP + pinRow(n) * ROW + ROW / 2);
+const pinEdge = n => (isJ5(n) ? RCX + PW : n % 2 ? LCX : RCX + PW);
 let pinned = null;
 
 function render(conns) {
@@ -317,6 +336,9 @@ function render(conns) {
   const owners = {};
   conns.forEach(c => { c.rows.sort((a, b) => a.pin - b.pin); c.rows.forEach(r => (owners[r.pin] = owners[r.pin] || []).push(c)); });
   conns.forEach(c => { c.h = 42 + c.rows.length * 20 + (c.notes ? c.notes.length * 14 + 6 : 0); });
+  const hasJ5 = conns.some(c => c.rows.some(r => isJ5(r.pin)));
+  const botCross = conns.reduce((s, c) => s + c.rows.filter(r => !isJ5(r.pin) && pinCol(r.pin) !== c.side && pinRow(r.pin) >= 10).length, 0);
+  j5Top = TOP + 20 * ROW + 14 + 9 * botCross + 40;
   ['L', 'R'].forEach(side => {
     const list = conns.filter(c => c.side === side);
     list.forEach(c => { c.want = c.rows.reduce((s, r) => s + pinY(r.pin), 0) / c.rows.length - c.h / 2; });
@@ -342,7 +364,7 @@ function render(conns) {
       wires.push(w);
     });
   });
-  const H = Math.max(headBottom + 14 + 9 * botLane + 20, ...conns.map(c => c.y + c.h)) + 20;
+  const H = Math.max(headBottom + 14 + 9 * botLane + 20, hasJ5 ? j5Top + 4 * ROW + 24 : 0, ...conns.map(c => c.y + c.h)) + 20;
   el('text', {x: (LCX + RCX + PW) / 2, y: 28, fill: '#eee', 'font-size': 16, 'font-weight': 700, 'text-anchor': 'middle'}, 'Speeduino');
   el('text', {x: (LCX + RCX + PW) / 2, y: 46, fill: '#999', 'font-size': 12, 'text-anchor': 'middle'}, 'IDC40-Adapter (2 × 20)');
   el('text', {x: LCX + PW / 2, y: TOP - 4, fill: '#888', 'font-size': 11, 'text-anchor': 'middle'}, 'ungerade: 1, 3 … 39');
@@ -368,6 +390,17 @@ function render(conns) {
     el('text', {x: px + 9, y: y + 19, fill: os ? '#fff' : '#555', 'font-size': 13, 'font-weight': 700}, n, g);
     el('text', {x: px + 36, y: y + 19, fill: os ? '#ddd' : '#555', 'font-size': 11.5}, PIN[n], g);
   }
+  if (hasJ5) {
+    el('text', {x: RCX + PW, y: j5Top - 22, fill: '#eee', 'font-size': 13, 'font-weight': 700, 'text-anchor': 'end'}, 'Stiftleiste J5 auf dem Board');
+    el('text', {x: RCX + PW, y: j5Top - 7, fill: '#999', 'font-size': 11, 'text-anchor': 'end'}, 'nicht am Adapter · Reihenfolge am Board prüfen');
+    for (const k in J5) {
+      const os = owners[k], y = j5Top + J5[k].i * ROW + 2;
+      const g = el('g', os ? {'data-c': os.map(o => o.id).join(' ')} : {});
+      el('rect', {x: RCX - 70, y, width: PW + 70, height: ROW - 4, rx: 5, fill: os ? '#222' : '#161616',
+        stroke: os ? ST[os[0].st].c : '#2c2c2c', 'stroke-width': os ? 2 : 1}, null, g);
+      el('text', {x: RCX - 61, y: y + 19, fill: os ? '#ddd' : '#666', 'font-size': 11.5}, J5[k].t, g);
+    }
+  }
   conns.forEach(c => {
     const g = el('g', {'data-c': c.id});
     el('rect', {x: c.x, y: c.y, width: BW, height: c.h, rx: 8, fill: '#1e1e1e', stroke: ST[c.st].c, 'stroke-width': c.st === 'new' ? 3 : 2}, null, g);
@@ -380,7 +413,7 @@ function render(conns) {
       const ry = c.y + 42 + i * 20;
       el('circle', {cx: c.x + 16, cy: ry + 10, r: 5, fill: WC[r.c]}, null, g);
       el('text', {x: c.x + 28, y: ry + 14, fill: r.isnew ? '#ffb27a' : '#eee', 'font-size': 12, 'font-weight': r.isnew ? 700 : 400},
-         r.lab + '  (Pin ' + r.pin + ')', g);
+         r.lab + (isJ5(r.pin) ? '  (J5 · VSS)' : '  (Pin ' + r.pin + ')'), g);
     });
     (c.notes || []).forEach((t, i) => el('text', {x: c.x + 10, y: c.y + 42 + c.rows.length * 20 + 14 + i * 14, fill: '#999', 'font-size': 11}, t, g));
   });
@@ -434,7 +467,8 @@ const CHECKS = [
  'TunerStudio: TPS kalibriert, MAP plausibel, Sensortyp = Board-Sensor',
  'VR-Modul eingebaut: Pin 1 zu IC3 geprüft, JP2 auf VR, JP4 aus, Flanke RISING',
  'TunerStudio: Drehzahl beim Durchdrehen sichtbar, Trigger-Winkel mit Zündlicht geprüft',
- 'Nockensensor: Pinbelegung und 5 V geklärt (später anschließen: 34/26/36)'
+ 'Nockensensor: Pinbelegung und 5 V geklärt (später anschließen: 34/26/36)',
+ 'G22: Ausgang gemessen (Open Collector?), J5-Pin VSS am Board gefunden, Signal an J5, 12 V Kl. 15 + Masse Motorblock'
 ];
 const box = document.getElementById('checks');
 CHECKS.forEach((t, i) => {
