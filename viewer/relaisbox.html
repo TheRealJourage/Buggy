@@ -23,9 +23,8 @@
   <b>Relaisbox – Entwurf v2</b>
   <span>Deckel:</span>
   <button data-lid="closed" class="active">alle zu</button>
-  <button data-lid="0">hinten auf</button>
-  <button data-lid="1">Mitte auf</button>
-  <button data-lid="2">vorn auf</button>
+  <button data-lid="0">Lastseite auf</button>
+  <button data-lid="1">Steuerseite auf</button>
   <button data-lid="all">alle ab</button>
   <label><input type="checkbox" id="walls" checked> Wände</label>
   <label><input type="checkbox" id="beams" checked> Sitzquerbalken</label>
@@ -36,9 +35,9 @@
   Box außen <b>500 × 430 × 115 mm</b> (L × B × H, User). Zwei Kanäle längs (User):
   <b>Lastseite</b> = vorhandener Relaisträger (ca. 36 Relais links/rechts, Sicherungen mittig, 12-V-Schiene an einem Ende;
   Weg Schiene → Relais → Sicherung → Stecker, festgelegt) · <b>Steuerseite</b> = Controller, EPB-Endstufen, Kleinteile.<br>
-  Deckel: drei Felder, getrennt durch Stege unter den zwei Sitzquerbalken (Vorschlag Claude); jeder Deckel mit Dichtung und Schnellverschlüssen, senkrecht abnehmbar.<br>
+  Deckel: <b>zwei Deckel links/rechts</b> über die volle Länge (User 2026-10-29), Lastseite links; Längssteg in der Mitte als Dichtfläche. Dichtung und Verschluss je Deckel: Vorschlag Claude.<br>
   <span class="warn">Geschätzt, nicht gemessen: Balkenlage (10 cm vom Heck, 3 cm breit, 25 cm Lücke), Trägerbreite (≈ halbe Box), Relais-Raster, alle Teile der Steuerseite.
-  Offen: welche Seite Last/Steuer, Abstand Balken–Box, Lage des Handbremsseils, Stecker-Lage.</span>
+  Offen: Abstand Balken–Box, Lage des Handbremsseils, Stecker-Lage.</span>
 </div>
 <div id="hover"></div>
 <script type="module">
@@ -50,7 +49,6 @@ const L = 500, W = 430, H = 115, T = 3, LID = 5, FRAME = 20;
 const REAR = -L / 2;
 // seat cross beams, estimate user 2026-10-29: 100 mm from rear edge, 30 mm wide, 250 mm gap
 const BEAMS = [[REAR + 100, REAR + 130], [REAR + 380, REAR + 410]];
-const FIELDS = [[REAR + T, BEAMS[0][0] + 15], [BEAMS[0][0] + 15, BEAMS[1][0] + 15], [BEAMS[1][0] + 15, L / 2 - T]];
 const IW = W - 2 * T, LOAD_W = IW / 2 - 5;
 const yLoad = IW / 4, yCtrl = -IW / 4;
 
@@ -91,22 +89,21 @@ box('Seitenwand rechts', L, T, H - LID, 0, -W / 2 + T / 2, 0, shell, { parent: w
 box('Stirnwand vorn (Fahrtrichtung)', T, W, H - LID, L / 2 - T / 2, 0, 0, shell, { parent: walls, opacity: .5 });
 box('Stirnwand hinten (Heck)', T, W, H - LID, -L / 2 + T / 2, 0, 0, shell, { parent: walls, opacity: .5 });
 
-// top frame + webs under the seat beams
+// top frame + longitudinal web
 const top = H - LID - 6, frame = 0x8a8f96;
 box('Rahmen oben (Dichtfläche)', L, FRAME, 6, 0, W / 2 - FRAME / 2, top, frame, { metal: true });
 box('Rahmen oben (Dichtfläche)', L, FRAME, 6, 0, -W / 2 + FRAME / 2, top, frame, { metal: true });
 box('Rahmen oben (Dichtfläche)', FRAME, W, 6, L / 2 - FRAME / 2, 0, top, frame, { metal: true });
 box('Rahmen oben (Dichtfläche)', FRAME, W, 6, -L / 2 + FRAME / 2, 0, top, frame, { metal: true });
-for (const [b0, b1] of BEAMS) box('Steg unter dem Sitzquerbalken (Vorschlag Claude)', b1 - b0, W, 6, (b0 + b1) / 2, 0, top, frame, { metal: true });
+box('Längssteg Mitte (trennt Last- und Steuerseite, Dichtfläche beider Deckel)', L, FRAME, 6, 0, 0, top, frame, { metal: true });
 
-// lids, each spans its field and rests on frame/webs
-const lids = FIELDS.map(([x0, x1], i) => {
+// two lids split left/right (user 2026-10-29): load side left, control side right
+const lids = [['Lastseite (links)', W / 4], ['Steuerseite (rechts)', -W / 4]].map(([nm, cy]) => {
   const g = new THREE.Group();
-  const cx = (x0 + x1) / 2, lx = x1 - x0;
-  const nm = ['hinten', 'Mitte', 'vorn'][i];
-  box(`Deckel ${nm} (${Math.round(lx)} mm, eigene Dichtung, unverlierbare Schrauben / Vierteldrehverschlüsse)`, lx - 4, W, LID, cx, 0, H - LID, 0x4a5560, { parent: g, metal: true, opacity: .8 });
-  for (const sx of [-1, 1]) for (const sy of [-1, 1])
-    box('Schnellverschluss (Typ offen)', 12, 12, 3, cx + sx * (lx / 2 - 12), sy * (W / 2 - 12), H, 0xd0b040, { parent: g, metal: true });
+  const ly = W / 2 - 2;
+  box(`Deckel ${nm}, 500 × ${Math.round(ly)} mm, eigene Dichtung, unverlierbare Schrauben / Vierteldrehverschlüsse`, L, ly, LID, 0, cy, H - LID, 0x4a5560, { parent: g, metal: true, opacity: .8 });
+  for (const sx of [-1, 0, 1]) for (const sy of [-1, 1])
+    box('Schnellverschluss (Typ offen)', 12, 12, 3, sx * (L / 2 - 12), cy + sy * (ly / 2 - 12), H, 0xd0b040, { parent: g, metal: true });
   scene.add(g);
   return g;
 });
