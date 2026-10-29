@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Relaisbox (Entwurf v2)</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #111; color: #ddd; font-family: system-ui, sans-serif; overflow: hidden; }
+  #bar { position: fixed; top: 0; left: 0; right: 0; padding: 8px 12px; background: #151517cc; display: flex; gap: 12px; align-items: center; font-size: 14px; z-index: 2; flex-wrap: wrap; }
+  #bar button { background: #333; color: #ddd; border: 1px solid #555; padding: 4px 9px; cursor: pointer; border-radius: 3px; }
+  #bar button.active { background: #4f6b8a; color: #fff; }
+  #bar .hint { color: #888; }
+  #info { position: fixed; bottom: 10px; left: 10px; max-width: 440px; padding: 10px 12px; background: #000a; border-radius: 6px; font-size: 13px; line-height: 1.4; }
+  #info h3 { margin: 0 0 4px; font-size: 12px; color: #8ab; text-transform: uppercase; letter-spacing: .05em; }
+  #info .warn { color: #fc6; }
+  #hover { position: fixed; pointer-events: none; padding: 4px 7px; background: #000d; border: 1px solid #555; border-radius: 4px; font-size: 12px; display: none; z-index: 3; }
+  canvas { display: block; }
+</style>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.js" } }</script>
+</head>
+<body>
+<div id="bar">
+  <b>Relaisbox – Entwurf v2</b>
+  <span>Deckel:</span>
+  <button data-lid="closed" class="active">alle zu</button>
+  <button data-lid="0">hinten auf</button>
+  <button data-lid="1">Mitte auf</button>
+  <button data-lid="2">vorn auf</button>
+  <button data-lid="all">alle ab</button>
+  <label><input type="checkbox" id="walls" checked> Wände</label>
+  <label><input type="checkbox" id="beams" checked> Sitzquerbalken</label>
+  <span class="hint">Maus: drehen · Rad: zoomen · rechts: verschieben · über Teile fahren = Name</span>
+</div>
+<div id="info">
+  <h3>Stand 2026-10-29 · Notiz Vault Buggy/Relaisbox.md</h3>
+  Box außen <b>500 × 430 × 115 mm</b> (L × B × H, User). Zwei Kanäle längs (User):
+  <b>Lastseite</b> = vorhandener Relaisträger (ca. 36 Relais links/rechts, Sicherungen mittig, 12-V-Schiene an einem Ende;
+  Weg Schiene → Relais → Sicherung → Stecker, festgelegt) · <b>Steuerseite</b> = Controller, EPB-Endstufen, Kleinteile.<br>
+  Deckel: drei Felder, getrennt durch Stege unter den zwei Sitzquerbalken (Vorschlag Claude); jeder Deckel mit Dichtung und Schnellverschlüssen, senkrecht abnehmbar.<br>
+  <span class="warn">Geschätzt, nicht gemessen: Balkenlage (10 cm vom Heck, 3 cm breit, 25 cm Lücke), Trägerbreite (≈ halbe Box), Relais-Raster, alle Teile der Steuerseite.
+  Offen: welche Seite Last/Steuer, Abstand Balken–Box, Lage des Handbremsseils, Stecker-Lage.</span>
+</div>
+<div id="hover"></div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from './vendor/OrbitControls.js';
+
+// x = driving direction (+x front, -x rear), y = left(+)/right(-), z = up; mm
+const L = 500, W = 430, H = 115, T = 3, LID = 5, FRAME = 20;
+const REAR = -L / 2;
+// seat cross beams, estimate user 2026-10-29: 100 mm from rear edge, 30 mm wide, 250 mm gap
+const BEAMS = [[REAR + 100, REAR + 130], [REAR + 380, REAR + 410]];
+const FIELDS = [[REAR + T, BEAMS[0][0] + 15], [BEAMS[0][0] + 15, BEAMS[1][0] + 15], [BEAMS[1][0] + 15, L / 2 - T]];
+const IW = W - 2 * T, LOAD_W = IW / 2 - 5;
+const yLoad = IW / 4, yCtrl = -IW / 4;
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(devicePixelRatio);
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a1c);
+const camera = new THREE.PerspectiveCamera(35, 1, 1, 5000);
+camera.position.set(-700, -820, 720);
+camera.up.set(0, 0, 1);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0, H / 2);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x333344, 1.3));
+const sun = new THREE.DirectionalLight(0xffffff, 2.0);
+sun.position.set(-300, -400, 800);
+scene.add(sun);
+
+const pickables = [];
+function box(name, sx, sy, sz, x, y, z, color, opts = {}) {
+  const mat = new THREE.MeshStandardMaterial({ color, roughness: .7, metalness: opts.metal ? .6 : .05, transparent: !!opts.opacity, opacity: opts.opacity ?? 1 });
+  const m = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), mat);
+  m.position.set(x, y, z + sz / 2);
+  m.add(new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry), new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: .35 })));
+  m.userData.name = name;
+  pickables.push(m);
+  (opts.parent ?? scene).add(m);
+  return m;
+}
+
+// tub
+const walls = new THREE.Group();
+scene.add(walls);
+const shell = 0x6b7a5a;
+box('Boden der Wanne', L, W, T, 0, 0, 0, shell, { parent: walls });
+box('Seitenwand links', L, T, H - LID, 0, W / 2 - T / 2, 0, shell, { parent: walls, opacity: .5 });
+box('Seitenwand rechts', L, T, H - LID, 0, -W / 2 + T / 2, 0, shell, { parent: walls, opacity: .5 });
+box('Stirnwand vorn (Fahrtrichtung)', T, W, H - LID, L / 2 - T / 2, 0, 0, shell, { parent: walls, opacity: .5 });
+box('Stirnwand hinten (Heck)', T, W, H - LID, -L / 2 + T / 2, 0, 0, shell, { parent: walls, opacity: .5 });
+
+// top frame + webs under the seat beams
+const top = H - LID - 6, frame = 0x8a8f96;
+box('Rahmen oben (Dichtfläche)', L, FRAME, 6, 0, W / 2 - FRAME / 2, top, frame, { metal: true });
+box('Rahmen oben (Dichtfläche)', L, FRAME, 6, 0, -W / 2 + FRAME / 2, top, frame, { metal: true });
+box('Rahmen oben (Dichtfläche)', FRAME, W, 6, L / 2 - FRAME / 2, 0, top, frame, { metal: true });
+box('Rahmen oben (Dichtfläche)', FRAME, W, 6, -L / 2 + FRAME / 2, 0, top, frame, { metal: true });
+for (const [b0, b1] of BEAMS) box('Steg unter dem Sitzquerbalken (Vorschlag Claude)', b1 - b0, W, 6, (b0 + b1) / 2, 0, top, frame, { metal: true });
+
+// lids, each spans its field and rests on frame/webs
+const lids = FIELDS.map(([x0, x1], i) => {
+  const g = new THREE.Group();
+  const cx = (x0 + x1) / 2, lx = x1 - x0;
+  const nm = ['hinten', 'Mitte', 'vorn'][i];
+  box(`Deckel ${nm} (${Math.round(lx)} mm, eigene Dichtung, unverlierbare Schrauben / Vierteldrehverschlüsse)`, lx - 4, W, LID, cx, 0, H - LID, 0x4a5560, { parent: g, metal: true, opacity: .8 });
+  for (const sx of [-1, 1]) for (const sy of [-1, 1])
+    box('Schnellverschluss (Typ offen)', 12, 12, 3, cx + sx * (lx / 2 - 12), sy * (W / 2 - 12), H, 0xd0b040, { parent: g, metal: true });
+  scene.add(g);
+  return g;
+});
+
+// seat cross beams (estimate), gap to box unknown
+const beams = new THREE.Group();
+scene.add(beams);
+for (const [b0, b1] of BEAMS)
+  box('Sitzquerbalken 3 cm (Schätzung User 2026-10-29), Abstand zur Box offen', b1 - b0, W + 120, 30, (b0 + b1) / 2, 0, H + 25, 0x9a4040, { parent: beams, metal: true, opacity: .75 });
+
+// handbrake cable below the box, longitudinal position unknown
+const cable = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, W + 160, 12), new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: .8 }));
+cable.position.set(0, 0, -15);
+cable.userData.name = 'Handbremsseil quer unter der Box (beweglich; Lage längs nicht bekannt) – darf die Box nie berühren';
+pickables.push(cable);
+scene.add(cable);
+
+// load side: existing relay carrier
+const floor = T, carrierH = 80, relayTop = 95;
+const loadX0 = REAR + T + 5, loadX1 = L / 2 - T - 5, loadL = loadX1 - loadX0;
+box('Relaisträger (vorhanden): Höhe 80 mm, mit Relais 90–95 mm, Länge per Kabel verstellbar, Breite ≈ halbe Box (geschätzt)', loadL, LOAD_W, 4, (loadX0 + loadX1) / 2, yLoad, floor, 0x5a4a3a);
+box('12-V-Verteilerschiene + dicke Zuleitung (Ende geschätzt)', 30, LOAD_W - 20, 30, loadX0 + 15, yLoad, floor + 4, 0xb05030, { metal: true });
+const relayRow = 18, rX0 = loadX0 + 45, rPitch = (loadL - 55) / relayRow;
+for (const side of [-1, 1]) for (let i = 0; i < relayRow; i++)
+  box('Relais (ca. 36 laut User, Raster hier geschätzt)', rPitch - 3, 40, relayTop - carrierH + 30, rX0 + (i + .5) * rPitch, yLoad + side * (LOAD_W / 2 - 25), floor + carrierH - 30, 0x3c3c3c);
+box('Sicherungsboxen mittig (36 Sicherungen; Anzahl Boxen/Typ offen)', loadL - 55, 70, 40, rX0 + (loadL - 55) / 2, yLoad, floor + 40, 0x2f6fbf);
+
+// control side: placeholders
+const cy = yCtrl;
+box('Relaisbox-Controller (Typ offen, Platzhalter)', 100, 80, 25, -150, cy + 40, floor, 0x2e7d4f);
+box('Speeduino (laut Kabelbaum-Übersicht in der Box; Platz offen, Maße nicht gemessen)', 150, 110, 30, 20, cy + 30, floor, 0x1f5f3f);
+for (let i = 0; i < 2; i++)
+  box('EPB-Endstufe BTS7960 (Vorschlag Claude, Platzhalter)', 50, 50, 30, -170 + i * 65, cy - 60, floor, 0x8a6a2a);
+box('Lüfter-PWM-Stufe (Platzhalter)', 50, 40, 25, -20, cy - 65, floor, 0x8a5fbf);
+box('Bremslicht-Dioden-ODER (2 × 1N5819)', 40, 30, 15, 50, cy - 65, floor, 0xbf5f8a);
+box('200-A-Relais ZL180 (45 × 45 × 45, Teile-Bestand) – Lage offen', 45, 45, 45, 180, cy + 40, floor, 0x777777, { metal: true });
+box('Kleiner 5-V-Wandler 2 A (Lage offen)', 50, 40, 20, 180, cy - 50, floor, 0x666688, { metal: true });
+
+// connectors on front wall + warning switch (positions open)
+const plugs = [['X1 Box ↔ Front (DT 12-pol) – Lage offen', 120], ['X2 – Lage offen', 40], ['X3 – Lage offen', -40], ['X5 – Lage offen', -120]];
+for (const [n, y] of plugs) box(n, 16, 40, 30, L / 2 + 8, y, 40, 0xd06020);
+box('Warnblinkschalter an der Relaisbox (festgelegt 2026-10-23) – Lage offen', 25, 18, 25, 60, -W / 2 - 9, 50, 0xe0c000);
+
+// lid modes
+let mode = 'closed';
+function applyLids() {
+  lids.forEach((g, i) => {
+    g.position.set(0, 0, mode === String(i) ? 120 : 0);
+    g.visible = mode !== 'all';
+  });
+  document.querySelectorAll('[data-lid]').forEach(b => b.classList.toggle('active', b.dataset.lid === mode));
+}
+document.querySelectorAll('[data-lid]').forEach(b => b.onclick = () => { mode = b.dataset.lid; applyLids(); });
+document.getElementById('walls').onchange = e => { walls.visible = e.target.checked; };
+document.getElementById('beams').onchange = e => { beams.visible = e.target.checked; };
+applyLids();
+
+// dimensions + labels
+const dimMat = new THREE.LineBasicMaterial({ color: 0x88ccff });
+function dim(a, b) { scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([a, b]), dimMat)); }
+dim(new THREE.Vector3(-L / 2, -W / 2 - 40, 0), new THREE.Vector3(L / 2, -W / 2 - 40, 0));
+dim(new THREE.Vector3(-L / 2 - 40, -W / 2, 0), new THREE.Vector3(-L / 2 - 40, W / 2, 0));
+dim(new THREE.Vector3(-L / 2, -W / 2 - 40, 0), new THREE.Vector3(-L / 2, -W / 2 - 40, H));
+function label(text, x, y, z, w = 110) {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 64;
+  const ctx = c.getContext('2d'); ctx.fillStyle = '#88ccff'; ctx.font = 'bold 34px system-ui'; ctx.textAlign = 'center'; ctx.fillText(text, 256, 44);
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false }));
+  s.position.set(x, y, z); s.scale.set(w * 2, 28, 1); scene.add(s);
+}
+label('500 (L)', 0, -W / 2 - 60, 0);
+label('430 (B)', -L / 2 - 70, 0, 0);
+label('115 (H)', -L / 2 - 30, -W / 2 - 60, H / 2);
+label('Lastseite', 0, yLoad, H + 70, 90);
+label('Steuerseite', 0, yCtrl, H + 70, 90);
+label('→ Fahrtrichtung', L / 2 + 110, 0, 0, 90);
+
+// hover
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(), hover = document.getElementById('hover');
+renderer.domElement.addEventListener('pointermove', e => {
+  mouse.set(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+  const hit = ray.intersectObjects(pickables.filter(m => m.visible && m.parent.visible), false)[0];
+  if (hit) { hover.style.display = 'block'; hover.style.left = e.clientX + 14 + 'px'; hover.style.top = e.clientY + 10 + 'px'; hover.textContent = hit.object.userData.name; }
+  else hover.style.display = 'none';
+});
+
+function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+</script>
+</body>
+</html>
