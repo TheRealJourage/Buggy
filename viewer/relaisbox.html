@@ -177,7 +177,7 @@ function buildShell(key) {
     lidsG.add(g);
     return g;
   });
-  document.getElementById('open').innerHTML = `<b>${L - 2 * FLANGE} × ${OPEN} mm</b> – der Relaisträger muss hier durchpassen (Breite messen!)`;
+  document.getElementById('open').innerHTML = `<b>${L - 2 * FLANGE} × ${OPEN} mm</b> – Relaisträger ca. 120 × 450 mm passt durch (User 2026-10-30)`;
   document.getElementById('nScrews').textContent = 2 * (xScrews.length * 2 + 4);
   // tub weight: floor + walls + flange + web + centre wall, sheet only
   const area = L * W + 2 * (L + W) * H + 2 * (L + W) * FLANGE + L * WEB + L * H;
@@ -195,15 +195,20 @@ pickables.push(cable);
 beams.add(cable);
 
 // interior placeholders (load side left, control side right)
-const IW = W / 2 - WEB / 2 - 10, yLoad = WEB / 2 + 5 + IW / 2, yCtrl = -yLoad, floor = 2;
-const loadX0 = REAR + 8, loadX1 = L / 2 - 8, loadL = loadX1 - loadX0;
+// relay carrier from photo 2026-10-30: 2 strips x 10 sockets, 300 mm each, ~120 mm wide, ~450 mm incl. bus bar
+const yLoad = WEB / 2 + OPEN / 2, yCtrl = -yLoad, floor = 2;
+const CARRIER_W = 120, STRIP_L = 300, STRIP_W = 40, CARRIER_L = 450;
+const loadX0 = -CARRIER_L / 2, stripX0 = loadX0, stripX1 = loadX0 + STRIP_L;
 const I = (...a) => box(...a, { parent: inside });
-box('Relaisträger (vorhanden): Höhe 80, mit Relais 90–95 mm, Länge per Kabel verstellbar, Breite ≈ halbe Box (geschätzt)', loadL, IW, 4, (loadX0 + loadX1) / 2, yLoad, floor, 0x5a4a3a, { parent: inside });
-box('12-V-Verteilerschiene + dicke Zuleitung (Ende geschätzt)', 30, IW - 20, 30, loadX1 - 15, yLoad, floor + 4, 0xb05030, { parent: inside, metal: true });
-const relayRow = 18, rX0 = loadX0 + 10, rPitch = (loadL - 55) / relayRow;
-for (const side of [-1, 1]) for (let i = 0; i < relayRow; i++)
-  I('Relais (ca. 36 laut User, Raster geschätzt)', rPitch - 3, 40, 45, rX0 + (i + .5) * rPitch, yLoad + side * (IW / 2 - 25), floor + 50, 0x3c3c3c);
-I('Sicherungsboxen mittig (36 Sicherungen; Anzahl Boxen/Typ offen)', loadL - 55, 70, 40, rX0 + (loadL - 55) / 2, yLoad, floor + 40, 0x2f6fbf);
+for (const side of [-1, 1]) {
+  const ys = yLoad + side * (CARRIER_W / 2 - STRIP_W / 2);
+  for (let i = 0; i < 10; i++)
+    I('Relaisleiste (vorhanden): 10 Sockel, Leiste 300 mm (User 2026-10-30), Höhe mit Relais 90–95 mm', STRIP_L / 10 - 2, STRIP_W, 93, stripX0 + (i + .5) * STRIP_L / 10, ys, floor, 0x3c3c3c);
+}
+for (let i = 0; i < 2; i++)
+  I('Sicherungsbox (2 Stück mittig, je ca. 10 Plätze; Maße aus Foto geschätzt)', 120, 35, 40, stripX0 + 80 + i * 140, yLoad, floor, 0x2f6fbf);
+I('12-V-Verteilerschiene am Trägerende, ca. 20 Abgänge (Foto 2026-10-30; welches Ende im Auto offen)', 130, 50, 30, stripX1 + 75, yLoad, floor, 0xb05030, { metal: true });
+I('Steuerleitungs-Stecker (baut der User neu)', 25, 20, 25, stripX1 + 25, yLoad + CARRIER_W / 2 + 15, floor, 0x222222);
 I('Relaisbox-Controller (Typ offen, Platzhalter)', 100, 80, 25, -150, yCtrl + 35, floor, 0x2e7d4f);
 I('Speeduino (laut Kabelbaum-Übersicht in der Box; Platz offen, Maße nicht gemessen)', 150, 110, 30, 20, yCtrl + 20, floor, 0x1f5f3f);
 for (let i = 0; i < 2; i++) I('EPB-Endstufe BTS7960 (Vorschlag Claude, Platzhalter)', 50, 50, 30, -170 + i * 65, yCtrl - 55, floor, 0x8a6a2a);
