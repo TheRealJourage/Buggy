@@ -22,7 +22,8 @@
    "kind": "sw",
    "label": "ZÜNDUNG",
    "cap": true,
-   "led": false
+   "led": false,
+   "lb": false
   },
   {
    "x": -72.0,
@@ -30,7 +31,11 @@
    "kind": "sw",
    "label": "START",
    "cap": true,
-   "led": false
+   "led": false,
+   "lb": true,
+   "thread": 5.449999999999999,
+   "lever": 17.45,
+   "mp": -3.8900000000000006
   },
   {
    "x": -36.0,
@@ -38,7 +43,8 @@
    "kind": "sw",
    "label": "KOMPRESSOR",
    "cap": true,
-   "led": false
+   "led": false,
+   "lb": false
   },
   {
    "x": -36.0,
@@ -46,7 +52,8 @@
    "kind": "sw",
    "label": "12 V FRONT",
    "cap": false,
-   "led": false
+   "led": false,
+   "lb": false
   },
   {
    "x": 0.0,
@@ -54,7 +61,8 @@
    "kind": "sw",
    "label": "WINDE",
    "cap": true,
-   "led": false
+   "led": false,
+   "lb": false
   },
   {
    "x": 0.0,
@@ -62,7 +70,8 @@
    "kind": "sw",
    "label": "12 V SITZ",
    "cap": false,
-   "led": false
+   "led": false,
+   "lb": false
   },
   {
    "x": 36.0,
@@ -70,7 +79,8 @@
    "kind": "sw",
    "label": "SITZHEIZUNG",
    "cap": false,
-   "led": false
+   "led": false,
+   "lb": false
   },
   {
    "x": 36.0,
@@ -78,7 +88,8 @@
    "kind": "sw",
    "label": "12 V HECK",
    "cap": false,
-   "led": false
+   "led": false,
+   "lb": false
   },
   {
    "x": 72.0,
@@ -86,7 +97,8 @@
    "kind": "sw",
    "label": "LÜFTER",
    "cap": false,
-   "led": false
+   "led": false,
+   "lb": false
   },
   {
    "x": 72.0,

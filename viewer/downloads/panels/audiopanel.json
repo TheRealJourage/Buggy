@@ -22,7 +22,8 @@
    "kind": "sw",
    "label": "CARPLAY",
    "cap": false,
-   "led": false
+   "led": false,
+   "lb": false
   },
   {
    "x": -54.0,
