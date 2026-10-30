@@ -21,6 +21,7 @@ genannten Datei; andere Notizen und Memory verlinken, statt zu wiederholen.
 | Gesamt-Funktionsliste, TÜV-Licht, Widersprüche | `Funktionsliste.md` |
 | Pneumatik: Logik, Messwerte, Airtec-Liste | `Druckluftanlage.md`; Mechanik/Beschaffung `Zylinderbox.md` |
 | Kühlung K1–K14, L1–L5 | `Kühlkreislauf.md` |
+| Ansaugung (K100-Klappen, Trichterprofile, Zylinderzuordnung) | `Ansaugung.md`; Teil in `Teile-Bestand.md` |
 | Speeduino-Pins | `Speeduino/Verkabelung.md` + `viewer/verkabelung.html` |
 | Speeduino-Tune (TunerStudio, Startversuch) | `Speeduino/Start-Tune.md`; Tune-Dateien `Speeduino/BuggyVR6/` |
 | Lenkrad (LIN, Versorgung, Schlüssel) | `SteeringControl/SteeringControl.md` |
