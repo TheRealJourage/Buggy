@@ -22,7 +22,7 @@
 </head>
 <body>
 <div id="bar">
-  <b>Relaisbox – Entwurf v3</b>
+  <b>Relaisbox – Entwurf v3.1</b>
   <span>Material:</span>
   <button data-mat="alu" class="active">Alu 2 mm</button>
   <button data-mat="va">Edelstahl 1,5 mm</button>
@@ -61,8 +61,8 @@ import { OrbitControls } from './vendor/OrbitControls.js';
 const L = 500, W = 430, H = 115;
 const FLANGE = 25, WEB = 50, LID = 5, GASKET = 3, SCREW_IN = 9, GASKET_IN = 19;
 const REAR = -L / 2;
-// seat cross beams, estimate user 2026-10-29
-const BEAMS = [[REAR + 100, REAR + 130], [REAR + 380, REAR + 410]];
+// seat cross beams, measured user 2026-10-30: 10–11 cm behind rear beam, 30 mm wide, 255 mm gap
+const BEAMS = [[REAR + 105, REAR + 135], [REAR + 390, REAR + 420]];
 const BEAM_MARGIN = 15;
 const MAT = { alu: { t: 2, rho: 2.7, color: 0xb8bec6, name: 'Alu 2 mm' }, va: { t: 1.5, rho: 7.9, color: 0x9aa3a8, name: 'Edelstahl 1,5 mm' } };
 
@@ -187,7 +187,7 @@ function buildShell(key) {
 
 // seat cross beams
 for (const [b0, b1] of BEAMS)
-  box('Sitzquerbalken 3 cm (Schätzung User 2026-10-29), Abstand zur Box offen – hier keine Schrauben', b1 - b0, W + 120, 30, (b0 + b1) / 2, 0, H + 40, 0x9a4040, { parent: beams, metal: true, opacity: .7 });
+  box('Sitzquerbalken 3 cm (gemessen User 2026-10-30: hinten 10–11 cm, Lücke 25,5 cm), Abstand zur Box offen – hier keine Schrauben', b1 - b0, W + 120, 30, (b0 + b1) / 2, 0, H + 40, 0x9a4040, { parent: beams, metal: true, opacity: .7 });
 const cable = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, W + 160, 12), new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: .8 }));
 cable.position.set(0, 0, -15);
 cable.userData.name = 'Handbremsseil quer unter der Box (beweglich; Lage längs nicht bekannt) – darf die Box nie berühren';
