@@ -41,7 +41,7 @@ POT_PIN = (7.0, 9.4, 2.8, 1.5)   # radial slot for the pin (left): r from, r to,
 POT_DAM = (2.0, 12.0)  # tube around the pot so the silicone stays out: wall, depth behind plate
 KNOB_D = 24.0          # preview only, knob not measured yet
 # --- panel ---
-PLATE_T = 8.0          # 8 - 2 pocket = 6 mm in the thread, leaves 6 mm for nut + washer
+PLATE_T = 10.0         # 10 - 2 pocket = 8 mm in the thread, leaves 4 mm for the 2 mm nut (user 2026-10-30)
 PITCH_X, PITCH_Y = 36.0, 72.0   # glove-friendly spacing
 LABEL_Y = -22.0        # label centre below the hole
 LABEL_SIZE, LABEL_DEPTH = 4.2, 0.6
@@ -55,7 +55,7 @@ JOY_PCB = (27.0, 34.0, 1.6)     # X x Y x thickness, header pins at the bottom e
 JOY_HOLES = (20.0, 27.0, 2.6)   # mounting hole spacing X, Y and pilot diameter for M3 self-tapping (assumed)
 JOY_HOLE_D = 26.0               # front opening for the dome, must clear the tilted dome (assumed)
 JOY_POCKET = (26.0, 26.0, 2.0)  # square pocket from the back for the gimbal frame, leaves this skin at the front
-JOY_PCB_Z = -8.4                # PCB top face behind the plate (cap top then ~14 mm above the front)
+JOY_PCB_Z = -6.4                # PCB top face behind the plate, 16.4 behind the front (cap top then ~14 mm above the front)
 JOY_DAM = (WALL, 15.0)          # wall around the module so the silicone stays out: thickness, depth behind plate
 
 
