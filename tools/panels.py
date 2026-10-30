@@ -16,7 +16,7 @@ from build123d import (Align, Box, BuildPart, BuildSketch, Cylinder, FontStyle, 
 HOLE_D = 12.2          # measured 12 mm, +0.2 for resin shrink / fit
 KEY_W = 1.8            # groove in the thread: 2.0 wide, 0.8 deep -> nose slightly smaller
 KEY_D = 0.7
-FOOT_W, FOOT_H = 16.4, 29.4   # switch foot 16 x 29 (+0.4), long side vertical
+FOOT_W, FOOT_H = 16.4, 31.4   # switch foot 16 x 29 (+0.4), long side vertical; +1 at both ends after the test print (user 2026-10-22)
 FOOT_POCKET = 2.0      # foot sits this deep in the back of the plate (assumed centred on the thread)
 # --- flip cover base plate ---
 CAP_W, CAP_H, CAP_T = 17.4, 41.3, 0.9   # 17.1 x 41 x 0.9 (+0.3 in the plane)
@@ -27,7 +27,7 @@ LED_UP = 6.0 + 16.0    # LED centre 16 mm above the hole edge
 POT_HOLE = 7.1
 POT_BODY = 17.0        # back pocket and dam inside, body 16.3
 POT_LUGS = (17.0, 6.75 / 2 + 14.0 + 0.5)  # solder lugs 16 wide, reach 14 mm below the thread edge: width, reach from centre
-POT_EXTRA = 1.0        # extra room at both ends of the long side (user 2026-10-22), centre unchanged
+POT_EXTRA = 0.0        # extra room at both ends of the long side; pocket as test-printed fits (user 2026-10-30)
 POT_SKIN = 3.0         # plate left in front of the pot, rest of the 6 mm thread takes the nut
 POT_PIN = (7.0, 9.4, 2.8, 1.5)   # radial slot for the pin (left): r from, r to, width, depth into the skin
 POT_DAM = (2.0, 12.0)  # tube around the pot so the silicone stays out: wall, depth behind plate
