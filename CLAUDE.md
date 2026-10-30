@@ -17,6 +17,7 @@ genannten Datei; andere Notizen und Memory verlinken, statt zu wiederholen.
 | Bordnetz-Ebenen, Freigabe-Kette, Panels, Lenkrad-Funktionen, Hauptschalter | `Bordnetz-Konzept.md` |
 | Kabelbaum-Struktur, Stecker X1–X6, Controller-Knoten, harness.design | `Kabelbaum-Übersicht.md` + `WiringDiagram/harness.design/{Heck,Front,Gesamt}.harness` |
 | Ströme, Sicherungen, Hauptkabel | `Strombilanz.md` |
+| Relaisbox-Gehäuse (Einbauraum, Maßblatt, Deckel) | `Relaisbox.md` + `viewer/relaisbox.html` |
 | Gesamt-Funktionsliste, TÜV-Licht, Widersprüche | `Funktionsliste.md` |
 | Pneumatik: Logik, Messwerte, Airtec-Liste | `Druckluftanlage.md`; Mechanik/Beschaffung `Zylinderbox.md` |
 | Kühlung K1–K14, L1–L5 | `Kühlkreislauf.md` |
