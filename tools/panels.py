@@ -89,8 +89,8 @@ PANELS = {
         [sw('CARPLAY')], [pot('CARPLAY')], [pot('INTERCOM')], [pot('FUNK')], [pot('AMBIENT')], [pot('TACHO/LED')],
     ]},
     # engine test bench (user 2026-10-30): pump on, injectors on, start; engine off = injectors off.
-    # Open back, no potting; a full-thickness tab on the left for a screw clamp.
-    'testpanel': {'cable': +1, 'tab': (-1, 35.0), 'cols': [
+    # Plate only (no rim, print time), no potting; a full-thickness tab on the left for a screw clamp.
+    'testpanel': {'cable': +1, 'rim': False, 'tab': (-1, 35.0), 'cols': [
         [sw('PUMPE', True)], [sw('DÜSEN')], [sw('START', True, lb=True)],
     ]},
 }
@@ -235,15 +235,17 @@ def cut_joystick(x, y):
 
 def build(panel, labels=True):
     w, h, xc, yc = outline(panel)
+    rim = RIM_H if panel.get('rim', True) else 0
     with BuildPart() as p:
-        with BuildSketch(Plane.XY.offset(-RIM_H)):
+        with BuildSketch(Plane.XY.offset(-rim)):
             with Locations((xc, yc)):
                 RectangleRounded(w, h, CORNER_R)
-        extrude(amount=RIM_H + PLATE_T)
-        with BuildSketch(Plane.XY.offset(-RIM_H)):
-            with Locations((xc, yc)):
-                RectangleRounded(w - 2 * WALL, h - 2 * WALL, INNER_R)
-        extrude(amount=RIM_H, mode=Mode.SUBTRACT)
+        extrude(amount=rim + PLATE_T)
+        if rim:
+            with BuildSketch(Plane.XY.offset(-rim)):
+                with Locations((xc, yc)):
+                    RectangleRounded(w - 2 * WALL, h - 2 * WALL, INNER_R)
+            extrude(amount=rim, mode=Mode.SUBTRACT)
 
         if 'tab' in panel:
             side, tl = panel['tab']
@@ -266,6 +268,8 @@ def build(panel, labels=True):
                              align=(Align.CENTER, Align.CENTER))
                 extrude(sk.sketch, amount=-LABEL_DEPTH, mode=Mode.SUBTRACT)
 
+        if not rim:
+            return p.part, (w + panel.get('tab', (0, 0))[1], h)
         # groove only into the wall (a ring), so dams and bosses inside stay whole
         gd, gh, gz = GROOVE
         with BuildSketch(Plane.XY.offset(-gz - gh / 2)):
