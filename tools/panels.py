@@ -88,6 +88,11 @@ PANELS = {
     'audiopanel': {'cable': -1, 'cols': [
         [sw('CARPLAY')], [pot('CARPLAY')], [pot('INTERCOM')], [pot('FUNK')], [pot('AMBIENT')], [pot('TACHO/LED')],
     ]},
+    # engine test bench (user 2026-10-30): pump on, injectors on, start; engine off = injectors off.
+    # Open back, no potting; a full-thickness tab on the left for a screw clamp.
+    'testpanel': {'cable': +1, 'tab': (-1, 35.0), 'cols': [
+        [sw('PUMPE', True)], [sw('DÜSEN')], [sw('START', True, lb=True)],
+    ]},
 }
 
 
@@ -240,6 +245,11 @@ def build(panel, labels=True):
                 RectangleRounded(w - 2 * WALL, h - 2 * WALL, INNER_R)
         extrude(amount=RIM_H, mode=Mode.SUBTRACT)
 
+        if 'tab' in panel:
+            side, tl = panel['tab']
+            with Locations((xc + side * (w + tl) / 2, yc, PLATE_T / 2)):
+                Box(tl + 0.5, h, PLATE_T)
+
         for x, y, c in cells(panel):
             if c['kind'] == 'sw' and c['lb']:
                 cut_switch_lb(x, y, c['cap'])
@@ -267,7 +277,7 @@ def build(panel, labels=True):
         side = panel['cable']
         with Locations((xc + side * (w / 2 - WALL / 2), yc, -RIM_H / 2)):
             Cylinder(CABLE_D / 2, WALL + 4, rotation=(0, 90, 0), mode=Mode.SUBTRACT)
-    return p.part, (w, h)
+    return p.part, (w + panel.get('tab', (0, 0))[1], h)
 
 
 def build_coupon():
