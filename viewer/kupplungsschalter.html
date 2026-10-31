@@ -114,7 +114,7 @@ function update() {
   const txt = on[0] && on[1] ? 'getrennt' : on[0] ? 'in Bewegung' : on[1] ? 'Widerspruch' : 'eingekuppelt';
   $('state').innerHTML = on.map((v, i) => `<b class="${v ? 'on' : 'off'}">S${i + 1}</b>`).join(' ') + ` → ${txt}`;
 }
-$('s').max = m.stroke;
+$('s').max = m.strokeMax;
 $('s').oninput = update;
 $('glass').onchange = () => { blockMat.opacity = $('glass').checked ? 0.35 : 1; blockMat.depthWrite = !$('glass').checked; };
 update();

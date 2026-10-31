@@ -33,11 +33,12 @@ LEAD_EDGE = 1.0        # 45 deg on the other three leading edges
 WALL, FLOOR, CEIL = 3.0, 3.0, 2.0
 # --- travel (hypothesis: pin on the pedal ~150 mm above the pivot -> ~40 mm, To-Do.md 2026-10-23) ---
 STROKE = 40.0
+STROKE_MAX = 60.0      # pin and tunnel allow up to the travel at the pedal tip (55-60 mm), mount point free
 S2_BEFORE_END = 4.0    # S2 trips this far before full travel (default position in the rail)
 REST_MARGIN = 1.0      # at rest the pin tip stops this far before it would touch the S1 lever (hypothesis: lever
                        # runs straight from the hinge at the plunger edge to the tip)
-ADJ = 6.0              # rail reaches this far beyond the default positions
-P0 = 35.0              # pin tip at rest: guided length in the tunnel
+ADJ = 16.0             # rail reaches this far beyond the default positions (+2 cm, user 2026-10-31)
+P0 = 45.0              # pin tip at rest: guided length in the tunnel
 # --- mounting ---
 BOLT_D = 6.2           # M6 at the pedal eye and the rear clevis
 M2_NUT = (4.4, 1.8)    # across flats + clearance, depth of the nut channel
@@ -75,8 +76,8 @@ S1_AT = U_TRIP - REST_IN
 S2_AT = STROKE - S2_BEFORE_END
 X2 = P0 + S2_AT - U_TRIP                          # S2 hinge
 RAIL = (X1 - ADJ, X2 + SW_L + ADJ)
-TUN_L = max(RAIL[1] + 3.0, P0 + STROKE + 3.0)
-PIN_L = P0 + STROKE + 5.0                         # square part; the eye stays outside the tunnel at full travel
+TUN_L = max(RAIL[1] + 3.0, P0 + STROKE_MAX + 3.0)
+PIN_L = P0 + STROKE_MAX + 5.0                         # square part; the eye stays outside the tunnel at full travel
 EYE_R = 7.0
 CLEVIS_X = TUN_L + 7.0
 OUT_Y = TUN / 2 + WALL
@@ -156,7 +157,7 @@ def lever_tip(s):
 
 def meta():
     return {'sw': [SW_L, SW_H, SW_T], 'leverRest': LEVER_REST, 'leverTrip': LEVER_TRIP, 'pin': PIN, 'tun': TUN,
-            'edge': EDGE, 'gap': GAP, 'x1': X1, 'x2': X2, 'p0': P0, 'stroke': STROKE, 'lead': [LEAD[0], LEAD_TAN],
+            'edge': EDGE, 'gap': GAP, 'x1': X1, 'x2': X2, 'p0': P0, 'stroke': STROKE, 'strokeMax': STROKE_MAX, 'lead': [LEAD[0], LEAD_TAN],
             's1At': S1_AT, 's2At': S2_AT, 'rail': RAIL}
 
 
