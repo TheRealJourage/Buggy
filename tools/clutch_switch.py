@@ -27,13 +27,15 @@ PIN = 8.0              # square pin, cannot turn
 CLR = 0.25             # per side
 TUN = PIN + 2 * CLR
 GAP = 0.6              # plunger edge above the pin top -> lever pushed to 0.6, 0.4 beyond the trip point
-LEAD = 1.0             # 45 deg chamfer on the pin's leading top edge
+LEAD = (2.5, 30.0)     # chamfer on the pin's leading top edge (height, angle to the top): rides over a lever
+                       # or switch that sits a bit low, or a step in the tunnel (user 2026-10-31)
+LEAD_EDGE = 1.0        # 45 deg on the other three leading edges
 WALL, FLOOR, CEIL = 3.0, 3.0, 2.0
 # --- travel (hypothesis: pin on the pedal ~150 mm above the pivot -> ~40 mm, To-Do.md 2026-10-23) ---
 STROKE = 40.0
 S2_BEFORE_END = 4.0    # S2 trips this far before full travel (default position in the rail)
-REST_IN = 1.5          # pin tip this far past the S1 hinge at rest, lever not touched yet (hypothesis: lever runs
-                       # straight from the hinge at the plunger edge to the tip)
+REST_MARGIN = 1.0      # at rest the pin tip stops this far before it would touch the S1 lever (hypothesis: lever
+                       # runs straight from the hinge at the plunger edge to the tip)
 ADJ = 6.0              # rail reaches this far beyond the default positions
 P0 = 35.0              # pin tip at rest: guided length in the tunnel
 # --- mounting ---
@@ -41,8 +43,33 @@ BOLT_D = 6.2           # M6 at the pedal eye and the rear clevis
 M2_NUT = (4.4, 1.8)    # across flats + clearance, depth of the nut channel
 
 EDGE = PIN + GAP                                  # plunger edge height
-U_TOUCH = GAP * SW_L / LEVER_REST                 # pin tip past the hinge when it first lifts the lever
-U_TRIP = GAP * SW_L / LEVER_TRIP                  # ... when the switch trips
+LEAD_TAN = math.tan(math.radians(LEAD[1]))
+LEAD_L = LEAD[0] / LEAD_TAN
+
+
+def lever_at(u):
+    """Lever tip below the plunger edge with the pin tip u past the hinge: the straight lever rests on the
+    highest point of the pin top (flat at GAP, chamfer lower towards the tip)."""
+    if u <= 0:
+        return LEVER_REST
+    tip = LEVER_REST
+    for i in range(1, 401):
+        w = min(u, SW_L) * i / 400
+        below = GAP + max(0.0, w - (u - LEAD_L)) * LEAD_TAN
+        tip = min(tip, SW_L * below / w)
+    return tip
+
+
+def first_u(limit):
+    u = 0.0
+    while lever_at(u) > limit:
+        u += 0.01
+    return u
+
+
+U_TOUCH = first_u(LEVER_REST - 1e-6)              # pin tip past the hinge when it first lifts the lever
+U_TRIP = first_u(LEVER_TRIP)                      # ... when the switch trips
+REST_IN = U_TOUCH - REST_MARGIN
 X1 = P0 - REST_IN                                 # S1 hinge (front of the body)
 S1_AT = U_TRIP - REST_IN
 S2_AT = STROKE - S2_BEFORE_END
@@ -100,8 +127,14 @@ def build_pin():
     """Pin with its tip at X = 0 (rest position is X = P0), bottom on the tunnel floor."""
     with BuildPart() as p:
         with BuildSketch(Plane.XZ):
-            Polygon((-PIN_L, 0), (0, 0), (0, PIN - LEAD), (-LEAD, PIN), (-PIN_L, PIN), align=None)
+            Polygon((-PIN_L, 0), (-LEAD_EDGE, 0), (0, LEAD_EDGE), (0, PIN - LEAD[0]), (-LEAD_L, PIN), (-PIN_L, PIN),
+                    align=None)
         extrude(amount=PIN / 2, both=True)
+        with BuildSketch(Plane.XY.offset(-1)):
+            h = PIN / 2
+            Polygon((-PIN_L - 1, -h), (-LEAD_EDGE, -h), (0, LEAD_EDGE - h), (0, h - LEAD_EDGE), (-LEAD_EDGE, h),
+                    (-PIN_L - 1, h), align=None)
+        extrude(amount=PIN + 2, mode=Mode.INTERSECT)
         with Locations((-PIN_L - EYE_R + 2, 0, PIN / 2)):
             Cylinder(EYE_R, PIN, rotation=(90, 0, 0))
             Cylinder(BOLT_D / 2, PIN + 2, rotation=(90, 0, 0), mode=Mode.SUBTRACT)
@@ -117,16 +150,13 @@ def build_coupon(block):
 
 
 def lever_tip(s):
-    """Lever tip below the plunger edge at pedal travel s (pin tip at P0 + s), straight lever assumed."""
-    def at(xh):
-        u = P0 + s - xh
-        return LEVER_REST if u <= U_TOUCH else max(GAP, GAP * SW_L / min(u, SW_L))
-    return at(X1), at(X2)
+    """Lever tips of S1 and S2 at pedal travel s (pin tip at P0 + s)."""
+    return lever_at(P0 + s - X1), lever_at(P0 + s - X2)
 
 
 def meta():
     return {'sw': [SW_L, SW_H, SW_T], 'leverRest': LEVER_REST, 'leverTrip': LEVER_TRIP, 'pin': PIN, 'tun': TUN,
-            'edge': EDGE, 'gap': GAP, 'x1': X1, 'x2': X2, 'p0': P0, 'stroke': STROKE, 'uTouch': U_TOUCH,
+            'edge': EDGE, 'gap': GAP, 'x1': X1, 'x2': X2, 'p0': P0, 'stroke': STROKE, 'lead': [LEAD[0], LEAD_TAN],
             's1At': S1_AT, 's2At': S2_AT, 'rail': RAIL}
 
 

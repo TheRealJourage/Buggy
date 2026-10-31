@@ -89,10 +89,17 @@ const levers = [m.x1, m.x2].map((xh) => {
   return { xh, pivot };
 });
 
-// lever tip below the plunger edge; straight lever from the hinge assumed (same as tools/clutch_switch.py)
+// lever tip below the plunger edge: straight lever resting on the pin top, chamfer included (same as tools/clutch_switch.py)
 function leverTip(xh, s) {
   const u = m.p0 + s - xh;
-  return u <= m.uTouch ? m.leverRest : Math.max(m.gap, m.gap * L / Math.min(u, L));
+  if (u <= 0) return m.leverRest;
+  const [lh, lt] = m.lead;
+  let tip = m.leverRest;
+  for (let i = 1; i <= 400; i++) {
+    const w = Math.min(u, L) * i / 400;
+    tip = Math.min(tip, L * (m.gap + Math.max(0, w - (u - lh / lt)) * lt) / w);
+  }
+  return tip;
 }
 
 function update() {
