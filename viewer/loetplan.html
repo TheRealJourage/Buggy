@@ -50,19 +50,19 @@
 
   <rect x="40" y="300" width="260" height="250" rx="8" fill="#202020" stroke="#777"/>
   <text x="52" y="322" fill="#ccc" font-size="13" font-weight="700">Stiftleiste J5 (2,54 mm, Proto-Bereich)</text>
-  <text x="52" y="338" fill="#e8a33d" font-size="11">Reihenfolge nicht geprüft → Schritt A</text>
+  <text x="52" y="338" fill="#e8a33d" font-size="11">Reihenfolge laut Platinendatei v0.4.3d → Aufdruck prüfen</text>
   <rect x="150" y="352" width="140" height="34" rx="5" fill="#2a2a2a" stroke="#ff9a3c" stroke-width="2"/>
   <text x="160" y="374" fill="#fff" font-size="13" font-weight="700">VSS = D20</text>
   <rect x="150" y="396" width="140" height="34" rx="5" fill="#161616" stroke="#333"/>
   <text x="160" y="418" fill="#666" font-size="13">D21 · frei</text>
-  <rect x="150" y="440" width="140" height="34" rx="5" fill="#2a2a2a" stroke="#4da3ff" stroke-width="2"/>
-  <text x="160" y="462" fill="#fff" font-size="13" font-weight="700">A9 · Öldruck</text>
-  <rect x="150" y="484" width="140" height="34" rx="5" fill="#161616" stroke="#333"/>
-  <text x="160" y="506" fill="#666" font-size="13">A10 · frei</text>
+  <rect x="150" y="440" width="140" height="34" rx="5" fill="#161616" stroke="#333"/>
+  <text x="160" y="462" fill="#666" font-size="13">A10 · frei</text>
+  <rect x="150" y="484" width="140" height="34" rx="5" fill="#2a2a2a" stroke="#4da3ff" stroke-width="2"/>
+  <text x="160" y="506" fill="#fff" font-size="13" font-weight="700">A9 · Öldruck</text>
   <text x="52" y="372" fill="#999" font-size="11">1 kΩ ↑5 V,</text>
   <text x="52" y="386" fill="#999" font-size="11">100 nF</text>
-  <text x="52" y="460" fill="#999" font-size="11">470 Ω,</text>
-  <text x="52" y="474" fill="#999" font-size="11">100 nF</text>
+  <text x="52" y="504" fill="#999" font-size="11">470 Ω,</text>
+  <text x="52" y="518" fill="#999" font-size="11">100 nF</text>
 
   <!-- oil sensor -->
   <rect x="600" y="70" width="270" height="170" rx="10" fill="#1e1e1e" stroke="#ff8a3d" stroke-width="3"/>
@@ -75,7 +75,7 @@
 
   <path d="M290 129 C440 129 450 150 610 150" fill="none" stroke="#ff5a5a" stroke-width="3.5"/>
   <path d="M290 213 C440 213 450 185 610 185" fill="none" stroke="#aaa" stroke-width="3.5"/>
-  <path d="M290 457 L420 457 L420 220 L610 220" fill="none" stroke="#4da3ff" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M290 501 L420 501 L420 220 L610 220" fill="none" stroke="#4da3ff" stroke-width="3.5" stroke-linejoin="round"/>
 
   <!-- G22 -->
   <rect x="600" y="290" width="270" height="150" rx="10" fill="#1e1e1e" stroke="#ff8a3d" stroke-width="3"/>
@@ -114,8 +114,8 @@
 <h3>A · J5 finden (stromlos)</h3>
 <div class="steps" data-g="a">
 <label class="chk"><input type="checkbox"><span>J5 auf dem Board gefunden. Nicht bestückt → 4-polige Stiftleiste 2,54 mm einlöten</span></label>
-<label class="chk"><input type="checkbox"><span>Durchgang Mega-Pin <b>„20 / SDA“</b> → J5-Stift = <b>VSS</b>, mit Klebeband beschriftet</span></label>
-<label class="chk"><input type="checkbox"><span>Durchgang Mega-Pin <b>„A9“</b> → J5-Stift = <b>A9</b>, beschriftet</span></label>
+<label class="chk"><input type="checkbox"><span>Aufdruck neben J5 lesen: <b>VSS · D21 · A10 · A9</b> (so in der Platinendatei v0.4.3d). Passt → Board ist v0.4.3d-Layout. Fehlt der Aufdruck → Durchgang Mega-Pin <b>„20 / SDA“</b> → VSS suchen</span></label>
+<label class="chk"><input type="checkbox"><span>A9 ist der Stift <b>neben „A9“</b>, am Ende der Leiste, auf der Seite von J1 (5 V). Über den 470-Ω-Widerstand geht er zum Mega, deshalb kein Durchgang direkt zu Mega-Pin A9 (≈ 470 Ω messen)</span></label>
 <label class="chk"><input type="checkbox"><span>Lage an Claude gemeldet (Foto mit Beschriftung)</span></label>
 </div>
 <h3>B · Öldrucksensor löten</h3>
