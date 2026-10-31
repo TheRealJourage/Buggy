@@ -225,8 +225,10 @@
 <ul>
 <li><b>Festgelegt (User, 2026-10-31):</b> ein Öldrucksensor am Speeduino, der Wert geht über Pi/CAN nach vorn (Variante B). Kein eigener Widerstandsgeber für ein Rundinstrument. Ob das Rundinstrument Öldruck entfällt oder elektronisch angesteuert wird, ist offen.</li>
 <li>Firmware 202501.7 (ini): Menü „Oil Pressure“, Pin wählbar A0–A15, lineare Kennlinie 0 V / 5 V, Vorlagen 0-10 BAR, 0-100 PSI, 0-150 PSI. Dazu der Öldruck-Schutz (Mindestdruck über Drehzahl, mit Verzögerung).</li>
-<li>Leitungen, Vorschlag: Signal → <b>J5/A9</b> (A10 bleibt frei). Am 40-Pin-Adapter ist kein Analogeingang mehr frei. +5 V vom Board (VDDA 25/26) als eigene Ader, Masse an den Punkt von Pin 36.</li>
-<li>Offen: Sensor auswählen (Messbereich, Gewinde), Einbauort am Block, J5 am Board prüfen (gleiche Prüfung wie beim G22).</li>
+<li>Sensor (vorhanden): <b>Flylin JY202216</b>, 200 PSI, 5 V, 0,5–4,5 V, 1/8"-27 NPT, Gewindeadapter vorhanden. Pigtail: rot +5 V, schwarz Masse, blau Signal.</li>
+<li>Leitungen, Vorschlag: <b>blau → J5/A9</b> (A10 bleibt frei; am 40-Pin-Adapter ist kein Analogeingang mehr frei), <b>rot → Adapter-Pin 26</b> (5 V, später zusammen mit dem Nockensensor), <b>schwarz → Adapter-Pin 36</b> (Sensormasse zurück zur ECU).</li>
+<li>TunerStudio (gerechnet, 50 psi/V): Pin A9, Pressure at 0 V = −25 psi (−1,72 bar), at 5 V = 225 psi (15,51 bar). Motor steht → Anzeige ≈ 0.</li>
+<li>Offen: Einbauort am Block, J5 am Board prüfen (gleiche Prüfung wie beim G22).</li>
 </ul>
 
 <h2>6. Reihenfolge beim Umbau</h2>
@@ -251,7 +253,7 @@
 <li>Dritter Temperatursensor („Dings-Temperatur"); Kühlmittel- und Ansaugluft-Sensor selbst</li>
 <li>Nockenversteller-Ventil: Strombelastbarkeit des HC-2-Ausgangs und Freilaufdiode</li>
 <li>Geschwindigkeitsgeber G22: Ausgangsstufe (Open Collector oder 12 V), J5 bestückt und welcher J5-Pin VSS ist, Impulse/km</li>
-<li>Öldrucksensor: Typ, Messbereich, Gewinde, Einbauort am Block; welcher J5-Pin A9 ist</li>
+<li>Öldrucksensor: Einbauort am Block; welcher J5-Pin A9 ist</li>
 </ul>
 
 <script>
@@ -317,10 +319,12 @@ const SOLL = FIXED.concat([
    {pin:'J5-VSS', lab:'G22 Pin 2 · Signal', c:'neu', isnew:true}],
    notes:['Pin 1 → +12 V Kl. 15, Sicherung', 'Pin 3 → Masse Motorblock (wie Pin 36)',
           'J5 am Board, nicht am Adapter', 'erst messen: nur Open Collector direkt', 'kein Vorwiderstand, nie 12 V an J5']},
- {id:'oil', side:'R', st:'new', name:'Öldrucksensor', sub:'3-Draht 0,5–4,5 V · noch nicht gekauft', rows:[
-   {pin:'J5-A9', lab:'Signal', c:'neu', isnew:true}],
-   notes:['+5 V vom Board (VDDA 25/26), eigene Ader', 'Masse → Punkt von Pin 36',
-          'Wert per Pi/CAN nach vorn (festgelegt 31.10.)', 'A9 statt A10: Vorschlag, J5 am Board prüfen']}
+ {id:'oil', side:'R', st:'new', name:'Öldrucksensor', sub:'Flylin JY202216 · 200 PSI · 0,5–4,5 V', rows:[
+   {pin:26, lab:'+5 V · rot (mit Nocke geteilt)', c:'rot', isnew:true},
+   {pin:36, lab:'Masse · schwarz', c:'schwarz', isnew:true},
+   {pin:'J5-A9', lab:'Signal · blau', c:'blau', isnew:true}],
+   notes:['Wert per Pi/CAN nach vorn (festgelegt 31.10.)', 'A9: Vorschlag, J5-Reihenfolge am Board prüfen',
+          'TS: A9, 0 V = −25 psi, 5 V = 225 psi']}
 ]);
 // Pins outside the IDC40: header J5 in the proto area of v0.4.3d (proto.sch). Pin order on the header not verified.
 const J5 = {'J5-VSS':{i:0, t:'VSS = D20 (1 kΩ ↑5 V, 100 nF)'}, 'J5-D21':{i:1, t:'D21'}, 'J5-A9':{i:2, t:'A9 (470 Ω, 100 nF)'}, 'J5-A10':{i:3, t:'A10 (470 Ω, 100 nF)'}};
