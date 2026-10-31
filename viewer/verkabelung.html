@@ -327,8 +327,8 @@ const SOLL = FIXED.concat([
    notes:['Wert per Pi/CAN nach vorn (festgelegt 31.10.)', 'A9: Vorschlag, J5-Reihenfolge am Board prüfen',
           'TS: A9, 0 V = −25 psi, 5 V = 225 psi']}
 ]);
-// Pins outside the IDC40: header J5 in the proto area of v0.4.3d (proto.sch). Pin order on the header not verified.
-const J5 = {'J5-VSS':{i:0, t:'VSS = D20 (1 kΩ ↑5 V, 100 nF)'}, 'J5-D21':{i:1, t:'D21'}, 'J5-A9':{i:2, t:'A9 (470 Ω, 100 nF)'}, 'J5-A10':{i:3, t:'A10 (470 Ω, 100 nF)'}};
+// Pins outside the IDC40: header J5 in the proto area; order VSS, D21, A10, A9 from v0.4.3d.kicad_pcb, not checked on the real board.
+const J5 = {'J5-VSS':{i:0, t:'VSS = D20 (1 kΩ ↑5 V, 100 nF)'}, 'J5-D21':{i:1, t:'D21'}, 'J5-A9':{i:3, t:'A9 (470 Ω, 100 nF)'}, 'J5-A10':{i:2, t:'A10 (470 Ω, 100 nF)'}};
 
 const NS = 'http://www.w3.org/2000/svg';
 const svg = document.getElementById('plan');
