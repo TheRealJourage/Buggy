@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Kupplungsschalter 3D (Druckteil)</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #111; color: #ddd; font-family: system-ui, sans-serif; overflow: hidden; }
+  #bar { position: fixed; top: 0; left: 0; right: 0; padding: 8px 12px; background: #151517cc; display: flex; gap: 14px; align-items: center; font-size: 14px; z-index: 2; flex-wrap: wrap; }
+  #bar a { color: #8cf; }
+  #bar .hint { color: #888; }
+  #state b { padding: 1px 6px; border-radius: 4px; }
+  .on { background: #2a7a2a; } .off { background: #444; }
+  canvas { display: block; }
+</style>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.js" } }</script>
+</head>
+<body>
+<div id="bar">
+  <b>Kupplungsschalter</b>
+  <label>Pedalweg <input id="s" type="range" min="0" max="40" step="0.1" value="0"> <span id="sv">0.0</span> mm</label>
+  <span id="state"></span>
+  <label><input id="glass" type="checkbox" checked> Block durchsichtig</label>
+  <span>Block: <a href="downloads/kupplung/kupplungsschalter_block.stl" download>STL</a> · <a href="downloads/kupplung/kupplungsschalter_block.step" download>STEP</a></span>
+  <span>Stift: <a href="downloads/kupplung/kupplungsschalter_stift.stl" download>STL</a> · <a href="downloads/kupplung/kupplungsschalter_stift.step" download>STEP</a></span>
+  <span>Probestück: <a href="downloads/kupplung/kupplungsschalter_probestueck.stl" download>STL</a> · <a href="downloads/kupplung/kupplungsschalter_probestueck.step" download>STEP</a></span>
+  <span class="hint">Maus: drehen · Rad: zoomen · rechts: verschieben</span>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from './vendor/OrbitControls.js';
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(devicePixelRatio);
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a1c);
+const camera = new THREE.PerspectiveCamera(35, 1, 1, 5000);
+camera.position.set(-60, -150, 110);
+camera.up.set(0, 0, 1);
+const controls = new OrbitControls(camera, renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x333344, 1.4));
+const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+sun.position.set(-150, -200, 400);
+scene.add(sun);
+const fill = new THREE.DirectionalLight(0xffffff, 1.4);
+fill.position.set(150, 200, -400);
+scene.add(fill);
+
+function parseStl(buf) {
+  const dv = new DataView(buf);
+  const n = dv.getUint32(80, true);
+  const pos = new Float32Array(n * 9);
+  for (let i = 0; i < n; i++) {
+    const o = 84 + i * 50 + 12;
+    for (let k = 0; k < 9; k++) pos[i * 9 + k] = dv.getFloat32(o + k * 4, true);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.computeVertexNormals();
+  return g;
+}
+const load = async (n) => parseStl(await fetch(`downloads/kupplung/kupplungsschalter_${n}.stl`).then((r) => r.arrayBuffer()));
+const $ = (id) => document.getElementById(id);
+
+const m = await fetch('downloads/kupplung/kupplungsschalter.json').then((r) => r.json());
+const blockMat = new THREE.MeshStandardMaterial({ color: 0x8a8d93, roughness: 0.7, transparent: true, opacity: 0.35, depthWrite: false });
+const block = new THREE.Mesh(await load('block'), blockMat);
+const pin = new THREE.Mesh(await load('stift'), new THREE.MeshStandardMaterial({ color: 0xf07a1a, roughness: 0.5 }));
+const root = new THREE.Group();
+root.add(block, pin);
+scene.add(root);
+block.geometry.computeBoundingBox();
+const bb = block.geometry.boundingBox;
+root.position.set(-(bb.max.x + bb.min.x) / 2 + 20, 0, -(bb.max.z + bb.min.z) / 2);
+
+const [L, H, T] = m.sw;
+const swMat = new THREE.MeshStandardMaterial({ color: 0x1b1b1d, roughness: 0.6 });
+const leverMat = new THREE.MeshStandardMaterial({ color: 0xd8dadd, metalness: 0.9, roughness: 0.25 });
+const levers = [m.x1, m.x2].map((xt) => {
+  const body = new THREE.Mesh(new THREE.BoxGeometry(L, T, H), swMat);
+  body.position.set(xt + L / 2, 0, m.edge + H / 2);
+  const pivot = new THREE.Group();
+  pivot.position.set(xt + L, 0, m.edge);
+  const len = Math.hypot(L, m.leverRest);
+  const lever = new THREE.Mesh(new THREE.BoxGeometry(len, 4, 0.4), leverMat);
+  lever.position.set(-len / 2, 0, 0);
+  pivot.add(lever);
+  root.add(body, pivot);
+  return { xt, pivot };
+});
+
+function leverTip(xt, s) {
+  const d = m.p0 + s - xt;
+  if (d < 0) return m.leverRest;
+  return Math.min(m.leverRest, Math.max(m.gap, m.edge - Math.min(m.pin, m.tipZ + d * m.tan)));
+}
+
+function update() {
+  const s = +$('s').value;
+  $('sv').textContent = s.toFixed(1);
+  pin.position.x = m.p0 + s;
+  const on = levers.map(({ xt, pivot }) => {
+    const p = leverTip(xt, s);
+    pivot.rotation.y = -Math.atan2(p, L);
+    return p <= m.leverTrip;
+  });
+  const txt = on[0] && on[1] ? 'getrennt' : on[0] ? 'in Bewegung' : on[1] ? 'Widerspruch' : 'eingekuppelt';
+  $('state').innerHTML = on.map((v, i) => `<b class="${v ? 'on' : 'off'}">S${i + 1}</b>`).join(' ') + ` → ${txt}`;
+}
+$('s').max = m.stroke;
+$('s').oninput = update;
+$('glass').onchange = () => { blockMat.opacity = $('glass').checked ? 0.35 : 1; blockMat.depthWrite = !$('glass').checked; };
+update();
+
+function resize() {
+  renderer.setSize(innerWidth, innerHeight);
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+resize();
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+</script>
+</body>
+</html>
