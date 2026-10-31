@@ -77,32 +77,31 @@ root.position.set(-(bb.max.x + bb.min.x) / 2 + 20, 0, -(bb.max.z + bb.min.z) / 2
 const [L, H, T] = m.sw;
 const swMat = new THREE.MeshStandardMaterial({ color: 0x1b1b1d, roughness: 0.6 });
 const leverMat = new THREE.MeshStandardMaterial({ color: 0xd8dadd, metalness: 0.9, roughness: 0.25 });
-const levers = [m.x1, m.x2].map((xt) => {
+const levers = [m.x1, m.x2].map((xh) => {
   const body = new THREE.Mesh(new THREE.BoxGeometry(L, T, H), swMat);
-  body.position.set(xt + L / 2, 0, m.edge + H / 2);
+  body.position.set(xh + L / 2, 0, m.edge + H / 2);
   const pivot = new THREE.Group();
-  pivot.position.set(xt + L, 0, m.edge);
-  const len = Math.hypot(L, m.leverRest);
-  const lever = new THREE.Mesh(new THREE.BoxGeometry(len, 4, 0.4), leverMat);
-  lever.position.set(-len / 2, 0, 0);
+  pivot.position.set(xh, 0, m.edge);
+  const lever = new THREE.Mesh(new THREE.BoxGeometry(L, 4, 0.4), leverMat);
+  lever.position.set(L / 2, 0, -0.2);
   pivot.add(lever);
   root.add(body, pivot);
-  return { xt, pivot };
+  return { xh, pivot };
 });
 
-function leverTip(xt, s) {
-  const d = m.p0 + s - xt;
-  if (d < 0) return m.leverRest;
-  return Math.min(m.leverRest, Math.max(m.gap, m.edge - Math.min(m.pin, m.tipZ + d * m.tan)));
+// lever tip below the plunger edge; straight lever from the hinge assumed (same as tools/clutch_switch.py)
+function leverTip(xh, s) {
+  const u = m.p0 + s - xh;
+  return u <= m.uTouch ? m.leverRest : Math.max(m.gap, m.gap * L / Math.min(u, L));
 }
 
 function update() {
   const s = +$('s').value;
   $('sv').textContent = s.toFixed(1);
   pin.position.x = m.p0 + s;
-  const on = levers.map(({ xt, pivot }) => {
-    const p = leverTip(xt, s);
-    pivot.rotation.y = -Math.atan2(p, L);
+  const on = levers.map(({ xh, pivot }) => {
+    const p = leverTip(xh, s);
+    pivot.rotation.y = Math.atan2(p, L);
     return p <= m.leverTrip;
   });
   const txt = on[0] && on[1] ? 'getrennt' : on[0] ? 'in Bewegung' : on[1] ? 'Widerspruch' : 'eingekuppelt';
