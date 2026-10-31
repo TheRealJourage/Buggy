@@ -26,43 +26,48 @@
 </head>
 <body>
 <h1>Lötplan: Öldrucksensor + Geschwindigkeitsgeber G22</h1>
-<p class="hint">Stand 2026-10-31. Ergänzt den Soll-Plan in <a href="verkabelung.html#soll" style="color:#8cf">verkabelung.html</a>. Öldruck: Variante B festgelegt (User, 2026-10-31), Sensor Flylin JY202216. Pin-Ziele sind <b>Vorschlag Claude</b>; J5-Reihenfolge und G22-Belegung sind <b>nicht geprüft</b>.</p>
+<p class="hint">Stand 2026-10-31. Ergänzt den Soll-Plan in <a href="verkabelung.html#soll" style="color:#8cf">verkabelung.html</a>. Öldruck: Variante B festgelegt (User, 2026-10-31), Sensor Flylin JY202216. Pin-Ziele sind <b>Vorschlag Claude</b>. Lage von J1/J5/J6 aus der Platinendatei v0.4.3d, am eigenen Board <b>nicht geprüft</b>; G22-Belegung ungeprüft.</p>
 <div class="warn"><b>Beim Löten:</b> Batterie ab, ECU abgesteckt, USB ab. Nie 12 V auf J5 oder einen Adapter-Pin.</div>
 
 <h2>1. Plan</h2>
 <div class="svgwrap">
 <svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg">
-  <!-- ECU -->
+  <!-- ECU: proto area at the board edge, positions from v0.4.3d.kicad_pcb -->
   <rect x="20" y="30" width="300" height="540" rx="10" fill="#1a1a1a" stroke="#555" stroke-width="2"/>
-  <text x="170" y="56" fill="#eee" font-size="16" font-weight="700" text-anchor="middle">Speeduino (im Gehäuse)</text>
+  <text x="170" y="52" fill="#eee" font-size="15" font-weight="700" text-anchor="middle">Speeduino-Platine · Proto-Bereich</text>
+  <text x="170" y="68" fill="#e8a33d" font-size="11" text-anchor="middle">Lage laut Platinendatei v0.4.3d → Aufdruck prüfen</text>
 
-  <rect x="40" y="76" width="260" height="190" rx="8" fill="#202020" stroke="#777"/>
-  <text x="52" y="98" fill="#ccc" font-size="13" font-weight="700">40-Pin-Adapter · Lötkelche</text>
-  <rect x="150" y="112" width="140" height="34" rx="5" fill="#2a2a2a" stroke="#ff5a5a" stroke-width="2"/>
-  <text x="160" y="134" fill="#fff" font-size="14" font-weight="700">26 · 5 V</text>
-  <text x="52" y="128" fill="#999" font-size="11">schon dran:</text>
-  <text x="52" y="142" fill="#999" font-size="11">rot 2 (Nocke)</text>
-  <rect x="150" y="196" width="140" height="34" rx="5" fill="#2a2a2a" stroke="#aaa" stroke-width="2"/>
-  <text x="160" y="218" fill="#fff" font-size="14" font-weight="700">36 · GND</text>
-  <text x="52" y="212" fill="#999" font-size="11">schon dran:</text>
-  <text x="52" y="226" fill="#999" font-size="11">Kurbel-Schirm</text>
-  <text x="52" y="254" fill="#ff8a3d" font-size="11">je eine 2. Ader in den Kelch</text>
+  <rect x="40" y="80" width="260" height="56" rx="8" fill="#202020" stroke="#777"/>
+  <text x="52" y="100" fill="#ccc" font-size="12" font-weight="700">J6 · 5 × GND</text>
+  <text x="52" y="116" fill="#999" font-size="11">quer über J5</text>
+  <rect x="150" y="92" width="140" height="34" rx="5" fill="#2a2a2a" stroke="#aaa" stroke-width="2"/>
+  <text x="160" y="114" fill="#fff" font-size="13" font-weight="700">GND (ein Stift)</text>
 
-  <rect x="40" y="300" width="260" height="250" rx="8" fill="#202020" stroke="#777"/>
-  <text x="52" y="322" fill="#ccc" font-size="13" font-weight="700">Stiftleiste J5 (2,54 mm, Proto-Bereich)</text>
-  <text x="52" y="338" fill="#e8a33d" font-size="11">Reihenfolge laut Platinendatei v0.4.3d → Aufdruck prüfen</text>
-  <rect x="150" y="352" width="140" height="34" rx="5" fill="#2a2a2a" stroke="#ff9a3c" stroke-width="2"/>
-  <text x="160" y="374" fill="#fff" font-size="13" font-weight="700">VSS = D20</text>
-  <rect x="150" y="396" width="140" height="34" rx="5" fill="#161616" stroke="#333"/>
-  <text x="160" y="418" fill="#666" font-size="13">D21 · frei</text>
-  <rect x="150" y="440" width="140" height="34" rx="5" fill="#161616" stroke="#333"/>
-  <text x="160" y="462" fill="#666" font-size="13">A10 · frei</text>
-  <rect x="150" y="484" width="140" height="34" rx="5" fill="#2a2a2a" stroke="#4da3ff" stroke-width="2"/>
-  <text x="160" y="506" fill="#fff" font-size="13" font-weight="700">A9 · Öldruck</text>
-  <text x="52" y="372" fill="#999" font-size="11">1 kΩ ↑5 V,</text>
-  <text x="52" y="386" fill="#999" font-size="11">100 nF</text>
-  <text x="52" y="504" fill="#999" font-size="11">470 Ω,</text>
-  <text x="52" y="518" fill="#999" font-size="11">100 nF</text>
+  <rect x="40" y="150" width="260" height="196" rx="8" fill="#202020" stroke="#777"/>
+  <text x="52" y="170" fill="#ccc" font-size="12" font-weight="700">J5 · 4 Stifte</text>
+  <rect x="150" y="180" width="140" height="34" rx="5" fill="#2a2a2a" stroke="#ff9a3c" stroke-width="2"/>
+  <text x="160" y="202" fill="#fff" font-size="13" font-weight="700">VSS = D20</text>
+  <rect x="150" y="224" width="140" height="34" rx="5" fill="#161616" stroke="#333"/>
+  <text x="160" y="246" fill="#666" font-size="13">D21 · frei</text>
+  <rect x="150" y="268" width="140" height="34" rx="5" fill="#161616" stroke="#333"/>
+  <text x="160" y="290" fill="#666" font-size="13">A10 · frei</text>
+  <rect x="150" y="306" width="140" height="34" rx="5" fill="#2a2a2a" stroke="#4da3ff" stroke-width="2"/>
+  <text x="160" y="328" fill="#fff" font-size="13" font-weight="700">A9 · Öldruck</text>
+  <text x="52" y="198" fill="#999" font-size="11">1 kΩ ↑5 V,</text>
+  <text x="52" y="212" fill="#999" font-size="11">100 nF</text>
+  <text x="52" y="322" fill="#999" font-size="11">470 Ω,</text>
+  <text x="52" y="336" fill="#999" font-size="11">100 nF</text>
+
+  <rect x="40" y="350" width="260" height="56" rx="8" fill="#202020" stroke="#777"/>
+  <text x="52" y="370" fill="#ccc" font-size="12" font-weight="700">J1 · 5 × 5 V</text>
+  <text x="52" y="386" fill="#999" font-size="11">gleiche Reihe wie J5</text>
+  <rect x="150" y="362" width="140" height="34" rx="5" fill="#2a2a2a" stroke="#ff5a5a" stroke-width="2"/>
+  <text x="160" y="384" fill="#fff" font-size="13" font-weight="700">5 V (ein Stift)</text>
+
+  <text x="40" y="440" fill="#999" font-size="11">J5 und J1 = eine durchgehende Stiftreihe:</text>
+  <text x="40" y="456" fill="#999" font-size="11">VSS · D21 · A10 · A9 · 5V · 5V · 5V · 5V · 5V</text>
+  <text x="40" y="486" fill="#999" font-size="11">40-Pin-Adapter (26/36) bleibt unberührt.</text>
+  <text x="40" y="502" fill="#999" font-size="11">Nicht am Arduino Mega löten.</text>
 
   <!-- oil sensor -->
   <rect x="600" y="70" width="270" height="170" rx="10" fill="#1e1e1e" stroke="#ff8a3d" stroke-width="3"/>
@@ -73,9 +78,9 @@
   <circle cx="616" cy="185" r="6" fill="#aaa"/><text x="630" y="190" fill="#eee" font-size="13">schwarz · Masse</text>
   <circle cx="616" cy="220" r="6" fill="#4da3ff"/><text x="630" y="225" fill="#eee" font-size="13">blau · Signal</text>
 
-  <path d="M290 129 C440 129 450 150 610 150" fill="none" stroke="#ff5a5a" stroke-width="3.5"/>
-  <path d="M290 213 C440 213 450 185 610 185" fill="none" stroke="#aaa" stroke-width="3.5"/>
-  <path d="M290 501 L420 501 L420 220 L610 220" fill="none" stroke="#4da3ff" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M290 109 L470 109 L470 185 L610 185" fill="none" stroke="#aaa" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M290 323 L430 323 L430 220 L610 220" fill="none" stroke="#4da3ff" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M290 379 L450 379 L450 150 L610 150" fill="none" stroke="#ff5a5a" stroke-width="3.5" stroke-linejoin="round"/>
 
   <!-- G22 -->
   <rect x="600" y="290" width="270" height="150" rx="10" fill="#1e1e1e" stroke="#ff8a3d" stroke-width="3"/>
@@ -85,9 +90,9 @@
   <circle cx="616" cy="392" r="6" fill="#ffd23f"/><text x="630" y="397" fill="#eee" font-size="13">Pin 1 · +12 V</text>
   <circle cx="616" cy="424" r="6" fill="#aaa"/><text x="630" y="429" fill="#eee" font-size="13">Pin 3 · Masse</text>
 
-  <path d="M290 369 C450 369 450 360 610 360" fill="none" stroke="#ff9a3c" stroke-width="3.5" stroke-dasharray="10 6"/>
-  <rect x="380" y="372" width="150" height="20" rx="10" fill="#ff5a5a"/>
-  <text x="455" y="386" fill="#111" font-size="11" font-weight="800" text-anchor="middle">erst nach Messung</text>
+  <path d="M290 197 L400 197 L400 360 L610 360" fill="none" stroke="#ff9a3c" stroke-width="3.5" stroke-dasharray="10 6" stroke-linejoin="round"/>
+  <rect x="470" y="330" width="120" height="20" rx="10" fill="#ff5a5a"/>
+  <text x="530" y="344" fill="#111" font-size="11" font-weight="800" text-anchor="middle">erst nach Messung</text>
 
   <path d="M610 392 L575 392 L575 495 L540 495" fill="none" stroke="#ffd23f" stroke-width="3" stroke-linejoin="round"/>
   <path d="M610 424 L590 424 L590 545 L540 545" fill="none" stroke="#aaa" stroke-width="3" stroke-linejoin="round"/>
@@ -102,9 +107,9 @@
 <h2>2. Leitungsliste</h2>
 <table>
 <tr><th>Von</th><th>Nach</th><th>Hinweis</th></tr>
-<tr><td>Öldruck rot</td><td>Adapter-Pin 26</td><td>2. Ader im Kelch, später auch Nocke</td></tr>
-<tr><td>Öldruck schwarz</td><td>Adapter-Pin 36</td><td>2. Ader im Kelch, Sensormasse zur ECU</td></tr>
-<tr><td>Öldruck blau</td><td>J5 · A9</td><td>an den Stift löten oder Dupont-Buchse</td></tr>
+<tr><td>Öldruck rot</td><td>J1 · 5 V (ein Stift)</td><td>Dupont-Buchse aufstecken oder anlöten</td></tr>
+<tr><td>Öldruck schwarz</td><td>J6 · GND (ein Stift)</td><td>Sensormasse zur ECU</td></tr>
+<tr><td>Öldruck blau</td><td>J5 · A9</td><td>Stift zwischen A10 und dem ersten 5-V-Stift</td></tr>
 <tr><td>G22 Pin 2</td><td>J5 · VSS (D20)</td><td>verlegen, <b>Ende isoliert lassen</b> bis Schritt D</td></tr>
 <tr><td>G22 Pin 1</td><td>12 V geschaltet (wie Board) über eigene Sicherung</td><td>Sicherungswert: Hypothese 2 A, Geber zieht nur mA (nicht gemessen)</td></tr>
 <tr><td>G22 Pin 3</td><td>Massepunkt Motorblock (wo Pin 36 hinführt)</td><td>–</td></tr>
@@ -122,9 +127,8 @@
 <div class="steps" data-g="b">
 <label class="chk"><input type="checkbox"><span>3-adrige Leitung rot/schwarz/blau, am Sensorende Gegenstecker zum Pigtail</span></label>
 <label class="chk"><input type="checkbox"><span>Schrumpfschlauch auf jede Ader schieben, <b>bevor</b> gelötet wird</span></label>
-<label class="chk"><input type="checkbox"><span>rot → Kelch 26, schwarz → Kelch 36 (zur vorhandenen Ader dazu)</span></label>
-<label class="chk"><input type="checkbox"><span>blau → J5 A9, Schrumpf drüber</span></label>
-<label class="chk"><input type="checkbox"><span>Zugentlastung: Leitung mit Kabelbinder am Adapterkabel/Gehäuse, kein Zug auf J5</span></label>
+<label class="chk"><input type="checkbox"><span>rot → J1 (5 V), schwarz → J6 (GND), blau → J5 A9 · Dupont-Buchsen oder angelötet, Schrumpf drüber</span></label>
+<label class="chk"><input type="checkbox"><span>Zugentlastung: Leitung mit Kabelbinder am Adapterkabel/Gehäuse, kein Zug auf J1/J5/J6</span></label>
 </div>
 <h3>C · G22 verlegen</h3>
 <div class="steps" data-g="c">
@@ -142,9 +146,9 @@
 
 <h3>E · Prüfen vor dem Einschalten</h3>
 <div class="steps" data-g="e">
-<label class="chk"><input type="checkbox"><span>Pin 26 gegen 36: <b>kein</b> Durchgang</span></label>
-<label class="chk"><input type="checkbox"><span>J5 A9 gegen 26 und gegen 36: kein Durchgang (Sensor abgesteckt)</span></label>
-<label class="chk"><input type="checkbox"><span>Durchgang je Ader: 26 → rot am Gegenstecker, 36 → schwarz, A9 → blau</span></label>
+<label class="chk"><input type="checkbox"><span>J1 (5 V) gegen J6 (GND): <b>kein</b> Durchgang</span></label>
+<label class="chk"><input type="checkbox"><span>J5 A9 gegen J1 und gegen J6: kein Durchgang (Sensor abgesteckt)</span></label>
+<label class="chk"><input type="checkbox"><span>Durchgang je Ader: J1 → rot am Gegenstecker, J6 → schwarz, A9 → blau</span></label>
 </div>
 
 <h2>4. TunerStudio danach</h2>

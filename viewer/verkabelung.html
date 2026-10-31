@@ -226,7 +226,7 @@
 <li><b>Festgelegt (User, 2026-10-31):</b> ein Öldrucksensor am Speeduino, der Wert geht über Pi/CAN nach vorn (Variante B). Kein eigener Widerstandsgeber für ein Rundinstrument. Ob das Rundinstrument Öldruck entfällt oder elektronisch angesteuert wird, ist offen.</li>
 <li>Firmware 202501.7 (ini): Menü „Oil Pressure“, Pin wählbar A0–A15, lineare Kennlinie 0 V / 5 V, Vorlagen 0-10 BAR, 0-100 PSI, 0-150 PSI. Dazu der Öldruck-Schutz (Mindestdruck über Drehzahl, mit Verzögerung).</li>
 <li>Sensor (vorhanden): <b>Flylin JY202216</b>, 200 PSI, 5 V, 0,5–4,5 V, 1/8"-27 NPT, Gewindeadapter vorhanden. Pigtail: rot +5 V, schwarz Masse, blau Signal.</li>
-<li>Leitungen, Vorschlag: <b>blau → J5/A9</b> (A10 bleibt frei; am 40-Pin-Adapter ist kein Analogeingang mehr frei), <b>rot → Adapter-Pin 26</b> (5 V, später zusammen mit dem Nockensensor), <b>schwarz → Adapter-Pin 36</b> (Sensormasse zurück zur ECU).</li>
+<li>Leitungen, Vorschlag: <b>blau → J5/A9</b> (A10 bleibt frei; am 40-Pin-Adapter ist kein Analogeingang mehr frei), <b>rot → J1 (5 V)</b>, <b>schwarz → J6 (GND)</b>; beide Stiftleisten liegen direkt neben J5 (Platinendatei v0.4.3d), der 40-Pin-Adapter bleibt unberührt (User 2026-10-31).</li>
 <li>TunerStudio (gerechnet, 50 psi/V): Pin A9, Pressure at 0 V = −25 psi (−1,72 bar), at 5 V = 225 psi (15,51 bar). Motor steht → Anzeige ≈ 0.</li>
 <li>Lötplan für Öldruck + G22: <a href="loetplan.html" style="color:#8cf">loetplan.html</a></li>
 <li>Offen: Einbauort am Block, J5 am Board prüfen (gleiche Prüfung wie beim G22).</li>
@@ -321,10 +321,8 @@ const SOLL = FIXED.concat([
    notes:['Pin 1 → +12 V Kl. 15, Sicherung', 'Pin 3 → Masse Motorblock (wie Pin 36)',
           'J5 am Board, nicht am Adapter', 'erst messen: nur Open Collector direkt', 'kein Vorwiderstand, nie 12 V an J5']},
  {id:'oil', side:'R', st:'new', name:'Öldrucksensor', sub:'Flylin JY202216 · 200 PSI · 0,5–4,5 V', rows:[
-   {pin:26, lab:'+5 V · rot (mit Nocke geteilt)', c:'rot', isnew:true},
-   {pin:36, lab:'Masse · schwarz', c:'schwarz', isnew:true},
    {pin:'J5-A9', lab:'Signal · blau', c:'blau', isnew:true}],
-   notes:['Wert per Pi/CAN nach vorn (festgelegt 31.10.)', 'A9: Vorschlag, J5-Reihenfolge am Board prüfen',
+   notes:['rot → J1 (5 V), schwarz → J6 (GND), beide neben J5', 'Wert per Pi/CAN nach vorn (festgelegt 31.10.)', 'A9: Vorschlag, J5-Reihenfolge am Board prüfen',
           'TS: A9, 0 V = −25 psi, 5 V = 225 psi']}
 ]);
 // Pins outside the IDC40: header J5 in the proto area; order VSS, D21, A10, A9 from v0.4.3d.kicad_pcb, not checked on the real board.
