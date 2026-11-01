@@ -5,7 +5,7 @@ import { createSim, GATE_X, GATE_TRAVEL, GATE_NAMES, A_STROKE, A_CYL_STROKE, A_S
 import {
   HM20, HM25, G_BODY, A_BODY, B_BODY, WALL_X, WALL_T, FLOOR_T, FLOOR_EXT, RIGID, HOLE_D, CLEVIS, FK32, AX_Y,
   BRACKET, SLED_BRACKET, RAIL, CARRIAGE, SLED_T, SLED_W, ROW_Z, G_Z, POTI_Z, G_ROD_END0, G_X0, B_ROD_END0, B_OFFSET,
-  A_ROD_END0, A_X0, CB, PLATE, GUSSET, G_BRACKET_X, A_BRACKET_X, SLED_TOP, SLED, RAIL_X0, MITN_BACK0,
+  A_ROD_END0, A_X0, CB, PLATE, GUSSET, WALL_H, G_BRACKET_X, A_BRACKET_X, SLED_TOP, SLED, RAIL_X0, MITN_BACK0,
 } from './boxgeo.js';
 
 const CYL_R = HM20.D / 2;
@@ -221,7 +221,7 @@ function wire() {
 }
 const gWire = wire(), rowWire = wire();
 world.add(gWire, rowWire);
-world.add(info(box(WALL_T, CB.h - FLOOR_T, CB.z1 - CB.z0, mat.alu, WALL_X + WALL_T / 2, FLOOR_T + (CB.h - FLOOR_T) / 2, (CB.z0 + CB.z1) / 2),
+world.add(info(box(WALL_T, WALL_H, CB.z1 - CB.z0, mat.alu, WALL_X + WALL_T / 2, FLOOR_T + WALL_H / 2, (CB.z0 + CB.z1) / 2),
   'Stirnwand = Seil-Widerlager', `Blech ${WALL_T} mm mit Clip-Bohrungen Ø ${HOLE_D.G} (Wählseil) / Ø ${HOLE_D.R} (Schaltseil)`,
   'Die Seilenden clipsen direkt in die Boxwand ein wie im Original-Schaltgehäuse. Wand mit der Grundplatte verschweißt und außen mit drei Knotenblechen abgestützt – sie nimmt die volle Seilkraft auf.'));
 for (const z of GUSSET.z) {

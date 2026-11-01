@@ -22,7 +22,7 @@ test('rail carries the sled over the whole A stroke', () => {
 });
 
 test('everything fits inside the box', () => {
-  assert.ok(g.A_X0 > g.CB.x0 + g.WALL_T);
+  assert.ok(g.A_X0 - (g.CB.x0 + g.WALL_T) >= 5, 'at least 5 mm air behind A');
   assert.ok(g.A_BRACKET_X - g.BRACKET.foot > g.CB.x0 + g.WALL_T);
   assert.ok(g.RAIL_X0 + g.RAIL.len < g.WALL_X - g.RIGID.R);
   assert.ok(g.AX_Y + g.HM25.D / 2 < g.CB.h);

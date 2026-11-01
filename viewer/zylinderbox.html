@@ -39,7 +39,7 @@
 <body>
 <main>
 <h1>Zylinderbox – Bauplan (Entwurf v1)</h1>
-<div class="sub">Stand 2026-11-01 · Doku: Vault <code>Buggy/Zylinderbox.md</code> · 3D: <a href="./">Viewer</a> (Ansicht „Box“) · Rechnung: <a href="auslegung.html">auslegung.html</a> · Maße kommen aus <code>boxgeo.js</code>, dieselben wie im 3D-Viewer</div>
+<div class="sub">Stand 2026-11-01 · Doku: Vault <code>Buggy/Zylinderbox.md</code> · 3D: <a href="./">Viewer</a> (Ansicht „Box“) · Rechnung: <a href="auslegung.html">auslegung.html</a> · <b>Für die Fertigung gilt der <a href="zeichnungen.html">Zeichnungssatz</a> (<a href="downloads/Zylinderbox-Zeichnungen.pdf">PDF</a>)</b> · Maße kommen aus <code>boxgeo.js</code>, dieselben wie im 3D-Viewer</div>
 
 <div class="box">
 <b>Festgelegt (User, 2026-11-01):</b> Die Zylinder sitzen in Eigenbau-Lagerböcken: Ø-22,5-Bohrung, Kopfgewinde M22 × 1,5, Mutter RM-25. Das Grundgerüst (Grundplatte, Stirnwand, Knotenbleche) wird geschweißt, alles andere geschraubt.<br>
@@ -100,7 +100,7 @@
   <li><b>Prüfen</b> (orangener Kasten oben). Airtec-Teile, Schiene und Wagen müssen dafür da sein.</li>
   <li><b>Material besorgen:</b> Bleche, Alu-Winkel und Normteile laut Liste (Metallhändler, Reststücke reichen).</li>
   <li><b>Kollege schweißt das Grundgerüst</b> (Teile 1–3): Stirnwand rechtwinklig auf die Platte, Knotenbleche außen. Danach die Clip-Bohrungen in die Stirnwand.</li>
-  <li><b>Grundplatte bohren:</b> M6 für die Lagerböcke. Für die Schiene die Schiene selbst auflegen, auf q = <span class="q-row"></span> ausrichten und die Löcher übertragen (M3). Dann die Befestigungslöcher, M4 in die Seitenkanten für die Haube und M4 für die Rückwand-Lasche.</li>
+  <li><b>Grundplatte bohren:</b> Lochtabelle im Zeichnungssatz (BGY-ZB-02): M6 für Lagerböcke und Befestigung, M3 für die Schiene (vorher an der Schiene prüfen), M4 für die Rückwand-Lasche. Die Haube hält mit 4 Blindnietmuttern M4 in Stirnwand und Rückwand.</li>
   <li><b>Böcke und Schlitten:</b> Winkel auf 50 mm ablängen. Ø 22,5 mit Stufenbohrer, Langlöcher fräsen oder als Doppelbohrung mit Feile, M10 × 1,25 in den Mitnehmer. Wagen mit Senkschrauben an den Schlitten, dann die Böcke an den Schlitten.</li>
   <li><b>Schlitten aufsetzen:</b> Muss über die <span class="a-stroke"></span> mm Weg ohne Klemmen laufen.</li>
   <li><b>Vormontieren:</b> Zylinder in die Böcke stecken, RM-25 vorn nur handfest. An A die Anschlaghülse aufschieben, FK-32 aufschrauben und in den Mitnehmer drehen, mit RL-25 kontern. RD-20 an G und B mit RL-20 kontern, die Poti-Lasche zwischen RL-20 und RD-20 an G klemmen.</li>
@@ -114,7 +114,7 @@
     </ol>
   </li>
   <li><b>Probelauf mit 7 bar:</b> Sensoren ZS-6701 mit den Spannbändern NT-550 verschieben, bis die LED in der Endlage schaltet (B „aus“ bei ~21 mm). Drossel an G auf ~100 mm/s.</li>
-  <li><b>Schließen:</b> Rückwand mit Tülle und Kabelverschraubung, Schläuche mit Schlaufe zum Schlitten (B fährt <span class="a-stroke"></span> mm mit), Haube aufschrauben. Ablaufbohrung Ø 6 an der tiefsten Stelle der Einbaulage.</li>
+  <li><b>Schließen:</b> Rückwand mit Tülle und Kabelverschraubung, Schläuche mit Schlaufe zum Schlitten (B fährt <span class="a-stroke"></span> mm mit), Haube aufsetzen und an den Blindnietmuttern verschrauben. Ablaufbohrung Ø 6 an der tiefsten Stelle der Einbaulage.</li>
 </ol>
 
 <h2>6 Offen</h2>
@@ -262,7 +262,7 @@ function svg(id, w, h) {
 
 // ---------- end wall (seen from outside: poti side on the right)
 {
-  const Wd = g.CB.z1 - g.CB.z0, Hh = g.CB.h - g.FLOOR_T, M = 30;
+  const Wd = g.CB.z1 - g.CB.z0, Hh = g.WALL_H, M = 30;
   const s = svg('wall', Wd + 2 * M + 20, Hh + g.FLOOR_T + 2 * M + 10);
   const QX = (qq) => M + 10 + (Wd - qq), HY = (h) => M + Hh - h;
   rect(s, QX(Wd), HY(Hh), Wd, Hh, { fill: C.plate });
@@ -368,16 +368,16 @@ const plateHoles = [];
   for (const [x, z] of [[g.CB.x1 + 20, g.G_Z], [g.CB.x1 + 20, g.ROW_Z], [g.CB.x0 + 20, g.CB.z0 + 20], [g.CB.x0 + 20, g.CB.z1 - 20]]) add(x, z, 'M6 Befestigung (Puffer)', C.dim);
   for (let i = 0; i < g.RAIL.len / g.RAIL.pitch; i++) circ(s, X(g.RAIL_X0 + g.RAIL.pitch / 2 + i * g.RAIL.pitch), Z(g.ROW_Z), 1.2, { stroke: '#aaa' });
   text(s, X(g.PLATE.x0) + W * k / 2, Z(g.PLATE.z1) + 14, 'blau M6 Böcke · gelb M6 Befestigung · grau M3 Schiene (mit Schiene abnehmen)', { 'font-size': 8 });
-  text(s, X(g.PLATE.x0) + W * k / 2, Z(g.PLATE.z1) + 26, 'Seitenkanten: je 4 × M4 für die Haube · hinten 2 × M4 Rückwand-Lasche', { 'font-size': 8 });
+  text(s, X(g.PLATE.x0) + W * k / 2, Z(g.PLATE.z1) + 26, 'hinten 2 × M4 Rückwand-Lasche · genaue Koordinaten: Zeichnungssatz BGY-ZB-02', { 'font-size': 8 });
   const t = document.getElementById('holes');
   for (const [w, dd, qq] of plateHoles) t.insertRow().innerHTML = `<td>${w}</td><td class="n">${r1(dd)}</td><td class="n">${r1(qq)}</td>`;
 }
 
 // ---------- parts + standard parts
 {
-  const L = r1(g.PLATE.x1 - g.PLATE.x0), Wd = g.CB.z1 - g.CB.z0, Hh = g.CB.h - g.FLOOR_T, BL = r1(g.CB.x1 - g.CB.x0);
+  const L = r1(g.PLATE.x1 - g.PLATE.x0), Wd = g.CB.z1 - g.CB.z0, Hh = g.WALL_H, BL = r1(g.CB.x1 - g.CB.x0);
   const parts = [
-    ['1', 'Grundplatte', `Alu ${g.FLOOR_T} mm, EN AW-5083`, `${L} × ${Wd}`, 1, 'Bohrbild Abschnitt 4, Gewinde M6/M4/M3', 'Kollege (Schweißen) / selbst (Bohren)'],
+    ['1', 'Grundplatte', `Alu ${g.FLOOR_T} mm, EN AW-5083`, `${L} × ${Wd}`, 1, 'Lochtabelle BGY-ZB-02, Gewinde M6/M4/M3', 'Kollege (Schweißen) / selbst (Bohren)'],
     ['2', 'Stirnwand', 'Alu 2 mm, AlMg3', `${Wd} × ${Hh}`, 1, `Ø ${g.HOLE_D.G} / Ø ${g.HOLE_D.R} nach dem Schweißen`, 'Kollege'],
     ['3', 'Knotenblech', `Alu ${g.GUSSET.t} mm`, `Dreieck ${g.GUSSET.base} × ${g.GUSSET.h}`, 3, 'an Wand + Platte schweißen', 'Kollege'],
     ['4', 'Lagerbock G, A', 'Alu-Winkel 60 × 60 × 6', `Länge ${B.w}`, 2, `Ø ${B.hole}, 2 Langlöcher`, 'selbst'],
@@ -386,8 +386,8 @@ const plateHoles = [];
     ['7', 'Poti-Lasche', 'Alu 3 mm', `~55 × 16`, 1, `Ø 8,5 (Stange G) und Bohrung für Poti-Auge, Abstand ${r1(g.G_Z - g.POTI_Z)}`, 'selbst'],
     ['8', 'Poti-Halter', 'Alu-Winkel', 'nach Lieferung', 1, 'Langloch längs', 'selbst'],
     ['9', 'Anschlaghülse A', 'Alu/Stahl Rundmaterial Ø 16', '40 lang, innen Ø 10,5', 1, 'Passscheiben M10 dazu', 'selbst (To-Do)'],
-    ['10', 'Haube', 'Alu 1,5 mm, U gekantet', `Deckel ${Wd + 3}, Seiten ${g.CB.h} hoch, Länge ${BL}`, 1, 'seitlich 4 × M4 je Seite in die Plattenkante', 'Kantbank (Kollege?)'],
-    ['11', 'Rückwand', 'Alu 1,5 mm', `${Wd} × ${Hh} + Lasche 15`, 1, 'Tülle Schläuche (Bohrung nach Tülle), Ø 16,5 für M16', 'selbst'],
+    ['10', 'Haube', 'Alu 1,5 mm, gekantet', 'außen 664 × 156 × 83, Laschen vorn/hinten 18', 1, '4 × Ø 4,5 in den Laschen (BGY-ZB-06)', 'Metallbauer'],
+    ['11', 'Rückwand', 'Alu 1,5 mm', `${Wd} × ${Hh} + Lasche 15`, 1, 'Tülle Schläuche (Bohrung nach Tülle), Ø 16,5 für M16, 2 × Blindnietmutter M4 (BGY-ZB-03)', 'Metallbauer'],
   ];
   const t = document.getElementById('parts');
   for (const p of parts) t.insertRow().innerHTML = p.map((c, i) => `<td${i === 4 ? ' class="n"' : ''}>${c}</td>`).join('');
@@ -399,7 +399,8 @@ const plateHoles = [];
     ['Senkschraube M5 × 10 (ISO 10642), nicht länger', 4, 'Bock B und Mitnehmer auf den Schlitten'],
     ['Senkschraube M3 (ISO 10642), Länge nach Gewindetiefe Wagen', 8, 'Wagen an den Schlitten'],
     ['Zylinderschraube M3 × 8', 8, 'Schiene auf die Platte (Senkbohrung der Schiene)'],
-    ['Linsenschraube M4 × 8', 10, 'Haube, Rückwand'],
+    ['Linsenschraube M4 × 8', 6, 'Haube (4), Rückwand-Lasche (2)'],
+    ['Blindnietmutter M4', 4, 'in Stirnwand und Rückwand (setzt der Metallbauer)'],
     ['Gummitülle (6 Schläuche Ø 6) + Kabelverschraubung M16', '1 + 1', 'Rückwand'],
     ['Gummipuffer M6 (vorhanden) oder Schrauben M6', 4, 'Befestigung im Rahmen; Bolzen höchstens 8 mm einschrauben'],
   ];

@@ -55,9 +55,13 @@ export const A_ROD_END0 = B_REAR0 - B_OFFSET;
 export const A_HEAD = A_ROD_END0 - HM25.WF - A_STOP;          // stop sleeve keeps the rod 12 mm out
 export const A_X0 = A_HEAD - A_BODY;
 
-export const CB = { x0: A_X0 - 5 - WALL_T, x1: WALL_X + WALL_T, z0: POTI_Z - 8 - GAP - WALL_T, z1: CB_Z1, h: Math.ceil(AX_Y + HM25.D / 2 + 20) };
+// outer length rounded for fabrication (>= 5 mm air behind A, checked in the tests)
+export const BOX_L = 660;
+export const CB = { x0: WALL_X + WALL_T - BOX_L, x1: WALL_X + WALL_T, z0: POTI_Z - 8 - GAP - WALL_T, z1: CB_Z1, h: Math.ceil(AX_Y + HM25.D / 2 + 20) };
 export const PLATE = { x0: CB.x0, x1: CB.x1 + FLOOR_EXT, z0: CB.z0, z1: CB.z1 };
-export const GUSSET = { t: 4, base: FLOOR_EXT, h: 55, z: [(CB.z0 + G_Z) / 2, (G_Z + ROW_Z) / 2, CB.z1 - 5] };
+export const LID_T = 1.5;
+export const WALL_H = CB.h - FLOOR_T - LID_T - 0.5;   // end and rear wall, 0.5 mm below the cover
+export const GUSSET = { t: 4, base: FLOOR_EXT, h: 55, z: [26, 87, 146].map((q) => CB.z0 + q) };
 
 // brackets: front face sits nutGap behind the head face (nut in front), foot points to the rear
 export const G_BRACKET_X = G_HEAD - BRACKET.nutGap;
@@ -65,7 +69,7 @@ export const A_BRACKET_X = A_HEAD - BRACKET.nutGap;
 // sled at a = 0: from the drive bracket back face to the B bracket front face
 export const SLED_TOP = FLOOR_T + RAIL.h + SLED_T;
 export const SLED = { x0: MITN_BACK0, x1: B_HEAD0 - BRACKET.nutGap };
-export const RAIL_X0 = SLED.x0 - (RAIL.len - (SLED.x1 - SLED.x0) - A_STROKE) / 2;
+export const RAIL_X0 = PLATE.x0 + Math.round(SLED.x0 - (RAIL.len - (SLED.x1 - SLED.x0) - A_STROKE) / 2 - PLATE.x0);
 
 // distance from the inner face of the end wall (how the plan is dimensioned)
 export const fromWall = (x) => Math.round((WALL_X - x) * 10) / 10;
