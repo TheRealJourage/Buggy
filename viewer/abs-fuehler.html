@@ -27,10 +27,10 @@
 <div id="bar">
   <b>ABS-Fühler hinten</b>
   <span>Fühler durch:</span>
-  <button data-side="top" class="active">Top</button>
+  <button data-side="left" class="active">Seite vorn (gewählt)</button>
+  <button data-side="right">Seite hinten</button>
+  <button data-side="top">Top</button>
   <button data-side="bottom">Boden</button>
-  <button data-side="left">Seite A</button>
-  <button data-side="right">Seite B</button>
   <span>Zahnkranz außen:</span>
   <button data-ring="73.8" class="active">73,8</button>
   <button data-ring="81">81</button>
@@ -50,7 +50,7 @@
   </table>
   <span class="warn">Würfelmaße aus den SolidWorks-Dateien gelesen (Front 120 × 160 × 8, Bohrung Ø 85, Seiten innen ±47, Top/Boden innen ±66) – Hypothese, nicht nachgemessen.
   Fühler Spitze→Flansch 28 mm = Einbautiefe 3B0 927 807 G / Bosch 0 265 006 573 (ERA-Katalog); für den verbauten …574 Hypothese. Würfeltiefe, Lagerflansch, Gelenk und Fühlerflansch sind Platzhalter. Zahnkranz 73,8 (Codex, Katalog A4 B5 quattro hinten) oder ~81 (Claude, abgeleitet) – offen.
-  Schraubenköpfe der Lagerbefestigung im Würfel nicht gezeichnet.</span>
+  Lagerschrauben: 2 oben, 2 unten (User), genaue Lage Platzhalter. Sockel 10 mm, Schraublasche (20 mm, M6) und Flanschform: Vorschlag/Platzhalter – am neuen Fühler messen.</span>
 </div>
 <div id="hover"></div>
 <script type="module">
@@ -66,10 +66,11 @@ const SENSOR_X = 27, SENSOR_D = 18;
 const PLATE = {
   top:    { dir: new THREE.Vector3(0, 0, 1),  inner: TOP_IN,  t: TOP_T,  name: 'Top-Platte 10 mm' },
   bottom: { dir: new THREE.Vector3(0, 0, -1), inner: TOP_IN,  t: BOT_T,  name: 'Boden-Platte 8 mm' },
-  left:   { dir: new THREE.Vector3(0, 1, 0),  inner: SIDE_IN, t: SIDE_T, name: 'Seitenplatte A 8 mm' },
-  right:  { dir: new THREE.Vector3(0, -1, 0), inner: SIDE_IN, t: SIDE_T, name: 'Seitenplatte B 8 mm' },
+  left:   { dir: new THREE.Vector3(0, 1, 0),  inner: SIDE_IN, t: SIDE_T, name: 'Seitenplatte vorn 8 mm', side: true },
+  right:  { dir: new THREE.Vector3(0, -1, 0), inner: SIDE_IN, t: SIDE_T, name: 'Seitenplatte hinten 8 mm', side: true },
 };
-const state = { side: 'top', ring: 73.8 };
+const state = { side: 'left', ring: 73.8 };
+const SOCKEL_H = 10, EAR = 20, SCREW = 6; // ear offset + M6: placeholders
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(devicePixelRatio);
@@ -122,8 +123,8 @@ const steel = mat(0x8a929a, { transparent: true, opacity: 0.35, depthWrite: fals
   g.applyMatrix4(new THREE.Matrix4().set(0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1));
   add(g, steel, 'Front-Platte 8 mm, Bohrung Ø 85 (Radlager)', cube);
 }
-boxAt(FRONT_T, FRONT_T + DEPTH, SIDE_IN, SIDE_IN + SIDE_T, -TOP_IN, TOP_IN, steel, 'Seitenplatte A 8 mm (innen 47 mm von der Achse)', cube);
-boxAt(FRONT_T, FRONT_T + DEPTH, -SIDE_IN - SIDE_T, -SIDE_IN, -TOP_IN, TOP_IN, steel, 'Seitenplatte B 8 mm (innen 47 mm von der Achse)', cube);
+boxAt(FRONT_T, FRONT_T + DEPTH, SIDE_IN, SIDE_IN + SIDE_T, -TOP_IN, TOP_IN, steel, 'Seitenplatte vorn 8 mm (innen 47 mm von der Achse) – Fühler hier', cube);
+boxAt(FRONT_T, FRONT_T + DEPTH, -SIDE_IN - SIDE_T, -SIDE_IN, -TOP_IN, TOP_IN, steel, 'Seitenplatte hinten 8 mm (innen 47 mm von der Achse)', cube);
 boxAt(FRONT_T, FRONT_T + DEPTH, -SIDE_IN - SIDE_T, SIDE_IN + SIDE_T, TOP_IN, TOP_IN + TOP_T, steel, 'Top-Platte 10 mm (innen 66 mm von der Achse), Träger-Aufnahme', cube);
 boxAt(FRONT_T, FRONT_T + DEPTH, -SIDE_IN - SIDE_T, SIDE_IN + SIDE_T, -TOP_IN - BOT_T, -TOP_IN, steel, 'Boden-Platte 8 mm (innen 66 mm von der Achse), Träger-Aufnahme', cube);
 
@@ -133,6 +134,14 @@ cylX(65, -12, 0, mat(0x6d7a86), 'Radlagerflansch (Platzhalter Ø 130 × 12)', pa
 cylX(84.75 / 2, 0, 40, mat(0x9fb0c0), 'Radlager Ø 84,75 (User), Länge Platzhalter', parts, 30);
 const ringGroup = new THREE.Group(); parts.add(ringGroup);
 cylX(16, 40, FRONT_T + DEPTH + 60, mat(0x555a60), 'Antriebswelle W8 (schematisch)', parts);
+
+// bearing bolts M12 hex from inside, 2 top / 2 bottom (user); positions placeholder
+for (const [y, z] of [[-27, 50], [27, 50], [-27, -50], [27, -50]]) {
+  const h = add(new THREE.CylinderGeometry(10, 10, 7.5, 6), mat(0xb0b0b0), 'Lagerschraube M12 Sechskant + Scheibe, Kopf innen (Lage Platzhalter, User: 2 oben, 2 unten)', scene);
+  h.rotation.z = Math.PI / 2; h.position.set(FRONT_T + 2.5 + 3.75, y, z);
+  const w = add(new THREE.CylinderGeometry(12, 12, 2.5, 24), mat(0x909090), 'Scheibe M12', scene);
+  w.rotation.z = Math.PI / 2; w.position.set(FRONT_T + 1.25, y, z);
+}
 
 // sensor
 const sensorGroup = new THREE.Group(); scene.add(sensorGroup);
@@ -160,27 +169,39 @@ function rebuild() {
   const body = new THREE.CylinderGeometry(SENSOR_D / 2 - 1, SENSOR_D / 2 - 1, depth, 32);
   const m = add(body, sensorMat, `Fühler Ø ~17 (Bohrung Ø 18), Spitze ${rTip.toFixed(1).replace('.', ',')} mm von der Achse`, sensorGroup);
   m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d); m.position.copy(at((rTip + rFl) / 2));
-  // flange with screw ear, placeholder 40 x 20 x 5
-  const fl = add(new THREE.BoxGeometry(40, 5, 20), flangeMat, 'Fühlerflansch mit Schraublasche (Platzhalter 40 × 20 × 5)', sensorGroup);
-  fl.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d); fl.position.copy(at(rFl + 2.5));
+  // flange: round head + ear towards +x (inside), screw M6 – placeholders
+  const up = new THREE.Vector3(0, 1, 0);
+  const head = add(new THREE.CylinderGeometry(12, 12, 5, 32), flangeMat, 'Fühlerkopf/Flansch (Form Platzhalter)', sensorGroup);
+  head.quaternion.setFromUnitVectors(up, d); head.position.copy(at(rFl + 2.5));
+  const ear = add(new THREE.BoxGeometry(EAR, 5, 14), flangeMat, `Schraublasche, Loch ${EAR} mm neben Fühlermitte, zeigt nach innen (Platzhalter)`, sensorGroup);
+  ear.quaternion.setFromUnitVectors(up, d); ear.position.copy(at(rFl + 2.5)).add(new THREE.Vector3(EAR / 2, 0, 0));
+  const screw = add(new THREE.CylinderGeometry(SCREW / 2, SCREW / 2, 26, 16), mat(0xc8c8c8), `Schraube M${SCREW} (Platzhalter) in Gewinde im Sockel`, sensorGroup);
+  screw.quaternion.setFromUnitVectors(up, d); screw.position.copy(at(rFl - 6)).add(new THREE.Vector3(EAR, 0, 0));
   // cable
   const cab = add(new THREE.CylinderGeometry(3, 3, 40, 12), mat(0x111111), 'Kabel', sensorGroup);
   cab.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d); cab.position.copy(at(rFl + 25));
   // bore through plate
   const bore = add(new THREE.CylinderGeometry(SENSOR_D / 2, SENSOR_D / 2, p.t + 0.4, 32), holeMat, `Bohrung Ø 18 in ${p.name}, Mitte ${SENSOR_X} mm hinter Außenfläche Front`, sensorGroup);
   bore.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d); bore.position.copy(at(p.inner + p.t / 2));
-  // spacer between plate and flange
+  // side: welded block (sockel) 10 mm + shims; top/bottom: plain spacer
   const spacer = rFl - rOut;
-  if (spacer > 0.05) {
-    const s = add(new THREE.CylinderGeometry(14, 14, spacer, 32, 1, false), shimMat, `Distanzstück/Scheiben ${spacer.toFixed(1).replace('.', ',')} mm`, sensorGroup);
-    s.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d); s.position.copy(at(rOut + spacer / 2));
+  const sock = p.side ? Math.min(SOCKEL_H, Math.max(spacer, 0)) : 0;
+  if (sock > 0.05) {
+    const b = add(new THREE.BoxGeometry(EAR + 32, sock, 32), mat(0x6f8fa8), `Sockel ${sock} mm, angeschweißt, Ø-18-Durchgang + Gewinde M${SCREW} (Vorschlag Claude)`, sensorGroup);
+    b.quaternion.setFromUnitVectors(up, d); b.position.copy(at(rOut + sock / 2)).add(new THREE.Vector3(EAR / 2, 0, 0));
+  }
+  const shim = spacer - sock;
+  if (shim > 0.05) {
+    const sh = add(new THREE.BoxGeometry(EAR + 24, shim, 24), shimMat, `Unterlegscheiben/Blech ${shim.toFixed(1).replace('.', ',')} mm`, sensorGroup);
+    sh.quaternion.setFromUnitVectors(up, d); sh.position.copy(at(rOut + sock + shim / 2)).add(new THREE.Vector3(EAR / 2, 0, 0));
   }
   const fmt = v => v.toFixed(1).replace('.', ',');
   el('rTip').textContent = `${fmt(rTip)} mm von der Achse (Zahnkranz ${fmt(rRing)} + Spalt ${fmt(gap)})`;
   el('rFl').textContent = `${fmt(rFl)} mm von der Achse (Spitze + ${fmt(depth)})`;
   el('rPl').textContent = `${p.name}: innen ${p.inner}, außen ${rOut} mm von der Achse`;
   const res = el('res');
-  if (spacer >= 0) res.innerHTML = `<span class="ok">Flansch ${fmt(spacer)} mm über der Platte</span> → Distanzstück/Scheiben ${fmt(spacer)} mm (orange)`;
+  if (spacer >= 0 && p.side) res.innerHTML = `<span class="ok">Flansch ${fmt(spacer)} mm über der Platte</span> → Sockel ${fmt(sock)} mm (blau) + Scheiben ${fmt(Math.max(shim, 0))} mm (orange)`;
+  else if (spacer >= 0) res.innerHTML = `<span class="ok">Flansch ${fmt(spacer)} mm über der Platte</span> → Distanzstück ${fmt(spacer)} mm (orange)`;
   else res.innerHTML = `<span class="bad">Flansch ${fmt(-spacer)} mm in der Platte</span> → Platte ansenken/aussparen oder kürzerer Fühler`;
 }
 
