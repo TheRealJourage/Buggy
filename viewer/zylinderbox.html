@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Zylinderbox Bauplan</title>
+<style>
+  body { margin: 0; background: #111; color: #ddd; font-family: system-ui, sans-serif; font-size: 15px; line-height: 1.45; }
+  main { max-width: 1100px; margin: 0 auto; padding: 14px; }
+  h1 { font-size: 20px; margin: 4px 0; }
+  h2 { font-size: 16px; color: #8ab; margin: 26px 0 6px; border-bottom: 1px solid #333; padding-bottom: 3px; }
+  h3 { font-size: 14px; margin: 14px 0 4px; }
+  a { color: #8cf; }
+  .sub { color: #999; font-size: 13px; }
+  .box { background: #1b1d22; border: 1px solid #333; border-radius: 6px; padding: 8px 12px; margin: 8px 0; }
+  .warn { border-color: #a80; }
+  .warn b { color: #fc6; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 6px 0; }
+  th, td { border-bottom: 1px solid #2c2f35; padding: 4px 6px; text-align: left; vertical-align: top; }
+  th { color: #8ab; font-weight: 600; }
+  td.n { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  svg { display: block; width: 100%; height: auto; background: #16181c; border-radius: 6px; margin: 6px 0; }
+  svg text { fill: #ddd; font-family: system-ui, sans-serif; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px; }
+  ol li { margin: 4px 0; }
+  .tag { font-size: 12px; padding: 1px 6px; border-radius: 3px; background: #333; margin-right: 4px; }
+  .hyp { color: #fc6; }
+  @media print {
+    body { background: #fff; color: #000; font-size: 11pt; }
+    svg { background: #fff; }
+    svg text { fill: #000; }
+    .box { background: #fff; }
+    h2 { color: #000; }
+    a { color: #000; }
+  }
+</style>
+</head>
+<body>
+<main>
+<h1>Zylinderbox – Bauplan (Entwurf v1)</h1>
+<div class="sub">Stand 2026-11-01 · Doku: Vault <code>Buggy/Zylinderbox.md</code> · 3D: <a href="./">Viewer</a> (Ansicht „Box“) · Rechnung: <a href="auslegung.html">auslegung.html</a> · Maße kommen aus <code>boxgeo.js</code>, dieselben wie im 3D-Viewer</div>
+
+<div class="box">
+<b>Festgelegt (User, 2026-11-01):</b> Die Zylinder sitzen in Eigenbau-Lagerböcken: Ø-22,5-Bohrung, Kopfgewinde M22 × 1,5, Mutter RM-25. Das Grundgerüst (Grundplatte, Stirnwand, Knotenbleche) wird geschweißt, alles andere geschraubt.<br>
+<b>Bemaßung:</b> <b>d</b> = Abstand ab der <b>Innenseite der Stirnwand</b> nach hinten · <b>q</b> = Abstand quer ab der <b>Außenkante auf der Poti-Seite</b> · <b>h</b> = Höhe über der <b>Oberseite der Grundplatte</b>. Alle Zylinderachsen liegen auf h = <span id="axh"></span> mm.
+</div>
+
+<div class="box warn">
+<b>Vor dem Bohren prüfen</b> (von diesen Punkten hängen Maße ab):
+<ol>
+  <li><b>Clip-Form der Seilenden:</b> rund oder mit Nase? Außenmaß des Bundes vor der Wand? → Stirnwand-Bohrungen und Abstand der Knotenbleche</li>
+  <li><b>Seilauge höchstens 8 mm dick</b> (Schlitz am RD-20)?</li>
+  <li>Sobald die Airtec-Teile da sind: <b>Länge des Kopfgewindes am HM</b>, Mutter RM-25 dabei? Wie lang ist der Gewindezapfen am FK-32? Davon hängen der Bockabstand (8 mm) und der Mitnehmer-Spalt (10 mm) ab. Die Langlöcher gleichen ± 6 mm aus</li>
+  <li><b>MGN12-Nachbau:</b> Lochabstand der Schiene und Bohrbild der Wagen am Teil nachmessen. Die Werte unten sind HIWIN-Katalogwerte aus meinem Kenntnisstand und nicht geprüft</li>
+  <li><b>Poti KPZ 125:</b> Länge und Augenbolzen erst nach der Lieferung bekannt → Poti-Halter dann festlegen</li>
+</ol>
+</div>
+
+<h2>1 Draufsicht</h2>
+<div class="sub">Gezeichnet mit allen Zylindern eingefahren (Gang 2/4). Seilseite rechts, Poti-Seite oben. Gestrichelt: Linearführung unter dem Schlitten.</div>
+<div class="scroll"><svg id="top"></svg></div>
+
+<h3>Maßkette (Längen ab Stirnwand innen)</h3>
+<table id="chain"><tr><th>Teil</th><th>d von</th><th>d bis</th><th>q (Achse)</th><th>Hinweis</th></tr></table>
+
+<h2>2 Stirnwand, Ansicht von außen</h2>
+<div class="grid2">
+  <svg id="wall"></svg>
+  <div>
+    <table>
+      <tr><th>Bohrung</th><th>Ø</th><th>q</th><th>h</th></tr>
+      <tr><td>Wählseil (G)</td><td class="n" id="hg-d"></td><td class="n" id="hg-q"></td><td class="n" id="hg-h"></td></tr>
+      <tr><td>Schaltseil (A/B)</td><td class="n" id="hr-d"></td><td class="n" id="hr-q"></td><td class="n" id="hr-h"></td></tr>
+    </table>
+    <p>Die Wand ist <b>2 mm</b> dick, weil die Original-Seilenden in 2-mm-Wände einrasten. Erst schweißen, dann bohren (Verzug), h ab Plattenoberseite messen.</p>
+    <p><b>Knotenbleche</b> (<span id="gt"></span> mm, Dreieck <span id="gb"></span> × <span id="gh"></span> mm) bei q = <span id="gq"></span>, jeweils an Wand und Platte durchgeschweißt.</p>
+    <p class="sub"><b>Abschätzung Claude, warum die Knotenbleche Pflicht sind:</b> Ein Zylinder drückt bei 7 bar mit bis zu ~200 N (<a href="auslegung.html">Rechnung</a>). Bei 40 mm Hebel sind das 8 N·m am Wandfuß. Ein 2-mm-Blech, 152 mm breit, kommt damit auf ~80 MPa Biegespannung. Das liegt etwa bei der Dehngrenze von weichem AlMg3 (Kenntnisstand, Wert nicht geprüft), und neben der Schweißnaht ist das Blech weich. Mit den drei Knotenblechen trägt die Wand nur noch die Felder dazwischen. <span class="hyp">Hypothese:</span> Das reicht. Prüfen: beim Probelauf eine Messuhr an die Wand halten.</p>
+    <p class="sub">Ob sich 2 mm Blech sauber an die 8-mm-Platte schweißen lassen, beurteilt der Kollege.</p>
+  </div>
+</div>
+
+<h2>3 Teileliste und Zuschnitt</h2>
+<table id="parts"><tr><th>#</th><th>Teil</th><th>Material / Halbzeug</th><th>Maß (mm)</th><th>Stk</th><th>Bearbeitung</th><th>Wer</th></tr></table>
+<h3>Normteile und Kaufteile</h3>
+<table id="std"><tr><th>Teil</th><th>Stk</th><th>Wofür</th></tr></table>
+
+<h2>4 Einzelteile</h2>
+<div class="grid2">
+  <div><h3>Lagerbock G und A (2 Stk)</h3><svg id="br60"></svg></div>
+  <div><h3>Lagerbock B und Mitnehmer (je 1 Stk)</h3><svg id="br40"></svg></div>
+  <div><h3>Schlitten B (1 Stk), Draufsicht</h3><svg id="sled"></svg></div>
+</div>
+<h3>Grundplatte, Bohrbild</h3>
+<div class="scroll"><svg id="plate"></svg></div>
+<table id="holes"><tr><th>Loch</th><th>d</th><th>q</th></tr></table>
+
+<h2>5 Bauschritte</h2>
+<ol>
+  <li><b>Prüfen</b> (orangener Kasten oben). Airtec-Teile, Schiene und Wagen müssen dafür da sein.</li>
+  <li><b>Material besorgen:</b> Bleche, Alu-Winkel und Normteile laut Liste (Metallhändler, Reststücke reichen).</li>
+  <li><b>Kollege schweißt das Grundgerüst</b> (Teile 1–3): Stirnwand rechtwinklig auf die Platte, Knotenbleche außen. Danach die Clip-Bohrungen in die Stirnwand.</li>
+  <li><b>Grundplatte bohren:</b> M6 für die Lagerböcke. Für die Schiene die Schiene selbst auflegen, auf q = <span class="q-row"></span> ausrichten und die Löcher übertragen (M3). Dann die Befestigungslöcher, M4 in die Seitenkanten für die Haube und M4 für die Rückwand-Lasche.</li>
+  <li><b>Böcke und Schlitten:</b> Winkel auf 50 mm ablängen. Ø 22,5 mit Stufenbohrer, Langlöcher fräsen oder als Doppelbohrung mit Feile, M10 × 1,25 in den Mitnehmer. Wagen mit Senkschrauben an den Schlitten, dann die Böcke an den Schlitten.</li>
+  <li><b>Schlitten aufsetzen:</b> Muss über die <span class="a-stroke"></span> mm Weg ohne Klemmen laufen.</li>
+  <li><b>Vormontieren:</b> Zylinder in die Böcke stecken, RM-25 vorn nur handfest. An A die Anschlaghülse aufschieben, FK-32 aufschrauben und in den Mitnehmer drehen, mit RL-25 kontern. RD-20 an G und B mit RL-20 kontern, die Poti-Lasche zwischen RL-20 und RD-20 an G klemmen.</li>
+  <li><b>Einstellen mit den Seilen</b> (Getriebe von Hand schalten, alle Zylinder drucklos):
+    <ol type="a">
+      <li>Seilenden in die Stirnwand clipsen.</li>
+      <li><b>G:</b> Getriebe in Gasse R. Die Stange von G um <span class="g-r"></span> mm herausziehen (bis zum Gassenanschlag bleiben dann die 6,5 mm Reserve). Bock G im Langloch schieben, bis der Bolzen frei durch das Wählseil-Auge geht. Festziehen. Kontrolle: Gasse 5 liegt bei <span class="g-5"></span> mm.</li>
+      <li><b>A (Neutral):</b> Getriebe in Neutral, A ganz ausgefahren (Hubende), B ganz eingefahren. Bock A schieben, bis der Bolzen B frei durch das Schaltseil-Auge geht. Festziehen. In jeder Gasse prüfen, ob Neutral frei ist (offener Punkt: Gasse 5 hatte Neutral bei 34,8 mm).</li>
+      <li><b>Gang 2/4:</b> A einfahren. Der Gang muss <b>voll einrasten, bevor die Hülse am Kopf anliegt</b>. Gemessen sind 27,7–27,9 mm, die Hülse gibt <span class="a-stroke"></span> mm frei. Rastet der Gang nicht ganz ein, die Hülse kürzen. Passscheiben verlängern die Hülse und verkürzen damit den Weg nach unten.</li>
+      <li><b>Obere Reihe:</b> B ausfahren. R, 1, 3 und 5 müssen einrasten, bevor B am Hubende ist (gemessen höchstens 28,1 von 40 mm).</li>
+    </ol>
+  </li>
+  <li><b>Probelauf mit 7 bar:</b> Sensoren ZS-6701 mit den Spannbändern NT-550 verschieben, bis die LED in der Endlage schaltet (B „aus“ bei ~21 mm). Drossel an G auf ~100 mm/s.</li>
+  <li><b>Schließen:</b> Rückwand mit Tülle und Kabelverschraubung, Schläuche mit Schlaufe zum Schlitten (B fährt <span class="a-stroke"></span> mm mit), Haube aufschrauben. Ablaufbohrung Ø 6 an der tiefsten Stelle der Einbaulage.</li>
+</ol>
+
+<h2>6 Offen</h2>
+<ul>
+  <li>Einbauort im Rahmen und Biegeradien der Seile</li>
+  <li>Starr oder auf Gummipuffern lagern? Die Befestigungslöcher passen für beides</li>
+  <li>Lage der Ablaufbohrung (hängt vom Einbauort ab)</li>
+  <li>Poti-Halter (nach Lieferung des Potis)</li>
+</ul>
+</main>
+
+<script type="module">
+import * as g from './boxgeo.js';
+import { GATE_X, A_STROKE } from './sim.js';
+
+const r1 = (v) => (Math.round(v * 10) / 10).toLocaleString('de-DE');
+const d = g.fromWall, q = g.fromSide;
+const NS = 'http://www.w3.org/2000/svg';
+const C = { plate: '#2a2e35', line: '#7f97b0', cyl: '#9aa3ad', dark: '#5a606a', red: '#c0504d', dim: '#e0b050', weld: '#e07040', hole: '#16181c' };
+
+function el(parent, tag, attrs, text) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (text !== undefined) e.textContent = text;
+  parent.appendChild(e);
+  return e;
+}
+const rect = (s, x, y, w, h, a = {}) => el(s, 'rect', { x: Math.min(x, x + w), y: Math.min(y, y + h), width: Math.abs(w), height: Math.abs(h), fill: 'none', stroke: C.line, 'stroke-width': 0.8, ...a });
+const line = (s, x1, y1, x2, y2, a = {}) => el(s, 'line', { x1, y1, x2, y2, stroke: C.line, 'stroke-width': 0.6, ...a });
+const circ = (s, cx, cy, r, a = {}) => el(s, 'circle', { cx, cy, r, fill: C.hole, stroke: C.line, 'stroke-width': 0.6, ...a });
+const text = (s, x, y, t, a = {}) => el(s, 'text', { x, y, 'font-size': 8, 'text-anchor': 'middle', ...a }, t);
+function dimH(s, x1, x2, y, label, a = {}) {
+  line(s, x1, y, x2, y, { stroke: C.dim, ...a });
+  for (const x of [x1, x2]) line(s, x, y - 3, x, y + 3, { stroke: C.dim });
+  text(s, (x1 + x2) / 2, y - 2.5, label, { fill: C.dim, 'font-size': 7.5 });
+}
+function dimV(s, x, y1, y2, label) {
+  line(s, x, y1, x, y2, { stroke: C.dim });
+  for (const y of [y1, y2]) line(s, x - 3, y, x + 3, y, { stroke: C.dim });
+  text(s, x - 3, (y1 + y2) / 2 + 2.5, label, { fill: C.dim, 'font-size': 7.5, 'text-anchor': 'end' });
+}
+function svg(id, w, h) {
+  const s = document.getElementById(id);
+  s.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  return s;
+}
+
+// ---------- top view (x right = cable side, z down = away from the poti side)
+{
+  const M = { l: 60, t: 50 };
+  const W = g.PLATE.x1 - g.PLATE.x0, H = g.PLATE.z1 - g.PLATE.z0;
+  const s = svg('top', W + M.l + 30, H + M.t + 80);
+  const X = (x) => x - g.PLATE.x0 + M.l, Z = (z) => z - g.PLATE.z0 + M.t;
+  rect(s, X(g.PLATE.x0), Z(g.PLATE.z0), W, H, { fill: C.plate });
+  rect(s, X(g.WALL_X), Z(g.CB.z0), g.WALL_T, H, { fill: C.cyl, stroke: C.weld });
+  rect(s, X(g.CB.x0), Z(g.CB.z0), 1.5, H, { fill: C.dark });
+  for (const z of g.GUSSET.z) rect(s, X(g.CB.x1), Z(z) - g.GUSSET.t / 2, g.GUSSET.base, g.GUSSET.t, { fill: C.dark, stroke: C.weld });
+  // rail + sled
+  rect(s, X(g.RAIL_X0), Z(g.ROW_Z) - g.RAIL.w / 2, g.RAIL.len, g.RAIL.w, { 'stroke-dasharray': '3 2', stroke: '#888' });
+  rect(s, X(g.SLED.x0), Z(g.ROW_Z) - g.SLED_W / 2, g.SLED.x1 - g.SLED.x0, g.SLED_W, { 'stroke-dasharray': '5 2', fill: '#3a3f48' });
+  // brackets (upright solid, foot light)
+  const bracket = (x, z, b) => {
+    rect(s, X(x) - b.foot, Z(z) - b.w / 2, b.foot - b.t, b.w, { fill: '#4a505a' });
+    rect(s, X(x) - b.t, Z(z) - b.w / 2, b.t, b.w, { fill: C.dark, stroke: '#ccc' });
+  };
+  bracket(g.G_BRACKET_X, g.G_Z, g.BRACKET);
+  bracket(g.A_BRACKET_X, g.ROW_Z, g.BRACKET);
+  bracket(g.SLED.x1, g.ROW_Z, g.SLED_BRACKET);
+  rect(s, X(g.MITN_BACK0), Z(g.ROW_Z) - g.SLED_BRACKET.w / 2, g.SLED_BRACKET.t, g.SLED_BRACKET.w, { fill: C.red });
+  rect(s, X(g.MITN_BACK0) + g.SLED_BRACKET.t, Z(g.ROW_Z) - g.SLED_BRACKET.w / 2, g.SLED_BRACKET.foot - g.SLED_BRACKET.t, g.SLED_BRACKET.w, { fill: '#7a4040' });
+  // cylinders, rods, sleeve, coupling, clevises
+  const cyl = (x0, x1, z, r, fill = C.cyl) => rect(s, X(x0), Z(z) - r, x1 - x0, 2 * r, { fill, stroke: '#ddd', 'stroke-width': 0.5 });
+  cyl(g.G_X0, g.G_HEAD, g.G_Z, g.HM20.D / 2);
+  cyl(g.G_HEAD, g.G_ROD_END0, g.G_Z, g.HM20.rod / 2, '#ccc');
+  cyl(g.G_ROD_END0, g.G_ROD_END0 + g.CLEVIS, g.G_Z, 8, C.dark);
+  cyl(g.A_X0, g.A_HEAD, g.ROW_Z, g.HM25.D / 2);
+  cyl(g.A_HEAD, g.A_ROD_END0, g.ROW_Z, 8, C.red);
+  cyl(g.A_ROD_END0, g.A_ROD_END0 + g.FK32, g.ROW_Z, 11, C.dark);
+  cyl(g.B_REAR0, g.B_HEAD0, g.ROW_Z, g.HM20.D / 2);
+  cyl(g.B_HEAD0, g.B_ROD_END0, g.ROW_Z, g.HM20.rod / 2, '#ccc');
+  cyl(g.B_ROD_END0, g.B_ROD_END0 + g.CLEVIS, g.ROW_Z, 8, C.dark);
+  for (const [k, z] of [['G', g.G_Z], ['R', g.ROW_Z]]) {
+    cyl(g.WALL_X - g.RIGID[k], g.WALL_X, z, g.HOLE_D[k] / 2 - 2, '#6a5a3a');
+    line(s, X(g.WALL_X + g.WALL_T), Z(z), X(g.PLATE.x1) + 20, Z(z), { 'stroke-width': 3, stroke: '#333' });
+  }
+  rect(s, X(g.G_ROD_END0) - 120, Z(g.POTI_Z) - 6, 185, 12, { 'stroke-dasharray': '4 2', stroke: '#aaa' });
+  text(s, X(g.G_ROD_END0) - 27, Z(g.POTI_Z) + 3, 'Poti KPZ 125 (Lage nach Lieferung)', { 'font-size': 6.5 });
+  // labels
+  const lab = (x, z, t, dy = 3) => text(s, X(x), Z(z) + dy, t, { 'font-size': 7 });
+  lab((g.G_X0 + g.G_HEAD) / 2, g.G_Z, 'G  HM-20-040');
+  lab((g.A_X0 + g.A_HEAD) / 2, g.ROW_Z, 'A  HM-25-040');
+  lab((g.B_REAR0 + g.B_HEAD0) / 2, g.ROW_Z, 'B  HM-20-040');
+  lab(g.A_ROD_END0 + g.FK32 / 2, g.ROW_Z, 'FK-32', -14);
+  lab((g.A_HEAD + g.A_ROD_END0) / 2, g.ROW_Z, 'Hülse', -14);
+  lab(g.MITN_BACK0, g.ROW_Z, 'Mitnehmer', 34);
+  lab(g.SLED.x1, g.ROW_Z, 'Bock B', 34);
+  lab(g.G_BRACKET_X - 30, g.G_Z, 'Bock G', -29);
+  lab(g.A_BRACKET_X - 30, g.ROW_Z, 'Bock A', 34);
+  text(s, X(g.WALL_X) - 3, Z(g.CB.z1) + 11, 'Stirnwand', { 'font-size': 7, 'text-anchor': 'end' });
+  lab(g.CB.x0, g.CB.z1, 'Rückwand', 12);
+  text(s, X(g.CB.x1) + 3, Z(g.CB.z1) + 11, 'Knotenbleche', { 'font-size': 7, 'text-anchor': 'start' });
+  text(s, X(g.PLATE.x1) + 18, Z(g.G_Z) - 17, 'Wählseil', { 'font-size': 7, 'text-anchor': 'end' });
+  text(s, X(g.PLATE.x1) + 18, Z(g.ROW_Z) - 17, 'Schaltseil', { 'font-size': 7, 'text-anchor': 'end' });
+  // dimensions
+  const yB = Z(g.PLATE.z1);
+  dimH(s, X(g.PLATE.x0), X(g.PLATE.x1), yB + 50, `Grundplatte ${r1(g.PLATE.x1 - g.PLATE.x0)}`);
+  dimH(s, X(g.CB.x0), X(g.CB.x1), yB + 30, `Box außen ${r1(g.CB.x1 - g.CB.x0)}`);
+  dimH(s, X(g.CB.x1), X(g.PLATE.x1), yB + 30, `${g.FLOOR_EXT}`);
+  const yT = Z(g.PLATE.z0) - 10;
+  for (const [x, t] of [[g.G_BRACKET_X, d(g.G_BRACKET_X)], [g.RAIL_X0 + g.RAIL.len, d(g.RAIL_X0 + g.RAIL.len)], [g.RAIL_X0, d(g.RAIL_X0)], [g.A_BRACKET_X, d(g.A_BRACKET_X)], [g.CB.x0 + g.WALL_T, d(g.CB.x0 + g.WALL_T)]]) {
+    line(s, X(x), yT, X(x), Z(g.PLATE.z0), { stroke: C.dim, 'stroke-dasharray': '1 2' });
+    text(s, X(x), yT - 3, `d ${r1(t)}`, { fill: C.dim, 'font-size': 7 });
+  }
+  text(s, X(g.WALL_X), yT - 3, 'd 0', { fill: C.dim, 'font-size': 7 });
+  const xL = X(g.PLATE.x0) - 6;
+  dimV(s, xL - 30, Z(g.PLATE.z0), Z(g.PLATE.z1), `${r1(H)}`);
+  for (const [z, t] of [[g.POTI_Z, 'Poti'], [g.G_Z, 'G'], [g.ROW_Z, 'A/B']]) {
+    line(s, xL, Z(z), X(g.PLATE.x0), Z(z), { stroke: C.dim, 'stroke-dasharray': '1 2' });
+    text(s, xL - 2, Z(z) + 2.5, `q ${r1(q(z))} ${t}`, { fill: C.dim, 'font-size': 7, 'text-anchor': 'end' });
+  }
+}
+
+// ---------- chain table
+{
+  const rows = [
+    ['Seilauge G (Bolzen, eingefahren)', g.G_ROD_END0 + g.CLEVIS, null, g.G_Z, 'ausgefahren + 40 mm'],
+    ['Zylinder G', g.G_HEAD, g.G_X0, g.G_Z, 'Kopf vorn, Gabel hinten'],
+    ['Lagerbock G (Vorderkante)', g.G_BRACKET_X, g.G_BRACKET_X - g.BRACKET.foot, g.G_Z, `${g.BRACKET.nutGap} mm hinter dem Kopf (Mutter vorn), Langloch ± 6`],
+    ['Schiene MGN12', g.RAIL_X0 + g.RAIL.len, g.RAIL_X0, g.ROW_Z, `${g.RAIL.len} mm`],
+    ['Schlitten (Gang 2/4)', g.SLED.x1, g.SLED.x0, g.ROW_Z, `fährt bis ${A_STROKE} mm nach vorn`],
+    ['Zylinder B (Gang 2/4)', g.B_HEAD0, g.B_REAR0, g.ROW_Z, ''],
+    ['Mitnehmer', g.MITN_FRONT0, g.MITN_BACK0, g.ROW_Z, `${g.MITN_GAP} mm Spalt zu B`],
+    ['FK-32', g.MITN_BACK0, g.A_ROD_END0, g.ROW_Z, `${r1(g.FK32)} mm`],
+    ['Anschlaghülse', g.A_ROD_END0, g.A_HEAD, g.ROW_Z, '40 mm, liegt eingefahren am Kopf'],
+    ['Zylinder A', g.A_HEAD, g.A_X0, g.ROW_Z, ''],
+    ['Lagerbock A (Vorderkante)', g.A_BRACKET_X, g.A_BRACKET_X - g.BRACKET.foot, g.ROW_Z, 'Langloch ± 6'],
+    ['Rückwand innen', g.CB.x0 + g.WALL_T, null, null, `${r1(g.A_X0 - (g.CB.x0 + g.WALL_T))} mm Luft hinter A`],
+  ];
+  const t = document.getElementById('chain');
+  for (const [n, a, b, z, h] of rows) {
+    const tr = t.insertRow();
+    tr.innerHTML = `<td>${n}</td><td class="n">${r1(d(a))}</td><td class="n">${b === null ? '' : r1(d(b))}</td><td class="n">${z === null ? '' : r1(q(z))}</td><td>${h}</td>`;
+  }
+}
+
+// ---------- end wall (seen from outside: poti side on the right)
+{
+  const Wd = g.CB.z1 - g.CB.z0, Hh = g.CB.h - g.FLOOR_T, M = 30;
+  const s = svg('wall', Wd + 2 * M + 20, Hh + g.FLOOR_T + 2 * M + 10);
+  const QX = (qq) => M + 10 + (Wd - qq), HY = (h) => M + Hh - h;
+  rect(s, QX(Wd), HY(Hh), Wd, Hh, { fill: C.plate });
+  rect(s, QX(Wd), HY(0), Wd, g.FLOOR_T, { fill: '#3a3f48' });
+  line(s, QX(Wd), HY(0), QX(0), HY(0), { stroke: C.weld, 'stroke-width': 1.5 });
+  for (const z of g.GUSSET.z) rect(s, QX(q(z)) - g.GUSSET.t / 2, HY(g.GUSSET.h), g.GUSSET.t, g.GUSSET.h, { fill: C.dark, stroke: C.weld });
+  for (const [k, z] of [['G', g.G_Z], ['R', g.ROW_Z]]) {
+    circ(s, QX(q(z)), HY(g.AX_H), g.HOLE_D[k] / 2);
+    line(s, QX(q(z)) - 16, HY(g.AX_H), QX(q(z)) + 16, HY(g.AX_H), { 'stroke-dasharray': '3 1 1 1' });
+    text(s, QX(q(z)), HY(g.AX_H) - g.HOLE_D[k] / 2 - 3, `Ø ${g.HOLE_D[k]}`, { 'font-size': 7 });
+  }
+  dimH(s, QX(Wd), QX(0), HY(Hh) - 8, `${Wd}`);
+  dimH(s, QX(q(g.G_Z)), QX(0), HY(0) + g.FLOOR_T + 12, `q ${q(g.G_Z)}`);
+  dimH(s, QX(q(g.ROW_Z)), QX(0), HY(0) + g.FLOOR_T + 24, `q ${q(g.ROW_Z)}`);
+  dimV(s, QX(Wd) - 4, HY(Hh), HY(0), `${Hh}`);
+  dimV(s, QX(0) + 24, HY(g.AX_H), HY(0), `${g.AX_H}`);
+  text(s, QX(0) + 4, HY(Hh) - 12, 'Poti-Seite', { 'font-size': 6.5, 'text-anchor': 'end' });
+  document.getElementById('hg-d').textContent = g.HOLE_D.G;
+  document.getElementById('hr-d').textContent = g.HOLE_D.R;
+  document.getElementById('hg-q').textContent = q(g.G_Z);
+  document.getElementById('hr-q').textContent = q(g.ROW_Z);
+  document.getElementById('hg-h').textContent = g.AX_H;
+  document.getElementById('hr-h').textContent = g.AX_H;
+  document.getElementById('gt').textContent = g.GUSSET.t;
+  document.getElementById('gb').textContent = g.GUSSET.base;
+  document.getElementById('gh').textContent = g.GUSSET.h;
+  document.getElementById('gq').textContent = g.GUSSET.z.map((z) => r1(q(z))).join(' / ');
+}
+
+// ---------- brackets
+const B = g.BRACKET, SB = g.SLED_BRACKET;
+const SLOT_X = B.t + (B.foot - B.t) / 2, SLOT_Q = 17, SB_HOLE_X = SB.t + (SB.foot - SB.t) / 2, SB_HOLE_Q = 15;
+const SLED_AX = g.AX_Y - g.SLED_TOP;
+{
+  const s = svg('br60', 200, 150);
+  const ox = 20, oy = 20;
+  rect(s, ox, oy + B.h - B.h, B.w, B.h, { fill: C.plate });
+  circ(s, ox + B.w / 2, oy + B.h - g.AX_H, B.hole / 2);
+  text(s, ox + B.w / 2, oy - 5, 'Ansicht von vorn', { 'font-size': 7 });
+  dimH(s, ox, ox + B.w, oy + B.h + 12, `${B.w}`);
+  dimV(s, ox - 4, oy, oy + B.h, `${B.h}`);
+  text(s, ox + B.w / 2, oy + B.h - g.AX_H + 3, `Ø ${r1(B.hole)}`, { 'font-size': 6 });
+  line(s, ox + B.w + 4, oy + B.h - g.AX_H, ox + B.w + 4, oy + B.h, { stroke: C.dim });
+  text(s, ox + B.w + 6, oy + B.h - g.AX_H / 2, `${g.AX_H}`, { fill: C.dim, 'font-size': 7, 'text-anchor': 'start' });
+  // foot from above
+  const fx = 110, fy = 20;
+  rect(s, fx, fy, B.foot, B.w, { fill: C.plate });
+  rect(s, fx, fy, B.t, B.w, { fill: C.dark });
+  for (const dq of [-SLOT_Q, SLOT_Q]) el(s, 'rect', { x: fx + SLOT_X - B.slot / 2, y: fy + B.w / 2 + dq - 3.3, width: B.slot, height: 6.6, rx: 3.3, fill: C.hole, stroke: C.line, 'stroke-width': 0.6 });
+  text(s, fx + B.foot / 2, fy - 5, 'Fuß von oben', { 'font-size': 7 });
+  dimH(s, fx, fx + SLOT_X, fy + B.w + 12, `${SLOT_X}`);
+  text(s, fx + B.foot / 2, fy + B.w + 26, `Langloch 6,6 × ${B.slot}, Abstand ${2 * SLOT_Q}`, { 'font-size': 6.5 });
+  text(s, 100, 140, `Alu-Winkel ${B.h} × ${B.foot} × ${B.t}, Länge ${B.w}. Vorderkante = Seite der Mutter`, { 'font-size': 6.5 });
+}
+{
+  const s = svg('br40', 205, 150);
+  const ox = 20, oy = 25;
+  for (const [i, t, hole] of [[0, 'Bock B', `Ø ${r1(B.hole)}`], [1, 'Mitnehmer', 'M10 × 1,25']]) {
+    const x = ox + i * 70;
+    rect(s, x, oy, SB.w, SB.h, { fill: C.plate });
+    circ(s, x + SB.w / 2, oy + SB.h - SLED_AX, i ? 4.4 : B.hole / 2);
+    text(s, x + SB.w / 2, oy - 6, t, { 'font-size': 7 });
+    text(s, x + SB.w / 2, oy + SB.h + 10, hole, { 'font-size': 6.5 });
+  }
+  dimV(s, ox - 4, oy + SB.h - SLED_AX, oy + SB.h, `${r1(SLED_AX)}`);
+  const fx = 145, fy = 25;
+  rect(s, fx, fy, SB.foot, SB.w, { fill: C.plate });
+  rect(s, fx, fy, SB.t, SB.w, { fill: C.dark });
+  for (const dq of [-SB_HOLE_Q, SB_HOLE_Q]) circ(s, fx + SB_HOLE_X, fy + SB.w / 2 + dq, 2.75);
+  text(s, fx + 15, fy - 6, 'Fuß', { 'font-size': 7 });
+  text(s, 100, 112, `Alu-Winkel ${SB.h} × ${SB.foot} × ${SB.t}, Länge ${SB.w}. Fuß: 2 × Ø 5,5 mit Senkung 90°,`, { 'font-size': 6.5 });
+  text(s, 100, 122, `${r1(SB_HOLE_X)} mm ab Außenseite Steg, Abstand ${2 * SB_HOLE_Q}. Fuß zeigt unter B.`, { 'font-size': 6.5 });
+  text(s, 100, 136, 'Mitnehmer: FK-32 eindrehen, hinten mit RL-25 kontern.', { 'font-size': 6.5 });
+}
+// ---------- sled
+{
+  const L = g.SLED.x1 - g.SLED.x0, Wd = g.SLED_W;
+  const s = svg('sled', L + 70, Wd + 80);
+  const ox = 40, oy = 22;
+  rect(s, ox, oy, L, Wd, { fill: C.plate });
+  const cars = [g.CARRIAGE.len / 2, L - g.CARRIAGE.len / 2];
+  for (const c of cars) {
+    rect(s, ox + c - g.CARRIAGE.len / 2, oy + Wd / 2 - g.CARRIAGE.w / 2, g.CARRIAGE.len, g.CARRIAGE.w, { 'stroke-dasharray': '3 2', stroke: '#888' });
+    for (const dx of [-10, 10]) for (const dq of [-10, 10]) circ(s, ox + c + dx, oy + Wd / 2 + dq, 1.7);
+  }
+  for (const x of [SB_HOLE_X, L - SB_HOLE_X]) for (const dq of [-SB_HOLE_Q, SB_HOLE_Q]) circ(s, ox + x, oy + Wd / 2 + dq, 2.5, { stroke: C.dim });
+  dimH(s, ox, ox + L, oy + Wd + 14, `${r1(L)}`);
+  dimV(s, ox - 4, oy, oy + Wd, `${Wd}`);
+  text(s, ox + L / 2, oy - 6, `Alu ${g.SLED_T} mm · links Mitnehmer (hinten), rechts Bock B (vorn)`, { 'font-size': 6.5 });
+  text(s, ox + L / 2, oy + Wd + 30, 'Wagen: 4 × Ø 3,4, Senkung 90° für M3 (20 × 20)', { 'font-size': 6 });
+  text(s, ox + L / 2, oy + Wd + 40, `Böcke (gelb): 4 × M5, ${r1(SB_HOLE_X)} ab Ende, Abstand ${2 * SB_HOLE_Q}`, { 'font-size': 6 });
+}
+// ---------- base plate drilling
+const plateHoles = [];
+{
+  const W = g.PLATE.x1 - g.PLATE.x0, H = g.PLATE.z1 - g.PLATE.z0;
+  const s = svg('plate', W + 40, H + 60);
+  const k = 1, X = (x) => 20 + (x - g.PLATE.x0) * k, Z = (z) => 20 + (z - g.PLATE.z0) * k;
+  rect(s, X(g.PLATE.x0), Z(g.PLATE.z0), W * k, H * k, { fill: C.plate });
+  line(s, X(g.WALL_X), Z(g.PLATE.z0), X(g.WALL_X), Z(g.PLATE.z1), { stroke: C.weld, 'stroke-width': 1.2 });
+  const add = (x, z, what, col) => { plateHoles.push([what, d(x), q(z)]); circ(s, X(x), Z(z), 3, { stroke: col, 'stroke-width': 1 }); };
+  for (const [bx, z] of [[g.G_BRACKET_X, g.G_Z], [g.A_BRACKET_X, g.ROW_Z]]) for (const dq of [-SLOT_Q, SLOT_Q]) add(bx - SLOT_X, z + dq, 'M6 Lagerbock', '#8cf');
+  for (const [x, z] of [[g.CB.x1 + 20, g.G_Z], [g.CB.x1 + 20, g.ROW_Z], [g.CB.x0 + 20, g.CB.z0 + 20], [g.CB.x0 + 20, g.CB.z1 - 20]]) add(x, z, 'M6 Befestigung (Puffer)', C.dim);
+  for (let i = 0; i < g.RAIL.len / g.RAIL.pitch; i++) circ(s, X(g.RAIL_X0 + g.RAIL.pitch / 2 + i * g.RAIL.pitch), Z(g.ROW_Z), 1.2, { stroke: '#aaa' });
+  text(s, X(g.PLATE.x0) + W * k / 2, Z(g.PLATE.z1) + 14, 'blau M6 Böcke · gelb M6 Befestigung · grau M3 Schiene (mit Schiene abnehmen)', { 'font-size': 8 });
+  text(s, X(g.PLATE.x0) + W * k / 2, Z(g.PLATE.z1) + 26, 'Seitenkanten: je 4 × M4 für die Haube · hinten 2 × M4 Rückwand-Lasche', { 'font-size': 8 });
+  const t = document.getElementById('holes');
+  for (const [w, dd, qq] of plateHoles) t.insertRow().innerHTML = `<td>${w}</td><td class="n">${r1(dd)}</td><td class="n">${r1(qq)}</td>`;
+}
+
+// ---------- parts + standard parts
+{
+  const L = r1(g.PLATE.x1 - g.PLATE.x0), Wd = g.CB.z1 - g.CB.z0, Hh = g.CB.h - g.FLOOR_T, BL = r1(g.CB.x1 - g.CB.x0);
+  const parts = [
+    ['1', 'Grundplatte', `Alu ${g.FLOOR_T} mm, EN AW-5083`, `${L} × ${Wd}`, 1, 'Bohrbild Abschnitt 4, Gewinde M6/M4/M3', 'Kollege (Schweißen) / selbst (Bohren)'],
+    ['2', 'Stirnwand', 'Alu 2 mm, AlMg3', `${Wd} × ${Hh}`, 1, `Ø ${g.HOLE_D.G} / Ø ${g.HOLE_D.R} nach dem Schweißen`, 'Kollege'],
+    ['3', 'Knotenblech', `Alu ${g.GUSSET.t} mm`, `Dreieck ${g.GUSSET.base} × ${g.GUSSET.h}`, 3, 'an Wand + Platte schweißen', 'Kollege'],
+    ['4', 'Lagerbock G, A', 'Alu-Winkel 60 × 60 × 6', `Länge ${B.w}`, 2, `Ø ${B.hole}, 2 Langlöcher`, 'selbst'],
+    ['5', 'Lagerbock B, Mitnehmer', 'Alu-Winkel 40 × 40 × 5', `Länge ${SB.w}`, 2, `Ø ${B.hole} bzw. M10 × 1,25; Fuß 2 × Senkung`, 'selbst'],
+    ['6', 'Schlitten B', `Alu ${g.SLED_T} mm`, `${r1(g.SLED.x1 - g.SLED.x0)} × ${g.SLED_W}`, 1, '8 × Senkung M3, 4 × M5', 'selbst'],
+    ['7', 'Poti-Lasche', 'Alu 3 mm', `~55 × 16`, 1, `Ø 8,5 (Stange G) und Bohrung für Poti-Auge, Abstand ${r1(g.G_Z - g.POTI_Z)}`, 'selbst'],
+    ['8', 'Poti-Halter', 'Alu-Winkel', 'nach Lieferung', 1, 'Langloch längs', 'selbst'],
+    ['9', 'Anschlaghülse A', 'Alu/Stahl Rundmaterial Ø 16', '40 lang, innen Ø 10,5', 1, 'Passscheiben M10 dazu', 'selbst (To-Do)'],
+    ['10', 'Haube', 'Alu 1,5 mm, U gekantet', `Deckel ${Wd + 3}, Seiten ${g.CB.h} hoch, Länge ${BL}`, 1, 'seitlich 4 × M4 je Seite in die Plattenkante', 'Kantbank (Kollege?)'],
+    ['11', 'Rückwand', 'Alu 1,5 mm', `${Wd} × ${Hh} + Lasche 15`, 1, 'Tülle Schläuche (Bohrung nach Tülle), Ø 16,5 für M16', 'selbst'],
+  ];
+  const t = document.getElementById('parts');
+  for (const p of parts) t.insertRow().innerHTML = p.map((c, i) => `<td${i === 4 ? ' class="n"' : ''}>${c}</td>`).join('');
+  const std = [
+    ['Mutter M22 × 1,5 (Airtec RM-25)', 3, 'Zylinder in den Böcken (Airtec-Liste Pos. 10)'],
+    ['Kontermutter M8 (RL-20)', 2, 'RD-20 an G und B'],
+    ['Kontermutter M10 × 1,25 (RL-25)', 1, 'FK-32 am Mitnehmer'],
+    ['Zylinderschraube M6 × 16 + Scheibe', 4, 'Lagerböcke G, A'],
+    ['Senkschraube M5 × 10 (ISO 10642), nicht länger', 4, 'Bock B und Mitnehmer auf den Schlitten'],
+    ['Senkschraube M3 (ISO 10642), Länge nach Gewindetiefe Wagen', 8, 'Wagen an den Schlitten'],
+    ['Zylinderschraube M3 × 8', 8, 'Schiene auf die Platte (Senkbohrung der Schiene)'],
+    ['Linsenschraube M4 × 8', 10, 'Haube, Rückwand'],
+    ['Gummitülle (6 Schläuche Ø 6) + Kabelverschraubung M16', '1 + 1', 'Rückwand'],
+    ['Gummipuffer M6 (vorhanden) oder Schrauben M6', 4, 'Befestigung im Rahmen; Bolzen höchstens 8 mm einschrauben'],
+  ];
+  const t2 = document.getElementById('std');
+  for (const p of std) t2.insertRow().innerHTML = p.map((c, i) => `<td${i === 1 ? ' class="n"' : ''}>${c}</td>`).join('');
+}
+
+document.getElementById('axh').textContent = g.AX_H;
+for (const e of document.querySelectorAll('.q-row')) e.textContent = r1(q(g.ROW_Z));
+for (const e of document.querySelectorAll('.a-stroke')) e.textContent = A_STROKE;
+for (const e of document.querySelectorAll('.g-r')) e.textContent = r1(GATE_X[0]);
+for (const e of document.querySelectorAll('.g-5')) e.textContent = r1(GATE_X[3]);
+</script>
+</body>
+</html>
