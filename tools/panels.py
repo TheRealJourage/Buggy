@@ -78,12 +78,16 @@ PANELS = {
         [sw('ZUSATZ-FERN', True), sw('RÜCKFAHR', True, True)],
         [sw('LICHT'), sw('NEBEL', True, True)],
     ]},
+    # split again 2026-11-01 (user): everything needed to drive on the engine panel, incl. compressor
     'motorpanel': {'cable': -1, 'cols': [
         [sw('ZÜNDUNG', True), sw('START', True, lb=True)],
-        [sw('KOMPRESSOR', True), sw('12 V FRONT')],
-        [sw('WINDE', True), sw('12 V SITZ')],
-        [sw('SITZHEIZUNG'), sw('12 V HECK')],
+        [sw('MOTOR', True), sw('KOMPRESSOR', True)],
         [sw('LÜFTER'), pot('LÜFTER %')],
+    ]},
+    'zubehoerpanel': {'cable': -1, 'cols': [
+        [sw('WINDE', True), sw('12 V FRONT')],
+        [sw('SITZHEIZUNG'), sw('12 V SITZ')],
+        [None, sw('12 V HECK')],
     ]},
     'audiopanel': {'cable': -1, 'cols': [
         [sw('CARPLAY')], [pot('CARPLAY')], [pot('INTERCOM')], [pot('FUNK')], [pot('AMBIENT')], [pot('TACHO/LED')],
