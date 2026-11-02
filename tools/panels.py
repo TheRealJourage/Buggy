@@ -46,9 +46,8 @@ PITCH_X, PITCH_Y = 36.0, 72.0   # glove-friendly spacing
 LABEL_Y = -22.0        # label centre below the hole
 LABEL_SIZE, LABEL_DEPTH = 4.2, 0.6
 MARGIN = 10.0
-WALL, RIM_H = 3.0, 45.0
+WALL, RIM_H = 3.0, 12.0   # low rim only holds the 5-10 mm potting, face-up print (user 2026-11-02)
 CORNER_R, INNER_R = 1.0, 0.5   # angular box, only a small edge break
-CABLE_D = 7.0          # 4 wires, exit towards the steering wheel
 GROOVE = (1.0, 1.5, 5.0)  # silicone key groove in the inner wall: depth, height, distance behind plate
 # --- KY-023 style joystick module (product picture: PCB 34 x 27, 32 high). ASSUMED, measure when found ---
 JOY_PCB = (27.0, 34.0, 1.6)     # X x Y x thickness, header pins at the bottom end
@@ -281,10 +280,6 @@ def build(panel, labels=True):
                 RectangleRounded(w - 2 * WALL + 2 * gd, h - 2 * WALL + 2 * gd, INNER_R + gd)
                 RectangleRounded(w - 2 * WALL, h - 2 * WALL, INNER_R, mode=Mode.SUBTRACT)
         extrude(amount=gh, mode=Mode.SUBTRACT)
-
-        side = panel['cable']
-        with Locations((xc + side * (w / 2 - WALL / 2), yc, -RIM_H / 2)):
-            Cylinder(CABLE_D / 2, WALL + 4, rotation=(0, 90, 0), mode=Mode.SUBTRACT)
     return p.part, (w + panel.get('tab', (0, 0))[1], h)
 
 
