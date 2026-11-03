@@ -5,3 +5,5 @@ viewer/handbuch/
 .immich-key
 # io_check run logs
 srcTest/SteeringControl/tools/logs/
+# agent research reports (working files)
+.research-*

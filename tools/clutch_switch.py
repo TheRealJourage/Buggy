@@ -31,6 +31,8 @@ LEAD = (2.5, 30.0)     # chamfer on the pin's leading top edge (height, angle to
                        # or switch that sits a bit low, or a step in the tunnel (user 2026-10-31)
 LEAD_EDGE = 1.0        # 45 deg on the other three leading edges
 WALL, FLOOR, CEIL = 3.0, 3.0, 2.0
+TOP_EXTRA = 4.0         # outer rail wall raised above the switch top: only 0.45 mm were left over the nut channel,
+                       # first print broke there (user 2026-11-02)
 # --- travel (hypothesis: pin on the pedal ~150 mm above the pivot -> ~40 mm, To-Do.md 2026-10-23) ---
 STROKE = 40.0
 STROKE_MAX = 60.0      # pin and tunnel allow up to the travel at the pedal tip (55-60 mm), mount point free
@@ -104,7 +106,7 @@ def rail():
 
 
 def build_block():
-    top = EDGE + SW_H
+    top = EDGE + SW_H + TOP_EXTRA
     with BuildPart() as p:
         with Locations((0, -OUT_Y, -FLOOR)):
             Box(TUN_L, 2 * OUT_Y, FLOOR + TUN + CEIL, align=(Align.MIN, Align.MIN, Align.MIN))

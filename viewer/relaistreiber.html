@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Relaistreiber ULN2003AN</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 12px; background: #111; color: #eee; font-size: 16px; line-height: 1.4; max-width: 1000px; }
+  h1 { font-size: 21px; margin: 4px 0 6px; }
+  h2 { font-size: 18px; margin: 26px 0 8px; color: #8cf; border-bottom: 1px solid #333; padding-bottom: 4px; }
+  p, li { color: #ddd; }
+  a { color: #8cf; }
+  code { background: #1d1d1d; border-radius: 4px; font-size: 14px; padding: 1px 4px; }
+  .hint { color: #aaa; font-size: 14px; }
+  .hyp { color: #e8c547; }
+  .warn { background: #3a2a10; border-left: 4px solid #e8a33d; padding: 8px 10px; margin: 10px 0; font-size: 15px; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; margin: 6px 0; }
+  th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid #2a2a2a; vertical-align: top; }
+  th { color: #8cf; font-weight: 600; }
+  .svgwrap { overflow-x: auto; background: #181818; border-radius: 8px; padding: 6px; margin: 8px 0; }
+  svg { display: block; min-width: 900px; }
+  svg text { font-family: system-ui, sans-serif; fill: #ddd; font-size: 13px; }
+  svg .small { font-size: 11px; fill: #aaa; }
+  svg .title { font-weight: 700; fill: #fff; font-size: 15px; }
+  svg .y { fill: #e8c547; }
+  svg .sig { stroke: #8cf; stroke-width: 1.6; fill: none; }
+  svg .pwr { stroke: #e8a33d; stroke-width: 2; fill: none; }
+  svg .gnd { stroke: #999; stroke-width: 1.6; fill: none; }
+  svg .part { stroke: #ccc; stroke-width: 1.6; fill: #1d1d1d; }
+  svg .dot { fill: #8cf; }
+  svg .dotp { fill: #e8a33d; }
+  .gr { color: #7fe07f; }
+</style>
+</head>
+<body>
+<h1>Relaistreiber ULN2003AN – Schaltplan</h1>
+<p class="hint">Stand 2026-11-02. Quelle der Festlegungen: <code>Relaisbox.md</code> (Relais-Belegung, „Festgelegt 2026-11-01“) und <code>Bordnetz-Konzept.md</code>. <span class="hyp">Gelb = Vorschlag Claude / Hypothese, nicht festgelegt.</span> Teensy-Pins sind bewusst nicht belegt (Firmware-Thema, <code>OUTnn</code> = logischer Signalname).</p>
+
+<div class="warn"><b>Offen vor dem Aufbau:</b> Spulenwiderstand der Hella-Relais ist noch nicht gemessen (To-Do Halle, 85 ↔ 86). Alle Stromangaben unten sind <b>Annahmen</b>, bis das gemessen ist.</div>
+
+<h2>1. Das Prinzip (pro Kanal)</h2>
+<ol>
+  <li><b>Teensy-Pin</b> (3,3 V) → <b>ULN-Eingang</b> (Pin 1–7), dazu <b>100 kΩ nach Masse</b>: Relais bleibt aus, solange der Teensy startet oder hängt.</li>
+  <li><b>ULN-Ausgang</b> (Pin 16–10) zieht <b>Spule Pin 85 nach Masse</b> (Low-Side).</li>
+  <li><b>Spule Pin 86</b> hängt an <b>+12V_STEUER</b> (Kl. 30 über eine eigene Sicherung).</li>
+  <li><b>COM (Pin 9)</b> an <b>+12V_STEUER</b>: die internen Freilaufdioden des ULN2003 fangen die Abschaltspitze der Spule. Keine externen Dioden nötig.</li>
+  <li><b>Pin 8</b> an Masse, gemeinsam mit dem Teensy.</li>
+</ol>
+<p>20 Sockel im Relaisträger, davon <b>Sockel 5 (Motor-Relais) nicht am ULN</b> (festgelegt: Spulen-Plus über Motor-Schalter, Spulen-Masse Speeduino Pin 31). Bleiben <b>19 Kanäle → 3 × ULN2003AN</b> (7 + 7 + 5, zwei Kanäle frei).</p>
+
+<h2>2. Schaltplan der drei Treiber</h2>
+<div id="chips"></div>
+
+<h2>3. Versorgung der Treiber und Spulen</h2>
+<div class="svgwrap">
+<svg id="pwr" viewBox="0 0 900 230" width="100%" role="img" aria-label="Versorgung +12V_STEUER"></svg>
+</div>
+
+<h2>4. Kanalzuordnung</h2>
+<p class="hint">Sockelnummern und Verbraucher aus <code>Relaisbox.md</code> (Entwurf 2026-11-01, Sockelnummern noch frei – <span class="hyp">Chip-Zuordnung ist Vorschlag Claude</span>). Sockel 5 und die „Nicht im Träger“-Verbraucher (Lüfter, Anlasser, Kompressor, ZL180) sind nicht dabei.</p>
+<table id="map"><thead><tr><th>Signal</th><th>Chip</th><th>IN-Pin</th><th>OUT-Pin</th><th>Sockel</th><th>Verbraucher</th></tr></thead><tbody></tbody></table>
+
+<h2>5. Bauteile</h2>
+<table>
+<tr><th>Menge</th><th>Teil</th><th>Stand</th></tr>
+<tr><td>3</td><td>ULN2003AN, DIP-16 (Bürklin 50S2350)</td><td>laut To-Do im Warenkorb, Bestellung nicht bestätigt</td></tr>
+<tr><td>3</td><td>DIP-16-Fassung (Bürklin 36P7290)</td><td>wie oben</td></tr>
+<tr><td>19</td><td>Pull-down 100 kΩ (Netzwerk 4609X-101-104 oder einzeln)</td><td>noch zu suchen (To-Do)</td></tr>
+<tr><td>1</td><td class="hyp">Elko ca. 100 µF ≥ 25 V an +12V_STEUER</td><td>Vorschlag Claude, Wert nicht gerechnet</td></tr>
+<tr><td>3</td><td class="hyp">100 nF Keramik, je einer an COM/Pin 8 jedes Chips</td><td>Vorschlag Claude</td></tr>
+<tr><td>1</td><td class="hyp">TVS-Diode an +12V_STEUER (Lastabwurf der 120-A-Lichtmaschine)</td><td>Vorschlag Claude; 1.5KE24A hat der User laut To-Do, Eignung hier nicht geprüft</td></tr>
+<tr><td>1</td><td class="hyp">Sicherung F_S für die Steuerspannung</td><td>Wert offen, erst nach Spulenmessung</td></tr>
+</table>
+
+<h2>6. Was belegt ist und was nicht</h2>
+<ul>
+  <li><b>Festgelegt (User, 2026-11-01):</b> Teensy 4.0 → ULN2003AN → Hella-Relais, alles über Relais, Schiene an Kl. 30, Motor-Relais mit Spulen-Masse am Speeduino.</li>
+  <li><b>Datenblatt TI SLRS027T</b> (laut <code>Controller-Inventar.md</code>): ULN2003 Eingangswiderstand 2,7 kΩ, VI(on) max. 2,7 V bei 250 mA, 500 mA je Kanal; passt damit an 3,3 V. Der ULN2004 nicht.</li>
+  <li class="hyp"><b>Annahme Spulenstrom:</b> typische 12-V-Mikrorelais haben etwa 90 Ω → 0,13 A bei 12 V, 0,16 A bei 14,4 V (Kenntnisstand, nicht gemessen). Das ist weit unter 250 mA je Kanal.</li>
+  <li class="hyp"><b>Annahme Wärme:</b> bei 7 Kanälen gleichzeitig an liegt die Verlustleistung im DIP-16 im Bereich von 1 W (Spannungsabfall je Kanal ca. 1 V, Kenntnisstand). Die Grenze steht im Datenblatt (Abschnitt Power Dissipation) und ist hier nicht geprüft. Im Betrieb sind selten alle Relais gleichzeitig an.</li>
+  <li class="hyp"><b>Kl.-15-Variante</b> (Bordnetz-Konzept, Vorschlag, nicht entschieden): Relais, die nur mit Zündung laufen sollen, bekommen Pin 86 aus Kl. 15 statt aus +12V_STEUER. COM bleibt trotzdem an Kl. 30 (sonst Rückspeisung in Kl. 15).</li>
+  <li><b>Offen:</b> Freilaufdiode am Motor-Relais (Spule hängt am Speeduino Pin 31, nicht am ULN) · ZL180 (Spule ca. 0,4–0,48 A) nicht über einen ULN-Kanal · Strombilanz Teil A neu aufteilen.</li>
+</ul>
+
+<script>
+// Sockel / Verbraucher je Chip-Kanal (Relaisbox.md, Entwurf 2026-11-01); null = Kanal frei
+const CHIPS = [
+  { name: 'U1', rows: [[1,'Blinker links'],[2,'Blinker rechts'],[3,'Stand-/Rücklicht'],[4,'Nachlaufpumpe V51'],[6,'Abblendlicht'],[7,'Fernlicht'],[8,'Nebelscheinwerfer vorn']] },
+  { name: 'U2', rows: [[9,'Nebelschlussleuchte'],[10,'Rückfahrlicht'],[11,'Bremslicht'],[12,'Spiegelheizung'],[13,'Zusatz-Fernlicht Mitte'],[14,'Offroad Mitte'],[15,'Offroad Heck L+R']] },
+  { name: 'U3', rows: [[16,'Rundumleuchte (später)'],[17,'Nahfeldlicht (später)'],[18,'Suchscheinwerfer (später)'],[19,'Reserve'],[20,'Reserve'],null,null] }
+];
+
+const Y0 = 110, DY = 50;
+const pad = n => String(n).padStart(2, '0');
+const gnd = (x, y) => `<path class="gnd" d="M${x} ${y}v8M${x-8} ${y+8}h16M${x-5} ${y+12}h10M${x-2} ${y+16}h4"/>`;
+
+let sigNo = 0;
+const mapRows = [];
+
+function chipSVG(chip) {
+  let s = '';
+  const top = Y0 - 40, bot = Y0 + 6 * DY + 70;
+  s += `<text class="title" x="20" y="28">${chip.name} – ULN2003AN</text>`;
+  s += `<text class="small" x="20" y="46">Teensy 4.0 (3,3 V) → Eingang · Ausgang → Spule Pin 85 · Spule Pin 86 → +12V_STEUER</text>`;
+  s += `<rect class="part" x="20" y="${top}" width="130" height="${bot - top}" rx="6"/>`;
+  s += `<text x="85" y="${top + 20}" text-anchor="middle">Teensy 4.0</text><text class="small" x="85" y="${bot - 8}" text-anchor="middle">GPIO 3,3 V</text>`;
+  s += `<rect class="part" x="420" y="${top}" width="120" height="${bot - top}" rx="4"/>`;
+  s += `<text x="480" y="${top + 20}" text-anchor="middle" style="font-weight:700">${chip.name}</text><text class="small" x="480" y="${top + 34}" text-anchor="middle">ULN2003AN</text>`;
+  chip.rows.forEach((r, i) => {
+    const y = Y0 + i * DY, k = i + 1, pin = 17 - k;
+    s += `<text class="small" x="426" y="${y - 4}">${k}</text>`;
+    s += `<text class="small" x="534" y="${y - 4}" text-anchor="end">${pin}</text>`;
+    s += `<text class="small" x="480" y="${y + 4}" text-anchor="middle">${k}B ▷ ${k}C</text>`;
+    if (r) {
+      const sig = 'OUT' + pad(++sigNo);
+      mapRows.push([sig, chip.name, k, pin, r[0], r[1]]);
+      s += `<line class="sig" x1="150" y1="${y}" x2="420" y2="${y}"/>`;
+      s += `<text class="y" x="146" y="${y - 5}" text-anchor="end">${sig}</text>`;
+      s += `<circle class="dot" cx="330" cy="${y}" r="3"/>`;
+      s += `<line class="sig" x1="330" y1="${y}" x2="330" y2="${y + 9}"/>`;
+      s += `<rect class="part" x="324" y="${y + 9}" width="12" height="20"/>`;
+      s += `<line class="gnd" x1="330" y1="${y + 29}" x2="330" y2="${y + 32}"/>${gnd(330, y + 32).replace('M330 ' + (y + 32) + 'v8', 'M330 ' + (y + 32) + 'v0')}`;
+      s += `<text class="small" x="342" y="${y + 23}">100 k</text>`;
+      s += `<line class="sig" x1="540" y1="${y}" x2="600" y2="${y}"/>`;
+      s += `<text class="small" x="572" y="${y - 5}" text-anchor="middle">85</text>`;
+      s += `<rect class="part" x="600" y="${y - 11}" width="60" height="22"/>`;
+      s += `<text x="630" y="${y + 5}" text-anchor="middle">S${r[0]}</text>`;
+      s += `<text class="small" x="672" y="${y - 5}">86</text>`;
+      s += `<line class="pwr" x1="660" y1="${y}" x2="740" y2="${y}"/><circle class="dotp" cx="740" cy="${y}" r="3"/>`;
+      s += `<text x="752" y="${y + 4}">${r[1]}</text>`;
+    } else {
+      s += `<line class="gnd" x1="420" y1="${y}" x2="400" y2="${y}"/>${gnd(400, y)}`;
+      s += `<text class="small" x="330" y="${y + 4}" text-anchor="end">Eingang an Masse</text>`;
+      s += `<text class="small" x="560" y="${y + 4}">frei</text>`;
+    }
+  });
+  const yb = Y0 + 6 * DY + 40;
+  s += `<line class="gnd" x1="420" y1="${yb}" x2="400" y2="${yb}"/>${gnd(400, yb)}`;
+  s += `<text class="small" x="426" y="${yb - 4}">8</text><text class="small" x="380" y="${yb + 4}" text-anchor="end">E = Masse</text>`;
+  s += `<text class="small" x="534" y="${yb - 4}" text-anchor="end">9</text>`;
+  s += `<line class="pwr" x1="540" y1="${yb}" x2="740" y2="${yb}"/><circle class="dotp" cx="740" cy="${yb}" r="3"/>`;
+  s += `<text class="small" x="640" y="${yb - 5}" text-anchor="middle">COM (Freilaufdioden)</text>`;
+  s += `<line class="pwr" x1="740" y1="${Y0 - 30}" x2="740" y2="${yb}"/>`;
+  s += `<text class="y" x="740" y="${Y0 - 38}" text-anchor="middle">+12V_STEUER</text>`;
+  s += `<text class="small" x="20" y="${bot + 18}">Teensy-GND, Pin 8 und alle Pull-downs an einer Masse. Unbenutzte Eingänge fest an Masse.</text>`;
+  return `<svg viewBox="0 0 980 ${bot + 28}" width="100%" role="img" aria-label="${chip.name}">${s}</svg>`;
+}
+
+document.getElementById('chips').innerHTML = CHIPS.map(c => `<div class="svgwrap">${chipSVG(c)}</div>`).join('');
+
+document.querySelector('#map tbody').innerHTML = mapRows.map(r =>
+  `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>S${r[4]}</td><td>${r[5]}</td></tr>`).join('') +
+  `<tr><td colspan="6" class="hint">Sockel 5 Motor-Relais: nicht am ULN. Spulen-Plus über Motor-Schalter, Spulen-Masse Speeduino Pin 31 (festgelegt User 2026-11-01).</td></tr>`;
+
+// Versorgung
+(function () {
+  let s = '';
+  const y = 80;
+  s += `<text class="title" x="20" y="28">+12V_STEUER</text>`;
+  s += `<text class="small" x="20" y="46">Kl. 30 (Verteilerschiene der Relaisbox) → eigene Sicherung → alle Relaisspulen (Pin 86) und ULN-COM</text>`;
+  s += `<text x="20" y="${y + 4}">Kl. 30</text>`;
+  s += `<line class="pwr" x1="62" y1="${y}" x2="130" y2="${y}"/>`;
+  s += `<rect class="part" x="130" y="${y - 10}" width="60" height="20"/><text class="small y" x="160" y="${y + 4}" text-anchor="middle">F_S</text>`;
+  s += `<text class="small y" x="160" y="${y - 16}" text-anchor="middle">Wert offen</text>`;
+  s += `<line class="pwr" x1="190" y1="${y}" x2="640" y2="${y}"/><circle class="dotp" cx="230" cy="${y}" r="3"/>`;
+  [[280, 'cap', '≈100 µF'], [360, 'cap2', '100 nF'], [440, 'tvs', 'TVS']].forEach(([x, t, lab]) => {
+    s += `<circle class="dotp" cx="${x}" cy="${y}" r="3"/>`;
+    if (t === 'tvs') {
+      s += `<line class="pwr" x1="${x}" y1="${y}" x2="${x}" y2="${y + 24}"/>`;
+      s += `<path class="part" d="M${x - 8} ${y + 42}L${x + 8} ${y + 42}L${x} ${y + 24}Z"/>`;
+      s += `<line class="gnd" x1="${x - 8}" y1="${y + 24}" x2="${x + 8}" y2="${y + 24}"/>`;
+      s += `<line class="gnd" x1="${x}" y1="${y + 42}" x2="${x}" y2="${y + 70}"/>${gnd(x, y + 70)}`;
+    } else {
+      s += `<line class="pwr" x1="${x}" y1="${y}" x2="${x}" y2="${y + 30}"/>`;
+      s += `<line class="gnd" x1="${x - 11}" y1="${y + 30}" x2="${x + 11}" y2="${y + 30}"/><line class="gnd" x1="${x - 11}" y1="${y + 37}" x2="${x + 11}" y2="${y + 37}"/>`;
+      s += `<line class="gnd" x1="${x}" y1="${y + 37}" x2="${x}" y2="${y + 70}"/>${gnd(x, y + 70)}`;
+    }
+    s += `<text class="small y" x="${x + 14}" y="${y + 30}">${lab}</text>`;
+  });
+  s += `<text class="small" x="650" y="${y - 12}">→ Pin 9 (COM) von U1, U2, U3</text>`;
+  s += `<text class="small" x="650" y="${y + 4}">→ Pin 86 aller ULN-Relaisspulen</text>`;
+  s += `<text class="small" x="650" y="${y + 20}">(100 nF je Chip nahe Pin 8/9 zusätzlich)</text>`;
+  s += `<text class="small y" x="20" y="205">Elko, TVS und Sicherung: Vorschlag Claude, Werte nicht gerechnet. Sockel 5 (Motor-Relais) hängt nicht an +12V_STEUER, sondern am Motor-Schalter.</text>`;
+  document.getElementById('pwr').innerHTML = s;
+})();
+</script>
+</body>
+</html>
