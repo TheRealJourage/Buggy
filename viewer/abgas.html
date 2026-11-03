@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Abgasanlage im Heck</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #111; color: #ddd; font-family: system-ui, sans-serif; overflow: hidden; }
+  #bar { position: fixed; top: 0; left: 0; right: 0; padding: 8px 12px; background: #151517cc; display: flex; gap: 8px; align-items: center; font-size: 14px; z-index: 2; flex-wrap: wrap; }
+  button { background: #333; color: #ddd; border: 1px solid #555; padding: 4px 9px; cursor: pointer; border-radius: 3px; }
+  button.active { background: #4f6b8a; color: #fff; }
+  #bar .hint { color: #888; font-size: 12px; }
+  #params { position: fixed; top: 52px; right: 10px; width: 310px; max-height: calc(100vh - 70px); overflow-y: auto; padding: 8px 12px; background: #000b; border-radius: 6px; font-size: 13px; }
+  #params label { display: flex; justify-content: space-between; align-items: center; margin: 3px 0; gap: 6px; }
+  #params input[type=range] { width: 115px; }
+  #params select { background: #222; color: #ddd; border: 1px solid #555; }
+  #params .v { width: 54px; text-align: right; color: #fff; }
+  #params h3, #info h3 { margin: 7px 0 3px; font-size: 12px; color: #8ab; text-transform: uppercase; letter-spacing: .05em; }
+  #params .dis { opacity: .35; }
+  #info { position: fixed; bottom: 10px; left: 10px; max-width: 600px; max-height: 60vh; overflow-y: auto; padding: 10px 12px; background: #000b; border-radius: 6px; font-size: 13px; line-height: 1.4; }
+  #info table { border-collapse: collapse; margin: 4px 0; }
+  #info td { padding: 0 10px 0 0; vertical-align: top; }
+  .warn { color: #fc6; } .bad { color: #f77; font-weight: bold; } .ok { color: #8d8; font-weight: bold; } .muted { color: #999; font-size: 12px; }
+  #hover { position: fixed; pointer-events: none; padding: 4px 7px; background: #000d; border: 1px solid #555; border-radius: 4px; font-size: 12px; display: none; z-index: 3; max-width: 420px; }
+  canvas { display: block; }
+</style>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.js" } }</script>
+</head>
+<body>
+<div id="bar">
+  <b>Abgasanlage – VR6 quer im Heck</b>
+  <button data-v="T" class="active">6-2-1 Leistung</button>
+  <button data-v="S">6-1 Spitze</button>
+  <button data-v="G">Guss + Y (Basis)</button>
+  <span>Ansicht:</span>
+  <button data-cam="iso">Gesamt</button><button data-cam="rear">Von hinten</button><button data-cam="side">Seite</button><button data-cam="top">Oben</button>
+  <span class="hint">Maus: drehen · Rad: zoomen · rechts: verschieben · über Teile fahren = Name + Länge</span>
+</div>
+
+<div id="params">
+  <h3>Bauraum (messen!)</h3>
+  <label>Tiefe Flansch → Rahmenende <input type="range" id="depth" min="220" max="500" step="10" value="300"><span class="v" id="depth_v"></span></label>
+  <label>nach oben ab Kanalmitte <input type="range" id="zmax" min="300" max="1200" step="10" value="800"><span class="v" id="zmax_v"></span></label>
+  <label>nach unten ab Kanalmitte <input type="range" id="zmin" min="0" max="400" step="10" value="100"><span class="v" id="zmin_v"></span></label>
+  <label>seitlich über Kopf hinaus <input type="range" id="side" min="100" max="700" step="10" value="350"><span class="v" id="side_v"></span></label>
+  <label>Kanal-Abstand (Hypothese) <input type="range" id="pitch" min="55" max="85" step="1" value="65"><span class="v" id="pitch_v"></span></label>
+  <label>Zyl. 1 sitzt <select id="cyl1"><option value="r">rechts (wie Golf)</option><option value="l">links</option></select></label>
+  <h3>Primärrohre</h3>
+  <label id="l_rpm">abstimmen auf /min <input type="range" id="rpm" min="3500" max="7000" step="100" value="5000"><span class="v" id="rpm_v"></span></label>
+  <label id="l_pid">innen Ø <input type="range" id="pid" min="30" max="42" step="0.5" value="35"><span class="v" id="pid_v"></span></label>
+  <label>Auslass öffnet v. UT (Hyp.) <input type="range" id="eo" min="40" max="70" step="1" value="56"><span class="v" id="eo_v"></span></label>
+  <label id="l_hb">unterste Rohrlage <input type="range" id="hb" min="-300" max="300" step="10" value="40"><span class="v" id="hb_v"></span></label>
+  <label>Sammler an <select id="cside"><option value="6">Zyl.-6-Seite</option><option value="1">Zyl.-1-Seite</option></select></label>
+  <h3>Sekundär / Sammelrohr</h3>
+  <label id="l_sec">Sekundär-Länge <input type="range" id="sec" min="200" max="900" step="10" value="400"><span class="v" id="sec_v"></span></label>
+  <label id="l_sid">Sekundär innen Ø <input type="range" id="sid" min="42" max="60" step="0.5" value="50"><span class="v" id="sid_v"></span></label>
+  <label>Sammelrohr innen Ø <input type="range" id="tid" min="50" max="70" step="0.5" value="60"><span class="v" id="tid_v"></span></label>
+  <h3>Kat-Platz / Endrohre</h3>
+  <label>Kat-Strecke (V-Band) <input type="range" id="lkat" min="150" max="450" step="10" value="300"><span class="v" id="lkat_v"></span></label>
+  <label><input type="checkbox" id="cat"> Kat-Hülle zeigen (Ø 130)</label>
+  <label>Endrohre <select id="ntail"><option>1</option><option selected>2</option><option>4</option></select></label>
+  <label>Mündung <select id="tdir"><option value="up">nach oben</option><option value="rear">nach hinten</option></select></label>
+  <label>Wand <input type="range" id="wall" min="1" max="2" step="0.05" value="1.5"><span class="v" id="wall_v"></span></label>
+  <label><input type="checkbox" id="lbl" checked> Beschriftungen</label>
+  <label><input type="checkbox" id="lim" checked> Bauraum-Grenzen zeigen</label>
+</div>
+
+<div id="info"></div>
+<div id="hover"></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from './vendor/OrbitControls.js';
+import * as X from './exhaust.js';
+
+// Engine transverse in the rear. x = vehicle lateral (+x = left), y = rearward (0 = exhaust flange face), z = up (0 = port centre). mm
+const state = { v: 'T' };
+const $ = (id) => document.getElementById(id);
+const NUM = ['depth', 'zmax', 'zmin', 'side', 'pitch', 'rpm', 'pid', 'eo', 'hb', 'sec', 'sid', 'tid', 'lkat', 'wall'];
+const P = () => ({ ...Object.fromEntries(NUM.map((k) => [k, +$(k).value])), cyl1: $('cyl1').value, cside: $('cside').value, ntail: +$('ntail').value, tdir: $('tdir').value, cat: $('cat').checked });
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(devicePixelRatio);
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a1c);
+const camera = new THREE.PerspectiveCamera(35, 1, 5, 20000);
+camera.up.set(0, 0, 1);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x333344, 1.5));
+const sun = new THREE.DirectionalLight(0xffffff, 1.6); sun.position.set(900, 1400, 1600); scene.add(sun);
+
+const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, metalness: 0.4, roughness: 0.55, side: THREE.DoubleSide, ...o });
+const ghost = (color, op) => new THREE.MeshBasicMaterial({ color, transparent: true, opacity: op, depthWrite: false, side: THREE.DoubleSide });
+const M = {
+  head: mat(0x5b6168, { transparent: true, opacity: 0.6 }), block: mat(0x44484e, { transparent: true, opacity: 0.45 }), gbox: mat(0x3e4a3e, { transparent: true, opacity: 0.45 }),
+  cast: mat(0x6e5a4a), g1: mat(0xd08a3c), g2: mat(0x3c8ad0), sec: mat(0xc0c0c8), main: mat(0xa8acb2), coll: mat(0x9a9a9a),
+  flange: mat(0xdddddd), cat: ghost(0xff5050, 0.25), sonde: mat(0x30d060), tail: mat(0x8c9096), bad: mat(0xff2020),
+  wall: ghost(0xff9a3c, 0.08), floor: ghost(0x40a0ff, 0.06),
+};
+
+const world = new THREE.Group(); scene.add(world);
+let pickables = [], labels = [], tubes = [], solids = [];
+const v3 = (x, y, z) => new THREE.Vector3(x, y, z);
+
+function add(geo, m, name) { const o = new THREE.Mesh(geo, m); o.userData.name = name; world.add(o); pickables.push(o); return o; }
+function box(x0, x1, y0, y1, z0, z1, m, name, solid = false) {
+  const [a, b] = [Math.min(x0, x1), Math.max(x0, x1)];
+  const o = add(new THREE.BoxGeometry(b - a, y1 - y0, z1 - z0), m, name); o.position.set((a + b) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
+  if (solid) solids.push({ name, box: new THREE.Box3(v3(a, y0, z0), v3(b, y1, z1)) });
+  return o;
+}
+function label(text, pos, color = '#fff', scale = 1) {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 64;
+  const g = c.getContext('2d'); g.font = 'bold 34px system-ui'; g.fillStyle = color; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, 256, 32);
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true }));
+  s.scale.set(240 * scale, 30 * scale, 1); s.position.copy(pos); s.renderOrder = 10; world.add(s); labels.push(s); return s;
+}
+
+// polyline with rounded corners (quadratic Bézier fillets, radius R)
+function poly(pts, R) {
+  const path = new THREE.CurvePath();
+  let prev = pts[0];
+  for (let i = 1; i < pts.length - 1; i++) {
+    const A = pts[i - 1], B = pts[i], C = pts[i + 1];
+    const la = A.distanceTo(B), lc = C.distanceTo(B);
+    const u1 = A.clone().sub(B).normalize(), u2 = C.clone().sub(B).normalize();
+    if (la < 1e-6 || lc < 1e-6 || u1.dot(u2) < -0.999) { if (B.distanceTo(prev) > 1e-6) path.add(new THREE.LineCurve3(prev, B)); prev = B; continue; }
+    const r = Math.min(R, la * (i === 1 ? 1 : 0.5), lc * (i === pts.length - 2 ? 1 : 0.5));
+    const p1 = B.clone().addScaledVector(u1, r), p2 = B.clone().addScaledVector(u2, r);
+    if (p1.distanceTo(prev) > 1e-6) path.add(new THREE.LineCurve3(prev, p1));
+    path.add(new THREE.QuadraticBezierCurve3(p1, B, p2)); prev = p2;
+  }
+  path.add(new THREE.LineCurve3(prev, pts[pts.length - 1]));
+  return path;
+}
+// solve a monotonic length(param) = L by bisection
+function solve(fn, L, lo, hi) { for (let i = 0; i < 50; i++) { const m = (lo + hi) / 2; if (fn(m).getLength() < L) lo = m; else hi = m; } return fn((lo + hi) / 2); }
+
+// kind: 'p','s','m','t' (tails may leave the space)
+function tube(curve, od, m, name, kind) {
+  const len = curve.getLength();
+  const mesh = add(new THREE.TubeGeometry(curve, Math.max(60, Math.round(len / 6)), od / 2, 20, false), m, `${name} – Länge ${len.toFixed(0)} mm`);
+  tubes.push({ curve, r: od / 2, name, kind, len, mesh });
+  return len;
+}
+function cone(a, b, r0, r1, m, name) {
+  const d = b.clone().sub(a), len = d.length();
+  const o = add(new THREE.CylinderGeometry(r1, r0, len, 32, 1, false), m, name);
+  o.position.copy(a.clone().add(b).multiplyScalar(0.5));
+  o.quaternion.setFromUnitVectors(v3(0, 1, 0), d.clone().normalize());
+  tubes.push({ curve: new THREE.LineCurve3(a, b), r: Math.max(r0, r1), name, kind: 'c', len, mesh: o });
+  return o;
+}
+function disc(c, axis, r, m, name) {
+  const o = add(new THREE.CylinderGeometry(r, r, 8, 32), m, name);
+  o.position.copy(c); o.quaternion.setFromUnitVectors(v3(0, 1, 0), axis.clone().normalize()); return o;
+}
+
+function build() {
+  for (const o of [...world.children]) { world.remove(o); o.geometry?.dispose(); o.material?.map?.dispose(); }
+  pickables = []; labels = []; tubes = []; solids = [];
+  const p = P();
+  const ED = 180 + p.eo, Lp = X.bellLength(p.rpm, ED);
+  const od = (id) => id + 2 * p.wall;
+  const s1 = p.cyl1 === 'r' ? 1 : -1;                       // cyl 1 at -x (right) when s1 = 1
+  const xs = [0, 1, 2, 3, 4, 5].map((i) => s1 * (i - 2.5) * p.pitch);
+  const half = 2.5 * p.pitch, headX = half + 90;
+  const dC = (p.cside === '6' ? 1 : -1) * s1;               // direction towards the collector side
+  const r = { notes: [], ED, Lp };
+
+  // engine + gearbox (placeholders)
+  box(-headX, headX, -230, 0, -70, 150, M.head, 'Zylinderkopf quer (Maße Platzhalter) – Auslassflansch bei y = 0, zeigt nach hinten', true);
+  box(-half - 110, half + 110, -320, 30, -430, -70, M.block, 'Motorblock (Maße Platzhalter)', true);
+  box(s1 * (half + 110), s1 * (half + 480), -300, 60, -380, 80, M.gbox, 'Getriebe 02A/02J (Platzhalter; Seite gegenüber Zyl. 1 wie Golf – Hypothese)', true);
+  xs.forEach((x, i) => { disc(v3(x, 1, 0), v3(0, 1, 0), 20, M.flange, `Auslasskanal Zyl. ${i + 1}`); label(`${i + 1}`, v3(x, -30, 190), '#ffd27a', 0.8); });
+
+  const X0 = -headX - p.side, X1 = headX + p.side;
+  if ($('lim').checked) {
+    box(X0, X1, p.depth, p.depth + 4, -p.zmin, p.zmax, M.wall, `Rahmenende hinten (${p.depth} mm hinter dem Flansch) – Durchbruch nur an bestimmten Stellen, messen`);
+    box(X0, X1, 0, p.depth, -p.zmin - 2, -p.zmin, M.floor, `Untergrenze ${p.zmin} mm unter Kanalmitte (unten schwierig)`);
+    box(X0, X1, 0, p.depth, p.zmax, p.zmax + 2, M.floor, `Obergrenze ${p.zmax} mm über Kanalmitte`);
+    label('Rahmenende hinten', v3(0, p.depth + 10, p.zmax + 60), '#ffb070');
+    label('vorn (Fahrer)', v3(0, -420, 300), '#aaa', 0.8);
+    label('links', v3(X1 + 80, 150, 0), '#aaa', 0.7); label('rechts', v3(X0 - 80, 150, 0), '#aaa', 0.7);
+  }
+
+  const dP = od(p.pid), rP = dP / 2;
+  const yL1 = 80, yL2 = Math.min(p.depth - rP - 25, 200), yM = (yL1 + yL2) / 2;
+  const R = Math.min(1.5 * dP, (yL2 - yL1) / 2);              // bend radius primaries
+  const stack = dP + 10;
+  const XC = dC * (headX + 40);                               // collector entry plane (x)
+  const CL = state.v === 'S' ? 170 : 120;
+  let Ytop, toMerge = [], mergeEnd, mergeName;
+
+  if (state.v === 'T' || state.v === 'S') {
+    // stack order: farthest from the collector lowest
+    const order = [0, 1, 2, 3, 4, 5].sort((a, b) => Math.abs(XC - xs[b]) - Math.abs(XC - xs[a]));
+    const zRun = []; order.forEach((ci, k) => { zRun[ci] = p.hb + k * stack; });
+    const groups = state.v === 'T' ? [order.slice(0, 3), order.slice(3)] : [order];
+    const ringR = state.v === 'T' ? dP * 0.62 : dP * 0.9;
+    const ents = [], colC = [];
+    groups.forEach((g, gi) => {
+      const zc = g.reduce((s, ci) => s + zRun[ci], 0) / g.length;
+      const C = v3(XC, yL2, zc); colC[gi] = C;
+      const n = g.length;
+      const pts = Array.from({ length: n }, (_, k) => { const t = -Math.PI / 2 + (k / n) * 2 * Math.PI; return v3(XC, yL2 + Math.cos(t) * ringR * 0.9, zc + Math.sin(t) * ringR); }).sort((a, b) => a.z - b.z);
+      g.forEach((ci) => { ents[ci] = pts.shift(); });
+    });
+    const prim = (ci) => (Hu) => poly([v3(xs[ci], 0, 0), v3(xs[ci], yL1, 0), v3(xs[ci], yL1, Hu), v3(xs[ci], yL2, Hu), v3(xs[ci], yL2, zRun[ci]),
+      v3(XC - dC * 150, yL2, zRun[ci]), ents[ci].clone().addScaledVector(v3(dC, 0, 0), -40), ents[ci]], R);
+    const HuMin = (ci) => Math.max(zRun[ci] + 2 * R + 5, 2 * R + 5);
+    const minL = Math.max(...xs.map((_, ci) => prim(ci)(HuMin(ci)).getLength()));
+    const L = Math.max(Lp, minL);
+    if (L > Lp + 1) r.notes.push(`Primärrohre in dieser Führung mindestens ${L.toFixed(0)} mm → abgestimmt höchstens auf ≈ ${Math.round(X.bellRpm(L, ED))} /min (unterste Lage / Sammler-Seite ändern).`);
+    r.primLen = []; let huMax = 0;
+    xs.forEach((_, ci) => {
+      const c = solve(prim(ci), L, HuMin(ci), 4000);
+      r.primLen[ci] = tube(c, dP, (state.v === 'T' ? groups[0].includes(ci) : ci < 3) ? M.g1 : M.g2, `Primärrohr Zyl. ${ci + 1} (ID ${p.pid})`, 'p');
+      const bb = new THREE.Box3().setFromPoints(c.getSpacedPoints(80)); huMax = Math.max(huMax, bb.max.z);
+    });
+    Ytop = huMax + rP + 20;
+    const exits = colC.map((C, gi) => { const e = C.clone().addScaledVector(v3(dC, 0, 0), CL); cone(C, e, ringR + rP + 2, (state.v === 'T' ? od(p.sid) : od(p.tid)) / 2, M.coll, state.v === 'T' ? `3-in-1-Sammler ${gi ? '{4,5,6}' : '{1,2,3}'} (gleichmäßig 240°)` : '6-in-1-Sammler'); return e; });
+
+    if (state.v === 'T') {
+      const dS = od(p.sid), off = dS * 0.6;
+      // two risers outside the head in separate y-lanes; the shorter one gets a hump above the Y height
+      const Yc = v3(XC + dC * CL, yM, Ytop + dS / 2);
+      const lanes = [yM + off, yM - off];
+      const yEnt = lanes.map((y) => v3(Yc.x, y, Yc.z));
+      const Xo = [exits[0].x + dC * (2.5 * dS + 20), exits[0].x + dC * (1.5 * dS + 10)];   // lower collector rises outside
+      const sec = (gi) => (H) => { const S = exits[gi], E = yEnt[gi]; return poly([S, v3(Xo[gi], S.y, S.z), v3(Xo[gi], lanes[gi], S.z + 1.5 * dS), v3(Xo[gi], lanes[gi], E.z + H), v3(E.x + dC * 110, lanes[gi], E.z + H), v3(E.x + dC * 55, lanes[gi], E.z), E], 1.5 * dS); };
+      const minS = Math.max(sec(0)(0).getLength(), sec(1)(0).getLength());
+      const Ls = Math.max(p.sec, minS);
+      if (Ls > p.sec + 1) r.notes.push(`Sekundärrohre in dieser Führung mindestens ${Ls.toFixed(0)} mm.`);
+      r.secLen = [0, 1].map((gi) => tube(solve(sec(gi), Ls, 0, 3000), dS, M.sec, `Sekundärrohr ${gi ? '{4,5,6}' : '{1,2,3}'} (ID ${p.sid}, gleich lang)`, 's'));
+      mergeEnd = Yc.clone().addScaledVector(v3(dC, 0, 0), -170);
+      cone(Yc, mergeEnd, dS * 1.15, od(p.tid) / 2, M.coll, 'Y-Merge 2-in-1 (Merge-Collector, kein T-Stück; 170 mm Platzhalter)');
+      label('Y', Yc.clone().add(v3(0, 0, 100)), '#ddd', 0.8);
+      xs.forEach((_, ci) => { toMerge[ci] = r.primLen[ci] + CL + r.secLen[groups[0].includes(ci) ? 0 : 1] + 170; });
+      mergeName = 'Y';
+    } else {
+      const dT = od(p.tid), S = exits[0];
+      const top = v3(S.x + dC * (1.5 * dT), yM, Ytop + dT / 2);
+      const bend = poly([S, v3(top.x, S.y, S.z), v3(top.x, yM, top.z), top.clone().addScaledVector(v3(dC, 0, 0), -200)], 1.5 * dT);
+      const bl = tube(bend, dT, M.main, `U-Bogen nach oben (ID ${p.tid})`, 'm');
+      mergeEnd = top.clone().addScaledVector(v3(dC, 0, 0), -200);
+      xs.forEach((_, ci) => { toMerge[ci] = r.primLen[ci] + CL + bl; });
+      mergeName = '6-in-1';
+      label('6-in-1', colC[0].clone().add(v3(dC * 80, 0, 110)), '#ddd', 0.8);
+    }
+  }
+
+  if (state.v === 'G') {
+    // OEM cast manifolds; outlets point DOWN as in the Golf (Hypothese)
+    const groups = [[0, 1, 2], [3, 4, 5]];
+    const gcx = groups.map((g) => (xs[g[0]] + xs[g[2]]) / 2);
+    const outl = gcx.map((x) => v3(x, 95, -150));
+    r.runLen = [];
+    groups.forEach((g, gi) => {
+      g.forEach((ci) => {
+        const O = outl[gi];
+        r.runLen[ci] = tube(new THREE.CatmullRomCurve3([v3(xs[ci], 0, 0), v3(xs[ci], 45, 0), v3((xs[ci] + O.x) / 2, 85, -60), O.clone().add(v3(0, 0, 40)), O], false, 'centripetal'), 44, M.cast, `OEM-Gusskrümmer ${gi ? '4–6 (022 253 034)' : '1–3 (022 253 033)'}, Kanal Zyl. ${ci + 1} (Form schematisch)`, 'p');
+      });
+      disc(outl[gi], v3(0, 0, 1), 42, M.flange, 'Krümmer-Ausgang 3-Loch (Dichtung 021 253 115) – zeigt im Golf nach unten (Hypothese), Ø messen');
+    });
+    const dS = od(p.sid), off = dS * 0.6, zl = -150 - 90;
+    Ytop = 200;
+    const Yc = v3(XC + dC * 120, yM, Ytop + off + dS / 2);
+    const far = gcx[0] * dC < gcx[1] * dC ? 0 : 1;          // group farther from the collector side runs lower/outer
+    const yEnt = []; yEnt[far] = Yc.clone().add(v3(0, 0, off)); yEnt[1 - far] = Yc.clone().add(v3(0, 0, -off));
+    const lane = []; lane[far] = yL2; lane[1 - far] = yL2 - dS - 12;
+    const sec = (gi) => (D) => { const O = outl[gi], Xo = Yc.x + dC * (90 + D); return poly([O, v3(O.x, O.y, zl), v3(O.x, lane[gi], zl - (gi === far ? 0 : 0)), v3(Xo, lane[gi], zl), v3(Xo, yM, yEnt[gi].z), yEnt[gi].clone().addScaledVector(v3(dC, 0, 0), 60), yEnt[gi]], 1.5 * dS); };
+    const minS = Math.max(sec(far)(dS * 1.2 + 10).getLength(), sec(1 - far)(0).getLength());
+    const Ls = Math.max(p.sec, minS);
+    if (Ls > p.sec + 1) r.notes.push(`Sekundärrohre in dieser Führung mindestens ${Ls.toFixed(0)} mm.`);
+    r.secLen = [0, 1].map((gi) => tube(solve(sec(gi), Ls, gi === far ? dS * 1.2 + 10 : 0, 3000), dS, gi ? M.g2 : M.g1, `Sekundärrohr ${gi ? '4-5-6' : '1-2-3'} (ID ${p.sid}, U-Bogen nach oben)`, 's'));
+    mergeEnd = Yc.clone().addScaledVector(v3(dC, 0, 0), -170);
+    cone(Yc, mergeEnd, dS * 1.15, od(p.tid) / 2, M.coll, 'Y-Merge 2-in-1');
+    xs.forEach((_, ci) => { toMerge[ci] = r.runLen[ci] + r.secLen[ci < 3 ? 0 : 1] + 170; });
+    mergeName = 'Y';
+  }
+
+  // main pipe across the top: sonde → cat section (V-band) → split → tails
+  const dT = od(p.tid), tR = dT / 2, inV = v3(-dC, 0, 0);
+  const at = (d) => mergeEnd.clone().addScaledVector(inV, d);
+  const SON = 100, K0 = 240, K1 = K0 + p.lkat, SP0 = K1 + 50, SP1 = SP0 + 110;
+  tube(new THREE.LineCurve3(at(0), at(K0)), dT, M.main, `Sammelrohr ID ${p.tid} (alle 6 Zylinder)`, 'm');
+  const sb = add(new THREE.CylinderGeometry(12, 12, 70, 16), M.sonde, `LSU 4.9 in M18×1,5-Muffe: ${SON} mm hinter dem ${mergeName}, oben senkrecht auf waagrechtem Rohr`);
+  sb.position.copy(at(SON).add(v3(0, 0, tR + 32))); sb.rotation.x = Math.PI / 2;
+  label('Sonde', at(SON).add(v3(0, 0, tR + 110)), '#5f5', 0.9);
+  disc(at(K0), inV, tR + 14, M.flange, 'V-Band-Flansch – Kat-Strecke Anfang');
+  disc(at(K1), inV, tR + 14, M.flange, 'V-Band-Flansch – Kat-Strecke Ende');
+  tube(new THREE.LineCurve3(at(K0 + 4), at(K1 - 4)), dT, M.main, `Kat-Ersatzrohr ${p.lkat} mm (später Kat zwischen den V-Bändern)`, 'm');
+  if (p.cat) {
+    const c = add(new THREE.CylinderGeometry(65, 65, p.lkat - 20, 32), M.cat, `Kat-Hülle Ø 130 × ${p.lkat - 20} (Platzhalter – Mustang-Kat 16399 messen)`);
+    c.position.copy(at((K0 + K1) / 2)); c.quaternion.setFromUnitVectors(v3(0, 1, 0), inV);
+    tubes.push({ curve: new THREE.LineCurve3(at(K0 + 10), at(K1 - 10)), r: 65, name: 'Kat-Hülle', kind: 'k', len: p.lkat, mesh: c });
+  }
+  label('Kat-Platz', at((K0 + K1) / 2).add(v3(0, 0, 120)), '#f99', 0.9);
+  tube(new THREE.LineCurve3(at(K1), at(SP0)), dT, M.main, 'Rohr', 'm');
+  const n = p.ntail, tid = X.splitId(p.tid, n), dt = od(tid);
+  const spread = (k) => (n === 1 ? 0 : (k - (n - 1) / 2) * (dt + 8));
+  cone(at(SP0), at(SP1), tR, n === 1 ? tR : Math.max(tR, (n * (dt + 8)) / 2), M.coll, `Aufteilung 1 → ${n} (flächengleich, je ID ${tid.toFixed(1)})`);
+  for (let k = 0; k < n; k++) {
+    const S = at(SP1).add(v3(0, spread(k), 0));
+    const pts = p.tdir === 'up'
+      ? [S, S.clone().addScaledVector(inV, 70), v3(S.x + inV.x * 70, S.y, Math.max(p.zmax + 150, S.z + 220))]
+      : [S, S.clone().addScaledVector(inV, 70), v3(S.x + inV.x * 70, Math.max(p.depth + 150, S.y + 200), S.z)];
+    tube(poly(pts, 1.5 * dt), dt, M.tail, `Endrohr ${k + 1}/${n} ID ${tid.toFixed(1)} – Mündung ${p.tdir === 'up' ? 'nach oben' : 'nach hinten'} (§ 47c zulässig)`, 't');
+  }
+  r.tailId = tid;
+  r.toSonde = toMerge.map((d) => d + SON);
+  r.p = p;
+  check(r, p, X0, X1);
+  for (const s of labels) s.visible = $('lbl').checked;
+  report(r);
+}
+
+// limits + collisions by sampling the centre lines
+function check(r, p, X0, X1) {
+  const viol = new Set(), coll = new Set();
+  const samples = tubes.map((t) => { const N = Math.max(12, Math.round((t.len || 200) / 15)); return Array.from({ length: N + 1 }, (_, i) => ({ q: t.curve.getPointAt ? t.curve.getPointAt(i / N) : t.curve.getPoint(i / N), u: i / N })); });
+  tubes.forEach((t, i) => {
+    for (const { q, u } of samples[i]) {
+      if (t.kind === 't' && u > 0.5) continue;
+      if (q.y + t.r > p.depth + 1) viol.add(`hinten: ${t.name}`);
+      if (q.z - t.r < -p.zmin - 1) viol.add(`unten: ${t.name}`);
+      if (q.z + t.r > p.zmax + 1) viol.add(`oben: ${t.name}`);
+      if (q.x - t.r < X0 - 1 || q.x + t.r > X1 + 1) viol.add(`seitlich: ${t.name}`);
+      if (q.y > t.r + 3) for (const s of solids) if (s.box.clone().expandByScalar(t.r).containsPoint(q)) { coll.add(`${t.name.split(' (')[0]} ↔ ${s.name.split(' (')[0]}`); t.mesh.material = M.bad; break; }
+    }
+  });
+  const clear = 4;
+  for (let i = 0; i < tubes.length; i++) for (let j = i + 1; j < tubes.length; j++) {
+    const a = tubes[i], b = tubes[j];
+    // ignore the ends where pipes legitimately meet (collector entries / exits)
+    const skip = (t, u) => (t.kind === 'c' || t.kind === 'k' ? false : (1 - u) * t.len < (t.kind === 'p' ? 190 : 70) || u * t.len < (t.kind === 'p' ? 10 : 70));
+    let hit = false;
+    for (const pa of samples[i]) {
+      if (skip(a, pa.u)) continue;
+      for (const pb of samples[j]) {
+        if (skip(b, pb.u)) continue;
+        if (pa.q.distanceTo(pb.q) < a.r + b.r + clear) { hit = true; break; }
+      }
+      if (hit) break;
+    }
+    const joined = (a.kind === 'c' || b.kind === 'c' || a.kind === 'k' || b.kind === 'k');
+    if (hit && !joined) { coll.add(`${a.name.split(' (')[0]} ↔ ${b.name.split(' (')[0]}`); a.mesh.material = M.bad; b.mesh.material = M.bad; }
+  }
+  r.viol = [...viol]; r.coll = [...coll];
+  const bb = new THREE.Box3();
+  tubes.filter((t) => t.kind !== 't').forEach((t) => bb.expandByObject(t.mesh));
+  r.bb = bb;
+}
+
+const fmt = (n) => Math.round(n).toLocaleString('de-DE');
+function report(r) {
+  const p = r.p, rows = [];
+  if (state.v !== 'G') {
+    const L = r.primLen, Lm = (Math.min(...L) + Math.max(...L)) / 2;
+    rows.push(['Primärrohre', `${fmt(Math.min(...L))}–${fmt(Math.max(...L))} mm, ID ${p.pid} → abgestimmt ≈ <b>${fmt(X.bellRpm(Lm, r.ED))} /min</b> <span class="muted">(Ziel ${p.rpm}; Bell, ED ${r.ED}° Hypothese)</span>`]);
+    rows.push(['Primär-Ø passt zu', `≈ ${fmt(X.rpmForPrimaryId(p.pid))} /min <span class="muted">(Fläche = n/88 200 · V<sub>Zyl</sub>)</span>`]);
+  } else rows.push(['Primär', 'OEM-Guss, keine Abstimmung. Ausgänge zeigen nach unten (Golf, Hypothese) → U-Bogen unter dem Kopf nötig']);
+  if (r.secLen) rows.push(['Sekundärrohre', `${r.secLen.map(fmt).join(' / ')} mm, ID ${p.sid} <span class="muted">(Claude 55–57, Codex 45–48 → offen)</span>`]);
+  rows.push(['Sonde', `alle 6 Zylinder, ${fmt(Math.min(...r.toSonde))}–${fmt(Math.max(...r.toSonde))} mm hinter dem Auslass <span class="muted">(AEM ≥ 457, 14Point7 ≈ 600; Sechskant &lt; 600 °C)</span>`]);
+  rows.push(['Kat-Platz', `${p.lkat} mm zwischen zwei V-Bändern hinter der Sonde, jetzt Ersatzrohr`]);
+  rows.push(['Endrohre', `${p.ntail} × ID ${r.tailId.toFixed(1)} (flächengleich zu ID ${p.tid}), ${p.tdir === 'up' ? 'nach oben' : 'nach hinten'}`]);
+  const b = r.bb;
+  rows.push(['Belegter Raum', `hinten ${fmt(b.max.y)}/${p.depth} · oben ${fmt(b.max.z)}/${p.zmax} · unten ${fmt(Math.max(0, -b.min.z))}/${p.zmin} · seitlich ${fmt(b.min.x)} … ${fmt(b.max.x)} (Grenze ±${fmt(2.5 * p.pitch + 90 + p.side)})`]);
+  rows.push(['Grenzen', r.viol.length ? `<span class="bad">überschritten:</span> ${r.viol.slice(0, 3).join('; ')}${r.viol.length > 3 ? ` (+${r.viol.length - 3})` : ''}` : '<span class="ok">eingehalten</span>']);
+  rows.push(['Kollisionen', r.coll.length ? `<span class="bad">${r.coll.length}:</span> ${r.coll.slice(0, 3).join('; ')}${r.coll.length > 3 ? ' …' : ''} (rot)` : '<span class="ok">keine</span> <span class="muted">(Mittellinien-Abtastung, 4 mm Luft, nur Platzhalter-Motor)</span>']);
+  const desc = {
+    T: '<b>6-2-1 (Vorschlag Claude, Leistung):</b> jedes Primärrohr in seiner Ebene nach hinten, hoch, 180° in die zweite Lage, runter, dann gestapelt zur Seite → zwei 3-in-1 {1,2,3}/{4,5,6} (gleichmäßig 240°) → gleich lange Sekundärrohre außen hoch → Y oben → Sammelrohr mit Sonde quer über den Motor.',
+    S: '<b>6-1 (Spitzenleistung):</b> gleiche Primärführung, alle 6 in einen 6-in-1-Sammler, U-Bogen hoch, Sammelrohr oben. Üblich für Spitze oben, Mitte schwächer (Forum, keine VR6-Messung).',
+    G: '<b>Guss + Y (Basis):</b> Serien-Krümmer ohne Abstimmung, zum Vergleich. Die Ausgänge nach unten passen schlecht zu „unten schwierig“.',
+  }[state.v];
+  $('info').innerHTML = `<h3>Stand 2026-11-03 · Vault Buggy/Abgasanlage.md · Vorschlag, nichts festgelegt</h3>${desc}
+    <table>${rows.map(([a, c]) => `<tr><td>${a}</td><td>${c}</td></tr>`).join('')}</table>
+    ${r.notes.length ? `<div class="warn">${r.notes.join('<br>')}</div>` : ''}
+    <div class="muted">Platzhalter: Kopf/Block/Getriebe, Kanal-Abstand, Rahmen nur als Grenzflächen, Lage der Durchbrüche. Leistungsgewinn für den AUE nicht beziffert. Recht T3b: 85 dB(A), Fahrerohr 86/90 dB(A) – ohne Dämpfer kaum erreichbar (Hypothese). Farben: orange/blau = Gruppen, rot = Kollision.</div>`;
+}
+
+function setCam(k) {
+  const T = v3(0, 120, 300);
+  const pos = { iso: v3(1500, 2200, 1500), rear: v3(0, 3000, 450), side: v3(3000, 150, 400), top: v3(0, 150, 3400) }[k];
+  camera.position.copy(pos); controls.target.copy(T); controls.update();
+}
+
+const DEF = { T: { sec: 400 }, S: {}, G: { sec: 450 } };
+for (const b of document.querySelectorAll('[data-v]')) b.onclick = () => {
+  state.v = b.dataset.v; document.querySelectorAll('[data-v]').forEach((x) => x.classList.toggle('active', x === b));
+  for (const [k, val] of Object.entries(DEF[state.v])) $(k).value = val;
+  syncUi(); build();
+};
+for (const b of document.querySelectorAll('[data-cam]')) b.onclick = () => setCam(b.dataset.cam);
+function syncUi() {
+  for (const k of NUM) $(k + '_v').textContent = $(k).value + (k === 'eo' ? '°' : '');
+  const g = state.v === 'G';
+  for (const id of ['l_rpm', 'l_pid', 'l_hb']) $(id).classList.toggle('dis', g);
+  for (const id of ['l_sec', 'l_sid']) $(id).classList.toggle('dis', state.v === 'S');
+}
+for (const el of document.querySelectorAll('#params input, #params select')) el.oninput = el.onchange = () => { syncUi(); build(); };
+
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(), hover = $('hover');
+renderer.domElement.addEventListener('pointermove', (e) => {
+  mouse.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+  const hit = ray.intersectObjects(pickables.filter((o) => o.material !== M.wall && o.material !== M.floor))[0];
+  if (hit) { hover.style.display = 'block'; hover.style.left = e.clientX + 14 + 'px'; hover.style.top = e.clientY + 14 + 'px'; hover.textContent = hit.object.userData.name; }
+  else hover.style.display = 'none';
+});
+function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+syncUi(); build(); setCam('iso');
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+</script>
+</body>
+</html>
