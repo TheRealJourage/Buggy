@@ -19,8 +19,11 @@
   <b>Druckteil</b>
   <select id="which">
     <option value="lichtpanel">Lichtpanel</option>
-    <option value="motorpanel">Motor &amp; Zubehör</option>
+    <option value="motorpanel">Motor</option>
+    <option value="zubehoerpanel">Zubehör</option>
     <option value="audiopanel">Entertainment, Audio &amp; Helligkeit</option>
+    <option value="testpanel">Motor-Testpanel (Pumpe, Düsen, Start)</option>
+    <option value="probestueck_lanboo">Probestück LANBOO (Start-Schalter)</option>
   </select>
   <label><input type="checkbox" id="parts" checked> Schalter + Kappen zeigen</label>
   <label><input type="checkbox" id="open"> Kappen offen</label>
@@ -73,6 +76,7 @@ const redCap = new THREE.MeshStandardMaterial({ color: 0xc81a10, roughness: 0.35
 const clearCap = new THREE.MeshStandardMaterial({ color: 0xff3a2e, roughness: 0.1, transparent: true, opacity: 0.45 });
 const ledMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xff2010, emissiveIntensity: 0.6 });
 const black = new THREE.MeshStandardMaterial({ color: 0x1b1b1d, roughness: 0.6 });
+const orange = new THREE.MeshStandardMaterial({ color: 0xf07a1a, roughness: 0.5 });
 const root = new THREE.Group();
 scene.add(root);
 const panel = new THREE.Mesh(new THREE.BufferGeometry(), panelMat);
@@ -100,12 +104,22 @@ function buildParts(meta) {
     const g = new THREE.Group();
     g.position.set(c.x, c.y, T);
     if (c.kind === 'sw') {
-      const bush = new THREE.Mesh(new THREE.CylinderGeometry(6, 6, meta.thread, 24), chrome);
-      bush.rotation.x = Math.PI / 2; bush.position.z = meta.thread / 2; g.add(bush);
+      const thread = c.thread ?? meta.thread, leverL = c.lever ?? meta.lever;
+      const bush = new THREE.Mesh(new THREE.CylinderGeometry(6, 6, thread, 24), chrome);
+      bush.rotation.x = Math.PI / 2; bush.position.z = thread / 2; g.add(bush);
+      if (c.lb) {
+        // LANBOO 12NZ2 behind the plate: metal plate 15 x 30, ring 14.9 x 2.3, body 15 x 30 x 18.4
+        const mp = new THREE.Mesh(new THREE.BoxGeometry(15.03, 30.16, 0.8), chrome);
+        mp.position.z = c.mp - 0.4; g.add(mp);
+        const ring = new THREE.Mesh(new THREE.CylinderGeometry(7.43, 7.43, 2.29, 32), chrome);
+        ring.rotation.x = Math.PI / 2; ring.position.z = c.mp + 1.15; g.add(ring);
+        const body = new THREE.Mesh(new THREE.BoxGeometry(15, 30, 18.4), orange);
+        body.position.z = c.mp - 0.8 - 9.2; g.add(body);
+      }
       const nut = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 2.5, 6), chrome);
       nut.rotation.x = Math.PI / 2; nut.position.z = 1.25 + (c.cap ? meta.capT : 0); g.add(nut);
-      const lever = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2, meta.lever, 16), chrome);
-      lever.rotation.x = Math.PI / 2 - 0.35; lever.position.set(0, -meta.lever * 0.17, meta.thread + meta.lever / 2 - 1); g.add(lever);
+      const lever = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2, leverL, 16), chrome);
+      lever.rotation.x = Math.PI / 2 - 0.35; lever.position.set(0, -leverL * 0.17, thread + leverL / 2 - 1); g.add(lever);
       if (c.cap) {
         const plate = new THREE.Mesh(new THREE.BoxGeometry(meta.capW, meta.capH, meta.capT), chrome);
         plate.position.set(0, meta.capTop - meta.capH / 2, -meta.capT / 2 + 0.01); g.add(plate);

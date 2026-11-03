@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Zylinderbox Zeichnungssatz</title>
+<style>
+  body { margin: 0; background: #444; font-family: system-ui, sans-serif; }
+  #bar { padding: 8px 12px; color: #eee; font-size: 14px; }
+  #bar a { color: #9cf; }
+  #sheets svg.sheet { display: block; width: calc(100% - 24px); height: auto; margin: 0 12px 14px; box-shadow: 0 2px 8px #0008; }
+  @page { size: 420mm 297mm; margin: 0; }
+  @media print {
+    body { background: #fff; }
+    #bar { display: none; }
+    #sheets svg.sheet { width: 420mm; height: 297mm; margin: 0; box-shadow: none; break-after: page; }
+  }
+</style>
+</head>
+<body>
+<div id="bar">Zylinderbox – Zeichnungssatz für den Metallbauer (7 Blätter A3, Entwurf) · <a href="downloads/Zylinderbox-Zeichnungen.pdf">PDF</a> · <a href="zylinderbox.html">Maßblatt / Bauanleitung</a> · Drucken: A3 quer, ohne Ränder</div>
+<div id="sheets"></div>
+<script type="module" src="./zeichnungen.js"></script>
+</body>
+</html>

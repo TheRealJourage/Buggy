@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Lötplan Öldruck + G22</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 12px; background: #111; color: #eee; font-size: 16px; line-height: 1.4; max-width: 1000px; }
+  h1 { font-size: 21px; margin: 4px 0 6px; }
+  h2 { font-size: 18px; margin: 26px 0 8px; color: #8cf; border-bottom: 1px solid #333; padding-bottom: 4px; }
+  p, li { color: #ddd; }
+  .hint { color: #aaa; font-size: 14px; }
+  .warn { background: #3a2a10; border-left: 4px solid #e8a33d; padding: 8px 10px; margin: 10px 0; font-size: 15px; }
+  .stop { background: #3a1414; border-left: 4px solid #ff5a5a; padding: 8px 10px; margin: 10px 0; font-size: 15px; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; margin: 6px 0; }
+  th, td { text-align: left; padding: 5px 6px; border-bottom: 1px solid #2a2a2a; vertical-align: top; }
+  th { color: #8cf; font-weight: 600; }
+  .svgwrap { overflow-x: auto; background: #181818; border-radius: 8px; padding: 6px; }
+  svg { width: 100%; min-width: 640px; height: auto; }
+  svg text { font-family: system-ui, sans-serif; }
+  label.chk { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; }
+  label.chk input { width: 22px; height: 22px; flex: none; margin-top: 1px; }
+  .dot { display: inline-block; width: 12px; height: 12px; border-radius: 6px; margin-right: 4px; vertical-align: -1px; }
+  button { font-size: 15px; padding: 6px 12px; border-radius: 8px; border: 1px solid #444; background: #222; color: #ddd; }
+</style>
+</head>
+<body>
+<h1>Lötplan: Öldrucksensor + Geschwindigkeitsgeber G22</h1>
+<p class="hint">Stand 2026-10-31. Ergänzt den Soll-Plan in <a href="verkabelung.html#soll" style="color:#8cf">verkabelung.html</a>. Öldruck: Variante B festgelegt (User, 2026-10-31), Sensor Flylin JY202216. Pin-Ziele sind <b>Vorschlag Claude</b>. Lage von J1/J5/J6 aus der Platinendatei v0.4.3d, am eigenen Board <b>nicht geprüft</b>; G22-Belegung ungeprüft.</p>
+<div class="warn"><b>Beim Löten:</b> Batterie ab, ECU abgesteckt, USB ab. Nie 12 V auf J5 oder einen Adapter-Pin.</div>
+
+<h2>1. Plan</h2>
+<div class="svgwrap">
+<svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- ECU: proto area at the board edge, positions from v0.4.3d.kicad_pcb -->
+  <rect x="20" y="30" width="300" height="540" rx="10" fill="#1a1a1a" stroke="#555" stroke-width="2"/>
+  <text x="170" y="52" fill="#eee" font-size="15" font-weight="700" text-anchor="middle">Speeduino-Platine · Proto-Bereich</text>
+  <text x="170" y="68" fill="#e8a33d" font-size="11" text-anchor="middle">Lage laut Platinendatei v0.4.3d → Aufdruck prüfen</text>
+
+  <rect x="40" y="80" width="260" height="56" rx="8" fill="#202020" stroke="#777"/>
+  <text x="52" y="100" fill="#ccc" font-size="12" font-weight="700">J6 · 5 × GND</text>
+  <text x="52" y="116" fill="#999" font-size="11">quer über J5</text>
+  <rect x="150" y="92" width="140" height="34" rx="5" fill="#2a2a2a" stroke="#aaa" stroke-width="2"/>
+  <text x="160" y="114" fill="#fff" font-size="13" font-weight="700">GND (ein Stift)</text>
+
+  <rect x="40" y="150" width="260" height="196" rx="8" fill="#202020" stroke="#777"/>
+  <text x="52" y="170" fill="#ccc" font-size="12" font-weight="700">J5 · 4 Stifte</text>
+  <rect x="150" y="180" width="140" height="34" rx="5" fill="#2a2a2a" stroke="#ff9a3c" stroke-width="2"/>
+  <text x="160" y="202" fill="#fff" font-size="13" font-weight="700">VSS = D20</text>
+  <rect x="150" y="224" width="140" height="34" rx="5" fill="#161616" stroke="#333"/>
+  <text x="160" y="246" fill="#666" font-size="13">D21 · frei</text>
+  <rect x="150" y="268" width="140" height="34" rx="5" fill="#161616" stroke="#333"/>
+  <text x="160" y="290" fill="#666" font-size="13">A10 · frei</text>
+  <rect x="150" y="306" width="140" height="34" rx="5" fill="#2a2a2a" stroke="#4da3ff" stroke-width="2"/>
+  <text x="160" y="328" fill="#fff" font-size="13" font-weight="700">A9 · Öldruck</text>
+  <text x="52" y="198" fill="#999" font-size="11">1 kΩ ↑5 V,</text>
+  <text x="52" y="212" fill="#999" font-size="11">100 nF</text>
+  <text x="52" y="322" fill="#999" font-size="11">470 Ω,</text>
+  <text x="52" y="336" fill="#999" font-size="11">100 nF</text>
+
+  <rect x="40" y="350" width="260" height="56" rx="8" fill="#202020" stroke="#777"/>
+  <text x="52" y="370" fill="#ccc" font-size="12" font-weight="700">J1 · 5 × 5 V</text>
+  <text x="52" y="386" fill="#999" font-size="11">unter J5</text>
+  <rect x="150" y="362" width="140" height="34" rx="5" fill="#2a2a2a" stroke="#ff5a5a" stroke-width="2"/>
+  <text x="160" y="384" fill="#fff" font-size="13" font-weight="700">5 V (ein Stift)</text>
+
+  <text x="40" y="440" fill="#999" font-size="11">J5 und J1 = eine durchgehende Stiftreihe:</text>
+  <text x="40" y="456" fill="#999" font-size="11">VSS · D21 · A10 · A9 · 5V · 5V · 5V · 5V · 5V</text>
+  <text x="40" y="486" fill="#999" font-size="11">40-Pin-Adapter (26/36) bleibt unberührt.</text>
+  <text x="40" y="502" fill="#999" font-size="11">Nicht am Arduino Mega löten.</text>
+
+  <!-- oil sensor -->
+  <rect x="600" y="70" width="270" height="170" rx="10" fill="#1e1e1e" stroke="#ff8a3d" stroke-width="3"/>
+  <text x="612" y="94" fill="#fff" font-size="15" font-weight="700">Öldrucksensor</text>
+  <text x="612" y="112" fill="#aaa" font-size="11">Flylin JY202216 · 200 PSI · 0,5–4,5 V</text>
+  <text x="612" y="126" fill="#aaa" font-size="11">Stecker am Pigtail · Farbe an Farbe</text>
+  <circle cx="616" cy="150" r="6" fill="#ff5a5a"/><text x="630" y="155" fill="#eee" font-size="13">rot · +5 V</text>
+  <circle cx="616" cy="185" r="6" fill="#aaa"/><text x="630" y="190" fill="#eee" font-size="13">schwarz · Masse</text>
+  <circle cx="616" cy="220" r="6" fill="#4da3ff"/><text x="630" y="225" fill="#eee" font-size="13">blau · Signal</text>
+
+  <path d="M290 109 L470 109 L470 185 L610 185" fill="none" stroke="#aaa" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M290 323 L430 323 L430 220 L610 220" fill="none" stroke="#4da3ff" stroke-width="3.5" stroke-linejoin="round"/>
+  <path d="M290 379 L450 379 L450 150 L610 150" fill="none" stroke="#ff5a5a" stroke-width="3.5" stroke-linejoin="round"/>
+
+  <!-- G22 -->
+  <rect x="600" y="290" width="270" height="150" rx="10" fill="#1e1e1e" stroke="#ff8a3d" stroke-width="3"/>
+  <text x="612" y="314" fill="#fff" font-size="15" font-weight="700">G22 191 919 149 E</text>
+  <text x="612" y="330" fill="#aaa" font-size="11">Hall, 3-pol · Belegung laut VW-Plan, ungeprüft</text>
+  <circle cx="616" cy="360" r="6" fill="#ff9a3c"/><text x="630" y="365" fill="#eee" font-size="13">Pin 2 · Signal</text>
+  <circle cx="616" cy="392" r="6" fill="#ffd23f"/><text x="630" y="397" fill="#eee" font-size="13">Pin 1 · +12 V</text>
+  <circle cx="616" cy="424" r="6" fill="#aaa"/><text x="630" y="429" fill="#eee" font-size="13">Pin 3 · Masse</text>
+
+  <path d="M290 197 L400 197 L400 360 L610 360" fill="none" stroke="#ff9a3c" stroke-width="3.5" stroke-dasharray="10 6" stroke-linejoin="round"/>
+  <rect x="470" y="330" width="120" height="20" rx="10" fill="#ff5a5a"/>
+  <text x="530" y="344" fill="#111" font-size="11" font-weight="800" text-anchor="middle">erst nach Messung</text>
+
+  <path d="M610 392 L575 392 L575 495 L540 495" fill="none" stroke="#ffd23f" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M610 424 L590 424 L590 545 L540 545" fill="none" stroke="#aaa" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="360" y="478" width="180" height="34" rx="6" fill="#222" stroke="#ffd23f"/>
+  <text x="370" y="499" fill="#eee" font-size="12">Sicherung → 12 V geschaltet</text>
+  <rect x="360" y="528" width="180" height="34" rx="6" fill="#222" stroke="#aaa"/>
+  <text x="370" y="549" fill="#eee" font-size="12">Masse Motorblock (wie 36)</text>
+</svg>
+</div>
+<p class="hint"><span class="dot" style="background:#ff5a5a"></span>+5 V <span class="dot" style="background:#aaa"></span>Masse <span class="dot" style="background:#4da3ff"></span>Öldruck-Signal <span class="dot" style="background:#ff9a3c"></span>VSS-Signal (gestrichelt = erst nach Messung) <span class="dot" style="background:#ffd23f"></span>+12 V</p>
+
+<h2>2. Leitungsliste</h2>
+<table>
+<tr><th>Von</th><th>Nach</th><th>Hinweis</th></tr>
+<tr><td>Öldruck rot</td><td>J1 · 5 V (ein Stift)</td><td>Dupont-Buchse aufstecken oder anlöten</td></tr>
+<tr><td>Öldruck schwarz</td><td>J6 · GND (ein Stift)</td><td>Sensormasse zur ECU</td></tr>
+<tr><td>Öldruck blau</td><td>J5 · A9</td><td>Stift zwischen A10 und dem ersten 5-V-Stift</td></tr>
+<tr><td>G22 Pin 2</td><td>J5 · VSS (D20)</td><td>verlegen, <b>Ende isoliert lassen</b> bis Schritt D</td></tr>
+<tr><td>G22 Pin 1</td><td>12 V geschaltet (wie Board) über eigene Sicherung</td><td>Sicherungswert: Hypothese 2 A, Geber zieht nur mA (nicht gemessen)</td></tr>
+<tr><td>G22 Pin 3</td><td>Massepunkt Motorblock (wo Pin 36 hinführt)</td><td>–</td></tr>
+</table>
+
+<h2>3. Schritte (Haken bleiben im Browser gespeichert)</h2>
+<h3>A · J5 finden (stromlos)</h3>
+<div class="steps" data-g="a">
+<label class="chk"><input type="checkbox"><span>J5 auf dem Board gefunden. Nicht bestückt → 4-polige Stiftleiste 2,54 mm einlöten</span></label>
+<label class="chk"><input type="checkbox"><span>Aufdruck neben J5 lesen: <b>VSS · D21 · A10 · A9</b> (so in der Platinendatei v0.4.3d). Passt → Board ist v0.4.3d-Layout. Fehlt der Aufdruck → Durchgang Mega-Pin <b>„20 / SDA“</b> → VSS suchen</span></label>
+<label class="chk"><input type="checkbox"><span>A9 ist der Stift <b>neben „A9“</b>, am Ende der Leiste, auf der Seite von J1 (5 V). Über den 470-Ω-Widerstand geht er zum Mega, deshalb kein Durchgang direkt zu Mega-Pin A9 (≈ 470 Ω messen)</span></label>
+<label class="chk"><input type="checkbox"><span>Lage an Claude gemeldet (Foto mit Beschriftung)</span></label>
+</div>
+<h3>B · Öldrucksensor löten</h3>
+<div class="steps" data-g="b">
+<label class="chk"><input type="checkbox"><span>3-adrige Leitung rot/schwarz/blau, am Sensorende Gegenstecker zum Pigtail</span></label>
+<label class="chk"><input type="checkbox"><span>Schrumpfschlauch auf jede Ader schieben, <b>bevor</b> gelötet wird</span></label>
+<label class="chk"><input type="checkbox"><span>rot → J1 (5 V), schwarz → J6 (GND), blau → J5 A9 · Dupont-Buchsen oder angelötet, Schrumpf drüber</span></label>
+<label class="chk"><input type="checkbox"><span>Zugentlastung: Leitung mit Kabelbinder am Adapterkabel/Gehäuse, kein Zug auf J1/J5/J6</span></label>
+</div>
+<h3>C · G22 verlegen</h3>
+<div class="steps" data-g="c">
+<label class="chk"><input type="checkbox"><span>Signalader von J5 VSS bis zum G22 verlegt, Ende am Geber <b>isoliert</b></span></label>
+<label class="chk"><input type="checkbox"><span>Pin 1: Leitung mit Sicherungshalter zur geschalteten 12 V (wie Board)</span></label>
+<label class="chk"><input type="checkbox"><span>Pin 3: Leitung zum Massepunkt Motorblock</span></label>
+</div>
+<h3>D · G22 messen, dann Signal anschließen</h3>
+<div class="steps" data-g="d">
+<label class="chk"><input type="checkbox"><span>Pin 1 an 12 V, Pin 3 an Masse, Rad drehen, Pin 2 gegen Masse messen (ohne Pull-up)</span></label>
+<label class="chk"><input type="checkbox"><span>Pin 2 mit 4,7 kΩ nach 5 V messen, Rad drehen</span></label>
+<label class="chk"><input type="checkbox"><span>Ergebnis an Claude gemeldet</span></label>
+</div>
+<div class="stop"><b>Auswertung:</b> ohne Pull-up nichts, mit Pull-up 0/5 V → <b>Open Collector</b>: Pin 2 direkt an J5 VSS, <b>ohne Vorwiderstand</b>. Pin 2 liefert selbst 12 V → <b>nicht anschließen</b>, Pegelwandler festlegen.</div>
+
+<h3>E · Prüfen vor dem Einschalten</h3>
+<div class="steps" data-g="e">
+<label class="chk"><input type="checkbox"><span>J1 (5 V) gegen J6 (GND): <b>kein</b> Durchgang</span></label>
+<label class="chk"><input type="checkbox"><span>J5 A9 gegen J1 und gegen J6: kein Durchgang (Sensor abgesteckt)</span></label>
+<label class="chk"><input type="checkbox"><span>Durchgang je Ader: J1 → rot am Gegenstecker, J6 → schwarz, A9 → blau</span></label>
+</div>
+
+<h2>4. TunerStudio danach</h2>
+<table>
+<tr><th>Was</th><th>Wert</th><th>Quelle</th></tr>
+<tr><td>Oil Pressure</td><td>Enabled, Pin <b>A9</b>, danach Power Cycle</td><td>ini 202501.7</td></tr>
+<tr><td>Pressure at 0 V / 5 V</td><td><b>−25 psi / 225 psi</b> (−1,72 / 15,51 bar)</td><td>gerechnet aus 0,5 V = 0, 4,5 V = 200 psi (Händlerangabe)</td></tr>
+<tr><td>Kontrolle</td><td>Motor steht → ≈ 0</td><td>–</td></tr>
+<tr><td>VSS</td><td>Pulses per KM, Pin Board Default, Startwert siehe verkabelung.html</td><td>Vorschlag</td></tr>
+</table>
+
+<h2>5. Material</h2>
+<ul>
+<li>Litze in rot, schwarz, blau (Öldruck) und für den G22 drei Adern, Länge bis Getriebe bzw. Block (Vorschlag Claude: 0,5 mm², reine Signal-/Sensorleitungen)</li>
+<li>Gegenstecker zum Sensor-Pigtail, Stecker/Kontakte für den G22 (VW 3-pol, Typ nicht geklärt)</li>
+<li>Sicherungshalter fliegend + Flachsicherung, Ringöse für den Massepunkt</li>
+<li>Schrumpfschlauch, ggf. Dupont-Buchsen + 4-polige Stiftleiste 2,54 mm</li>
+<li>Gewindeadapter 1/8"-27 NPT (vorhanden), Gewindedichtung</li>
+</ul>
+<p><button id="reset">Haken zurücksetzen</button></p>
+
+<script>
+document.querySelectorAll('.steps').forEach(g => {
+  g.querySelectorAll('input').forEach((cb, i) => {
+    const key = 'loetplan_' + g.dataset.g + i;
+    cb.checked = localStorage.getItem(key) === '1';
+    cb.addEventListener('change', () => localStorage.setItem(key, cb.checked ? '1' : '0'));
+  });
+});
+document.getElementById('reset').addEventListener('click', () => {
+  Object.keys(localStorage).filter(k => k.startsWith('loetplan_')).forEach(k => localStorage.removeItem(k));
+  document.querySelectorAll('.steps input').forEach(cb => (cb.checked = false));
+});
+</script>
+</body>
+</html>

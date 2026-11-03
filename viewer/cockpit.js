@@ -19,17 +19,22 @@ const PANELS = [
     { id: 'rueck', type: 'B', cover: true, clearCap: true, capGlow: () => controls.rueck.st.pos === 'up', label: 'Rückfahr', sub: 'Zusatz weiß', pos: ['AUS', 'R-AUTO', 'AN'], info: 'Zusatz-Rückfahrscheinwerfer weiß (3,40 A, DT-Pin 8). Kappe zu = AUS. Mitte = Rangieren: an, solange R eingelegt ist. Oben = dauerhaft AN. Durchsichtige rote Kappe leuchtet bei AN (bei R-AUTO nicht, das ist straßenlegal). Zulassung mit TÜV klären.' },
     { id: 'nebel', type: 'B', cover: true, clearCap: true, capGlow: () => controls.nebel.st.pos === 'up' && controls.licht.st.pos !== 'down', label: 'Nebel', pos: ['AUS', 'VORN', 'V+SCHL'], info: 'Aus / Nebelscheinwerfer vorn / vorn + Nebelschlussleuchte. Wirkt nur mit Stand- oder Abblendlicht. Durchsichtige rote Kappe: leuchtet von unten (LED durch die Kappen-Platte), sobald die Nebelschlussleuchte an ist.' },
   ] },
-  { id: 'motor', title: 'Motor & Zubehör', x: 1250, y: 190, cols: 5, items: [
+  // split again 2026-11-01 (user): everything needed to drive on the engine panel, incl. compressor
+  { id: 'motor', title: 'Motor', x: 1250, y: 190, cols: 3, items: [
     { id: 'zuendung', type: 'A', cover: true, led: GREEN, label: 'Zündung', sub: 'Kl. 15', pos: ['AUS', 'AN'], info: 'Rastender Kippschalter, nur freigegeben bei gültigem Lenkrad-Code. LED leuchtet nur, wenn Kl. 15 wirklich anliegt.' },
-    { id: 'kompressor', type: 'B', cover: true, label: 'Kompressor', pos: ['AUTO', 'AUS', 'AN'], info: 'Kappe zu = AUTO (läuft erst bei laufendem Motor). Mitte = AUS. Oben = AN: übergeht nur „Motor läuft“, der Druckschalter schaltet immer ab.' },
-    { id: 'windeFrei', type: 'A', cover: true, led: YELLOW, label: 'Winde', sub: 'Freigabe', pos: ['AUS', 'FREI'], info: 'Freigabe für die Winde am Wischerhebel (herziehen = ein, wegdrücken = aus). Signal an den Controller, der die Winden-Relais schaltet. Vorschlag: zusätzlich in Reihe zur Spulenversorgung der Winden-Relais. Fernbedienung der Winde bleibt.' },
-    { id: 'sitz', type: 'C', label: 'Sitzheizung', pos: ['AUS', 'AN'], info: 'Einstufig, normaler Kippschalter (Typ C).' },
+    { id: 'motorSw', type: 'A', cover: true, led: AMBER, label: 'Motor', sub: 'Motor-Relais', pos: ['AUS', 'AN'], info: 'Festgelegt 2026-11-01: fest verdrahtet, Plus aus Kl. 15, liefert nur das Spulen-Plus des Motor-Relais (Pumpe, Zündspulen, Düsen, Lambda-Heizung). Motor aus = Motor-Schalter aus, Zündung bleibt an. Vor der Zündung einschalten, sonst kein Pumpen-Vorlauf. Typ A + Kappe neben der Zündung festgelegt 2026-11-01, Beleuchtung nicht nötig.' },
     { id: 'luefter', type: 'A', led: BLUE, label: 'Lüfter', sub: 'Auto / Manuell', pos: ['AUTO', 'MAN'], info: 'Auto = Speeduino (CLT, Pin 47). Manuell = Tastgrad vom Poti daneben. Typ A oder C noch offen.' },
     { id: 'start', type: 'T', cover: true, label: 'Start', sub: 'Kl. 50', pos: ['', 'START'], info: 'Tastend (EIN)-AUS mit Kappe. Wirkt nur bei BEREIT (N oder Kupplung getreten, Selbsttest ok).' },
+    { id: 'kompressor', type: 'B', cover: true, label: 'Kompressor', pos: ['AUTO', 'AUS', 'AN'], info: 'Kappe zu = AUTO (läuft erst bei laufendem Motor). Mitte = AUS. Oben = AN: übergeht nur „Motor läuft“, der Druckschalter schaltet immer ab.' },
+    { id: 'luefterPoti', type: 'pot', label: 'Lüfter', sub: 'Tastgrad', info: 'Tastgrad im Modus Manuell.' },
+  ] },
+  { id: 'zubehoer', title: 'Zubehör', x: 1590, y: 190, cols: 3, items: [
+    { id: 'windeFrei', type: 'A', cover: true, led: YELLOW, label: 'Winde', sub: 'Freigabe', pos: ['AUS', 'FREI'], info: 'Freigabe für die Winde am Wischerhebel (herziehen = ein, wegdrücken = aus). Signal an den Controller, der die Winden-Relais schaltet. Vorschlag: zusätzlich in Reihe zur Spulenversorgung der Winden-Relais. Fernbedienung der Winde bleibt.' },
+    { id: 'sitz', type: 'C', label: 'Sitzheizung', pos: ['AUS', 'AN'], info: 'Einstufig, normaler Kippschalter (Typ C).' },
+    { id: 'zubFrei', type: 'reserve', label: 'frei', info: 'Freier Platz.' },
     { id: 'a12Front', type: 'A', led: BLUE, label: '12 V Front', pos: ['AUS', 'AN'], info: '12-V-Abnahmepunkt außen an der Front.' },
     { id: 'a12Sitz', type: 'A', led: BLUE, label: '12 V Sitz', sub: 'hinter Fahrer', pos: ['AUS', 'AN'], info: '12-V-Abnahmepunkt hinter dem Fahrersitz.' },
     { id: 'a12Heck', type: 'A', led: BLUE, label: '12 V Heck', pos: ['AUS', 'AN'], info: '12-V-Abnahmepunkt außen am Heck.' },
-    { id: 'luefterPoti', type: 'pot', label: 'Lüfter', sub: 'Tastgrad', info: 'Tastgrad im Modus Manuell.' },
   ] },
   { id: 'audio', title: 'Entertainment, Audio & Helligkeit', x: 1250, y: 630, cols: 6, items: [
     { id: 'carplay', type: 'C', label: 'CarPlay-Pi', pos: ['AUS', 'AN'], info: 'Sound-/CarPlay-Pi an/aus (Typ C). Ohne den Pi läuft kein Audio: Musik, Telefon, Intercom und Funk gehen alle über ihn, deshalb sitzt der Schalter vorne bei den Lautstärkereglern.' },
@@ -273,7 +278,7 @@ function label(def, pos) {
 
 function act(def, why) {
   const st = controls[def.id].st;
-  if (def.id === 'start' && st.pos === 'up') log(on('zuendung') ? 'Start → Kl. 50 (nur bei BEREIT)' : 'Start ohne Zündung: keine Wirkung');
+  if (def.id === 'start' && st.pos === 'up') log(on('zuendung') ? 'Start → Kl. 50 (nur bei BEREIT)' + (on('motorSw') ? '' : ', Motor-Schalter aus: dreht, springt nicht an') : 'Start ohne Zündung: keine Wirkung');
   else if (def.type !== 'T') log(`${def.label}${def.sub ? ' ' + def.sub : ''}: ${label(def, st.pos)}${why ? ' (' + why + ')' : ''}`);
 }
 
@@ -506,7 +511,7 @@ function buildStatus() {
   dash.appendChild(el);
   const i = document.createElement('div');
   i.id = 'info';
-  i.innerHTML = '<b>Fahrersicht</b> – Lenkrad mittig, Lichtpanel links, Motor &amp; Zubehör und Entertainment/Audio rechts (Anordnung frei verschiebbar). Maus über ein Bedienelement zeigt Funktion und Status aus Bordnetz-Konzept.md.';
+  i.innerHTML = '<b>Fahrersicht</b> – Lenkrad mittig, Lichtpanel links, Motor, Zubehör und Entertainment/Audio rechts (Anordnung frei verschiebbar). Maus über ein Bedienelement zeigt Funktion und Status aus Bordnetz-Konzept.md.';
   dash.appendChild(i);
 }
 
