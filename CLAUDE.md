@@ -22,6 +22,7 @@ genannten Datei; andere Notizen und Memory verlinken, statt zu wiederholen.
 | Pneumatik: Logik, Messwerte, Airtec-Liste | `Druckluftanlage.md`; Mechanik/Beschaffung `Zylinderbox.md` |
 | Kühlung K1–K14, L1–L5 | `Kühlkreislauf.md` |
 | Abgasanlage (Krümmer, Y, Sondenort, Kats, Recht T3b) | `Abgasanlage.md` |
+| CAD-Grundmodell (frühes grobes STEP, Maße nur Hypothese; core `/srv/data/projects/Baugr2TUV.STEP`, Werkzeug `buggy-cad/`) | `DOKUMENTATION.md` „CAD-Grundmodell“ |
 | Ansaugung (K100-Klappen, Trichterprofile, Zylinderzuordnung) | `Ansaugung.md`; Teil in `Teile-Bestand.md` |
 | Speeduino-Pins | `Speeduino/Verkabelung.md` + `viewer/verkabelung.html` |
 | Speeduino-Tune (TunerStudio, Startversuch) | `Speeduino/Start-Tune.md`; Tune-Dateien `Speeduino/BuggyVR6/` |
