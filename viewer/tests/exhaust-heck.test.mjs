@@ -33,3 +33,13 @@ test('B reports the cross muffler hitting the cage tube with a too long cat', ()
   const o = H.build('B', { lkat: 450 });
   assert.ok(o.coll.some((c) => c.includes('Oberes Querrohr')));
 });
+
+test('all three layouts also fit with the OEM cast manifolds', () => {
+  for (const v of ['A', 'B', 'C']) for (const cyl1 of ['r', 'l']) {
+    const o = H.build(v, { krm: 'guss', cyl1 });
+    assert.deepEqual([...o.coll, ...o.viol, ...o.hyp, ...o.notes], [], v);
+    assert.ok(Math.abs(o.secLen[0] - o.secLen[1]) < 2, `${v} downpipes ${o.secLen.join('/')}`);
+    assert.ok(Math.min(...o.sondePath) >= 600, `${v} sonde ${Math.min(...o.sondePath)}`);
+    assert.equal(o.tunedRpm, null);
+  }
+});

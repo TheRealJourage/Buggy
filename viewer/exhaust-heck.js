@@ -11,7 +11,7 @@ const norm = (a) => mul(a, 1 / (len(a) || 1));
 const dist = (a, b) => len(sub(a, b));
 const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 
-export const TUBE = { prim: 38, sec: 63.5, main: 76.2 }; // OD; wall 1.5 → ID 35 / 60.5 / 73.2
+export const TUBE = { prim: 38, sec: 63.5, main: 76.2, down: 57, cast: 44 }; // OD; wall 1.5 → ID 35 / 60.5 / 73.2 / 54
 const FR = 24.15; // frame tube radius (48.3 mm)
 
 // frame members near the engine bay, centre lines from the STEP bounding boxes
@@ -133,20 +133,39 @@ export function build(v, o = {}) {
   const vband = (at, dir, r) => marks.push({ kind: 'vband', at, dir, r });
 
   const DOWN = [0, -1, 0], YL = 1058; // collectors point down; low runs at YL (floor 989 + r)
+  // OEM cast manifolds 1–3 / 4–6: outlet 3-hole flange below the head, pointing down (Golf, Hypothese); shape schematic
+  const cast = p.krm === 'guss';
+  function castFront() {
+    const O = [0, 1].map((gi) => [[0, 1, 2], [3, 4, 5]][gi].reduce((a, ci) => a + ports[ci][0], 0) / 3).map((x) => [x, p.yp - 150, -841]);
+    const runners = ports.map((P, ci) => {
+      const o = O[grpOf(ci)];
+      return part(`Serien-Gusskrümmer ${ci < 3 ? '1–3 (022 253 033)' : '4–6 (022 253 034)'}, Kanal Zyl. ${ci + 1} (Form schematisch)`,
+        fillet([P, add(P, [0, 0, -45]), [(P[0] + o[0]) / 2, p.yp - 70, -830], add(o, [0, 50, 0]), o], 30), TUBE.cast, 'p', { group: grpOf(ci), cast: true, chain: `cast${grpOf(ci)}`, skipEnd: 130 });
+    });
+    O.forEach((o) => marks.push({ kind: 'flange', at: o, name: 'Krümmer-Ausgang 3-Loch (Dichtung 021 253 115), zeigt nach unten (Hypothese) – Ø, Lage und Richtung am Motor messen' }));
+    return { O, runners };
+  }
+  const downName = (gi) => `Hosenrohr ${gi ? '4–6' : '1–3'} (57 × 1,5, Ø am Krümmer-Ausgang messen)`;
   if (v === 'A') {
     const g = [[0, 1, 2], [3, 4, 5]];
-    const C = [0, 1].map((gi) => [1000 + s1 * (gi ? 1.5 : -1.5) * p.pitch, 1300, -1000]);
-    const slots = [];
-    g.forEach((grp, gi) => { const sl = xSlots(C[gi], 27, 90, grp.map((ci) => ports[ci][0])); grp.forEach((ci, k) => { slots[ci] = sl[k]; }); });
-    // over the top: rise behind the head, then plunge into the downward collectors
-    const prim = primaries((ci) => ({ slot: slots[ci], axis: DOWN }),
-      (ci, t, P) => [[P[0], p.yp + t, -860], [P[0], p.yp + t, Math.min(-900, slots[ci][2] + 70)]], Lp, 500, grpOf);
-    const outl = [0, 1].map((gi) => collector(`3-in-1-Sammler ${gi ? '{4,5,6}' : '{1,2,3}'}`, C[gi], DOWN, 27, 3, 150, TUBE.sec));
     const M = [1000, YL, -1380];
     const ySl = [0, 1].map((gi) => [1000 + s1 * (gi ? 33 : -33), YL, -1380]);
-    const sec = [0, 1].map((gi) => { const O = outl[gi]; return part(`Sekundärrohr ${gi ? '{4,5,6}' : '{1,2,3}'} (63,5 × 1,5)`, fillet([O, [O[0], YL, O[2]], [O[0], YL, -1100], add(ySl[gi], [0, 0, 60]), ySl[gi]], Rs), TUBE.sec, 's', { group: gi, skipEnd: 60, skipStart: 40 }); });
+    let prim, outl, sec, collLen = 150, dS = TUBE.sec;
+    if (cast) {
+      const c = castFront(); prim = c.runners; outl = c.O; collLen = 0; dS = TUBE.down;
+      sec = [0, 1].map((gi) => { const O = outl[gi]; return part(downName(gi), fillet([O, [O[0], YL, O[2]], [O[0], YL, -1100], add(ySl[gi], [0, 0, 60]), ySl[gi]], 85), TUBE.down, 's', { group: gi, skipEnd: 60, skipStart: 40 }); });
+    } else {
+      const C = [0, 1].map((gi) => [1000 + s1 * (gi ? 1.5 : -1.5) * p.pitch, 1300, -1000]);
+      const slots = [];
+      g.forEach((grp, gi) => { const sl = xSlots(C[gi], 27, 90, grp.map((ci) => ports[ci][0])); grp.forEach((ci, k) => { slots[ci] = sl[k]; }); });
+      // over the top: rise behind the head, then plunge into the downward collectors
+      prim = primaries((ci) => ({ slot: slots[ci], axis: DOWN }),
+        (ci, t, P) => [[P[0], p.yp + t, -860], [P[0], p.yp + t, Math.min(-900, slots[ci][2] + 70)]], Lp, 500, grpOf);
+      outl = [0, 1].map((gi) => collector(`3-in-1-Sammler ${gi ? '{4,5,6}' : '{1,2,3}'}`, C[gi], DOWN, 27, 3, 150, TUBE.sec));
+      sec = [0, 1].map((gi) => { const O = outl[gi]; return part(`Sekundärrohr ${gi ? '{4,5,6}' : '{1,2,3}'} (63,5 × 1,5)`, fillet([O, [O[0], YL, O[2]], [O[0], YL, -1100], add(ySl[gi], [0, 0, 60]), ySl[gi]], Rs), TUBE.sec, 's', { group: gi, skipEnd: 60, skipStart: 40 }); });
+    }
     const yOut = [1000, YL, -1430];
-    cone('Y-Sammler 2-in-1 (Merge, kein T)', M, yOut, 33 + TUBE.sec / 2, TUBE.main / 2);
+    cone('Y-Sammler 2-in-1 (Merge, kein T)', M, yOut, 33 + dS / 2, TUBE.main / 2);
     const split = [1000, YL, -1465];
     part('Sammelrohr 76,2 (alle 6 Zylinder)', [yOut, split], TUBE.main, 'm');
     sonde([1000, YL + 38, -1448], [0, 1, 0], '≈ 20 mm hinter dem Y-Sammler, oben senkrecht');
@@ -161,18 +180,33 @@ export function build(v, o = {}) {
       part(`Stack ${x > 1000 ? 'links' : 'rechts'} (63,5, Mündung oben, schräg nach hinten)`, fillet([d1, add(d1, [0, 60, 0]), add(d1, [0, 110, -40])], 60), TUBE.sec, 't');
     });
     out.primLen = prim.map((q) => q.len); out.secLen = sec.map((q) => q.len);
-    out.sondePath = prim.map((q, ci) => q.len + 150 + sec[grpOf(ci)].len + 50 + 18);
+    out.sondePath = prim.map((q, ci) => q.len + collLen + sec[grpOf(ci)].len + 50 + 18);
   }
 
   if (v === 'B') {
-    const C = [1000, 1330, -1000];
-    const sl = xSlots(C, 47, 15, ports.map((P) => P[0]));
-    const prim = primaries((ci) => ({ slot: sl[ci], axis: DOWN }),
-      (ci, t, P) => [[P[0], p.yp + t, -850], [P[0], p.yp + t, Math.min(-880, sl[ci][2] + 70)]], Lp, 500, grpOf);
-    const o1 = collector('6-in-1-Sammler', C, DOWN, 47, 6, 180, TUBE.main);
     const zr = -1250, kb = [1000, 1250, zr], kt = [1000, 1250 + p.lkat, zr];
-    part('Sammelrohr 76,2 (alle 6 Zylinder), Bogen nach hinten und hoch', fillet([o1, [1000, YL, -1000], [1000, YL, zr], kb], 110), TUBE.main, 'm');
-    sonde([1000, YL + 38, -1110], [0, 1, 0], '≈ 200 mm hinter dem 6-in-1, oben senkrecht');
+    let prim, toSonde;
+    if (cast) {
+      // OEM manifolds → two short downpipes → Y right behind the engine instead of the 6-in-1
+      const c = castFront(); prim = c.runners;
+      const M = [1000, YL, -1060], ySl = [0, 1].map((gi) => [1000 + s1 * (gi ? 33 : -33), YL, -1060]);
+      const dn = [0, 1].map((gi) => { const O = c.O[gi]; return part(downName(gi), fillet([O, [O[0], YL, O[2]], add(ySl[gi], [0, 0, 70]), ySl[gi]], 85), TUBE.down, 's', { group: gi, skipEnd: 60, skipStart: 40 }); });
+      const yOut = [1000, YL, -1110];
+      cone('Y-Sammler 2-in-1 (Merge, kein T)', M, yOut, 33 + TUBE.down / 2, TUBE.main / 2);
+      part('Sammelrohr 76,2 (alle 6 Zylinder), nach hinten und hoch', fillet([yOut, [1000, YL, zr], kb], 110), TUBE.main, 'm');
+      sonde([1000, YL + 38, -1150], [0, 1, 0], '≈ 40 mm hinter dem Y-Sammler, oben senkrecht');
+      out.secLen = dn.map((q) => q.len);
+      toSonde = (q, ci) => q.len + dn[grpOf(ci)].len + 50 + 40;
+    } else {
+      const C = [1000, 1330, -1000];
+      const sl = xSlots(C, 47, 15, ports.map((P) => P[0]));
+      prim = primaries((ci) => ({ slot: sl[ci], axis: DOWN }),
+        (ci, t, P) => [[P[0], p.yp + t, -850], [P[0], p.yp + t, Math.min(-880, sl[ci][2] + 70)]], Lp, 500, grpOf);
+      const o1 = collector('6-in-1-Sammler', C, DOWN, 47, 6, 180, TUBE.main);
+      part('Sammelrohr 76,2 (alle 6 Zylinder), Bogen nach hinten und hoch', fillet([o1, [1000, YL, -1000], [1000, YL, zr], kb], 110), TUBE.main, 'm');
+      sonde([1000, YL + 38, -1110], [0, 1, 0], '≈ 200 mm hinter dem 6-in-1, oben senkrecht');
+      toSonde = (q) => q.len + 180 + 230;
+    }
     cyl(`Kat (Platzhalter Ø ${p.dkat} × ${p.lkat}, Mustang-Kat – messen)`, kb, kt, p.dkat, 'kat');
     vband(kb, [0, 1, 0], 45); vband(kt, [0, 1, 0], 45);
     const dy = kt[1] + 30 + p.ddmp / 2, half = p.ldmp / 2;
@@ -183,31 +217,35 @@ export function build(v, o = {}) {
       part(`Endrohr ${k > 0 ? 'links' : 'rechts'} (57 × 1,5, waagrecht nach hinten über den Heckkasten)`, fillet([e, add(e, [k * 70, 0, 0]), add(e, [k * 70, 0, -90]), [e[0] + k * 70, dy, -1630]], 85), 57, 't', { skipStart: 30 });
     }
     out.primLen = prim.map((q) => q.len);
-    out.sondePath = prim.map((q) => q.len + 180 + 230);
+    out.sondePath = prim.map(toSonde);
     if (dy + p.ddmp / 2 > 1792 - 10) notes.push('Querdämpfer zu hoch für das obere Querrohr.');
   }
 
   if (v === 'C') {
     const g = [[0, 1, 2], [3, 4, 5]];
-    const C = [0, 1].map((gi) => [1000 + s1 * (gi ? 1.5 : -1.5) * p.pitch, 1300, -960]);
-    const slots = [];
-    g.forEach((grp, gi) => { const sl = xSlots(C[gi], 27, 90, grp.map((ci) => ports[ci][0])); grp.forEach((ci, k) => { slots[ci] = sl[k]; }); });
-    const Lprim = p.cPrim ?? 480;
-    const prim = primaries((ci) => ({ slot: slots[ci], axis: DOWN }),
-      (ci, t, P) => [[P[0], p.yp + 20 + t, slots[ci][2] + 80]], Lprim, 300, grpOf);
-    const outl = [0, 1].map((gi) => collector(`3-in-1-Sammler ${gi ? '{4,5,6}' : '{1,2,3}'}`, C[gi], DOWN, 27, 3, 140, TUBE.sec));
+    let prim, outl, collLen = 140, dS = TUBE.sec;
+    if (cast) { const c = castFront(); prim = c.runners; outl = c.O; collLen = 0; dS = TUBE.down; }
+    else {
+      const C = [0, 1].map((gi) => [1000 + s1 * (gi ? 1.5 : -1.5) * p.pitch, 1300, -960]);
+      const slots = [];
+      g.forEach((grp, gi) => { const sl = xSlots(C[gi], 27, 90, grp.map((ci) => ports[ci][0])); grp.forEach((ci, k) => { slots[ci] = sl[k]; }); });
+      const Lprim = p.cPrim ?? 480;
+      prim = primaries((ci) => ({ slot: slots[ci], axis: DOWN }),
+        (ci, t, P) => [[P[0], p.yp + 20 + t, slots[ci][2] + 80]], Lprim, 300, grpOf);
+      outl = [0, 1].map((gi) => collector(`3-in-1-Sammler ${gi ? '{4,5,6}' : '{1,2,3}'}`, C[gi], DOWN, 27, 3, 140, TUBE.sec));
+    }
     // Y on the left (+X) rear, low; main turns up into the left stack
     const xs = 1000 + 180, M = [xs, YL, -1310];
     const ySl = [0, 1].map((gi) => [xs + (outl[gi][0] < outl[1 - gi][0] ? -33 : 33), YL, -1310]);
-    const secFn = (gi) => (t) => { const O = outl[gi], S = ySl[gi]; return fillet([O, [O[0], YL, O[2]], [(O[0] + S[0]) / 2 + t, YL, -1150], add(S, [0, 0, 80]), S], Rs); };
+    const secFn = (gi) => (t) => { const O = outl[gi], S = ySl[gi]; return fillet([O, [O[0], YL, O[2]], [(O[0] + S[0]) / 2 + t, YL, -1150], add(S, [0, 0, 80]), S], cast ? 85 : Rs); };
     const Ls = Math.max(...[0, 1].map((gi) => pathLen(secFn(gi)(0))));
     const sec = [0, 1].map((gi) => {
       const s = solve(secFn(gi), Ls, 0, Math.max(0, LIMITS.xMax - 40 - (outl[gi][0] + ySl[gi][0]) / 2));
       if (s.short) notes.push(`Sekundärrohr ${gi + 1} erreicht ${pathLen(s.pts).toFixed(0)} statt ${Ls.toFixed(0)} mm.`);
-      return part(`Sekundärrohr ${gi ? '{4,5,6}' : '{1,2,3}'} (63,5 × 1,5)`, s.pts, TUBE.sec, 's', { group: gi, skipEnd: 70, skipStart: 40 });
+      return part(cast ? downName(gi) : `Sekundärrohr ${gi ? '{4,5,6}' : '{1,2,3}'} (63,5 × 1,5)`, s.pts, dS, 's', { group: gi, skipEnd: 70, skipStart: 40 });
     });
     const yOut = add(M, [0, 0, -50]);
-    cone('Y-Sammler 2-in-1', M, yOut, 33 + TUBE.sec / 2, TUBE.main / 2);
+    cone('Y-Sammler 2-in-1', M, yOut, 33 + dS / 2, TUBE.main / 2);
     const kb = [xs, 1250, -1470], kt = [xs, 1250 + p.lkat, -1470];
     part('Sammelrohr 76,2 (alle 6 Zylinder), Bogen nach oben', fillet([yOut, [xs, YL, -1470], kb], 110), TUBE.main, 'm');
     sonde([xs, YL + 38, -1385], [0, 1, 0], '≈ 25 mm hinter dem Y, oben senkrecht');
@@ -219,9 +257,11 @@ export function build(v, o = {}) {
     const dirTip = norm([0.5, 0, -0.866]); // 30° to the left of straight back
     part('Endrohr (76,2, Hockeyschläger, Mündung hinten-links 30°)', fillet([d1, add(d1, [0, 70, 0]), add(add(d1, [0, 70, 0]), mul(dirTip, 140))], 110), TUBE.main, 't');
     out.primLen = prim.map((q) => q.len); out.secLen = sec.map((q) => q.len);
-    out.sondePath = prim.map((q, ci) => q.len + 140 + sec[grpOf(ci)].len + 50 + 25);
+    out.sondePath = prim.map((q, ci) => q.len + collLen + sec[grpOf(ci)].len + 50 + 25);
   }
+  out.cast = cast;
   check(out, frame({ upperBeam: p.upperBeam }));
+  if (cast) out.tunedRpm = null;
   return out;
 }
 

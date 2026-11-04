@@ -45,6 +45,8 @@
   <label>Kanalmitte Höhe Y <input type="range" id="yp" min="1300" max="1550" step="10" value="1420"><span class="v" id="yp_v"></span></label>
   <label>Kanal-Abstand <input type="range" id="pitch" min="55" max="85" step="1" value="65"><span class="v" id="pitch_v"></span></label>
   <label>Zyl. 1 sitzt <select id="cyl1"><option value="r">rechts</option><option value="l">links</option></select></label>
+  <h3>Krümmer</h3>
+  <label>Ausführung <select id="krm"><option value="faecher">Fächer (Selbstbau)</option><option value="guss">Serien-Guss 1–3 / 4–6</option></select></label>
   <h3>Primärrohre</h3>
   <label id="l_rpm">abstimmen auf /min <input type="range" id="rpm" min="4000" max="6500" step="100" value="5000"><span class="v" id="rpm_v"></span></label>
   <label id="l_cprim">Länge (Tri-Y) <input type="range" id="cPrim" min="420" max="600" step="10" value="480"><span class="v" id="cPrim_v"></span></label>
@@ -71,7 +73,7 @@ import * as H from './exhaust-heck.js';
 const state = { v: 'A' };
 const $ = (id) => document.getElementById(id);
 const NUM = ['yp', 'pitch', 'rpm', 'cPrim', 'eo', 'lkat', 'dkat', 'ldmp', 'ddmp'];
-const P = () => ({ ...Object.fromEntries(NUM.map((k) => [k, +$(k).value])), cyl1: $('cyl1').value, upperBeam: $('upperBeam').checked });
+const P = () => ({ ...Object.fromEntries(NUM.map((k) => [k, +$(k).value])), cyl1: $('cyl1').value, krm: $('krm').value, upperBeam: $('upperBeam').checked });
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(devicePixelRatio);
@@ -134,6 +136,7 @@ function build() {
   });
   for (const mk of r.marks) {
     if (mk.kind === 'sonde') { rod(mk.at, [mk.at[0], mk.at[1] + 70, mk.at[2]], 12, M.sonde, mk.name); label('Sonde', [mk.at[0], mk.at[1] + 140, mk.at[2]], '#5f5', 0.8); }
+    if (mk.kind === 'flange') rod([mk.at[0], mk.at[1] - 5, mk.at[2]], [mk.at[0], mk.at[1] + 5, mk.at[2]], 48, M.vband, mk.name);
     if (mk.kind === 'vband') rod([mk.at[0], mk.at[1] - 4, mk.at[2]], [mk.at[0], mk.at[1] + 4, mk.at[2]], mk.r, M.vband, 'V-Band-Flansch');
   }
   const kat = r.parts.find((q) => q.kind === 'kat'); if (kat) label('Kat', [kat.pts[1][0] + (state.v === 'A' ? 0 : 0), (kat.pts[0][1] + kat.pts[1][1]) / 2, kat.pts[0][2] - 120], '#f99', 0.8);
@@ -151,8 +154,11 @@ const fmt = (n) => Math.round(n).toLocaleString('de-DE');
 function report(r) {
   const p = r.p, rows = [];
   const L = r.primLen, Lm = L.reduce((a, b) => a + b, 0) / L.length;
-  rows.push(['Primärrohre', `6 × ${fmt(Lm)} mm (38 × 1,5, ID 35), gleich lang → Bell ≈ <b>${fmt(r.tunedRpm)} /min</b> <span class="muted">(ED ${r.ED}°, Hypothese)</span>`]);
-  if (r.secLen) rows.push(['Sekundärrohre', `2 × ${fmt(r.secLen[0])} mm (63,5 × 1,5)${state.v === 'C' ? ' <span class="muted">– Tri-Y: Primär + Sekundär ≈ ' + fmt(Lm + 140 + r.secLen[0]) + ' mm wirken zusammen</span>' : ''}`]);
+  if (r.cast) {
+    rows.push(['Krümmer', 'Serien-Guss 022 253 033 (1–3) / 034 (4–6), keine Abstimmung. Form und Ausgang schematisch: 3-Loch-Flansch ≈ 150 mm unter der Kanalmitte, nach unten (Hypothese) <span class="muted">– welche Krümmer verbaut sind: offen (Halle)</span>']);
+    rows.push(['Hosenrohre', `2 × ${fmt(r.secLen[0])} mm (57 × 1,5, gleich lang) <span class="muted">(Ø vor dem Y: Claude 55–57, Codex 45–48 ID → Krümmer-Ausgang messen)</span>`]);
+  } else rows.push(['Primärrohre', `6 × ${fmt(Lm)} mm (38 × 1,5, ID 35), gleich lang → Bell ≈ <b>${fmt(r.tunedRpm)} /min</b> <span class="muted">(ED ${r.ED}°, Hypothese)</span>`]);
+  if (r.secLen && !r.cast) rows.push(['Sekundärrohre', `2 × ${fmt(r.secLen[0])} mm (63,5 × 1,5)${state.v === 'C' ? ' <span class="muted">– Tri-Y: Primär + Sekundär ≈ ' + fmt(Lm + 140 + r.secLen[0]) + ' mm wirken zusammen</span>' : ''}`]);
   rows.push(['Sammelrohr', state.v === 'A' ? '76,2 (3″) bis zur Teilung, dann 2 × 63,5' : '76,2 (3″) wie der Mustang-Kat-Anschluss <span class="muted">(Faustregel 56–60 ID → Widerspruch offen)</span>']);
   rows.push(['Sonde', `sieht alle 6 Zylinder, ≈ ${fmt(Math.min(...r.sondePath))} mm Rohrweg ab Auslass <span class="muted">(AEM ≥ 457, 14Point7 ≈ 600)</span>`]);
   rows.push(['Kat', `${state.v === 'A' ? '2 × ' : ''}Ø ${p.dkat} × ${p.lkat} zwischen V-Bändern <span class="muted">(Platzhalter, Mustang-Kat 16399 messen)</span>`]);
@@ -165,7 +171,7 @@ function report(r) {
     A: '<b>A · 6-2-1-2 Twin-Stack (Vorschlag Claude, Leistung):</b> Primärrohre steigen hinter dem Kopf auf und fallen senkrecht in zwei 3-in-1 {1,2,3}/{4,5,6} (gleichmäßig 240°). Gleich lange Sekundärrohre laufen unten nach hinten in den Y-Sammler, die Sonde sitzt direkt dahinter. Danach Teilung auf zwei senkrechte Stränge mit je einem der beiden Mustang-Kats und einem Dämpfer, zwei Stacks oben am Heck. Symmetrisch, am meisten Schweißarbeit.',
     B: '<b>B · 6-1 Querdämpfer, Doppelrohr hinten (Vorschlag Claude):</b> Gleiche Primärführung, alle 6 Rohre in einen 6-in-1-Sammler. Das Sammelrohr läuft unten nach hinten (Sonde), dann senkrecht mit Kat in der Mitte hoch in einen Querdämpfer. Zwei Endrohre laufen waagrecht über dem Heckkasten nach hinten. Spitze oben, Mitte schwächer (Forum, keine VR6-Messung). Kat höchstens ≈ 350 mm.',
     C: '<b>C · Tri-Y, Mono-Stack hinten-links (Vorschlag Claude, Bauaufwand):</b> Kurze Primärrohre in zwei 3-in-1 gleich hinter dem Kopf, lange gleich lange Sekundärrohre unten nach links hinten in den Y. Ein Strang mit Kat + Dämpfer links hinten, Endrohr oben 30° nach hinten-links gebogen. Am wenigsten Biegungen, breites mittleres Band (Hypothese).',
-  }[state.v];
+  }[state.v] + (r.cast ? '<br><b>Mit Serien-Gusskrümmern:</b> Fächer und 3-in-1 entfallen, zwei gleich lange Hosenrohre führen unten nach hinten in den Y-Sammler, hinten ist alles wie oben. Kein Leistungsgewinn durch Abstimmung, aber viel weniger Schweißarbeit, fertige Dichtungen und Stehbolzen (Serienteile).' : '');
   $('info').innerHTML = `<h3>Stand 2026-11-04 · Planungsbasis 88 cm aus CAD (User) · Vorschlag, nichts festgelegt</h3>${desc}
     <table>${rows.map(([a, c]) => `<tr><td>${a}</td><td>${c}</td></tr>`).join('')}</table>
     ${r.notes.length ? `<div class="warn">${r.notes.join('<br>')}</div>` : ''}
@@ -181,8 +187,9 @@ for (const b of document.querySelectorAll('[data-v]')) b.onclick = () => { state
 for (const b of document.querySelectorAll('[data-cam]')) b.onclick = () => setCam(b.dataset.cam);
 function syncUi() {
   for (const k of NUM) $(k + '_v').textContent = $(k).value + (k === 'eo' ? '°' : '');
-  $('l_rpm').classList.toggle('dis', state.v === 'C');
-  $('l_cprim').classList.toggle('dis', state.v !== 'C');
+  const g = $('krm').value === 'guss';
+  $('l_rpm').classList.toggle('dis', g || state.v === 'C');
+  $('l_cprim').classList.toggle('dis', g || state.v !== 'C');
 }
 for (const el of document.querySelectorAll('#params input, #params select')) el.addEventListener('input', () => { syncUi(); build(); });
 
@@ -195,7 +202,8 @@ renderer.domElement.addEventListener('pointermove', (e) => {
 });
 function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
 addEventListener('resize', resize); resize();
-const q = new URLSearchParams(location.search).get('v'); if (q && 'ABC'.includes(q)) document.querySelector(`[data-v="${q}"]`).click();
+const qs = new URLSearchParams(location.search); if (qs.get('k') === 'guss') $('krm').value = 'guss';
+const q = qs.get('v'); if (q && 'ABC'.includes(q)) document.querySelector(`[data-v="${q}"]`).click();
 syncUi(); build(); setCam('iso');
 renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
 </script>
