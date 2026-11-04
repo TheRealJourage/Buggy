@@ -7,3 +7,5 @@ viewer/handbuch/
 srcTest/SteeringControl/tools/logs/
 # agent research reports (working files)
 .research-*
+# mesh derived from the STEP model (regenerate: /srv/data/projects/buggy-cad/export_parts.py)
+viewer/data/

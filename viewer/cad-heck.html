@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Heck aus dem CAD-Modell</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #111; color: #ddd; font-family: system-ui, sans-serif; overflow: hidden; }
+  #bar { position: fixed; top: 0; left: 0; right: 0; padding: 8px 12px; background: #151517cc; display: flex; gap: 8px; align-items: center; font-size: 14px; z-index: 2; flex-wrap: wrap; }
+  button { background: #333; color: #ddd; border: 1px solid #555; padding: 4px 9px; cursor: pointer; border-radius: 3px; }
+  #bar label { font-size: 13px; }
+  #bar .hint { color: #888; font-size: 12px; }
+  #info { position: fixed; bottom: 10px; left: 10px; max-width: 560px; padding: 10px 12px; background: #000b; border-radius: 6px; font-size: 13px; line-height: 1.4; }
+  #info .muted { color: #999; font-size: 12px; }
+  #pick { position: fixed; top: 60px; right: 10px; width: 300px; padding: 8px 12px; background: #000b; border-radius: 6px; font-size: 13px; line-height: 1.4; min-height: 20px; }
+  #hover { position: fixed; pointer-events: none; padding: 4px 7px; background: #000d; border: 1px solid #555; border-radius: 4px; font-size: 12px; display: none; z-index: 3; }
+  .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+  @media (max-width: 700px) { #pick { width: auto; left: 10px; } #info { max-height: 35vh; overflow-y: auto; } }
+</style>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.js" } }</script>
+</head>
+<body>
+<div id="bar">
+  <b>Heck aus dem STEP-Modell (2022)</b>
+  <button data-cam="rear">Von hinten</button><button data-cam="side">Seite</button><button data-cam="top">Oben</button><button data-cam="iso">Schräg</button>
+  <label><input type="checkbox" id="frame" checked> Rahmen/Teile</label>
+  <label><input type="checkbox" id="shell" checked> Flächenkörper (Motor/Getriebe)</label>
+  <label><input type="checkbox" id="cut"> Schnitt: nur hinter Z <input type="number" id="cutz" value="-900" step="50" style="width:70px"></label>
+  <a href="abgas-heck.html" style="color:#8cf;font-size:12px">Abgas-Viewer</a>
+  <span class="hint">Klick auf ein Teil = Maße · Rad: zoomen · rechts: verschieben</span>
+</div>
+<div id="pick">Teil anklicken</div>
+<div id="info">
+  <b>Was zu sehen ist:</b> alle Körper des STEP mit Z &lt; −250 (Heck).
+  <span class="sw" style="background:#6b8a6b"></span>Volumenkörper (Rahmen, Kiste, Sitze, Achsteile)
+  <span class="sw" style="background:#c98a4a"></span>Flächenkörper – darin stecken Motor und Getriebe (bisher von mir übersehen)
+  <span class="sw" style="background:#4a7ac9"></span>Kiste hinter dem Sitz (laut User Tank)<br>
+  <span class="muted">Koordinaten wie im Modell: Y = Höhe, Z = Länge (vorn = +Z), X = Breite (+X = links, Hypothese). Modell früh und grob, Maße nicht verlässlich; Heckbalken real quadratisch, oberer Balken fehlt im Modell.</span>
+</div>
+<div id="hover"></div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from './vendor/OrbitControls.js';
+
+const $ = (id) => document.getElementById(id);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(devicePixelRatio);
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x1a1a1c);
+const camera = new THREE.PerspectiveCamera(35, 1, 5, 40000);
+const controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping = true;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x333344, 1.4));
+const s1 = new THREE.DirectionalLight(0xffffff, 1.5); s1.position.set(2500, 3500, -4000); scene.add(s1);
+const s2 = new THREE.DirectionalLight(0xffffff, 0.6); s2.position.set(-2000, 2000, 2000); scene.add(s2);
+const TANK = new Set([138, 140, 142, 143]); // walls of the box behind the seat (solids index in export)
+const mats = {
+  solid: new THREE.MeshStandardMaterial({ color: 0x6b8a6b, metalness: 0.2, roughness: 0.7, side: THREE.DoubleSide }),
+  shell: new THREE.MeshStandardMaterial({ color: 0xc98a4a, metalness: 0.3, roughness: 0.6, side: THREE.DoubleSide }),
+  tank: new THREE.MeshStandardMaterial({ color: 0x4a7ac9, metalness: 0.2, roughness: 0.6, side: THREE.DoubleSide, transparent: true, opacity: 0.7 }),
+  sel: new THREE.MeshStandardMaterial({ color: 0xff4040, side: THREE.DoubleSide }),
+};
+const meshes = [];
+const data = await (await fetch('data/cad-heck.json', { cache: 'no-cache' })).json();
+for (const p of data) {
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(p.V, 3)); g.setIndex(p.F); g.computeVertexNormals();
+  const kind = TANK.has(p.i) ? 'tank' : p.kind;
+  const m = new THREE.Mesh(g, mats[kind]); m.userData = { ...p, kind, V: undefined, F: undefined }; scene.add(m); meshes.push(m);
+}
+const box = new THREE.Box3(); meshes.forEach((m) => box.expandByObject(m));
+const C = box.getCenter(new THREE.Vector3());
+
+// mm grid on the floor + rear frame end marker
+const grid = new THREE.GridHelper(4000, 40, 0x555555, 0x333333); grid.position.set(C.x, 940, C.z); scene.add(grid);
+
+function apply() {
+  const cz = +$('cutz').value, cut = $('cut').checked;
+  for (const m of meshes) {
+    const k = m.userData.kind;
+    m.visible = (k === 'shell' ? $('shell').checked : $('frame').checked) && (!cut || m.userData.bb[2] < cz);
+  }
+}
+for (const id of ['frame', 'shell', 'cut', 'cutz']) $(id).addEventListener('input', apply);
+
+const name = (u) => u.kind === 'shell' ? 'Flächenkörper (Motor/Getriebe?)' : u.kind === 'tank' ? 'Kiste (Tank laut User)' : 'Volumenkörper';
+function pickInfo(u) {
+  const b = u.bb;
+  return `<b>${name(u)}</b> · Nr. ${u.i}<br>X ${b[0]} … ${b[3]} (${b[3] - b[0]} mm)<br>Y ${b[1]} … ${b[4]} (${b[4] - b[1]} mm)<br>Z ${b[2]} … ${b[5]} (${b[5] - b[2]} mm)<br><span style="color:#999;font-size:12px">Bounding Box aus dem STEP, Modellmaße = Hypothese</span>`;
+}
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(), hover = $('hover');
+let selected = null;
+const hit = (e) => { mouse.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(mouse, camera); return ray.intersectObjects(meshes.filter((m) => m.visible), false)[0]; };
+renderer.domElement.addEventListener('pointermove', (e) => {
+  const h = hit(e);
+  if (h) { hover.style.display = 'block'; hover.style.left = e.clientX + 14 + 'px'; hover.style.top = e.clientY + 10 + 'px'; hover.textContent = `${name(h.object.userData)} · Nr. ${h.object.userData.i}`; } else hover.style.display = 'none';
+});
+renderer.domElement.addEventListener('click', (e) => {
+  const h = hit(e);
+  if (selected) selected.material = mats[selected.userData.kind];
+  selected = h ? h.object : null;
+  if (selected) { selected.material = mats.sel; $('pick').innerHTML = pickInfo(selected.userData); } else $('pick').textContent = 'Teil anklicken';
+});
+
+const T = new THREE.Vector3(C.x, 1300, -1100);
+function setCam(k) {
+  const p = { rear: [C.x, 1450, -5200], side: [C.x + 4800, 1400, -1100], top: [C.x, 5600, -1100], iso: [C.x + 3200, 3000, -4200] }[k];
+  camera.position.set(...p); controls.target.copy(T); controls.update();
+}
+for (const b of document.querySelectorAll('[data-cam]')) b.onclick = () => setCam(b.dataset.cam);
+function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+apply(); setCam(new URLSearchParams(location.search).get('cam') || 'rear');
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+</script>
+</body>
+</html>
