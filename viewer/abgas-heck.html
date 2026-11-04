@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Buggy – Abgasanlage A/B/C im CAD-Rahmen</title>
+<title>Buggy – Abgasanlage hinter dem VR6</title>
 <style>
   html, body { margin: 0; height: 100%; background: #111; color: #ddd; font-family: system-ui, sans-serif; overflow: hidden; }
   #bar { position: fixed; top: 0; left: 0; right: 0; padding: 8px 12px; background: #151517cc; display: flex; gap: 8px; align-items: center; font-size: 14px; z-index: 2; flex-wrap: wrap; }
@@ -30,26 +30,23 @@
 </head>
 <body>
 <div id="bar">
-  <b>Abgasanlage im CAD-Rahmen</b>
-  <button data-v="A" class="active">A · Twin-Stack</button>
+  <b>Abgasanlage hinter dem VR6 (CAD)</b>
+  <button data-v="A" class="active">A · Fächer, Stack</button>
   <button data-v="B">B · Querdämpfer</button>
-  <button data-v="C">C · Tri-Y Mono</button>
+  <button data-v="C">C · Serien-Guss</button>
   <span>Ansicht:</span>
   <button data-cam="iso">Gesamt</button><button data-cam="rear">Von hinten</button><button data-cam="side">Seite</button><button data-cam="top">Oben</button>
-  <a href="abgas.html">alte Seite (Platzhalter-Bauraum)</a>
+  <a href="cad-heck.html">Heckansicht STEP</a>
   <span class="hint">Maus: drehen · Rad: zoomen · rechts: verschieben · über Teile fahren = Name + Länge</span>
 </div>
 
 <div id="params">
   <h3>Motor (Hypothese)</h3>
-  <label>Kanalmitte Höhe Y <input type="range" id="yp" min="1300" max="1550" step="10" value="1420"><span class="v" id="yp_v"></span></label>
+  <label>Kanalmitte Höhe Y <input type="range" id="yp" min="1450" max="1550" step="10" value="1500"><span class="v" id="yp_v"></span></label>
   <label>Kanal-Abstand <input type="range" id="pitch" min="55" max="85" step="1" value="65"><span class="v" id="pitch_v"></span></label>
   <label>Zyl. 1 sitzt <select id="cyl1"><option value="r">rechts</option><option value="l">links</option></select></label>
-  <h3>Krümmer</h3>
-  <label>Ausführung <select id="krm"><option value="faecher">Fächer (Selbstbau)</option><option value="guss">Serien-Guss 1–3 / 4–6</option></select></label>
   <h3>Primärrohre</h3>
-  <label id="l_rpm">abstimmen auf /min <input type="range" id="rpm" min="4000" max="6500" step="100" value="5000"><span class="v" id="rpm_v"></span></label>
-  <label id="l_cprim">Länge (Tri-Y) <input type="range" id="cPrim" min="420" max="600" step="10" value="480"><span class="v" id="cPrim_v"></span></label>
+  <label id="l_rpm">abstimmen auf /min <input type="range" id="rpm" min="4800" max="6500" step="100" value="5500"><span class="v" id="rpm_v"></span></label>
   <label>Auslass öffnet v. UT (Hyp.) <input type="range" id="eo" min="40" max="70" step="1" value="56"><span class="v" id="eo_v"></span></label>
   <h3>Kat / Dämpfer (Platzhalter)</h3>
   <label>Kat-Länge <input type="range" id="lkat" min="150" max="450" step="10" value="300"><span class="v" id="lkat_v"></span></label>
@@ -57,13 +54,14 @@
   <label>Dämpfer-Länge <input type="range" id="ldmp" min="200" max="450" step="10" value="320"><span class="v" id="ldmp_v"></span></label>
   <label>Dämpfer-Ø <input type="range" id="ddmp" min="90" max="140" step="5" value="110"><span class="v" id="ddmp_v"></span></label>
   <h3>Anzeige</h3>
+  <label><input type="checkbox" id="step" checked> Motor aus dem STEP zeigen</label>
+  <label><input type="checkbox" id="env"> Motor-Hülle (Kollisionsprüfung) zeigen</label>
   <label><input type="checkbox" id="upperBeam" checked> oberen Balken (Lage geraten) prüfen</label>
   <label><input type="checkbox" id="ghost" checked> Modell-Heckpfosten zeigen (real nicht so)</label>
   <label><input type="checkbox" id="lbl" checked> Beschriftungen</label>
 </div>
 
 <div id="info"></div>
-<div style="position:fixed;top:44px;left:12px;right:330px;z-index:2;background:#5a1d1d;color:#fff;padding:6px 10px;border-radius:4px;font-size:13px">⚠ <b>Ungültig (2026-11-04):</b> Die „Motorkiste“ hier ist in Wahrheit der Tank. Der echte VR6 steht dahinter (siehe <a href="cad-heck.html" style="color:#9cf">Heckansicht</a>), die Anlagen laufen durch ihn hindurch. Hinter dem Motor bleiben laut Modell nur ≈ 25 cm.</div>
 <div id="hover"></div>
 
 <script type="module">
@@ -73,8 +71,8 @@ import * as H from './exhaust-heck.js';
 
 const state = { v: 'A' };
 const $ = (id) => document.getElementById(id);
-const NUM = ['yp', 'pitch', 'rpm', 'cPrim', 'eo', 'lkat', 'dkat', 'ldmp', 'ddmp'];
-const P = () => ({ ...Object.fromEntries(NUM.map((k) => [k, +$(k).value])), cyl1: $('cyl1').value, krm: $('krm').value, upperBeam: $('upperBeam').checked });
+const NUM = ['yp', 'pitch', 'rpm', 'eo', 'lkat', 'dkat', 'ldmp', 'ddmp'];
+const P = () => ({ ...Object.fromEntries(NUM.map((k) => [k, +$(k).value])), cyl1: $('cyl1').value, upperBeam: $('upperBeam').checked });
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(devicePixelRatio);
@@ -96,6 +94,15 @@ const M = {
   t: mat(0xe0e0e6, { metalness: 0.9, roughness: 0.2 }), sonde: mat(0x30d060), vband: mat(0xdddddd), bad: mat(0xff2020),
 };
 const world = new THREE.Group(); scene.add(world);
+// real engine/gearbox surface bodies from the STEP (viewer/data, generated by buggy-cad/export_parts.py)
+const stepGroup = new THREE.Group(); scene.add(stepGroup);
+const stepMat = new THREE.MeshStandardMaterial({ color: 0xc98a4a, metalness: 0.3, roughness: 0.6, side: THREE.DoubleSide, transparent: true, opacity: 0.55, depthWrite: false });
+fetch('data/cad-heck.json', { cache: 'no-cache' }).then((r) => r.json()).then((data) => {
+  for (const p of data) if (p.kind === 'shell') {
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(p.V, 3)); g.setIndex(p.F); g.computeVertexNormals();
+    const m = new THREE.Mesh(g, stepMat); m.userData.name = `Motor/Getriebe aus dem STEP (Flächenkörper Nr. ${p.i})`; stepGroup.add(m);
+  }
+}).catch(() => { $('env').checked = true; build(); });
 let pickables = [], labels = [];
 const v3 = (a) => new THREE.Vector3(a[0], a[1], a[2]);
 
@@ -124,7 +131,8 @@ function build() {
     if (f.square) { const h = f.square / 2; boxMM([f.a[0] - h, f.a[1], f.a[2] - h], [f.b[0] + h, f.b[1], f.b[2] + h], m, f.name); }
     else rod(f.a, f.b, f.r, m, f.name);
   }
-  for (const e of H.ENGINE) boxMM(e.min, e.max, M.engine, e.name);
+  if ($('env').checked) for (const e of H.ENGINE) boxMM(e.min, e.max, M.engine, e.name);
+  stepGroup.visible = $('step').checked;
   r.ports.forEach((q, i) => { rod(q, [q[0], q[1], q[2] + 6], 18, M.vband, `Auslasskanal Zyl. ${i + 1}`); label(`${i + 1}`, [q[0], q[1] + 60, q[2] + 30], '#ffd27a', 0.7); });
 
   r.parts.forEach((q, i) => {
@@ -143,7 +151,9 @@ function build() {
   const kat = r.parts.find((q) => q.kind === 'kat'); if (kat) label('Kat', [kat.pts[1][0] + (state.v === 'A' ? 0 : 0), (kat.pts[0][1] + kat.pts[1][1]) / 2, kat.pts[0][2] - 120], '#f99', 0.8);
   const dmp = r.parts.find((q) => q.kind === 'dmp'); if (dmp) label('Dämpfer', [(dmp.pts[0][0] + dmp.pts[1][0]) / 2, (dmp.pts[0][1] + dmp.pts[1][1]) / 2, dmp.pts[0][2] - 140], '#ccc', 0.8);
   label('Heck (Rahmenende)', [1020, 900, -1700], '#ffb070', 0.9);
-  label('vorn (Sitze)', [1020, 1700, -450], '#aaa', 0.8);
+  label('vorn (Tank, Sitze)', [1020, 1700, -600], '#aaa', 0.8);
+  label('VR6 (STEP)', [900, 1680, -1000], '#e0a060', 0.8);
+  label('Käfig-Querrohr', [1500, 1880, -1265], '#aaa', 0.7);
   label('links', [1550, 1000, -1100], '#aaa', 0.7); label('rechts', [470, 1000, -1100], '#aaa', 0.7);
   label('oberer Balken? (geraten)', [1020, 1650, -1430], '#ffb070', 0.7);
   label('Heckbalken AHK (real)', [1020, 1420, -1680], '#ffb070', 0.7);
@@ -156,41 +166,41 @@ function report(r) {
   const p = r.p, rows = [];
   const L = r.primLen, Lm = L.reduce((a, b) => a + b, 0) / L.length;
   if (r.cast) {
-    rows.push(['Krümmer', 'Serien-Guss 022 253 033 (1–3) / 034 (4–6), keine Abstimmung. Form und Ausgang schematisch: 3-Loch-Flansch ≈ 150 mm unter der Kanalmitte, nach unten (Hypothese) <span class="muted">– welche Krümmer verbaut sind: offen (Halle)</span>']);
+    rows.push(['Krümmer', 'Serien-Guss 022 253 033 (1–3) / 034 (4–6), keine Abstimmung. Ausgang schematisch ≈ 170 mm unter der Kanalmitte, hinter dem Block, nach unten (Hypothese) <span class="muted">– welche Krümmer verbaut sind: offen (Halle)</span>']);
     rows.push(['Hosenrohre', `2 × ${fmt(r.secLen[0])} mm (57 × 1,5, gleich lang) <span class="muted">(Ø vor dem Y: Claude 55–57, Codex 45–48 ID → Krümmer-Ausgang messen)</span>`]);
-  } else rows.push(['Primärrohre', `6 × ${fmt(Lm)} mm (38 × 1,5, ID 35), gleich lang → Bell ≈ <b>${fmt(r.tunedRpm)} /min</b> <span class="muted">(ED ${r.ED}°, Hypothese)</span>`]);
-  if (r.secLen && !r.cast) rows.push(['Sekundärrohre', `2 × ${fmt(r.secLen[0])} mm (63,5 × 1,5)${state.v === 'C' ? ' <span class="muted">– Tri-Y: Primär + Sekundär ≈ ' + fmt(Lm + 140 + r.secLen[0]) + ' mm wirken zusammen</span>' : ''}`]);
-  rows.push(['Sammelrohr', state.v === 'A' ? '76,2 (3″) bis zur Teilung, dann 2 × 63,5' : '76,2 (3″) wie der Mustang-Kat-Anschluss <span class="muted">(Faustregel 56–60 ID → Widerspruch offen)</span>']);
+  } else {
+    rows.push(['Primärrohre', `6 × ${fmt(Lm)} mm (38 × 1,5, ID 35), gleich lang → Bell ≈ <b>${fmt(r.tunedRpm)} /min</b> <span class="muted">(ED ${r.ED}°, Hypothese). Länger geht nicht: das Käfig-Querrohr (Y 1816) begrenzt die Höhe über dem Kopf.</span>`]);
+    if (r.secLen) rows.push(['Sekundärrohre', `2 × ${fmt(r.secLen[0])} mm (63,5 × 1,5)`]);
+  }
+  rows.push(['Sammelrohr', '76,2 (3″) wie der Mustang-Kat-Anschluss, unten im Schacht hinter dem Block <span class="muted">(Faustregel 56–60 ID → Widerspruch offen)</span>']);
   rows.push(['Sonde', `sieht alle 6 Zylinder, ≈ ${fmt(Math.min(...r.sondePath))} mm Rohrweg ab Auslass <span class="muted">(AEM ≥ 457, 14Point7 ≈ 600)</span>`]);
-  rows.push(['Kat', `${state.v === 'A' ? '2 × ' : ''}Ø ${p.dkat} × ${p.lkat} zwischen V-Bändern <span class="muted">(Platzhalter, Mustang-Kat 16399 messen)</span>`]);
-  rows.push(['Dämpfer', `${state.v === 'A' ? '2 × ' : ''}Ø ${p.ddmp} × ${p.ldmp}, gerader Durchgang <span class="muted">(Marke + Typ nötig, Maße des echten Teils einsetzen)</span>`]);
-  rows.push(['Belegter Raum', `Y ${fmt(r.minY)} … ${fmt(r.maxY)} · hinten bis Z ${fmt(r.minZ)} (Rahmenende −1639) · Käfig-Querrohr oben bei Y 1816`]);
+  rows.push(['Kat', `Ø ${p.dkat} × ${p.lkat} senkrecht im Steigrohr links hinten, zwischen V-Bändern <span class="muted">(Platzhalter, Mustang-Kat 16399 messen)</span>`]);
+  rows.push(['Dämpfer', `Ø ${p.ddmp} × ${p.ldmp}, ${state.v === 'B' ? 'quer über dem Heck' : 'senkrecht über dem Kat'} <span class="muted">(Marke + Typ nötig, Maße des echten Teils einsetzen)</span>`]);
+  rows.push(['Belegter Raum', `Y ${fmt(r.minY)} … ${fmt(r.maxY)} · hinten bis Z ${fmt(r.minZ)} (Rahmenende −1639) · Käfig oben Y ≈ 1990`]);
   rows.push(['Grenzen', r.viol.length ? `<span class="bad">überschritten:</span> ${r.viol.slice(0, 3).join('; ')}` : '<span class="ok">eingehalten</span> <span class="muted">(Boden Y 989, innen X 654–1386, Rahmenende)</span>']);
-  rows.push(['Kollisionen', r.coll.length ? `<span class="bad">${r.coll.length}:</span> ${r.coll.slice(0, 4).join('; ')} (rot)` : '<span class="ok">keine</span> <span class="muted">(gegen CAD-Rahmen + Motorkiste, 4–5 mm Luft)</span>']);
+  rows.push(['Kollisionen', r.coll.length ? `<span class="bad">${r.coll.length}:</span> ${r.coll.slice(0, 4).join('; ')} (rot)` : '<span class="ok">keine</span> <span class="muted">(gegen CAD-Rahmen + Motor/Getriebe-Hülle aus dem STEP, 4–5 mm Luft)</span>']);
   rows.push(['Hypothese-Teile', r.hyp.length ? `<span class="warn">berührt: ${r.hyp.join('; ')}</span>` : '<span class="ok">frei</span> <span class="muted">(AHK-Balken real, oberer Balken geraten)</span>']);
   const desc = {
-    A: '<b>A · 6-2-1-2 Twin-Stack (Vorschlag Claude, Leistung):</b> Primärrohre steigen hinter dem Kopf auf und fallen senkrecht in zwei 3-in-1 {1,2,3}/{4,5,6} (gleichmäßig 240°). Gleich lange Sekundärrohre laufen unten nach hinten in den Y-Sammler, die Sonde sitzt direkt dahinter. Danach Teilung auf zwei senkrechte Stränge mit je einem der beiden Mustang-Kats und einem Dämpfer, zwei Stacks oben am Heck. Symmetrisch, am meisten Schweißarbeit.',
-    B: '<b>B · 6-1 Querdämpfer, Doppelrohr hinten (Vorschlag Claude):</b> Gleiche Primärführung, alle 6 Rohre in einen 6-in-1-Sammler. Das Sammelrohr läuft unten nach hinten (Sonde), dann senkrecht mit Kat in der Mitte hoch in einen Querdämpfer. Zwei Endrohre laufen waagrecht über dem Heckkasten nach hinten. Spitze oben, Mitte schwächer (Forum, keine VR6-Messung). Kat höchstens ≈ 350 mm.',
-    C: '<b>C · Tri-Y, Mono-Stack hinten-links (Vorschlag Claude, Bauaufwand):</b> Kurze Primärrohre in zwei 3-in-1 gleich hinter dem Kopf, lange gleich lange Sekundärrohre unten nach links hinten in den Y. Ein Strang mit Kat + Dämpfer links hinten, Endrohr oben 30° nach hinten-links gebogen. Am wenigsten Biegungen, breites mittleres Band (Hypothese).',
-  }[state.v] + (r.cast ? '<br><b>Mit Serien-Gusskrümmern:</b> Fächer und 3-in-1 entfallen, zwei gleich lange Hosenrohre führen unten nach hinten in den Y-Sammler, hinten ist alles wie oben. Kein Leistungsgewinn durch Abstimmung, aber viel weniger Schweißarbeit, fertige Dichtungen und Stehbolzen (Serienteile).' : '');
-  $('info').innerHTML = `<h3>Stand 2026-11-04 · Planungsbasis 88 cm aus CAD (User) · Vorschlag, nichts festgelegt</h3>${desc}
+    A: '<b>A · Fächer 6-2-1, Stack links (Vorschlag Claude, Leistung):</b> Die Primärrohre steigen direkt hinter dem Auslassflansch auf, laufen unter dem Käfig-Querrohr über den Block nach hinten und fallen in den Schacht zwischen Block und Heck. Dort sitzen zwei 3-in-1 {1,2,3}/{4,5,6} (gleichmäßig 240°), kurze Sekundärrohre und der Y-Sammler. Das Sammelrohr läuft unten nach links (Sonde) und steigt links hinten mit Kat und Dämpfer auf, Mündung oben.',
+    B: '<b>B · Fächer 6-1, Querdämpfer, 2 Rohre hinten (Vorschlag Claude, Optik):</b> Gleiche Primärführung, alle 6 in einen 6-in-1-Sammler unten im Schacht. Steigrohr links hinten mit Kat, oben ein Querdämpfer über dem Heck, zwei Endrohre waagrecht nach hinten. Spitze oben, Mitte schwächer (Forum, keine VR6-Messung).',
+    C: '<b>C · Serien-Gusskrümmer + Y (Vorschlag Claude, geringster Aufwand):</b> Beide Serien-Krümmer bleiben, zwei gleich lange Hosenrohre laufen hinter dem Block nach unten in den Y-Sammler. Danach wie A: Sonde unten, Steigrohr links hinten mit Kat und Dämpfer, Endrohr oben 30° nach hinten-links gebogen (§ 47c zulässig). Keine Abstimmung, aber Serien-Dichtungen und -Stehbolzen.',
+  }[state.v];
+  $('info').innerHTML = `<h3>Stand 2026-11-04 · Motor aus dem STEP, Auslass hinten (User) · Vorschlag, nichts festgelegt</h3>${desc}
     <table>${rows.map(([a, c]) => `<tr><td>${a}</td><td>${c}</td></tr>`).join('')}</table>
     ${r.notes.length ? `<div class="warn">${r.notes.join('<br>')}</div>` : ''}
-    <div class="muted">Rahmen und Motorkiste aus dem groben STEP-Modell 2022 (Maße nicht verlässlich). Motor nur als Kiste, Kanalhöhe/-abstand geraten. +X = links (Hypothese). Heckbalken real quadratisch, Kante 50 angenommen; oberer Balken fehlt im Modell, Lage geraten. Recht T3b: 85 dB(A), Fahrerohr 86/90 dB(A), Endrohr nicht nach rechts (§ 47c). Farben: orange/blau = Gruppen, rot = Kollision, orange-transparent = Hypothese.</div>`;
+    <div class="muted">Rahmen und Motor aus dem groben STEP-Modell 2022 (Maße nicht verlässlich). Auslassflansch im Modell bei Z −1185, Kanalhöhe und -abstand Hypothese; Zyl. 1 an der Riemenseite (Hypothese). +X = links (Hypothese, passt zur Getriebeseite wie im Golf). Heckbalken real quadratisch, Kante 50 angenommen; oberer Balken fehlt im Modell, Lage geraten. Recht T3b: 85 dB(A), Fahrerohr 86/90 dB(A), Endrohr nicht nach rechts (§ 47c). Farben: orange/blau = Gruppen, rot = Kollision, orange-transparent = Hypothese bzw. STEP-Motor.</div>`;
 }
 
-const TGT = new THREE.Vector3(1000, 1400, -1150);
+const TGT = new THREE.Vector3(1000, 1450, -1350);
 function setCam(k) {
-  const pos = { iso: [2900, 2700, -3000], rear: [1000, 1500, -4200], side: [4200, 1450, -1150], top: [1000, 4600, -1150] }[k];
+  const pos = { iso: [2900, 2800, -3400], rear: [1000, 1600, -4300], side: [4300, 1500, -1350], top: [1000, 4700, -1350] }[k];
   camera.position.copy(v3(pos)); controls.target.copy(TGT); controls.update();
 }
 for (const b of document.querySelectorAll('[data-v]')) b.onclick = () => { state.v = b.dataset.v; document.querySelectorAll('[data-v]').forEach((x) => x.classList.toggle('active', x === b)); syncUi(); build(); };
 for (const b of document.querySelectorAll('[data-cam]')) b.onclick = () => setCam(b.dataset.cam);
 function syncUi() {
   for (const k of NUM) $(k + '_v').textContent = $(k).value + (k === 'eo' ? '°' : '');
-  const g = $('krm').value === 'guss';
-  $('l_rpm').classList.toggle('dis', g || state.v === 'C');
-  $('l_cprim').classList.toggle('dis', g || state.v !== 'C');
+  $('l_rpm').classList.toggle('dis', state.v === 'C');
 }
 for (const el of document.querySelectorAll('#params input, #params select')) el.addEventListener('input', () => { syncUi(); build(); });
 
@@ -198,13 +208,12 @@ const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(), hover = $('hover
 renderer.domElement.addEventListener('pointermove', (e) => {
   mouse.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
   ray.setFromCamera(mouse, camera);
-  const hit = ray.intersectObjects(pickables, false)[0];
+  const hit = ray.intersectObjects(stepGroup.visible ? [...pickables, ...stepGroup.children] : pickables, false)[0];
   if (hit) { hover.style.display = 'block'; hover.style.left = e.clientX + 14 + 'px'; hover.style.top = e.clientY + 10 + 'px'; hover.textContent = hit.object.userData.name; } else hover.style.display = 'none';
 });
 function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
 addEventListener('resize', resize); resize();
-const qs = new URLSearchParams(location.search); if (qs.get('k') === 'guss') $('krm').value = 'guss';
-const q = qs.get('v'); if (q && 'ABC'.includes(q)) document.querySelector(`[data-v="${q}"]`).click();
+const q = new URLSearchParams(location.search).get('v'); if (q && 'ABC'.includes(q)) document.querySelector(`[data-v="${q}"]`).click();
 syncUi(); build(); setCam('iso');
 renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
 </script>
