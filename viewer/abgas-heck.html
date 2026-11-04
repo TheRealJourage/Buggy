@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Abgasanlage A/B/C im CAD-Rahmen</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #111; color: #ddd; font-family: system-ui, sans-serif; overflow: hidden; }
+  #bar { position: fixed; top: 0; left: 0; right: 0; padding: 8px 12px; background: #151517cc; display: flex; gap: 8px; align-items: center; font-size: 14px; z-index: 2; flex-wrap: wrap; }
+  button { background: #333; color: #ddd; border: 1px solid #555; padding: 4px 9px; cursor: pointer; border-radius: 3px; }
+  button.active { background: #4f6b8a; color: #fff; }
+  #bar .hint { color: #888; font-size: 12px; }
+  #bar a { color: #8cf; font-size: 12px; }
+  #params { position: fixed; top: 52px; right: 10px; width: 300px; max-height: calc(100vh - 70px); overflow-y: auto; padding: 8px 12px; background: #000b; border-radius: 6px; font-size: 13px; }
+  #params label { display: flex; justify-content: space-between; align-items: center; margin: 3px 0; gap: 6px; }
+  #params input[type=range] { width: 110px; }
+  #params select { background: #222; color: #ddd; border: 1px solid #555; }
+  #params .v { width: 50px; text-align: right; color: #fff; }
+  #params h3, #info h3 { margin: 7px 0 3px; font-size: 12px; color: #8ab; text-transform: uppercase; letter-spacing: .05em; }
+  #params .dis { opacity: .35; pointer-events: none; }
+  #info { position: fixed; bottom: 10px; left: 10px; max-width: 620px; max-height: 58vh; overflow-y: auto; padding: 10px 12px; background: #000b; border-radius: 6px; font-size: 13px; line-height: 1.4; }
+  #info table { border-collapse: collapse; margin: 4px 0; }
+  #info td { padding: 0 10px 0 0; vertical-align: top; }
+  .warn { color: #fc6; } .bad { color: #f77; font-weight: bold; } .ok { color: #8d8; font-weight: bold; } .muted { color: #999; font-size: 12px; }
+  #hover { position: fixed; pointer-events: none; padding: 4px 7px; background: #000d; border: 1px solid #555; border-radius: 4px; font-size: 12px; display: none; z-index: 3; max-width: 420px; }
+  canvas { display: block; }
+  @media (max-width: 700px) { #params { width: auto; left: 10px; top: auto; bottom: 10px; max-height: 40vh; } #info { max-height: 30vh; top: 90px; bottom: auto; } }
+</style>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.js" } }</script>
+</head>
+<body>
+<div id="bar">
+  <b>Abgasanlage im CAD-Rahmen</b>
+  <button data-v="A" class="active">A · Twin-Stack</button>
+  <button data-v="B">B · Querdämpfer</button>
+  <button data-v="C">C · Tri-Y Mono</button>
+  <span>Ansicht:</span>
+  <button data-cam="iso">Gesamt</button><button data-cam="rear">Von hinten</button><button data-cam="side">Seite</button><button data-cam="top">Oben</button>
+  <a href="abgas.html">alte Seite (Platzhalter-Bauraum)</a>
+  <span class="hint">Maus: drehen · Rad: zoomen · rechts: verschieben · über Teile fahren = Name + Länge</span>
+</div>
+
+<div id="params">
+  <h3>Motor (Hypothese)</h3>
+  <label>Kanalmitte Höhe Y <input type="range" id="yp" min="1300" max="1550" step="10" value="1420"><span class="v" id="yp_v"></span></label>
+  <label>Kanal-Abstand <input type="range" id="pitch" min="55" max="85" step="1" value="65"><span class="v" id="pitch_v"></span></label>
+  <label>Zyl. 1 sitzt <select id="cyl1"><option value="r">rechts</option><option value="l">links</option></select></label>
+  <h3>Primärrohre</h3>
+  <label id="l_rpm">abstimmen auf /min <input type="range" id="rpm" min="4000" max="6500" step="100" value="5000"><span class="v" id="rpm_v"></span></label>
+  <label id="l_cprim">Länge (Tri-Y) <input type="range" id="cPrim" min="420" max="600" step="10" value="480"><span class="v" id="cPrim_v"></span></label>
+  <label>Auslass öffnet v. UT (Hyp.) <input type="range" id="eo" min="40" max="70" step="1" value="56"><span class="v" id="eo_v"></span></label>
+  <h3>Kat / Dämpfer (Platzhalter)</h3>
+  <label>Kat-Länge <input type="range" id="lkat" min="150" max="450" step="10" value="300"><span class="v" id="lkat_v"></span></label>
+  <label>Kat-Ø <input type="range" id="dkat" min="100" max="160" step="5" value="130"><span class="v" id="dkat_v"></span></label>
+  <label>Dämpfer-Länge <input type="range" id="ldmp" min="200" max="450" step="10" value="320"><span class="v" id="ldmp_v"></span></label>
+  <label>Dämpfer-Ø <input type="range" id="ddmp" min="90" max="140" step="5" value="110"><span class="v" id="ddmp_v"></span></label>
+  <h3>Anzeige</h3>
+  <label><input type="checkbox" id="upperBeam" checked> oberen Balken (Lage geraten) prüfen</label>
+  <label><input type="checkbox" id="ghost" checked> Modell-Heckpfosten zeigen (real nicht so)</label>
+  <label><input type="checkbox" id="lbl" checked> Beschriftungen</label>
+</div>
+
+<div id="info"></div>
+<div id="hover"></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from './vendor/OrbitControls.js';
+import * as H from './exhaust-heck.js';
+
+const state = { v: 'A' };
+const $ = (id) => document.getElementById(id);
+const NUM = ['yp', 'pitch', 'rpm', 'cPrim', 'eo', 'lkat', 'dkat', 'ldmp', 'ddmp'];
+const P = () => ({ ...Object.fromEntries(NUM.map((k) => [k, +$(k).value])), cyl1: $('cyl1').value, upperBeam: $('upperBeam').checked });
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(devicePixelRatio);
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a1c);
+const camera = new THREE.PerspectiveCamera(35, 1, 5, 30000);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x333344, 1.5));
+const sun = new THREE.DirectionalLight(0xffffff, 1.6); sun.position.set(2500, 3500, -3000); scene.add(sun);
+const sun2 = new THREE.DirectionalLight(0xffffff, 0.6); sun2.position.set(-1500, 2000, 1500); scene.add(sun2);
+
+const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, metalness: 0.5, roughness: 0.45, side: THREE.DoubleSide, ...o });
+const ghost = (color, op) => new THREE.MeshStandardMaterial({ color, transparent: true, opacity: op, depthWrite: false, side: THREE.DoubleSide });
+const M = {
+  frame: mat(0x3d5a3d, { metalness: 0.2, roughness: 0.7 }), hyp: ghost(0xff9a3c, 0.45), ghost: ghost(0x88aa88, 0.15), engine: ghost(0x6a7078, 0.35),
+  g0: mat(0xd08a3c), g1: mat(0x3c8ad0), s: mat(0xc0c0c8), m: mat(0xa8acb2), cone: mat(0x9a9a9a), kat: mat(0xb04848), dmp: mat(0x404448, { metalness: 0.7 }),
+  t: mat(0xe0e0e6, { metalness: 0.9, roughness: 0.2 }), sonde: mat(0x30d060), vband: mat(0xdddddd), bad: mat(0xff2020),
+};
+const world = new THREE.Group(); scene.add(world);
+let pickables = [], labels = [];
+const v3 = (a) => new THREE.Vector3(a[0], a[1], a[2]);
+
+function add(geo, m, name) { const o = new THREE.Mesh(geo, m); o.userData.name = name; world.add(o); pickables.push(o); return o; }
+function rod(a, b, r, m, name, r1 = r, seg = 24) {
+  const A = v3(a), B = v3(b), d = B.clone().sub(A);
+  const o = add(new THREE.CylinderGeometry(r1, r, d.length(), seg), m, name);
+  o.position.copy(A.clone().add(B).multiplyScalar(0.5)); o.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()); return o;
+}
+function boxMM(min, max, m, name) { const o = add(new THREE.BoxGeometry(max[0] - min[0], max[1] - min[1], max[2] - min[2]), m, name); o.position.set((min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2); return o; }
+function label(text, pos, color = '#fff', scale = 1) {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 64;
+  const g = c.getContext('2d'); g.font = 'bold 34px system-ui'; g.fillStyle = color; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, 256, 32);
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true }));
+  s.scale.set(260 * scale, 32 * scale, 1); s.position.copy(v3(pos)); s.renderOrder = 10; world.add(s); labels.push(s); return s;
+}
+
+function build() {
+  for (const o of [...world.children]) { world.remove(o); o.geometry?.dispose(); o.material?.map?.dispose(); }
+  pickables = []; labels = [];
+  const p = P(), r = H.build(state.v, p);
+
+  for (const f of H.frame({ upperBeam: true })) {
+    if (f.ghost && !$('ghost').checked) continue;
+    const m = f.ghost ? M.ghost : f.hyp ? M.hyp : M.frame;
+    if (f.square) { const h = f.square / 2; boxMM([f.a[0] - h, f.a[1], f.a[2] - h], [f.b[0] + h, f.b[1], f.b[2] + h], m, f.name); }
+    else rod(f.a, f.b, f.r, m, f.name);
+  }
+  for (const e of H.ENGINE) boxMM(e.min, e.max, M.engine, e.name);
+  r.ports.forEach((q, i) => { rod(q, [q[0], q[1], q[2] + 6], 18, M.vband, `Auslasskanal Zyl. ${i + 1}`); label(`${i + 1}`, [q[0], q[1] + 60, q[2] + 30], '#ffd27a', 0.7); });
+
+  r.parts.forEach((q, i) => {
+    const m = r.bad.has(i) ? M.bad : q.kind === 'p' ? (q.group ? M.g1 : M.g0) : q.kind === 's' ? M.s : q.kind === 'cone' ? M.cone : q.kind === 'kat' ? M.kat : q.kind === 'dmp' ? M.dmp : q.kind === 't' ? M.t : M.m;
+    const name = `${q.name} – Länge ${q.len.toFixed(0)} mm`;
+    if (q.solid) { if (q.kind === 'cone') rod(q.pts[0], q.pts[1], q.r0, m, name, q.r1, 32); else rod(q.pts[0], q.pts[1], q.od / 2, m, name, q.od / 2, 32); return; }
+    const path = new THREE.CurvePath();
+    for (let k = 1; k < q.pts.length; k++) path.add(new THREE.LineCurve3(v3(q.pts[k - 1]), v3(q.pts[k])));
+    add(new THREE.TubeGeometry(path, Math.max(8, q.pts.length * 2), q.od / 2, 18, false), m, name);
+  });
+  for (const mk of r.marks) {
+    if (mk.kind === 'sonde') { rod(mk.at, [mk.at[0], mk.at[1] + 70, mk.at[2]], 12, M.sonde, mk.name); label('Sonde', [mk.at[0], mk.at[1] + 140, mk.at[2]], '#5f5', 0.8); }
+    if (mk.kind === 'vband') rod([mk.at[0], mk.at[1] - 4, mk.at[2]], [mk.at[0], mk.at[1] + 4, mk.at[2]], mk.r, M.vband, 'V-Band-Flansch');
+  }
+  const kat = r.parts.find((q) => q.kind === 'kat'); if (kat) label('Kat', [kat.pts[1][0] + (state.v === 'A' ? 0 : 0), (kat.pts[0][1] + kat.pts[1][1]) / 2, kat.pts[0][2] - 120], '#f99', 0.8);
+  const dmp = r.parts.find((q) => q.kind === 'dmp'); if (dmp) label('Dämpfer', [(dmp.pts[0][0] + dmp.pts[1][0]) / 2, (dmp.pts[0][1] + dmp.pts[1][1]) / 2, dmp.pts[0][2] - 140], '#ccc', 0.8);
+  label('Heck (Rahmenende)', [1020, 900, -1700], '#ffb070', 0.9);
+  label('vorn (Sitze)', [1020, 1700, -450], '#aaa', 0.8);
+  label('links', [1550, 1000, -1100], '#aaa', 0.7); label('rechts', [470, 1000, -1100], '#aaa', 0.7);
+  label('oberer Balken? (geraten)', [1020, 1650, -1430], '#ffb070', 0.7);
+  label('Heckbalken AHK (real)', [1020, 1420, -1680], '#ffb070', 0.7);
+  for (const s of labels) s.visible = $('lbl').checked;
+  report(r);
+}
+
+const fmt = (n) => Math.round(n).toLocaleString('de-DE');
+function report(r) {
+  const p = r.p, rows = [];
+  const L = r.primLen, Lm = L.reduce((a, b) => a + b, 0) / L.length;
+  rows.push(['Primärrohre', `6 × ${fmt(Lm)} mm (38 × 1,5, ID 35), gleich lang → Bell ≈ <b>${fmt(r.tunedRpm)} /min</b> <span class="muted">(ED ${r.ED}°, Hypothese)</span>`]);
+  if (r.secLen) rows.push(['Sekundärrohre', `2 × ${fmt(r.secLen[0])} mm (63,5 × 1,5)${state.v === 'C' ? ' <span class="muted">– Tri-Y: Primär + Sekundär ≈ ' + fmt(Lm + 140 + r.secLen[0]) + ' mm wirken zusammen</span>' : ''}`]);
+  rows.push(['Sammelrohr', state.v === 'A' ? '76,2 (3″) bis zur Teilung, dann 2 × 63,5' : '76,2 (3″) wie der Mustang-Kat-Anschluss <span class="muted">(Faustregel 56–60 ID → Widerspruch offen)</span>']);
+  rows.push(['Sonde', `sieht alle 6 Zylinder, ≈ ${fmt(Math.min(...r.sondePath))} mm Rohrweg ab Auslass <span class="muted">(AEM ≥ 457, 14Point7 ≈ 600)</span>`]);
+  rows.push(['Kat', `${state.v === 'A' ? '2 × ' : ''}Ø ${p.dkat} × ${p.lkat} zwischen V-Bändern <span class="muted">(Platzhalter, Mustang-Kat 16399 messen)</span>`]);
+  rows.push(['Dämpfer', `${state.v === 'A' ? '2 × ' : ''}Ø ${p.ddmp} × ${p.ldmp}, gerader Durchgang <span class="muted">(Marke + Typ nötig, Maße des echten Teils einsetzen)</span>`]);
+  rows.push(['Belegter Raum', `Y ${fmt(r.minY)} … ${fmt(r.maxY)} · hinten bis Z ${fmt(r.minZ)} (Rahmenende −1639) · Käfig-Querrohr oben bei Y 1816`]);
+  rows.push(['Grenzen', r.viol.length ? `<span class="bad">überschritten:</span> ${r.viol.slice(0, 3).join('; ')}` : '<span class="ok">eingehalten</span> <span class="muted">(Boden Y 989, innen X 654–1386, Rahmenende)</span>']);
+  rows.push(['Kollisionen', r.coll.length ? `<span class="bad">${r.coll.length}:</span> ${r.coll.slice(0, 4).join('; ')} (rot)` : '<span class="ok">keine</span> <span class="muted">(gegen CAD-Rahmen + Motorkiste, 4–5 mm Luft)</span>']);
+  rows.push(['Hypothese-Teile', r.hyp.length ? `<span class="warn">berührt: ${r.hyp.join('; ')}</span>` : '<span class="ok">frei</span> <span class="muted">(AHK-Balken real, oberer Balken geraten)</span>']);
+  const desc = {
+    A: '<b>A · 6-2-1-2 Twin-Stack (Vorschlag Claude, Leistung):</b> Primärrohre steigen hinter dem Kopf auf und fallen senkrecht in zwei 3-in-1 {1,2,3}/{4,5,6} (gleichmäßig 240°). Gleich lange Sekundärrohre laufen unten nach hinten in den Y-Sammler, die Sonde sitzt direkt dahinter. Danach Teilung auf zwei senkrechte Stränge mit je einem der beiden Mustang-Kats und einem Dämpfer, zwei Stacks oben am Heck. Symmetrisch, am meisten Schweißarbeit.',
+    B: '<b>B · 6-1 Querdämpfer, Doppelrohr hinten (Vorschlag Claude):</b> Gleiche Primärführung, alle 6 Rohre in einen 6-in-1-Sammler. Das Sammelrohr läuft unten nach hinten (Sonde), dann senkrecht mit Kat in der Mitte hoch in einen Querdämpfer. Zwei Endrohre laufen waagrecht über dem Heckkasten nach hinten. Spitze oben, Mitte schwächer (Forum, keine VR6-Messung). Kat höchstens ≈ 350 mm.',
+    C: '<b>C · Tri-Y, Mono-Stack hinten-links (Vorschlag Claude, Bauaufwand):</b> Kurze Primärrohre in zwei 3-in-1 gleich hinter dem Kopf, lange gleich lange Sekundärrohre unten nach links hinten in den Y. Ein Strang mit Kat + Dämpfer links hinten, Endrohr oben 30° nach hinten-links gebogen. Am wenigsten Biegungen, breites mittleres Band (Hypothese).',
+  }[state.v];
+  $('info').innerHTML = `<h3>Stand 2026-11-04 · Planungsbasis 88 cm aus CAD (User) · Vorschlag, nichts festgelegt</h3>${desc}
+    <table>${rows.map(([a, c]) => `<tr><td>${a}</td><td>${c}</td></tr>`).join('')}</table>
+    ${r.notes.length ? `<div class="warn">${r.notes.join('<br>')}</div>` : ''}
+    <div class="muted">Rahmen und Motorkiste aus dem groben STEP-Modell 2022 (Maße nicht verlässlich). Motor nur als Kiste, Kanalhöhe/-abstand geraten. +X = links (Hypothese). Heckbalken real quadratisch, Kante 50 angenommen; oberer Balken fehlt im Modell, Lage geraten. Recht T3b: 85 dB(A), Fahrerohr 86/90 dB(A), Endrohr nicht nach rechts (§ 47c). Farben: orange/blau = Gruppen, rot = Kollision, orange-transparent = Hypothese.</div>`;
+}
+
+const TGT = new THREE.Vector3(1000, 1400, -1150);
+function setCam(k) {
+  const pos = { iso: [2900, 2700, -3000], rear: [1000, 1500, -4200], side: [4200, 1450, -1150], top: [1000, 4600, -1150] }[k];
+  camera.position.copy(v3(pos)); controls.target.copy(TGT); controls.update();
+}
+for (const b of document.querySelectorAll('[data-v]')) b.onclick = () => { state.v = b.dataset.v; document.querySelectorAll('[data-v]').forEach((x) => x.classList.toggle('active', x === b)); syncUi(); build(); };
+for (const b of document.querySelectorAll('[data-cam]')) b.onclick = () => setCam(b.dataset.cam);
+function syncUi() {
+  for (const k of NUM) $(k + '_v').textContent = $(k).value + (k === 'eo' ? '°' : '');
+  $('l_rpm').classList.toggle('dis', state.v === 'C');
+  $('l_cprim').classList.toggle('dis', state.v !== 'C');
+}
+for (const el of document.querySelectorAll('#params input, #params select')) el.addEventListener('input', () => { syncUi(); build(); });
+
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(), hover = $('hover');
+renderer.domElement.addEventListener('pointermove', (e) => {
+  mouse.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+  const hit = ray.intersectObjects(pickables, false)[0];
+  if (hit) { hover.style.display = 'block'; hover.style.left = e.clientX + 14 + 'px'; hover.style.top = e.clientY + 10 + 'px'; hover.textContent = hit.object.userData.name; } else hover.style.display = 'none';
+});
+function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+const q = new URLSearchParams(location.search).get('v'); if (q && 'ABC'.includes(q)) document.querySelector(`[data-v="${q}"]`).click();
+syncUi(); build(); setCam('iso');
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+</script>
+</body>
+</html>
