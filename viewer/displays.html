@@ -34,7 +34,7 @@
 <body>
 <h1>Rund-Displays GC9A01: Entwurf</h1>
 <p class="hint">Stand 2026-11-05. 3 × 240 × 240 px, Anzeigefläche 32,4 mm (Händler). Canvas zeichnet 1:1 in Display-Pixeln.
-Belegung und Grenzwerte sind <span class="badge">Vorschlag Claude</span>, nicht festgelegt. Quelle: Vault <code>Buggy/Teile-Bestand.md</code> „Runde Displays GC9A01“.
+Layout und 3 Seiten <span class="badge fix">Festgelegt (User, 2026-11-05)</span>; Grenzwerte (außer Tankdruck) <span class="badge">Vorschlag Claude</span>. Quelle: Vault <code>Buggy/Teile-Bestand.md</code> „Runde Displays GC9A01“.
 Schrift im Entwurf = Systemschrift; auf dem Pico wird es eine Bitmap-Schrift (Arduino_GFX), die Größen bleiben gleich.</p>
 
 <div class="ctl">
@@ -67,8 +67,8 @@ Alle übrigen Grenzen sind Platzhalter ohne Quelle und vor dem Flashen festzuleg
 <h2>Aufbau eines Displays</h2>
 <ul class="hint">
   <li><b>Ring außen:</b> Farbe = schlechtester Wert auf diesem Display. Ein Blick auf drei Ringe genügt. Im Balken-Modus zeigt der Ring zusätzlich den Füllstand eines Werts.</li>
-  <li><b>Oben:</b> Titel. <b>Mitte:</b> ein großer Wert. <b>Unten:</b> zwei kleine Werte, Ziffern färben sich gelb/rot, wenn genau dieser Wert schuld ist.</li>
-  <li><b>Unten im Ring:</b> Seitenpunkte (welche Seite aktiv ist), bei Display 1 das SYNC-Warnsymbol.</li>
+  <li><b>Oben:</b> Titel. <b>Mitte:</b> ein großer Wert. <b>Unten:</b> zwei kleine Werte (Einheit klein hinter der Zahl, darunter nur der Name), Ziffern färben sich gelb/rot, wenn genau dieser Wert schuld ist.</li>
+  <li><b>Seiten:</b> 3 (Zustand · Last/Druckluft/Lüfter · Gemisch/Schaltung/Fahrt), Wechsel per Knopf. <b>Unten im Ring:</b> Seitenpunkte (welche Seite aktiv ist), bei Display 1 das SYNC-Warnsymbol.</li>
   <li>Für den Pico: feste Flächen, nur geänderte Ziffernbereiche neu zeichnen, kein Vollbildpuffer.</li>
 </ul>
 
@@ -87,15 +87,24 @@ const V = {
   fanman:{n:'Lüfter-Modus',sn:'Modus',src:'Panel-Schalter Auto/Manuell',min:0,max:1,step:1,v:0,d:0,st:x=>x?1:0,lim:'Auto / Manuell / –',fmt:x=>x?'MAN':'AUTO'},
   map:{n:'MAP',u:'kPa',src:'Speeduino',min:10,max:105,step:1,v:38,d:0,st:()=>0,lim:'–'},
   tps:{n:'Drossel',u:'%',src:'Speeduino',min:0,max:100,step:1,v:6,d:0,st:()=>0,lim:'–'},
-  adv:{n:'Zündung',sn:'Zünd.',u:'°',src:'Speeduino',min:-10,max:45,step:1,v:14,d:0,st:()=>0,lim:'–'},
+  adv:{n:'Zündung',u:'°',src:'Speeduino',min:-10,max:45,step:1,v:14,d:0,st:()=>0,lim:'–'},
+  fanreq:{n:'Lüfter-Anforderung',sn:'Anford.',src:'Speeduino D47 (Ein/Aus)',min:0,max:1,step:1,v:0,d:0,st:()=>0,lim:'–',fmt:x=>x?'AN':'aus'},
+  ego:{n:'Lambda-Korrektur',sn:'Korrektur',u:'%',src:'Speeduino (EGO-Korrektur)',min:-20,max:20,step:1,v:3,d:0,st:x=>Math.abs(x)>15?2:Math.abs(x)>10?1:0,lim:'±10 / ±10–15 / > ±15',fmt:x=>(x>0?'+':'')+x},
+  lsoll:{n:'Lambda Soll',sn:'Soll',src:'Speeduino (AFR-Zieltabelle)',min:0.7,max:1.1,step:0.01,v:1.0,d:2,st:()=>0,lim:'–'},
+  pw:{n:'Pulsbreite',sn:'Puls',u:'ms',src:'Speeduino',min:0,max:20,step:0.1,v:3.2,d:1,st:()=>0,lim:'–'},
+  shiftt:{n:'Schaltdauer',sn:'Dauer',u:'ms',src:'Schalt-Controller (CAN), ob er sie meldet: offen',min:0,max:800,step:10,v:180,d:0,st:x=>x>500?2:x>300?1:0,lim:'< 300 / 300–500 / > 500'},
+  vss:{n:'Geschwindigkeit',u:'km/h',src:'VSS am Speeduino',min:0,max:120,step:1,v:42,d:0,st:()=>0,lim:'–'},
 };
 const PAGES = [
   [ {t:'MOTOR', big:'lambda', s:['iat','duty'], bar:'duty', extra:['sync']},
     {t:'ANTRIEB', big:'gear', s:['press','comp'], bar:'press', extra:['shift']},
     {t:'FAHRZEUG', big:'tank', s:['fan','fanman'], bar:'tank'} ],
   [ {t:'LAST', big:'map', s:['tps','adv'], bar:'tps', extra:['sync']},
-    {t:'DRUCKLUFT', big:'press', s:['comp','gear'], bar:'press', extra:['shift']},
-    {t:'LÜFTER', big:'fan', s:['tank','fanman'], bar:'fan'} ],
+    {t:'DRUCKLUFT', big:'press', s:['comp','shift'], bar:'press'},
+    {t:'LÜFTER', big:'fan', s:['fanman','fanreq'], bar:'fan'} ],
+  [ {t:'GEMISCH', big:'ego', s:['lsoll','pw'], bar:'duty', extra:['sync']},
+    {t:'SCHALTUNG', big:'shift', s:['shiftt','gear'], bar:'press'},
+    {t:'FAHRT', big:'vss', s:['tank','fan'], bar:'tank'} ],
 ];
 const COL = ['#3ccf6e','#f2c230','#ff4d4d'];
 let page = 0, out = true, ring = 'status';
@@ -122,16 +131,20 @@ function draw(i){
   g.fillStyle='#8a8a8a'; g.font='600 16px system-ui'; g.fillText(L.t,120,56);
   const b=V[L.big], bs=st(L.big);
   g.fillStyle= bs ? COL[bs] : '#fff'; g.font='700 64px system-ui';
-  g.fillText(fmt(L.big), 120, 124);
-  g.fillStyle='#8a8a8a'; g.font='600 15px system-ui';
+  g.fillText(fmt(L.big), 120, 122);
+  g.fillStyle='#8a8a8a'; g.font='700 17px system-ui';
   g.fillText(b.u ? b.n+' '+b.u : b.n, 120, 150);
-  g.strokeStyle='#333'; g.lineWidth=1; g.beginPath(); g.moveTo(120,158); g.lineTo(120,200); g.stroke();
+  g.strokeStyle='#333'; g.lineWidth=1; g.beginPath(); g.moveTo(120,158); g.lineTo(120,198); g.stroke();
   L.s.forEach((k,j)=>{
-    const x = j? 162:78, o=V[k], s=st(k);
-    g.fillStyle = s? COL[s] : '#eee'; g.font='700 24px system-ui'; g.fillText(fmt(k), x, 182);
-    g.fillStyle='#777'; g.font='500 12px system-ui'; const ln=o.sn||o.n; g.fillText(o.u? ln+' '+o.u : ln, x, 197);
+    const x = j? 158:82, o=V[k], s=st(k);
+    g.font='700 24px system-ui'; const wv=g.measureText(fmt(k)).width;
+    g.font='700 13px system-ui'; const wu=o.u? g.measureText(o.u).width+3 : 0;
+    const left=x-(wv+wu)/2; g.textAlign='left';
+    g.fillStyle = s? COL[s] : '#eee'; g.font='700 24px system-ui'; g.fillText(fmt(k), left, 177);
+    if (o.u){ g.fillStyle='#8a8a8a'; g.font='700 13px system-ui'; g.fillText(o.u, left+wv+3, 177); }
+    g.textAlign='center'; g.fillStyle='#8a8a8a'; g.font='700 15px system-ui'; g.fillText(o.sn||o.n, x, 195);
   });
-  for (let p=0;p<PAGES.length;p++){ g.fillStyle = p===page?'#ddd':'#444'; g.beginPath(); g.arc(112+p*16,222,4,0,7); g.fill(); }
+  for (let p=0;p<PAGES.length;p++){ g.fillStyle = p===page?'#ddd':'#444'; g.beginPath(); g.arc(120-(PAGES.length-1)*8+p*16,222,4,0,7); g.fill(); }
   (L.extra||[]).forEach(k=>{
     if (!st(k)) return;
     const txt = k==='sync' ? 'SYNC' : 'SCHALT';

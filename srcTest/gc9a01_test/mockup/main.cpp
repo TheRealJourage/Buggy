@@ -22,7 +22,9 @@ constexpr uint16_t C_OK = 0x3E6D, C_WARN = 0xF606, C_BAD = 0xFA69;
 constexpr uint16_t C_GREY = 0x8C51, C_DIM = 0x7BAF, C_TRACK = 0x2124, C_SEP = 0x3186;
 const uint16_t STATUS_COL[] = {C_OK, C_WARN, C_BAD};
 
-struct Small { const char *val; const char *label; uint8_t st; };
+constexpr int PAGES = 3;
+
+struct Small { const char *val; const char *unit; const char *label; uint8_t st; };
 struct Screen {
   const char *title;
   const char *big; const char *bigLabel; uint8_t bigSt;
@@ -39,6 +41,30 @@ void centered(const char *txt, int16_t x, int16_t y, const uint8_t *font, uint16
   g->setTextColor(col);
   g->setCursor(x - w / 2 - x1, y);
   g->print(txt);
+}
+
+// Unit sits small behind the number, so the label below needs no unit and stays short.
+void valueWithUnit(const char *val, const char *unit, int16_t x, int16_t y, uint16_t col) {
+  int16_t x1, y1; uint16_t wv, wu = 0, h;
+  g->setFont(u8g2_font_helvB18_tf);
+  g->getTextBounds(val, 0, 0, &x1, &y1, &wv, &h);
+  int16_t xv = x1;
+  if (*unit) {
+    g->setFont(u8g2_font_helvB10_tf);
+    g->getTextBounds(unit, 0, 0, &x1, &y1, &wu, &h);
+    wu += 3;
+  }
+  int16_t left = x - (wv + wu) / 2;
+  g->setFont(u8g2_font_helvB18_tf);
+  g->setTextColor(col);
+  g->setCursor(left - xv, y);
+  g->print(val);
+  if (*unit) {
+    g->setFont(u8g2_font_helvB10_tf);
+    g->setTextColor(C_GREY);
+    g->setCursor(left + wv + 3, y);
+    g->print(unit);
+  }
 }
 
 void arc(float from, float to, uint16_t col) {
@@ -66,17 +92,17 @@ void render(const Screen &sc) {
     g->fillRect(120 - 34, 66, 68, 18, C_BAD);
     centered(sc.alarm, 120, 80, u8g2_font_helvB10_tf, RGB565_BLACK);
   }
-  centered(sc.big, 120, 132, u8g2_font_logisoso42_tf, sc.bigSt ? STATUS_COL[sc.bigSt] : RGB565_WHITE);
-  centered(sc.bigLabel, 120, 152, u8g2_font_helvB10_tf, C_GREY);
+  centered(sc.big, 120, 128, u8g2_font_logisoso42_tf, sc.bigSt ? STATUS_COL[sc.bigSt] : RGB565_WHITE);
+  centered(sc.bigLabel, 120, 150, u8g2_font_helvB14_tf, C_GREY);
 
-  g->drawFastVLine(120, 160, 40, C_SEP);
+  g->drawFastVLine(120, 158, 40, C_SEP);
   for (int j = 0; j < 2; j++) {
-    int16_t x = j ? 162 : 78;
+    int16_t x = j ? 158 : 82;
     const Small &s = sc.s[j];
-    centered(s.val, x, 184, u8g2_font_helvB18_tf, s.st ? STATUS_COL[s.st] : 0xEF7D);
-    centered(s.label, x, 199, u8g2_font_helvR08_tf, C_DIM);
+    valueWithUnit(s.val, s.unit, x, 177, s.st ? STATUS_COL[s.st] : 0xEF7D);
+    centered(s.label, x, 195, u8g2_font_helvB12_tf, C_GREY);
   }
-  for (int p = 0; p < 2; p++) g->fillCircle(112 + p * 16, 222, 4, p == sc.page ? 0xDEFB : 0x4208);
+  for (int p = 0; p < PAGES; p++) g->fillCircle(104 + p * 16, 222, 4, p == sc.page ? 0xDEFB : 0x4208);
 }
 
 void show(int disp, const Screen &sc) {
@@ -84,19 +110,28 @@ void show(int disp, const Screen &sc) {
   panel[disp]->draw16bitRGBBitmap(0, 0, g->getFramebuffer(), 240, 240);
 }
 
-// Page 1 of all three displays, then the alarm scenarios from the viewer.
+#define DEG "\xb0"
+#define UE "\xfc"
+
+// Pages 1-3 for displays 1-3 (viewer/displays.html), then alarm scenarios on page 1.
 const Screen SCREENS[] = {
-  {"MOTOR",    "0,98", "Lambda",       0, {{"32", "Luft \xb0""C", 0}, {"28", "Duty %", 0}},          nullptr, -1, 0},
-  {"ANTRIEB",  "1",    "Gang",         0, {{"9,4", "Druck bar", 0}, {"aus", "Kompr.", 0}},          nullptr, -1, 0},
-  {"FAHRZEUG", "64",   "Tank %",       0, {{"35", "L\xfc""fter %", 0}, {"AUTO", "Modus", 0}},       nullptr, -1, 0},
-  {"MOTOR",    "1,19", "Lambda",       2, {{"34", "Luft \xb0""C", 0}, {"72", "Duty %", 0}},          nullptr, -1, 0},
-  {"ANTRIEB",  "3",    "Gang",         0, {{"7,6", "Druck bar", 1}, {"AN", "Kompr.", 0}},           nullptr, -1, 0},
-  {"ANTRIEB",  "3",    "Gang",         0, {{"6,4", "Druck bar", 2}, {"AN", "Kompr.", 0}},           nullptr, -1, 0},
-  {"ANTRIEB",  "2",    "Gang",         0, {{"9,1", "Druck bar", 0}, {"aus", "Kompr.", 0}},          "SCHALT",  -1, 0},
-  {"MOTOR",    "--",   "Lambda",       0, {{"33", "Luft \xb0""C", 0}, {"0", "Duty %", 0}},           "SYNC",    -1, 0},
-  {"FAHRZEUG", "8",    "Tank %",       2, {{"35", "L\xfc""fter %", 0}, {"AUTO", "Modus", 0}},       nullptr, 0.08f, 0},
-  {"LAST",     "38",   "MAP kPa",      0, {{"6", "Drossel %", 0}, {"14", "Z\xfc""nd. \xb0", 0}},     nullptr, 0.06f, 1},
+  {"MOTOR",     "0,98", "Lambda",       0, {{"32", DEG "C", "Luft", 0}, {"28", "%", "Duty", 0}},          nullptr, -1, 0},
+  {"ANTRIEB",   "1",    "Gang",         0, {{"9,4", "bar", "Druck", 0}, {"aus", "", "Kompr.", 0}},        nullptr, -1, 0},
+  {"FAHRZEUG",  "64",   "Tank %",       0, {{"35", "%", "L" UE "fter", 0}, {"AUTO", "", "Modus", 0}},     nullptr, -1, 0},
+  {"LAST",      "38",   "MAP kPa",      0, {{"6", "%", "Drossel", 0}, {"14", DEG, "Z" UE "ndung", 0}},    nullptr, -1, 1},
+  {"DRUCKLUFT", "9,4",  "Tank bar",     0, {{"aus", "", "Kompr.", 0}, {"OK", "", "Schaltung", 0}},        nullptr, -1, 1},
+  {"L" UE "FTER", "35", "PWM %",        0, {{"AUTO", "", "Modus", 0}, {"aus", "", "Anford.", 0}},         nullptr, -1, 1},
+  {"GEMISCH",   "+3",   "Korrektur %",  0, {{"1,00", "", "Soll", 0}, {"3,2", "ms", "Puls", 0}},           nullptr, -1, 2},
+  {"SCHALTUNG", "OK",   "letzte",       0, {{"180", "ms", "Dauer", 0}, {"1", "", "Gang", 0}},             nullptr, -1, 2},
+  {"FAHRT",     "42",   "km/h",         0, {{"64", "%", "Tank", 0}, {"35", "%", "L" UE "fter", 0}},       nullptr, -1, 2},
+  {"MOTOR",     "1,19", "Lambda",       2, {{"34", DEG "C", "Luft", 0}, {"72", "%", "Duty", 0}},          nullptr, -1, 0},
+  {"ANTRIEB",   "3",    "Gang",         0, {{"7,6", "bar", "Druck", 1}, {"AN", "", "Kompr.", 0}},         nullptr, -1, 0},
+  {"ANTRIEB",   "3",    "Gang",         0, {{"6,4", "bar", "Druck", 2}, {"AN", "", "Kompr.", 0}},         nullptr, -1, 0},
+  {"ANTRIEB",   "2",    "Gang",         0, {{"9,1", "bar", "Druck", 0}, {"aus", "", "Kompr.", 0}},        "SCHALT",  -1, 0},
+  {"MOTOR",     "--",   "Lambda",       0, {{"33", DEG "C", "Luft", 0}, {"0", "%", "Duty", 0}},           "SYNC",    -1, 0},
+  {"FAHRZEUG",  "8",    "Tank %",       2, {{"35", "%", "L" UE "fter", 0}, {"AUTO", "", "Modus", 0}},     nullptr, 0.08f, 0},
 };
+constexpr int SCENARIO_DISPLAY[] = {0, 1, 1, 1, 0, 2};
 
 void setup() {
   Serial.begin(115200);
@@ -111,16 +146,17 @@ void setup() {
   g->begin(GFX_SKIP_OUTPUT_BEGIN);
 }
 
-// Normal view on all three, then one alarm scenario at a time on the matching display.
+void showPage(int page) {
+  for (int d = 0; d < 3; d++) show(d, SCREENS[page * 3 + d]);
+}
+
 void loop() {
-  for (int d = 0; d < 3; d++) show(d, SCREENS[d]);
-  delay(5000);
-  const int target[] = {0, 1, 1, 1, 0, 2, 0};
-  for (size_t i = 3; i < sizeof(SCREENS) / sizeof(SCREENS[0]); i++) {
+  for (int p = 0; p < PAGES; p++) { showPage(p); delay(5000); }
+  for (int i = 0; i < 6; i++) {
     uint32_t t = millis();
-    show(target[i - 3], SCREENS[i]);
-    Serial.printf("screen %u on display %d in %lu ms\n", (unsigned)i, target[i - 3] + 1, (unsigned long)(millis() - t));
+    show(SCENARIO_DISPLAY[i], SCREENS[9 + i]);
+    Serial.printf("scenario %d on display %d in %lu ms\n", i, SCENARIO_DISPLAY[i] + 1, (unsigned long)(millis() - t));
     delay(3000);
-    for (int d = 0; d < 3; d++) show(d, SCREENS[d]);
+    showPage(0);
   }
 }
