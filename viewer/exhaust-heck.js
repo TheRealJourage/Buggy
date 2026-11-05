@@ -32,8 +32,8 @@ export function frame(opt = {}) {
   seg('Käfig-Strebe links vorn', [1410, 1370, -720], [1735, 1815, -1265]);
   seg('Käfig-Strebe rechts hinten', [630, 1370, -1415], [310, 1800, -1270]);
   seg('Käfig-Strebe links hinten', [1410, 1370, -1415], [1730, 1800, -1270]);
-  // real rear beams (User 2026-11-04): square, carry the tow hitch, ~40 mm apart in the middle; edge 50 mm assumed
-  for (const x of [975, 1065]) seg('Heckbalken AHK (real quadratisch, Kante 50 angenommen)', [x, 965, -1615], [x, 1365, -1615], 35, { square: 50, hyp: true });
+  // real rear beams (Halle 2026-11-05): 35 × 35 square, 50 mm clear gap in the middle; height and depth from the model
+  for (const x of [1020 - 42.5, 1020 + 42.5]) seg('Heckbalken AHK (35 × 35 gemessen, Lage aus dem Modell)', [x, 965, -1615], [x, 1365, -1615], 25, { square: 35, hyp: true });
   // round uprights of the model at 830/1210 do not exist like this → shown as ghost only
   for (const x of [830, 1210]) seg('Heckpfosten im Modell (real nicht so)', [x, 965, -1615], [x, 1365, -1615], FR, { ghost: true });
   if (opt.upperBeam !== false) seg('Oberer Balken (fehlt im Modell, Lage geraten)', [1020, 1365, -1615], [1020, 1816, -1265], FR, { hyp: true, guess: true });
@@ -41,9 +41,50 @@ export function frame(opt = {}) {
 }
 // engine + gearbox envelope from the STEP surface bodies: one slab per 25 mm height band (x0, y0, zRear, x1, y1, zFront)
 const SLABS = [[720, 925, -1213, 891, 950, -830], [702, 975, -1228, 720, 1000, -830], [648, 1000, -1230, 1113, 1025, -830], [647, 1025, -1161, 675, 1050, -830], [616, 1050, -1310, 1585, 1075, -830], [608, 1075, -1325, 1647, 1100, -830], [604, 1100, -1332, 1650, 1125, -830], [646, 1125, -1335, 1633, 1150, -830], [646, 1150, -1336, 1602, 1175, -830], [649, 1175, -1334, 1167, 1200, -830], [653, 1200, -1337, 1601, 1225, -830], [648, 1225, -1337, 1602, 1250, -830], [648, 1250, -1316, 1601, 1275, -830], [652, 1275, -1323, 1444, 1300, -830], [652, 1300, -1284, 1443, 1325, -830], [652, 1325, -1261, 1326, 1350, -830], [652, 1350, -1223, 1326, 1375, -830], [718, 1375, -1195, 1324, 1400, -830], [670, 1400, -1196, 1206, 1425, -830], [626, 1425, -1197, 1187, 1450, -830], [664, 1450, -1185, 1186, 1475, -830], [664, 1475, -1184, 1170, 1500, -830], [663, 1500, -1184, 1186, 1525, -830], [663, 1525, -1184, 1186, 1550, -830], [624, 1550, -1190, 1185, 1575, -830], [1168, 1575, -1190, 1185, 1600, -830]];
-export const ENGINE = SLABS.map(([x0, y0, z0, x1, y1, z1]) => ({ name: 'Motor/Getriebe (STEP)', min: [x0, y0, z0], max: [x1, y1, z1] }));
-export const FLANGE = { z: -1185, x: 912, y: 1500 }; // exhaust flange face of the head in the model (plates 1443–1561 high, X 661–1164)
+export const engine = (o = {}) => SLABS.map(([x0, y0, z0, x1, y1, z1]) => {
+  const d = [o.dx ?? 0, o.dy ?? 0, o.dz ?? 0];
+  return { name: 'Motor/Getriebe (STEP)', min: add([x0, y0, z0], d), max: add([x1, y1, z1], d) };
+});
+export const ENGINE = engine();
+export const FLANGE = { z: -1185, x: 912, y: 1500, top: 1561 }; // exhaust flange face of the head in the model (plates 1443–1561 high, X 661–1164)
 export const LIMITS = { floor: 989, xMin: 654, xMax: 1386, sideBelowY: 1400, rear: -1639 };
+const CAGE = { y: 1816, r: FR, z: -1265 }, REAR_INNER = -1591; // cage cross tube; front face of the rear cross tubes
+
+// Halle 2026-11-05 (User, confirmed): the frame is as in the model, the engine sits differently (lower, further in).
+// Gaps: manifold top → cage cross tube (vertical), outermost runner → tube beside it (left/right in driving direction),
+// engine → inner side of the frame end at manifold height.
+export const HALLE = { top: 400, left: 220, right: 120, rear: 400 };
+const CAST_HALF = TUBE.cast / 2;
+const rearAt = (y, boxes) => Math.min(...boxes.filter((e) => e.min[1] <= y && e.max[1] >= y).map((e) => e.min[2]));
+// engine shift that reproduces the Halle gaps (Hypothese: manifold top = top of the head flange plates, runner edge = port ± 22)
+export function offsetFromHalle(pitch = 65) {
+  const dy = Math.round(CAGE.y - CAGE.r - HALLE.top - FLANGE.top);
+  const xRight = LIMITS.xMin + HALLE.right, xLeft = LIMITS.xMax - HALLE.left;
+  const dx = Math.round((xRight + xLeft) / 2 - FLANGE.x);
+  const dz = Math.round(REAR_INNER + HALLE.rear - rearAt(FLANGE.y, ENGINE));
+  return { dx, dy, dz, span: xLeft - xRight, modelSpan: 5 * pitch + 2 * CAST_HALF };
+}
+export const OFFSET = (({ dx, dy, dz }) => ({ dx, dy, dz }))(offsetFromHalle());
+// the same gaps measured back in the shifted model, plus engine boxes that cut a frame tube (model inconsistency)
+export function halleCheck(o = {}) {
+  const p = { yp: FLANGE.y, pitch: 65, cyl1: 'r', ...OFFSET, ...o };
+  const boxes = engine(p), xc = FLANGE.x + p.dx, half = 2.5 * p.pitch + CAST_HALF;
+  const rows = {
+    top: CAGE.y - CAGE.r - (FLANGE.top + p.dy),
+    right: xc - half - LIMITS.xMin,
+    left: LIMITS.xMax - (xc + half),
+    rear: rearAt(p.yp + p.dy, boxes) - REAR_INNER,
+  };
+  const cuts = new Set();
+  for (const m of frame({ upperBeam: false })) {
+    if (m.ghost) continue;
+    for (let k = 0; k <= 40; k++) {
+      const q = add(m.a, mul(sub(m.b, m.a), k / 40));
+      if (boxes.some((e) => [0, 1, 2].every((i) => q[i] > e.min[i] - m.r && q[i] < e.max[i] + m.r))) { cuts.add(m.name.split(' (')[0]); break; }
+    }
+  }
+  return { ...rows, cuts: [...cuts] };
+}
 
 // polyline with corner fillets (quadratic Bézier, tangent distance R), sampled every ~step mm
 export function fillet(pts, R, step = 6) {
@@ -98,20 +139,20 @@ export const VARIANTS = {
 };
 
 export function build(v, o = {}) {
-  const p = { yp: FLANGE.y, pitch: 65, cyl1: 'r', rpm: 5500, eo: 56, lkat: 300, dkat: 130, ldmp: 320, ddmp: 110, upperBeam: true, ...o };
+  const p = { yp: FLANGE.y, pitch: 65, cyl1: 'r', rpm: 5500, eo: 56, lkat: 300, dkat: 130, ldmp: 320, ddmp: 110, upperBeam: true, ...OFFSET, ...o };
   const ED = 180 + p.eo, Lp = bellLength(p.rpm, ED);
   const s1 = p.cyl1 === 'r' ? 1 : -1; // cyl 1 at low X (= right, pulley side) when s1 = 1
-  const Z0 = FLANGE.z, XC = FLANGE.x;
-  const ports = [0, 1, 2, 3, 4, 5].map((i) => [XC + s1 * (i - 2.5) * p.pitch, p.yp, Z0]);
+  const Z0 = FLANGE.z + p.dz, XC = FLANGE.x + p.dx, YP = p.yp + p.dy; // yp = channel height in the model, dx/dy/dz = engine shift
+  const ports = [0, 1, 2, 3, 4, 5].map((i) => [XC + s1 * (i - 2.5) * p.pitch, YP, Z0]);
   const parts = [], notes = [], marks = [];
   const part = (name, pts, od, kind, extra = {}) => { const q = { name, pts, od, kind, len: pathLen(pts), ...extra }; parts.push(q); return q; };
   const cyl = (name, a, b, d, kind, extra = {}) => part(name, [a, b], d, kind, { solid: true, ...extra });
   const cone = (name, a, b, r0, r1) => part(name, [a, b], 2 * Math.max(r0, r1), 'cone', { solid: true, r0, r1 });
   const grpOf = (ci) => (ci < 3 ? 0 : 1);
   const R = 1.5 * TUBE.prim, Rs = 1.5 * TUBE.sec;
-  const out = { v, p, parts, notes, marks, ports, Lp, ED };
-  const DOWN = [0, -1, 0], YL = 1058;           // low run in the well behind the block (floor 989 + r)
-  const ZM = -1480, ZR = -1520, XR = XC + 228;  // Y slots, main run along X, riser (left of centre, clear of the corner tube)
+  const out = { v, p, parts, notes, marks, ports, Lp, ED, engine: engine(p) };
+  const YL = 1058;                               // low run in the well behind the block (floor 989 + r)
+  const ZM = -1480, ZR = -1520, XR = FLANGE.x + 228; // Y slots, main run along X, riser (left of centre, clear of the corner tube)
   const gx = [0, 1].map((gi) => [[0, 1, 2], [3, 4, 5]][gi].reduce((a, ci) => a + ports[ci][0], 0) / 3);
   const sonde = (at, txt) => marks.push({ kind: 'sonde', at, name: `LSU 4.9 in M18×1,5-Muffe – ${txt}` });
   const vband = (at) => marks.push({ kind: 'vband', at, r: 45 });
@@ -126,14 +167,15 @@ export function build(v, o = {}) {
     });
   }
   // over the head: up behind the flange, back over the block, down into the well
-  const overTop = (ci, t, P, slot) => [[P[0], p.yp + t, Z0 - 75], [P[0], p.yp + t, slot[2] + 70]];
+  const overTop = (ci, t, P, slot) => [[P[0], YP + t, Z0 - 75], [P[0], YP + t, slot[2] + 70]];
+  const tMax = CAGE.y - YP + 15;
   function castFront() {
     // OEM manifolds: outlet flange behind/below the head, clear of the block (shape and position: Hypothese)
-    const O = gx.map((x) => [x, p.yp - 170, -1385]);
+    const O = gx.map((x) => [x, YP - 170, Z0 - 200]);
     const runners = ports.map((P, ci) => {
       const o = O[grpOf(ci)];
       return part(`Serien-Gusskrümmer ${ci < 3 ? '1–3 (022 253 033)' : '4–6 (022 253 034)'}, Kanal Zyl. ${ci + 1} (Form schematisch)`,
-        fillet([P, add(P, [0, 0, -45]), [(P[0] + o[0]) / 2, p.yp - 20, -1300], add(o, [0, 50, 0]), o], 35), TUBE.cast, 'p', { group: grpOf(ci), chain: `cast${grpOf(ci)}`, skipEnd: 140 });
+        fillet([P, add(P, [0, 0, -45]), [(P[0] + o[0]) / 2, YP - 20, Z0 - 115], add(o, [0, 50, 0]), o], 35), TUBE.cast, 'p', { group: grpOf(ci), chain: `cast${grpOf(ci)}`, skipEnd: 140 });
     });
     O.forEach((o) => marks.push({ kind: 'flange', at: o, name: 'Krümmer-Ausgang 3-Loch (Dichtung 021 253 115), nach unten (Hypothese) – Ø, Lage, Richtung messen' }));
     return { O, runners };
@@ -162,7 +204,7 @@ export function build(v, o = {}) {
     const C = gx.map((x) => [x, 1255, -1430]);
     const slots = [];
     [[0, 1, 2], [3, 4, 5]].forEach((grp, gi) => { const sl = xSlots(C[gi], 27, 90, grp.map((ci) => ports[ci][0])); grp.forEach((ci, k) => { slots[ci] = sl[k]; }); });
-    const prim = primaries((ci) => slots[ci], overTop, Lp, 330);
+    const prim = primaries((ci) => slots[ci], overTop, Lp, tMax);
     const outl = C.map((c, gi) => { const e = add(c, [0, -125, 0]); cone(`3-in-1-Sammler ${gi ? '{4,5,6}' : '{1,2,3}'}`, c, e, 27 + TUBE.prim / 2 + 2, TUBE.sec / 2); return e; });
     const { sec, yOut } = intoY(outl, TUBE.sec, (gi) => `Sekundärrohr ${gi ? '{4,5,6}' : '{1,2,3}'} (63,5 × 1,5)`);
     const d1 = vertDamper(mainToRiser(yOut, 'auf dem Sammelrohr unten, ≈ 100 mm hinter dem Y'));
@@ -174,7 +216,7 @@ export function build(v, o = {}) {
   if (v === 'B') {
     const C = [XC, 1285, -1460];
     const sl = xSlots(C, 47, 15, ports.map((P) => P[0]));
-    const prim = primaries((ci) => sl[ci], overTop, Lp, 330);
+    const prim = primaries((ci) => sl[ci], overTop, Lp, tMax);
     const o1 = add(C, [0, -150, 0]);
     cone('6-in-1-Sammler', C, o1, 47 + TUBE.prim / 2 + 2, TUBE.main / 2);
     const kt = mainToRiser(o1, 'auf dem Sammelrohr unten, ≈ 250 mm hinter dem 6-in-1');
@@ -231,7 +273,7 @@ export function check(out, members) {
         if (m.ghost) continue;
         if (segDist(pt, m.a, m.b) < r + m.r + 5) (m.hyp ? hyp : coll).set(`${q.name.split(' (')[0]} ↔ ${m.name.split(' (')[0]}`, i);
       }
-      if (!(q.kind === 'p' && s < 70)) for (const e of ENGINE) {
+      if (!(q.kind === 'p' && s < 70)) for (const e of out.engine ?? ENGINE) {
         if (pt[0] > e.min[0] - r && pt[0] < e.max[0] + r && pt[1] > e.min[1] - r && pt[1] < e.max[1] + r && pt[2] > e.min[2] - r && pt[2] < e.max[2] + r) coll.set(`${q.name.split(' (')[0]} ↔ ${e.name.split(' (')[0]}`, i);
       }
     }
