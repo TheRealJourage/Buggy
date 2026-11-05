@@ -1,14 +1,14 @@
 #include <Arduino.h>
 #include <Arduino_GFX_Library.h>
 
-// SPI0 on the Pico: GP18 = SCK, GP19 = MOSI
-constexpr int8_t PIN_SCK  = 18;
-constexpr int8_t PIN_MOSI = 19;
-constexpr int8_t PIN_CS   = 17;
-constexpr int8_t PIN_DC   = 20;
-constexpr int8_t PIN_RST  = 21;
+// Pins as soldered 2026-11-05; GP17 is no SCK pin, so bit-banged SPI.
+constexpr int8_t PIN_SCK  = 17;
+constexpr int8_t PIN_MOSI = 18;
+constexpr int8_t PIN_CS   = 16;
+constexpr int8_t PIN_DC   = 19;
+constexpr int8_t PIN_RST  = 20;
 
-Arduino_DataBus *bus = new Arduino_RPiPicoSPI(PIN_DC, PIN_CS, PIN_SCK, PIN_MOSI, GFX_NOT_DEFINED, spi0);
+Arduino_DataBus *bus = new Arduino_SWSPI(PIN_DC, PIN_CS, PIN_SCK, PIN_MOSI, GFX_NOT_DEFINED);
 Arduino_GFX *gfx = new Arduino_GC9A01(bus, PIN_RST, 0, true);
 
 void drawTestScreen(uint32_t round) {

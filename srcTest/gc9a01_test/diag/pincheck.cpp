@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 struct Line { uint8_t gpio; const char *name; };
-const Line lines[] = {{18, "SCL"}, {19, "SDA"}, {20, "DC"}, {17, "CS"}, {21, "RST"}};
+const Line lines[] = {{17, "SCL"}, {18, "SDA"}, {19, "DC"}, {16, "CS"}, {20, "RST"}};
 
 void setup() {
   Serial.begin(115200);
