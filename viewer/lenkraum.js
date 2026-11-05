@@ -1,6 +1,7 @@
 // Free space around the steering column (Halle 2026-11-05, Kabelbaum-Übersicht.md).
 // Frame: u = mm from measuring line "vorne" towards the power-steering unit,
-// y = mm lateral, + = left in driving direction, z = mm up from the top of the cross beam.
+// y = mm lateral, + = left in driving direction, z = mm up from the bottom of the free space.
+// The free space is 45 mm high (user 2026-11-06); the column runs through it in the middle.
 
 export const MEASURED = {
   steelW: 30,
@@ -8,15 +9,13 @@ export const MEASURED = {
   back: { left: 190, right: 235 },
   lenLeft: 140,
   lenRight: 160,
-  cableH: 45,
+  slabH: 45,
 };
 
 export const DEFAULT_PARAMS = {
   lineGap: 150,
-  steelLen: 40,
   colDia: 50,
-  uSteel: 70,
-  sideH: 135,
+  colAxis: 45,
 };
 
 export function widths(u, p) {
@@ -28,17 +27,12 @@ export function widths(u, p) {
   };
 }
 
-export function colAxisZ(p) {
-  return MEASURED.cableH + p.steelLen + p.colDia / 2;
+export function colBottomZ(p) {
+  return Math.max(0, p.colAxis - p.colDia / 2);
 }
 
 export function colTopZ(p) {
-  return MEASURED.cableH + p.steelLen + p.colDia;
-}
-
-// Top of the usable space; above it every mm costs sight.
-export function topZ(p) {
-  return Math.max(p.sideH, colTopZ(p));
+  return p.colAxis + p.colDia / 2;
 }
 
 export function corners(b) {
@@ -58,9 +52,8 @@ export function corners(b) {
 }
 
 export function aabb(b) {
-  const cs = corners(b);
   const r = { u0: Infinity, u1: -Infinity, y0: Infinity, y1: -Infinity, z0: Infinity, z1: -Infinity };
-  for (const k of cs) {
+  for (const k of corners(b)) {
     r.u0 = Math.min(r.u0, k.u); r.u1 = Math.max(r.u1, k.u);
     r.y0 = Math.min(r.y0, k.y); r.y1 = Math.max(r.y1, k.y);
     r.z0 = Math.min(r.z0, k.z); r.z1 = Math.max(r.z1, k.z);
@@ -77,10 +70,10 @@ export function overlaps(a, b) {
   return overlap1(p.u0, p.u1, q.u0, q.u1) && overlap1(p.y0, p.y1, q.y0, q.y1) && overlap1(p.z0, p.z1, q.z0, q.z1);
 }
 
-// Column and flat steel block the centre strip from the cable channel up to the column top.
+// Column (with the flat steel on it) blocks the centre strip from its underside up to its top.
 export function centreStrip(p) {
   const half = Math.max(MEASURED.steelW, p.colDia) / 2;
-  return { y0: -half, y1: half, z0: MEASURED.cableH, z1: colTopZ(p) };
+  return { y0: -half, y1: half, z0: colBottomZ(p), z1: colTopZ(p) };
 }
 
 export function check(b, p, others = []) {
@@ -89,17 +82,17 @@ export function check(b, p, others = []) {
   for (const k of corners(b)) {
     const w = widths(k.u, p);
     const uMax = k.y > -m.steelW / 2 ? m.lenLeft : m.lenRight;
-    if (k.z < -0.5) { errors.push('unter dem Querbalken (Fußraum)'); break; }
+    if (k.z < -0.5) { errors.push('unter dem Freiraum (Querbalken/Fußraum)'); break; }
     if (k.u < -0.5) { errors.push('vor der Messlinie „vorne“'); break; }
     if (k.u > uMax + 0.5) { errors.push(`stößt an die Servolenkung (max. ${uMax} mm)`); break; }
     if (k.y > m.steelW / 2 + w.left + 0.5 || k.y < -m.steelW / 2 - w.right - 0.5) { errors.push('seitlich außerhalb'); break; }
   }
   const r = aabb(b), cs = centreStrip(p);
-  if (overlap1(r.y0, r.y1, cs.y0, cs.y1) && overlap1(r.z0, r.z1, cs.z0, cs.z1)) errors.push('kollidiert mit Lenksäule/Flachstahl');
+  if (overlap1(r.y0, r.y1, cs.y0, cs.y1) && overlap1(r.z0, r.z1, cs.z0, cs.z1)) errors.push('kollidiert mit der Lenksäule');
   for (const o of others) if (o.id !== b.id && overlaps(b, o)) errors.push(`überlappt „${o.name}“`);
   const info = [];
-  if (overlap1(r.y0, r.y1, cs.y0, cs.y1) && r.z0 < m.cableH) info.push('unter der Lenksäule (Kabelkanal)');
-  const sight = Math.max(0, r.z1 - p.sideH);
+  if (overlap1(r.y0, r.y1, cs.y0, cs.y1) && r.z1 <= cs.z0 + 0.5) info.push('unter der Lenksäule (Kabelbereich)');
+  const sight = Math.max(0, r.z1 - m.slabH);
   return { status: errors.length ? 'red' : sight > 0.5 ? 'yellow' : 'green', errors, info, sight: Math.round(sight) };
 }
 
@@ -117,9 +110,9 @@ export function defaultLayout(p = DEFAULT_PARAMS) {
   const place = [
     { u: 50, y: 110, z: 0 },
     { u: 30, y: -80, z: 0 },
-    { u: 50, y: -160, z: 40 },
-    { u: 40, y: 0, z: topZ(p) },
-    { u: 30, y: -180, z: 0 },
+    { u: 45, y: -160, z: 0 },
+    { u: 40, y: 0, z: Math.max(MEASURED.slabH, colTopZ(p)) },
+    { u: 120, y: -150, z: 0 },
     { u: 30, y: 200, z: 0 },
   ];
   return PRESETS.map((pr, i) => ({ id: i + 1, tilt: 0, ...pr, ...place[i] }));

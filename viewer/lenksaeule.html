@@ -57,7 +57,7 @@
   <input id="name">
   <div class="grid" id="fields"></div>
   <div class="note" id="boxnote"></div>
-  <div class="note">u = Abstand ab Messlinie „vorne“ (Mitte) · y = seitlich, + = links in Fahrtrichtung (Mitte) · z = Unterkante über dem Querbalken · Neigung um die Querachse, + = Oberkante kippt weg von „vorne“</div>
+  <div class="note">u = Abstand ab Messlinie „vorne“ (Mitte) · y = seitlich, + = links in Fahrtrichtung (Mitte) · z = Unterkante über der Unterkante des Freiraums · Neigung um die Querachse, + = Oberkante kippt weg von „vorne“</div>
   <h3>Hypothesen Bauraum (mm)</h3>
   <div id="params"></div>
   <div class="row"><span>Fahrer sitzt an der Messlinie</span>
@@ -72,16 +72,16 @@
   <textarea id="json" placeholder="JSON hier – zum Schicken an Claude kopieren"></textarea>
 </div>
 <div id="legend">
-  <b>Gemessen (Halle 2026-11-05):</b> vorne 29 + 3 + 31,5 cm, weiter hinten 19 + 3 + 23,5 cm, Länge 16 cm (links am Servomotor 14 cm), 4,5 cm unter dem Flachstahl bis zum Querbalken (Kabelkanal unter der Lenksäule, blau). Gebaut wird links und rechts neben der Lenksäule.<br>
+  <b>Gemessen (Halle 2026-11-05):</b> vorne 29 + 3 + 31,5 cm, weiter hinten 19 + 3 + 23,5 cm, Länge 16 cm (links am Servomotor 14 cm), Freiraum 4,5 cm hoch (gesetzt), Lenksäule mittig darin. Gebaut wird links und rechts neben der Lenksäule, darunter (blau) nur Kabel.<br>
   <span style="color:#6c6">grün</span> = Freiraum (kostet keine Sicht) · <span class="warn">gelb</span> = ragt in die Sichtzone · <span style="color:#f66">rot</span> = passt nicht.<br>
-  <span class="note"><b>Hypothese</b> (grau, rechts einstellbar): Höhe des Freiraums links/rechts, Abstand der Messlinien, Lage von Lenksäule, Flachstahl und Servolenkung, Fahrerseite, alle Bauteil-Höhen. Seitenbegrenzung über die ganze Höhe wie gemessen angenommen.</span>
+  <span class="note"><b>Hypothese</b> (grau, rechts einstellbar): Abstand der Messlinien, Ø und Höhenlage der Lenksäule, Lage von Flachstahl und Servolenkung, Fahrerseite, alle Bauteil-Höhen. Seitenbegrenzung über die ganze Höhe wie gemessen angenommen.</span>
 </div>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
-import { MEASURED as M, DEFAULT_PARAMS, PRESETS, widths, colAxisZ, colTopZ, topZ, check, defaultLayout, corners } from './lenkraum.js';
+import { MEASURED as M, DEFAULT_PARAMS, PRESETS, widths, colBottomZ, colTopZ, check, defaultLayout, corners } from './lenkraum.js';
 
-const KEY = 'buggy-lenkraum-v1';
+const KEY = 'buggy-lenkraum-v2';
 let view = 'iso';
 let state = load() || fresh();
 let sel = state.boxes[0]?.id ?? null;
@@ -143,23 +143,24 @@ function boxAt(u0, u1, y0, y1, z0, z1, color, opacity = 1) {
 function buildSpace() {
   space.clear();
   const p = state.params, h = M.steelW / 2;
-  const slab = new THREE.ExtrudeGeometry(planShape(p), { depth: p.sideH, bevelEnabled: false });
-  space.add(solid(slab, 0x22c55e, 0.10), edges(slab, 0x4ade80, 0.9));
-  const cw = Math.max(M.steelW, p.colDia) / 2;
-  space.add(boxAt(0, M.lenLeft, -cw, cw, 0, M.cableH, 0x38bdf8, 0.35));
+  const slab = new THREE.ExtrudeGeometry(planShape(p), { depth: M.slabH, bevelEnabled: false });
+  space.add(solid(slab, 0x22c55e, 0.12), edges(slab, 0x4ade80, 0.9));
+  const cw = Math.max(M.steelW, p.colDia) / 2, cb = colBottomZ(p);
+  if (cb > 1) space.add(boxAt(0, M.lenLeft, -cw, cw, 0, cb, 0x38bdf8, 0.35));
   sightGroup = new THREE.Group();
   const sg = new THREE.ExtrudeGeometry(planShape(p), { depth: 220, bevelEnabled: false });
-  sg.translate(0, 0, topZ(p));
+  sg.translate(0, 0, M.slabH);
   sightGroup.add(solid(sg, 0xfacc15, 0.04), edges(sg, 0xfacc15, 0.25));
   sightGroup.visible = document.getElementById('sight').checked;
   space.add(sightGroup);
 
-  space.add(boxAt(p.uSteel - 4, p.uSteel + 4, -h, h, M.cableH, M.cableH + p.steelLen + p.colDia / 2, 0x8a8f98));
   const col = new THREE.Mesh(new THREE.CylinderGeometry(p.colDia / 2, p.colDia / 2, 420, 32), new THREE.MeshStandardMaterial({ color: 0x9aa3ad, metalness: 0.4, roughness: 0.5 }));
-  col.rotation.z = Math.PI / 2; col.position.set(110, 0, colAxisZ(p)); space.add(col);
-  space.add(boxAt(110, 170, -h - widths(150, p).right, h + widths(150, p).left, -30, 0, 0x6b5f4b));
-  space.add(boxAt(M.lenLeft, M.lenLeft + 110, h, h + 110, 0, 95, 0x555a63, 0.55));
-  space.add(boxAt(M.lenRight, M.lenRight + 90, -80, h, 0, colTopZ(p), 0x555a63, 0.55));
+  col.rotation.z = Math.PI / 2; col.position.set(110, 0, p.colAxis); space.add(col);
+  space.add(boxAt(60, 68, -h, h, p.colAxis, colTopZ(p) + 40, 0x8a8f98));
+  const wq = widths(150, p);
+  space.add(boxAt(110, 170, -h - wq.right, h + wq.left, -30, 0, 0x6b5f4b));
+  space.add(boxAt(M.lenLeft, M.lenLeft + 110, h, h + 110, -40, 60, 0x555a63, 0.55));
+  space.add(boxAt(M.lenRight, M.lenRight + 90, -80, h, -20, colTopZ(p), 0x555a63, 0.55));
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(900, 900), new THREE.MeshBasicMaterial({ color: 0x3a1f1f, transparent: true, opacity: 0.35, side: THREE.DoubleSide }));
   floor.position.set(80, 0, -200); space.add(floor);
 
@@ -169,13 +170,14 @@ function buildSpace() {
   space.add(label('19 cm', new THREE.Vector3(p.lineGap + 25, h + wb.left / 2, 0), '#8f8'));
   space.add(label('23,5 cm', new THREE.Vector3(p.lineGap + 25, -h - wb.right / 2, 0), '#8f8'));
   space.add(label('Messlinie „vorne“', new THREE.Vector3(-30, 0, -40), '#8f8'));
-  space.add(label(`Freiraum ${p.sideH / 10} cm hoch (Hyp.)`, new THREE.Vector3(70, h + wf.left + 40, p.sideH / 2), '#8f8'));
-  space.add(label('4,5 cm Kabelkanal', new THREE.Vector3(-30, 0, M.cableH / 2), '#7dd3fc'));
+  space.add(label('Freiraum 4,5 cm hoch', new THREE.Vector3(70, h + wf.left + 40, M.slabH / 2), '#8f8'));
+  if (cb > 1) space.add(label(`Kabel unter der Säule ${Math.round(cb)} mm`, new THREE.Vector3(-30, 0, cb / 2), '#7dd3fc', 18));
   space.add(label('14 cm (links)', new THREE.Vector3(M.lenLeft / 2, h + wb.left + 30, 0), '#8f8'));
   space.add(label('16 cm (rechts)', new THREE.Vector3(M.lenRight / 2, -h - wb.right - 30, 0), '#8f8'));
-  space.add(label('Servomotor (Lage Hyp.)', new THREE.Vector3(M.lenLeft + 55, h + 60, 115), '#aaa', 18));
+  space.add(label('Servomotor (Lage Hyp.)', new THREE.Vector3(M.lenLeft + 55, h + 60, 80), '#aaa', 18));
   space.add(label('Servolenkung (Hyp.)', new THREE.Vector3(M.lenRight + 45, -40, colTopZ(p) + 20), '#aaa', 18));
-  space.add(label('Lenksäule Ø (Hyp.)', new THREE.Vector3(260, 0, colAxisZ(p) + 40), '#aaa', 18));
+  space.add(label('Lenksäule Ø (Hyp.)', new THREE.Vector3(260, 0, p.colAxis + 40), '#aaa', 18));
+  space.add(label('Flachstahl (Lage Hyp.)', new THREE.Vector3(64, 0, colTopZ(p) + 55), '#aaa', 18));
   space.add(label('Querbalken (Hyp.)', new THREE.Vector3(140, -h - wb.right - 20, -45), '#aaa', 18));
   space.add(label('Fußraum frei lassen', new THREE.Vector3(80, 0, -200), '#f88'));
   const du = state.driverSide === 'vorne' ? -450 : 600;
@@ -243,7 +245,7 @@ function renderFields() {
 }
 $('name').oninput = () => { const b = state.boxes.find(x => x.id === sel); if (b) { b.name = $('name').value; save(); renderList(); } };
 
-const PARAMS = [['sideH', 'Höhe Freiraum links/rechts'], ['lineGap', 'Abstand Messlinien vorne → hinten'], ['colDia', 'Lenksäule Ø'], ['steelLen', 'Flachstahl zwischen Kabelkanal und Säule'], ['uSteel', 'Flachstahl ab Messlinie vorne']];
+const PARAMS = [['lineGap', 'Abstand Messlinien vorne → hinten'], ['colDia', 'Lenksäule Ø'], ['colAxis', 'Lenksäule Mitte über Unterkante Freiraum']];
 function renderParams() {
   const P = $('params'); P.innerHTML = '';
   for (const [k, t] of PARAMS) {

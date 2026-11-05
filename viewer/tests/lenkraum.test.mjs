@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { widths, check, defaultLayout, DEFAULT_PARAMS as P, MEASURED } from '../lenkraum.js';
+import { widths, check, defaultLayout, colBottomZ, DEFAULT_PARAMS as P, MEASURED } from '../lenkraum.js';
 
 const box = (o) => ({ id: 99, name: 't', l: 40, w: 40, h: 20, u: 50, y: 100, z: 0, tilt: 0, ...o });
 
@@ -14,17 +14,16 @@ test('box inside the side space is green', () => {
   assert.equal(check(box(), P).status, 'green');
 });
 
-test('box taller than the side space is yellow with sight height', () => {
-  assert.equal(check(box({ h: 100 }), P).status, 'green');
-  const r = check(box({ h: P.sideH + 20 }), P);
+test('box taller than 45 mm is yellow with sight height', () => {
+  const r = check(box({ h: MEASURED.slabH + 20 }), P);
   assert.equal(r.status, 'yellow');
   assert.equal(r.sight, 20);
 });
 
-test('box under the column is green with cable-channel info', () => {
-  const r = check(box({ y: 0, h: MEASURED.cableH }), P);
+test('flat box under the column is green with cable info', () => {
+  const r = check(box({ y: 0, h: colBottomZ(P) }), P);
   assert.equal(r.status, 'green');
-  assert.match(r.info.join(), /Kabelkanal/);
+  assert.match(r.info.join(), /Kabel/);
 });
 
 test('left side ends earlier at the servo motor', () => {
@@ -32,8 +31,8 @@ test('left side ends earlier at the servo motor', () => {
   assert.equal(check(box({ u: 130, y: -100 }), P).status, 'green');
 });
 
-test('box reaching above the cable channel in the centre collides with the column', () => {
-  const r = check(box({ y: 0, z: 50 }), P);
+test('box reaching into the column collides', () => {
+  const r = check(box({ y: 0, h: colBottomZ(P) + 5 }), P);
   assert.equal(r.status, 'red');
   assert.match(r.errors.join(), /Lenksäule/);
 });
