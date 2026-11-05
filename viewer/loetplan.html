@@ -26,7 +26,7 @@
 </head>
 <body>
 <h1>Lötplan: Öldrucksensor + Geschwindigkeitsgeber G22</h1>
-<p class="hint">Stand 2026-11-05 (Aderfarben der Leitung vom User), davor 2026-10-31. Ergänzt den Soll-Plan in <a href="verkabelung.html#soll" style="color:#8cf">verkabelung.html</a>. Öldruck: Variante B festgelegt (User, 2026-10-31), Sensor Flylin JY202216. Pin-Ziele sind <b>Vorschlag Claude</b>. Lage von J1/J5/J6 aus der Platinendatei v0.4.3d, am eigenen Board <b>nicht geprüft</b>; G22-Belegung ungeprüft.</p>
+<p class="hint">Stand 2026-11-05 (Aderfarben der Leitung + G22-Pigtail vom User), davor 2026-10-31. Ergänzt den Soll-Plan in <a href="verkabelung.html#soll" style="color:#8cf">verkabelung.html</a>. Öldruck: Variante B festgelegt (User, 2026-10-31), Sensor Flylin JY202216. Pin-Ziele sind <b>Vorschlag Claude</b>. Lage von J1/J5/J6 aus der Platinendatei v0.4.3d, am eigenen Board <b>nicht geprüft</b>; G22-Belegung ungeprüft.</p>
 <div class="warn"><b>Beim Löten:</b> Batterie ab, ECU abgesteckt, USB ab. Nie 12 V auf J5 oder einen Adapter-Pin.</div>
 
 <h2>1. Plan</h2>
@@ -86,9 +86,9 @@
   <rect x="600" y="290" width="270" height="150" rx="10" fill="#1e1e1e" stroke="#ff8a3d" stroke-width="3"/>
   <text x="612" y="314" fill="#fff" font-size="15" font-weight="700">G22 191 919 149 E</text>
   <text x="612" y="330" fill="#aaa" font-size="11">Hall, 3-pol · Belegung laut VW-Plan, ungeprüft</text>
-  <circle cx="616" cy="360" r="6" fill="#ff9a3c"/><text x="630" y="365" fill="#eee" font-size="13">Pin 2 · Signal · Leitung orange</text>
-  <circle cx="616" cy="392" r="6" fill="#ffd23f"/><text x="630" y="397" fill="#eee" font-size="13">Pin 1 · +12 V</text>
-  <circle cx="616" cy="424" r="6" fill="#aaa"/><text x="630" y="429" fill="#eee" font-size="13">Pin 3 · Masse</text>
+  <circle cx="616" cy="360" r="6" fill="#ff9a3c"/><text x="630" y="365" fill="#eee" font-size="13">Pin 2 · bl/ws · Signal → orange</text>
+  <circle cx="616" cy="392" r="6" fill="#ffd23f"/><text x="630" y="397" fill="#eee" font-size="13">Pin 1 · sw/ws · +12 V</text>
+  <circle cx="616" cy="424" r="6" fill="#aaa"/><text x="630" y="429" fill="#eee" font-size="13">Pin 3 · br · Masse</text>
 
   <path d="M290 197 L400 197 L400 360 L610 360" fill="none" stroke="#ff9a3c" stroke-width="3.5" stroke-dasharray="10 6" stroke-linejoin="round"/>
   <rect x="470" y="330" width="120" height="20" rx="10" fill="#ff5a5a"/>
@@ -110,9 +110,9 @@
 <tr><td>Öldruck rot (Pigtail rot)</td><td>J1 · 5 V (ein Stift)</td><td>Dupont-Buchse aufstecken oder anlöten</td></tr>
 <tr><td>Öldruck braun (Pigtail schwarz)</td><td>J6 · GND (ein Stift)</td><td>Sensormasse zur ECU</td></tr>
 <tr><td>Öldruck lila (Pigtail blau)</td><td>J5 · A9</td><td>Stift zwischen A10 und dem ersten 5-V-Stift</td></tr>
-<tr><td>G22 Pin 2 · orange</td><td>J5 · VSS (D20)</td><td>verlegen, <b>Ende isoliert lassen</b> bis Schritt D</td></tr>
-<tr><td>G22 Pin 1</td><td>12 V geschaltet (wie Board) über eigene Sicherung</td><td>Sicherungswert: Hypothese 2 A, Geber zieht nur mA (nicht gemessen)</td></tr>
-<tr><td>G22 Pin 3</td><td>Massepunkt Motorblock (wo Pin 36 hinführt)</td><td>–</td></tr>
+<tr><td>G22 Pin 2 · orange (Pigtail bl/ws)</td><td>J5 · VSS (D20)</td><td>verlegen, <b>Ende isoliert lassen</b> bis Schritt D</td></tr>
+<tr><td>G22 Pin 1 (Pigtail sw/ws)</td><td>12 V geschaltet (wie Board) über eigene Sicherung</td><td>Sicherungswert: Hypothese 2 A, Geber zieht nur mA (nicht gemessen)</td></tr>
+<tr><td>G22 Pin 3 (Pigtail br)</td><td>Massepunkt Motorblock (wo Pin 36 hinführt)</td><td>–</td></tr>
 </table>
 
 <h2>3. Schritte (Haken bleiben im Browser gespeichert)</h2>
@@ -163,7 +163,7 @@
 <h2>5. Material</h2>
 <ul>
 <li>Litze in rot, braun, lila (Öldruck) und für den G22 drei Adern (Signal orange), Länge bis Getriebe bzw. Block (Vorschlag Claude: 0,5 mm², reine Signal-/Sensorleitungen)</li>
-<li>Gegenstecker zum Sensor-Pigtail, Stecker/Kontakte für den G22 (VW 3-pol, Typ nicht geklärt)</li>
+<li>Gegenstecker zum Sensor-Pigtail, Stecker für den G22: VW-Pigtail vorhanden (sw/ws, bl/ws, br; 2026-11-05)</li>
 <li>Sicherungshalter fliegend + Flachsicherung, Ringöse für den Massepunkt</li>
 <li>Schrumpfschlauch, ggf. Dupont-Buchsen + 4-polige Stiftleiste 2,54 mm</li>
 <li>Gewindeadapter 1/8"-27 NPT (vorhanden), Gewindedichtung</li>
