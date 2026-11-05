@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Lenksäulen-Gehäuse</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1a1a1c; color: #ddd; font-family: system-ui, sans-serif; overflow: hidden; }
+  #bar { position: fixed; top: 0; left: 0; right: 0; padding: 6px 10px; background: #151517e6; display: flex; gap: 8px; align-items: center; font-size: 13px; z-index: 2; flex-wrap: wrap; }
+  button, select { background: #333; color: #ddd; border: 1px solid #555; padding: 4px 8px; cursor: pointer; border-radius: 3px; font-size: 13px; }
+  button.active { background: #4f6b8a; color: #fff; }
+  #panel { position: fixed; top: 44px; right: 0; bottom: 0; width: 340px; overflow-y: auto; background: #111d; padding: 8px 10px; font-size: 13px; box-sizing: border-box; z-index: 2; }
+  #panel.hidden { display: none; }
+  #panel h3 { margin: 10px 0 4px; font-size: 11px; color: #8ab; text-transform: uppercase; letter-spacing: .05em; }
+  .row { display: grid; grid-template-columns: 1fr 80px; gap: 4px; align-items: center; margin: 2px 0; }
+  .row input { width: 100%; box-sizing: border-box; background: #222; color: #eee; border: 1px solid #555; padding: 3px; font-size: 13px; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  .grid label { display: flex; flex-direction: column; font-size: 11px; color: #aaa; }
+  .grid input { width: 100%; box-sizing: border-box; background: #222; color: #eee; border: 1px solid #555; padding: 3px; font-size: 13px; }
+  #name { width: 100%; box-sizing: border-box; background: #222; color: #eee; border: 1px solid #555; padding: 3px; margin-bottom: 4px; }
+  .item { display: flex; gap: 6px; align-items: flex-start; padding: 3px 4px; border-radius: 3px; cursor: pointer; }
+  .item.sel { background: #2b3a4d; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; margin-top: 3px; }
+  .why { color: #f88; font-size: 11px; }
+  .warn { color: #fc6; }
+  .note { color: #999; font-size: 11px; }
+  textarea { width: 100%; height: 90px; box-sizing: border-box; background: #222; color: #ddd; border: 1px solid #555; font-size: 11px; }
+  #legend { position: fixed; left: 8px; bottom: 8px; max-width: 420px; background: #000b; padding: 8px 10px; border-radius: 6px; font-size: 12px; line-height: 1.4; }
+  canvas { display: block; }
+  @media (max-width: 700px) {
+    #panel { top: auto; left: 0; width: 100%; height: 48vh; }
+    #legend { display: none; }
+  }
+</style>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.js" } }</script>
+</head>
+<body>
+<div id="bar">
+  <b>Lenksäulen-Gehäuse · Bauraum</b>
+  <button data-view="iso" class="active">3D</button>
+  <button data-view="top">oben</button>
+  <button data-view="driver">Fahrerblick</button>
+  <button data-view="side">seitlich</button>
+  <label><input type="checkbox" id="sight" checked> Sichtzone</label>
+  <button id="togglePanel">Liste</button>
+</div>
+<div id="panel">
+  <h3>Boxen</h3>
+  <div id="list"></div>
+  <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">
+    <select id="preset"></select>
+    <button id="add">+ dazu</button>
+    <button id="dup">kopieren</button>
+    <button id="del">löschen</button>
+  </div>
+  <h3>Gewählte Box (mm)</h3>
+  <input id="name">
+  <div class="grid" id="fields"></div>
+  <div class="note" id="boxnote"></div>
+  <div class="note">u = Abstand ab Messlinie „vorne“ (Mitte) · y = seitlich, + = links in Fahrtrichtung (Mitte) · z = Unterkante über dem Querbalken · Neigung um die Querachse, + = Oberkante kippt weg von „vorne“</div>
+  <h3>Hypothesen Bauraum (mm)</h3>
+  <div id="params"></div>
+  <div class="row"><span>Fahrer sitzt an der Messlinie</span>
+    <select id="driverSide"><option value="vorne">„vorne“</option><option value="hinten">„hinten“</option></select></div>
+  <h3>Austausch</h3>
+  <div style="display:flex;gap:4px;flex-wrap:wrap">
+    <button id="export">Export → Feld</button>
+    <button id="copy">kopieren</button>
+    <button id="import">Feld → laden</button>
+    <button id="reset">zurücksetzen</button>
+  </div>
+  <textarea id="json" placeholder="JSON hier – zum Schicken an Claude kopieren"></textarea>
+</div>
+<div id="legend">
+  <b>Gemessen (Halle 2026-11-05):</b> vorne 29 + 3 + 31,5 cm, weiter hinten 19 + 3 + 23,5 cm, Länge 16 cm (links am Servomotor 14 cm), 4,5 cm unter dem Flachstahl bis zum Querbalken.<br>
+  <span style="color:#6c6">grün</span> = Freiraum (kostet keine Sicht) · <span class="warn">gelb</span> = ragt in die Sichtzone · <span style="color:#f66">rot</span> = passt nicht.<br>
+  <span class="note"><b>Hypothese</b> (grau, rechts einstellbar): Abstand der Messlinien, Lage von Lenksäule, Flachstahl und Servolenkung, Fahrerseite, alle Bauteil-Höhen. Freiraum oberhalb 4,5 cm nur als Sichtzone, Seitenbegrenzung dort wie unten angenommen.</span>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from './vendor/OrbitControls.js';
+import { MEASURED as M, DEFAULT_PARAMS, PRESETS, widths, colAxisZ, colTopZ, check, defaultLayout, corners } from './lenkraum.js';
+
+const KEY = 'buggy-lenkraum-v1';
+let view = 'iso';
+let state = load() || fresh();
+let sel = state.boxes[0]?.id ?? null;
+
+function fresh() { return { params: { ...DEFAULT_PARAMS }, driverSide: 'vorne', boxes: defaultLayout(DEFAULT_PARAMS) }; }
+function load() { try { const s = JSON.parse(localStorage.getItem(KEY)); return s && s.boxes ? s : null; } catch { return null; } }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(devicePixelRatio);
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a1c);
+const camera = new THREE.PerspectiveCamera(35, 1, 1, 10000);
+camera.up.set(0, 0, 1);
+const controls = new OrbitControls(camera, renderer.domElement);
+scene.add(new THREE.AmbientLight(0xffffff, 1.1));
+const sun = new THREE.DirectionalLight(0xffffff, 1.6); sun.position.set(-300, 400, 900); scene.add(sun);
+
+const space = new THREE.Group(); scene.add(space);
+const boxes = new THREE.Group(); scene.add(boxes);
+let sightGroup, driverLabel;
+
+function label(text, pos, color = '#ddd', size = 22) {
+  const c = document.createElement('canvas'); const ctx = c.getContext('2d');
+  ctx.font = `${size}px system-ui`; const w = Math.ceil(ctx.measureText(text).width) + 12;
+  c.width = w; c.height = size + 10;
+  ctx.font = `${size}px system-ui`; ctx.fillStyle = '#000a'; ctx.fillRect(0, 0, w, c.height);
+  ctx.fillStyle = color; ctx.textBaseline = 'middle'; ctx.fillText(text, 6, c.height / 2);
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
+  s.scale.set(w * 0.45, c.height * 0.45, 1); s.position.copy(pos); s.renderOrder = 10;
+  return s;
+}
+
+function planShape(p) {
+  const h = M.steelW / 2, pts = [];
+  for (let u = 0; u <= M.lenLeft; u += 10) pts.push([u, h + widths(u, p).left]);
+  pts.push([M.lenLeft, h + widths(M.lenLeft, p).left], [M.lenLeft, -h], [M.lenRight, -h]);
+  for (let u = M.lenRight; u >= 0; u -= 10) pts.push([u, -h - widths(u, p).right]);
+  return new THREE.Shape(pts.map(([u, y]) => new THREE.Vector2(u, y)));
+}
+
+function solid(geo, color, opacity = 1) {
+  const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color, transparent: opacity < 1, opacity, roughness: 0.7, depthWrite: opacity === 1 }));
+  return m;
+}
+function edges(geo, color, opacity = 1) {
+  return new THREE.LineSegments(new THREE.EdgesGeometry(geo, 20), new THREE.LineBasicMaterial({ color, transparent: opacity < 1, opacity }));
+}
+function boxAt(u0, u1, y0, y1, z0, z1, color, opacity = 1) {
+  const g = new THREE.BoxGeometry(u1 - u0, y1 - y0, z1 - z0);
+  const grp = new THREE.Group();
+  grp.add(solid(g, color, opacity), edges(g, 0x000000, 0.4));
+  grp.position.set((u0 + u1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
+  return grp;
+}
+
+function buildSpace() {
+  space.clear();
+  const p = state.params, h = M.steelW / 2;
+  const slab = new THREE.ExtrudeGeometry(planShape(p), { depth: M.slabH, bevelEnabled: false });
+  space.add(solid(slab, 0x22c55e, 0.12), edges(slab, 0x4ade80, 0.9));
+  sightGroup = new THREE.Group();
+  const sg = new THREE.ExtrudeGeometry(planShape(p), { depth: 220, bevelEnabled: false });
+  sg.translate(0, 0, M.slabH);
+  sightGroup.add(solid(sg, 0xfacc15, 0.04), edges(sg, 0xfacc15, 0.25));
+  sightGroup.visible = document.getElementById('sight').checked;
+  space.add(sightGroup);
+
+  space.add(boxAt(p.uSteel - 4, p.uSteel + 4, -h, h, M.slabH, M.slabH + p.steelLen + p.colDia / 2, 0x8a8f98));
+  const col = new THREE.Mesh(new THREE.CylinderGeometry(p.colDia / 2, p.colDia / 2, 420, 32), new THREE.MeshStandardMaterial({ color: 0x9aa3ad, metalness: 0.4, roughness: 0.5 }));
+  col.rotation.z = Math.PI / 2; col.position.set(110, 0, colAxisZ(p)); space.add(col);
+  space.add(boxAt(110, 170, -h - widths(150, p).right, h + widths(150, p).left, -30, 0, 0x6b5f4b));
+  space.add(boxAt(M.lenLeft, M.lenLeft + 110, h, h + 110, 0, 95, 0x555a63, 0.55));
+  space.add(boxAt(M.lenRight, M.lenRight + 90, -80, h, 0, colTopZ(p), 0x555a63, 0.55));
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(900, 900), new THREE.MeshBasicMaterial({ color: 0x3a1f1f, transparent: true, opacity: 0.35, side: THREE.DoubleSide }));
+  floor.position.set(80, 0, -200); space.add(floor);
+
+  const wf = widths(0, p), wb = widths(p.lineGap, p);
+  space.add(label('29 cm', new THREE.Vector3(-20, h + wf.left / 2, 0), '#8f8'));
+  space.add(label('31,5 cm', new THREE.Vector3(-20, -h - wf.right / 2, 0), '#8f8'));
+  space.add(label('19 cm', new THREE.Vector3(p.lineGap + 25, h + wb.left / 2, 0), '#8f8'));
+  space.add(label('23,5 cm', new THREE.Vector3(p.lineGap + 25, -h - wb.right / 2, 0), '#8f8'));
+  space.add(label('Messlinie „vorne“', new THREE.Vector3(-30, 0, -40), '#8f8'));
+  space.add(label('4,5 cm Freiraum', new THREE.Vector3(70, h + wf.left + 40, M.slabH / 2), '#8f8'));
+  space.add(label('14 cm (links)', new THREE.Vector3(M.lenLeft / 2, h + wb.left + 30, 0), '#8f8'));
+  space.add(label('16 cm (rechts)', new THREE.Vector3(M.lenRight / 2, -h - wb.right - 30, 0), '#8f8'));
+  space.add(label('Servomotor (Lage Hyp.)', new THREE.Vector3(M.lenLeft + 55, h + 60, 115), '#aaa', 18));
+  space.add(label('Servolenkung (Hyp.)', new THREE.Vector3(M.lenRight + 45, -40, colTopZ(p) + 20), '#aaa', 18));
+  space.add(label('Lenksäule Ø (Hyp.)', new THREE.Vector3(260, 0, colAxisZ(p) + 40), '#aaa', 18));
+  space.add(label('Querbalken (Hyp.)', new THREE.Vector3(140, -h - wb.right - 20, -45), '#aaa', 18));
+  space.add(label('Fußraum frei lassen', new THREE.Vector3(80, 0, -200), '#f88'));
+  const du = state.driverSide === 'vorne' ? -450 : 600;
+  driverLabel = label('Fahrer', new THREE.Vector3(du, 0, 300), '#7cf', 26);
+  driverLabel.visible = view !== 'driver';
+  space.add(driverLabel);
+}
+
+const statusColor = { green: 0x22c55e, yellow: 0xfacc15, red: 0xef4444 };
+let results = {};
+
+function buildBoxes() {
+  boxes.clear(); results = {};
+  for (const b of state.boxes) {
+    const r = check(b, state.params, state.boxes); results[b.id] = r;
+    const g = new THREE.BoxGeometry(b.l, b.w, b.h);
+    const grp = new THREE.Group();
+    const mesh = solid(g, new THREE.Color(b.color), b.id === sel ? 0.95 : 0.75);
+    mesh.userData.id = b.id;
+    grp.add(mesh, edges(g, b.id === sel ? 0xffffff : statusColor[r.status]));
+    if (r.status === 'red') grp.add(edges(new THREE.BoxGeometry(b.l + 4, b.w + 4, b.h + 4), 0xef4444));
+    grp.position.set(b.u, b.y, b.z + b.h / 2);
+    grp.rotation.y = (b.tilt || 0) * Math.PI / 180;
+    boxes.add(grp);
+  }
+  renderList();
+}
+
+const $ = (id) => document.getElementById(id);
+const hex = (c) => '#' + new THREE.Color(c).getHexString();
+
+function renderList() {
+  const L = $('list'); L.innerHTML = '';
+  let maxSight = 0;
+  for (const b of state.boxes) {
+    const r = results[b.id]; maxSight = Math.max(maxSight, r.status === 'red' ? 0 : r.sight);
+    const d = document.createElement('div'); d.className = 'item' + (b.id === sel ? ' sel' : '');
+    const txt = r.status === 'red' ? `<div class="why">${r.errors.join(' · ')}</div>` : r.status === 'yellow' ? `<div class="warn" style="font-size:11px">+${r.sight} mm in der Sichtzone</div>` : '';
+    d.innerHTML = `<span class="dot" style="background:${hex(statusColor[r.status])}"></span><span><span style="color:${b.color}">■</span> ${b.name}${txt}</span>`;
+    d.onclick = () => { sel = b.id; buildBoxes(); renderFields(); };
+    L.appendChild(d);
+  }
+  const s = document.createElement('div'); s.className = 'note'; s.style.marginTop = '4px';
+  s.textContent = `Höchster Punkt über dem Freiraum: ${maxSight} mm`;
+  L.appendChild(s);
+}
+
+const FIELDS = [['l', 'Tiefe u'], ['w', 'Breite y'], ['h', 'Höhe'], ['tilt', 'Neigung °'], ['u', 'u Mitte'], ['y', 'y Mitte'], ['z', 'z unten']];
+function renderFields() {
+  const b = state.boxes.find(x => x.id === sel);
+  const F = $('fields'); F.innerHTML = '';
+  $('name').value = b ? b.name : ''; $('boxnote').textContent = b?.note || '';
+  if (!b) return;
+  for (const [k, t] of FIELDS) {
+    const lab = document.createElement('label'); lab.textContent = t;
+    const inp = document.createElement('input'); inp.type = 'number'; inp.step = k === 'tilt' ? 5 : 5; inp.value = b[k] ?? 0;
+    inp.oninput = () => { const v = parseFloat(inp.value); if (!isNaN(v)) { b[k] = v; save(); buildBoxes(); } };
+    lab.appendChild(inp); F.appendChild(lab);
+  }
+  const lab = document.createElement('label'); lab.textContent = 'Farbe';
+  const c = document.createElement('input'); c.type = 'color'; c.value = b.color;
+  c.oninput = () => { b.color = c.value; save(); buildBoxes(); };
+  lab.appendChild(c); F.appendChild(lab);
+}
+$('name').oninput = () => { const b = state.boxes.find(x => x.id === sel); if (b) { b.name = $('name').value; save(); renderList(); } };
+
+const PARAMS = [['lineGap', 'Abstand Messlinien vorne → hinten'], ['colDia', 'Lenksäule Ø'], ['steelLen', 'Flachstahl sichtbar über 4,5 cm'], ['uSteel', 'Flachstahl ab Messlinie vorne']];
+function renderParams() {
+  const P = $('params'); P.innerHTML = '';
+  for (const [k, t] of PARAMS) {
+    const row = document.createElement('div'); row.className = 'row';
+    row.innerHTML = `<span>${t}</span>`;
+    const inp = document.createElement('input'); inp.type = 'number'; inp.step = 5; inp.value = state.params[k];
+    inp.oninput = () => { const v = parseFloat(inp.value); if (v > 0) { state.params[k] = v; save(); buildSpace(); buildBoxes(); } };
+    row.appendChild(inp); P.appendChild(row);
+  }
+  $('driverSide').value = state.driverSide;
+}
+$('driverSide').onchange = () => { state.driverSide = $('driverSide').value; save(); buildSpace(); setView(view); };
+
+const pre = $('preset');
+PRESETS.forEach((p, i) => pre.add(new Option(p.name, i)));
+pre.add(new Option('leere Box 50 × 50 × 20', 'x'));
+const nextId = () => Math.max(0, ...state.boxes.map(b => b.id)) + 1;
+$('add').onclick = () => {
+  const p = pre.value === 'x' ? { name: 'Box', l: 50, w: 50, h: 20, color: '#14b8a6' } : PRESETS[pre.value];
+  const b = { tilt: 0, u: 60, y: 120, z: 0, ...p, id: nextId() };
+  state.boxes.push(b); sel = b.id; save(); buildBoxes(); renderFields();
+};
+$('dup').onclick = () => {
+  const b = state.boxes.find(x => x.id === sel); if (!b) return;
+  const c = { ...b, id: nextId(), name: b.name + ' (2)', y: b.y - b.w - 10 };
+  state.boxes.push(c); sel = c.id; save(); buildBoxes(); renderFields();
+};
+$('del').onclick = () => {
+  const b = state.boxes.find(x => x.id === sel); if (!b || !confirm(`„${b.name}“ löschen?`)) return;
+  state.boxes = state.boxes.filter(x => x.id !== sel); sel = state.boxes[0]?.id ?? null; save(); buildBoxes(); renderFields();
+};
+$('export').onclick = () => { $('json').value = JSON.stringify({ stand: new Date().toISOString().slice(0, 10), ...state }, null, 1); };
+$('copy').onclick = async () => { $('export').onclick(); try { await navigator.clipboard.writeText($('json').value); $('copy').textContent = 'kopiert ✓'; } catch { $('json').select(); } };
+$('import').onclick = () => {
+  try { const s = JSON.parse($('json').value); if (!Array.isArray(s.boxes)) throw 0; state = { params: { ...DEFAULT_PARAMS, ...s.params }, driverSide: s.driverSide || 'vorne', boxes: s.boxes }; sel = state.boxes[0]?.id ?? null; save(); renderParams(); buildSpace(); buildBoxes(); renderFields(); }
+  catch { alert('JSON nicht lesbar'); }
+};
+$('reset').onclick = () => { if (!confirm('Alles auf den Ausgangsstand zurücksetzen?')) return; state = fresh(); sel = state.boxes[0].id; save(); renderParams(); buildSpace(); buildBoxes(); renderFields(); };
+$('sight').onchange = () => { if (sightGroup) sightGroup.visible = $('sight').checked; };
+$('togglePanel').onclick = () => $('panel').classList.toggle('hidden');
+
+function setView(v) {
+  view = v;
+  if (driverLabel) driverLabel.visible = v !== 'driver';
+  document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('active', b.dataset.view === v));
+  const d = state.driverSide === 'vorne' ? -1 : 1;
+  const target = new THREE.Vector3(80, 0, 40);
+  const pos = { iso: [80 + d * 650, -550, 520], top: [80 + d * 25, 0, 1100], driver: [80 + d * 750, 0, 420], side: [80, -1000, 80] }[v];
+  camera.position.set(...pos); controls.target.copy(target); controls.update();
+}
+document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => setView(b.dataset.view));
+
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
+let down = null;
+renderer.domElement.addEventListener('pointerdown', e => { down = [e.clientX, e.clientY]; });
+renderer.domElement.addEventListener('pointerup', e => {
+  if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5) return;
+  mouse.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+  const hit = ray.intersectObjects(boxes.children, true).find(h => h.object.userData.id);
+  if (hit) { sel = hit.object.userData.id; buildBoxes(); renderFields(); }
+});
+
+function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+renderParams(); buildSpace(); buildBoxes(); renderFields(); setView('iso');
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+</script>
+</body>
+</html>
