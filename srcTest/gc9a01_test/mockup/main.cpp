@@ -4,17 +4,18 @@
 #include <Arduino_GFX_Library.h>
 #include <U8g2lib.h>
 
-// Wiring 2026-11-05: SCL/SDA/DC/RST shared, one CS per display, hardware SPI0.
+// Wiring 2026-11-05/06: SCL/SDA/DC/RST shared, one CS per display, hardware SPI0.
 constexpr int8_t PIN_SCK  = 18;
 constexpr int8_t PIN_MOSI = 19;
 constexpr int8_t PIN_DC   = 17;
 constexpr int8_t PIN_RST  = 20;
-constexpr int8_t PIN_CS[3] = {16, 21, 22};
+constexpr int NUM_DISPLAYS = 4;
+constexpr int8_t PIN_CS[NUM_DISPLAYS] = {16, 21, 22, 26};
 // Arduino_RPiPicoSPI always claims a MISO pin; GP4 is SPI0 RX and unconnected.
 constexpr int8_t PIN_MISO_UNUSED = 4;
 constexpr int32_t SPI_HZ = 40000000;
 
-Arduino_GFX *panel[3];
+Arduino_GFX *panel[NUM_DISPLAYS];
 // One shared framebuffer (115 KB); three would not fit into the RP2040 RAM.
 Arduino_Canvas *g;
 
@@ -132,11 +133,13 @@ const Screen SCREENS[] = {
   {"FAHRZEUG",  "8",    "Tank %",       2, {{"35", "%", "L" UE "fter", 0}, {"AUTO", "", "Modus", 0}},     nullptr, 0.08f, 0},
 };
 constexpr int SCENARIO_DISPLAY[] = {0, 1, 1, 1, 0, 2};
+// Display 4 has no assigned content yet (only 3 pages x 3 displays decided).
+const Screen PLACEHOLDER = {"DISPLAY 4", "--", "noch frei", 0, {{"--", "", "Wert", 0}, {"--", "", "Wert", 0}}, nullptr, -1, 0};
 
 void setup() {
   Serial.begin(115200);
   for (int8_t cs : PIN_CS) { pinMode(cs, OUTPUT); digitalWrite(cs, HIGH); }
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < NUM_DISPLAYS; i++) {
     auto *bus = new Arduino_RPiPicoSPI(PIN_DC, PIN_CS[i], PIN_SCK, PIN_MOSI, PIN_MISO_UNUSED, spi0);
     // RST is shared: only display 1 pulses it (resets all three before any init).
     panel[i] = new Arduino_GC9A01(bus, i == 0 ? PIN_RST : GFX_NOT_DEFINED, 0, true);
@@ -148,6 +151,7 @@ void setup() {
 
 void showPage(int page) {
   for (int d = 0; d < 3; d++) show(d, SCREENS[page * 3 + d]);
+  show(3, PLACEHOLDER);
 }
 
 void loop() {
