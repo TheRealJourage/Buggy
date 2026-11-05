@@ -132,6 +132,14 @@ function xSlots(c, r, th0, xs) {
 }
 
 // ---------------------------------------------------------------- layouts
+// collector positions (frame coordinates), how far behind the flange the primaries climb and how far each group moves
+// sideways off the middle beam. Found by a sweep (2026-11-06): no contact incl. the guessed middle beam at 4500/min,
+// and still none when any value moves by ±20 mm.
+export const LAYOUT = {
+  A: { rise: 140, split: 95, aY: 1200, aZ: -1430, aDx: 50 },
+  B: { rise: 110, split: 100, bY: 1230, bZ: -1440, bDx: 40 },
+  C: {},
+};
 export const VARIANTS = {
   A: { title: 'A · Fächer 6-2-1, Stack links' },
   B: { title: 'B · Fächer 6-1, Querdämpfer, 2 Rohre hinten' },
@@ -139,7 +147,7 @@ export const VARIANTS = {
 };
 
 export function build(v, o = {}) {
-  const p = { yp: FLANGE.y, pitch: 65, cyl1: 'r', rpm: 5500, eo: 56, lkat: 300, dkat: 130, ldmp: 320, ddmp: 110, upperBeam: true, ...OFFSET, ...o };
+  const p = { yp: FLANGE.y, pitch: 65, cyl1: 'r', rpm: 4500, eo: 56, lkat: 300, dkat: 130, ldmp: 320, ddmp: 110, upperBeam: true, ...OFFSET, ...LAYOUT[v], ...o };
   const ED = 180 + p.eo, Lp = bellLength(p.rpm, ED);
   const s1 = p.cyl1 === 'r' ? 1 : -1; // cyl 1 at low X (= right, pulley side) when s1 = 1
   const Z0 = FLANGE.z + p.dz, XC = FLANGE.x + p.dx, YP = p.yp + p.dy; // yp = channel height in the model, dx/dy/dz = engine shift
@@ -167,7 +175,9 @@ export function build(v, o = {}) {
     });
   }
   // over the head: up behind the flange, back over the block, down into the well
-  const overTop = (ci, t, P, slot) => [[P[0], YP + t, Z0 - 75], [P[0], YP + t, slot[2] + 70]];
+  // up behind the flange (each group shifted sideways by `split`, away from the middle beam), back over the head, down into the well
+  const lane = (ci, P) => P[0] + s1 * (grpOf(ci) ? 1 : -1) * p.split;
+  const overTop = (ci, t, P, slot) => [[lane(ci, P), YP + t, Z0 - p.rise], [lane(ci, P), YP + t, slot[2] + 70]];
   const tMax = CAGE.y - YP + 15;
   function castFront() {
     // OEM manifolds: outlet flange behind/below the head, clear of the block (shape and position: Hypothese)
@@ -201,7 +211,7 @@ export function build(v, o = {}) {
   const vertDamper = (kt) => { const d0 = add(kt, [0, 30, 0]), d1 = add(d0, [0, p.ldmp, 0]); part('Rohr 76,2', [kt, d0], TUBE.main, 'm'); cyl(`Dämpfer (Absorption, gerader Durchgang, Ø ${p.ddmp} × ${p.ldmp}, mit Marke + Typ kaufen)`, d0, d1, p.ddmp, 'dmp'); return d1; };
 
   if (v === 'A') {
-    const C = gx.map((x) => [x, 1255, -1430]);
+    const C = gx.map((x, gi) => [x + s1 * (gi ? 1 : -1) * p.aDx, p.aY, p.aZ]);
     const slots = [];
     [[0, 1, 2], [3, 4, 5]].forEach((grp, gi) => { const sl = xSlots(C[gi], 27, 90, grp.map((ci) => ports[ci][0])); grp.forEach((ci, k) => { slots[ci] = sl[k]; }); });
     const prim = primaries((ci) => slots[ci], overTop, Lp, tMax);
@@ -214,7 +224,7 @@ export function build(v, o = {}) {
   }
 
   if (v === 'B') {
-    const C = [XC, 1285, -1460];
+    const C = [XC + p.bDx, p.bY, p.bZ];
     const sl = xSlots(C, 47, 15, ports.map((P) => P[0]));
     const prim = primaries((ci) => sl[ci], overTop, Lp, tMax);
     const o1 = add(C, [0, -150, 0]);

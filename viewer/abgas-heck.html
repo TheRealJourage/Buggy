@@ -51,7 +51,7 @@
   <label>Kanal-Abstand <input type="range" id="pitch" min="55" max="85" step="1" value="65"><span class="v" id="pitch_v"></span></label>
   <label>Zyl. 1 sitzt <select id="cyl1"><option value="r">rechts</option><option value="l">links</option></select></label>
   <h3>Primärrohre</h3>
-  <label id="l_rpm">abstimmen auf /min <input type="range" id="rpm" min="4000" max="6500" step="100" value="5500"><span class="v" id="rpm_v"></span></label>
+  <label id="l_rpm">abstimmen auf /min <input type="range" id="rpm" min="3800" max="6500" step="100" value="4500"><span class="v" id="rpm_v"></span></label>
   <label>Auslass öffnet v. UT (Hyp.) <input type="range" id="eo" min="40" max="70" step="1" value="56"><span class="v" id="eo_v"></span></label>
   <h3>Kat / Dämpfer (Platzhalter)</h3>
   <label>Kat-Länge <input type="range" id="lkat" min="150" max="450" step="10" value="300"><span class="v" id="lkat_v"></span></label>
@@ -175,7 +175,7 @@ function report(r, hc) {
     rows.push(['Krümmer', 'Serien-Guss VW (verbaut, User 2026-11-05), Teilenummer laut Recherche 022 253 033 (1–3) / 034 (4–6), keine Abstimmung. Ausgang schematisch ≈ 170 mm unter der Kanalmitte, hinter dem Block, nach unten (Hypothese) <span class="muted">– Ausgangs-Ø und Lage messen</span>']);
     rows.push(['Hosenrohre', `2 × ${fmt(r.secLen[0])} mm (57 × 1,5, gleich lang) <span class="muted">(Ø vor dem Y: Claude 55–57, Codex 45–48 ID → Krümmer-Ausgang messen)</span>`]);
   } else {
-    rows.push(['Primärrohre', `6 × ${fmt(Lm)} mm (38 × 1,5, ID 35), gleich lang → Bell ≈ <b>${fmt(r.tunedRpm)} /min</b> <span class="muted">(ED ${r.ED}°, Hypothese). Grenze ist das Käfig-Querrohr (Y 1816) über dem Kopf: mit der Motorlage aus der Halle passen ohne Kollision bis ≈ 4600/min (A, ≈ 1030 mm) bzw. 4700/min (B), vorher 5500/min.</span>`]);
+    rows.push(['Primärrohre', `6 × ${fmt(Lm)} mm (38 × 1,5, ID 35), gleich lang → Bell ≈ <b>${fmt(r.tunedRpm)} /min</b> <span class="muted">(ED ${r.ED}°, Hypothese). Die Rohre steigen erst ${state.v === 'A' ? 140 : 110} mm hinter dem Flansch auf (hinter dem Käfig-Querrohr) und jede Gruppe weicht ${state.v === 'A' ? 95 : 100} mm zur Seite aus, damit das Mittelrohr frei bleibt. Ohne jede Berührung (auch am geratenen Mittelrohr) geht es bis ≈ ${state.v === 'A' ? 4100 : 4400}/min; Standard 4500/min hat ±20 mm Reserve bei allen Sammler-Lagen.</span>`]);
     if (r.secLen) rows.push(['Sekundärrohre', `2 × ${fmt(r.secLen[0])} mm (63,5 × 1,5)`]);
   }
   rows.push(['Sammelrohr', '76,2 (3″) wie der Mustang-Kat-Anschluss, unten im Schacht hinter dem Block <span class="muted">(Faustregel 56–60 ID → Widerspruch offen)</span>']);
@@ -190,7 +190,7 @@ function report(r, hc) {
   rows.push(['Kollisionen', r.coll.length ? `<span class="bad">${r.coll.length}:</span> ${r.coll.slice(0, 4).join('; ')} (rot)` : '<span class="ok">keine</span> <span class="muted">(gegen CAD-Rahmen + Motor/Getriebe-Hülle aus dem STEP, 4–5 mm Luft)</span>']);
   rows.push(['Hypothese-Teile', r.hyp.length ? `<span class="warn">berührt: ${r.hyp.join('; ')}</span>` : '<span class="ok">frei</span> <span class="muted">(AHK-Balken real, oberer Balken geraten)</span>']);
   const desc = {
-    A: '<b>A · Fächer 6-2-1, Stack links (Vorschlag Claude, Leistung):</b> Die Primärrohre steigen direkt hinter dem Auslassflansch auf, laufen unter dem Käfig-Querrohr über den Block nach hinten und fallen in den Schacht zwischen Block und Heck. Dort sitzen zwei 3-in-1 {1,2,3}/{4,5,6} (gleichmäßig 240°), kurze Sekundärrohre und der Y-Sammler. Das Sammelrohr läuft unten nach links (Sonde) und steigt links hinten mit Kat und Dämpfer auf, Mündung oben.',
+    A: '<b>A · Fächer 6-2-1, Stack links (Vorschlag Claude, Leistung):</b> Die Primärrohre steigen hinter dem Käfig-Querrohr auf, je Gruppe seitlich am Mittelrohr vorbei, laufen über den Kopf nach hinten und fallen in den Schacht zwischen Block und Heck. Dort sitzen zwei 3-in-1 {1,2,3}/{4,5,6} (gleichmäßig 240°), kurze Sekundärrohre und der Y-Sammler. Das Sammelrohr läuft unten nach links (Sonde) und steigt links hinten mit Kat und Dämpfer auf, Mündung oben.',
     B: '<b>B · Fächer 6-1, Querdämpfer, 2 Rohre hinten (Vorschlag Claude, Optik):</b> Gleiche Primärführung, alle 6 in einen 6-in-1-Sammler unten im Schacht. Steigrohr links hinten mit Kat, oben ein Querdämpfer über dem Heck, zwei Endrohre waagrecht nach hinten. Spitze oben, Mitte schwächer (Forum, keine VR6-Messung).',
     C: '<b>C · Serien-Gusskrümmer + Y (Vorschlag Claude, geringster Aufwand):</b> Beide Serien-Krümmer bleiben, zwei gleich lange Hosenrohre laufen hinter dem Block nach unten in den Y-Sammler. Danach wie A: Sonde unten, Steigrohr links hinten mit Kat und Dämpfer, Endrohr oben 30° nach hinten-links gebogen (§ 47c zulässig). Keine Abstimmung, aber Serien-Dichtungen und -Stehbolzen.',
   }[state.v];
