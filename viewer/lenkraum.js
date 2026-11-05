@@ -99,8 +99,7 @@ export function check(b, p, others = []) {
 export const PRESETS = [
   { name: 'Front-Controller Nucleo-F446RE', l: 82.5, w: 70, h: 30, color: '#3b82f6', note: 'Platine 82,5 × 70 mm (Nucleo-64); Höhe mit Stiftleisten Hypothese' },
   { name: 'Pico (Rund-Displays)', l: 51, w: 21, h: 10, color: '#22c55e', note: 'Pico 51 × 21 mm; Höhe mit Steckern Hypothese' },
-  { name: 'Tacho-Pi', l: 85, w: 56, h: 20, color: '#ef4444', note: 'Pi 4/5 Platine 85 × 56 mm; Höhe mit Kühler Hypothese' },
-  { name: '7"-Display Waveshare DSI', l: 12, w: 193, h: 111, tilt: 20, color: '#a855f7', note: 'ca. 193 × 111 mm laut Händlern (Hypothese, Waveshare-Zeichnung prüfen); Tiefe Hypothese' },
+  { name: '7"-Display Waveshare DSI + Tacho-Pi hinten dran', l: 45, w: 193, h: 111, tilt: 20, color: '#a855f7', note: 'Pi mit Kühler sitzt direkt hinten am Display (User 2026-11-06). Front ca. 193 × 111 mm laut Händlern (Hypothese, Waveshare-Zeichnung prüfen); Tiefe 45 mm inkl. Pi + Kühler Hypothese' },
   { name: '3 Rund-Displays + SG90 (eingeklappt)', l: 50, w: 130, h: 25, color: '#f59e0b', note: 'je Platine 38 × 45,5 mm (Händler); Anordnung + Servo Hypothese' },
   { name: '5-V-Regler ≥ 1 A (Servo)', l: 45, w: 25, h: 15, color: '#94a3b8', note: 'Größe Hypothese' },
 ];
@@ -110,8 +109,7 @@ export function defaultLayout(p = DEFAULT_PARAMS) {
   const place = [
     { u: 50, y: 110, z: 0 },
     { u: 30, y: -80, z: 0 },
-    { u: 45, y: -160, z: 0 },
-    { u: 40, y: 0, z: Math.max(MEASURED.slabH, colTopZ(p)) },
+    { u: 55, y: 0, z: Math.max(MEASURED.slabH, colTopZ(p)) + 8 },
     { u: 120, y: -150, z: 0 },
     { u: 30, y: 200, z: 0 },
   ];
