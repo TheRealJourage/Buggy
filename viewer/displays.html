@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Rund-Displays</title>
+<style>
+  :root { --ok:#3ccf6e; --warn:#f2c230; --bad:#ff4d4d; --off:#555; }
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 12px 16px; background: #111; color: #eee; font-size: 16px; line-height: 1.4; max-width: 1040px; }
+  h1 { font-size: 21px; margin: 4px 0 6px; }
+  h2 { font-size: 18px; margin: 26px 0 8px; color: #8cf; border-bottom: 1px solid #333; padding-bottom: 4px; }
+  .hint { color: #aaa; font-size: 14px; }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 13px; font-weight: 600; color: #111; background: #e8c547; }
+  .badge.fix { background: #6bbf6b; }
+  .row { display: flex; gap: 18px; flex-wrap: wrap; align-items: flex-start; }
+  .stage { perspective: 600px; display: flex; gap: 18px; flex-wrap: wrap; padding: 14px; background: #1a1a1a; border-radius: 10px; }
+  .disp { text-align: center; }
+  .disp canvas { border-radius: 50%; background: #000; transition: transform .6s ease, filter .6s; transform-origin: 50% 100%; box-shadow: 0 0 0 6px #2a2a2a; }
+  .stage.in .disp canvas { transform: rotateX(82deg); filter: brightness(.15); }
+  .disp .cap { color: #999; font-size: 13px; margin-top: 8px; }
+  .ctl button { font-size: 15px; padding: 8px 12px; border-radius: 8px; border: 1px solid #444; background: #222; color: #ddd; margin: 0 6px 6px 0; cursor: pointer; }
+  .ctl button.on { background: #2a6; color: #fff; border-color: #2a6; }
+  #knob { width: 84px; height: 84px; border-radius: 50%; background: #333; border: 3px solid #666; color: #fff; font-weight: 700; user-select: none; touch-action: none; }
+  #knob:active { background: #2a6; }
+  .state { font-size: 15px; color: #ccc; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 6px 0; }
+  th, td { text-align: left; padding: 4px 6px; border-bottom: 1px solid #2a2a2a; vertical-align: middle; }
+  th { color: #8cf; font-weight: 600; }
+  td input[type=range] { width: 100%; min-width: 120px; }
+  td.v { font-variant-numeric: tabular-nums; width: 70px; }
+  .dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:4px; }
+</style>
+</head>
+<body>
+<h1>Rund-Displays GC9A01: Entwurf</h1>
+<p class="hint">Stand 2026-11-05. 3 × 240 × 240 px, Anzeigefläche 32,4 mm (Händler). Canvas zeichnet 1:1 in Display-Pixeln.
+Belegung und Grenzwerte sind <span class="badge">Vorschlag Claude</span>, nicht festgelegt. Quelle: Vault <code>Buggy/Teile-Bestand.md</code> „Runde Displays GC9A01“.
+Schrift im Entwurf = Systemschrift; auf dem Pico wird es eine Bitmap-Schrift (Arduino_GFX), die Größen bleiben gleich.</p>
+
+<div class="ctl">
+  Zoom: <button data-z="1">1× (px)</button><button data-z="1.25" class="on">1,25×</button><button data-z="2">2×</button><button data-z="mm">≈ Realgröße</button>
+  &nbsp; Ring: <button data-r="status" class="on">Status-Ring</button><button data-r="bar">Balken</button>
+</div>
+
+<div class="row">
+  <div class="stage" id="stage">
+    <div class="disp"><canvas id="c0" width="240" height="240"></canvas><div class="cap">1 Motor</div></div>
+    <div class="disp"><canvas id="c1" width="240" height="240"></canvas><div class="cap">2 Antrieb / Pneumatik</div></div>
+    <div class="disp"><canvas id="c2" width="240" height="240"></canvas><div class="cap">3 Kühlung / Fahrzeug</div></div>
+  </div>
+  <div>
+    <button id="knob">Knopf</button>
+    <p class="state" id="state"></p>
+    <p class="hint" style="max-width:260px"><span class="badge fix">Festgelegt</span> kurz tippen = ausfahren, erneut tippen = nächste Seite, halten = einfahren.
+    Haltezeit hier 0,6 s, <b>noch nicht festgelegt</b>.</p>
+  </div>
+</div>
+
+<h2>Szenarien</h2>
+<div class="ctl" id="scen"></div>
+
+<h2>Werte (Simulation)</h2>
+<table id="vals"><tr><th>Wert</th><th>Quelle</th><th>Regler</th><th>Ist</th><th>Grün / Gelb / Rot</th></tr></table>
+<p class="hint">Tankdruck-Grenzen aus <code>Druckluftanlage.md</code>: Pressostat schaltet 8,3–10,3 bar, Schaltdruck 7 bar (Filterregler). Rot unter 7 bar = Schaltung nicht mehr sicher versorgt (Hypothese).
+Alle übrigen Grenzen sind Platzhalter ohne Quelle und vor dem Flashen festzulegen.</p>
+
+<h2>Aufbau eines Displays</h2>
+<ul class="hint">
+  <li><b>Ring außen:</b> Farbe = schlechtester Wert auf diesem Display. Ein Blick auf drei Ringe genügt. Im Balken-Modus zeigt der Ring zusätzlich den Füllstand eines Werts.</li>
+  <li><b>Oben:</b> Titel. <b>Mitte:</b> ein großer Wert. <b>Unten:</b> zwei kleine Werte, Ziffern färben sich gelb/rot, wenn genau dieser Wert schuld ist.</li>
+  <li><b>Unten im Ring:</b> Seitenpunkte (welche Seite aktiv ist), bei Display 1 das SYNC-Warnsymbol.</li>
+  <li>Für den Pico: feste Flächen, nur geänderte Ziffernbereiche neu zeichnen, kein Vollbildpuffer.</li>
+</ul>
+
+<script>
+const V = {
+  lambda:{n:'Lambda',src:'Speeduino (Wideband, Pin 40)',min:0.6,max:1.4,step:0.01,v:0.98,d:2,st:x=>x<0.80||x>1.15?2:(x<0.85||x>1.05?1:0),lim:'0,85–1,05 / 0,80–1,15 / sonst'},
+  iat:{n:'Ansaugluft',sn:'Luft',u:'°C',src:'Speeduino IAT',min:-10,max:90,step:1,v:32,d:0,st:x=>x>65?2:x>50?1:0,lim:'< 50 / 50–65 / > 65'},
+  duty:{n:'Einspr.-Duty',sn:'Duty',u:'%',src:'Speeduino',min:0,max:100,step:1,v:28,d:0,st:x=>x>90?2:x>80?1:0,lim:'< 80 / 80–90 / > 90'},
+  sync:{n:'Sync',src:'Speeduino',min:0,max:1,step:1,v:1,d:0,st:x=>x?0:2,lim:'1 = ok / – / 0 = Verlust',fmt:x=>x?'ok':'weg'},
+  gear:{n:'Gang',src:'Schalt-Controller (CAN)',min:0,max:6,step:1,v:2,d:0,st:()=>0,lim:'–',fmt:x=>['R','N','1','2','3','4','5'][x]},
+  shift:{n:'Letzte Schaltung',src:'Schalt-Controller (CAN)',min:0,max:1,step:1,v:1,d:0,st:x=>x?0:2,lim:'ok / – / Fehler',fmt:x=>x?'OK':'FEHLER'},
+  press:{n:'Tankdruck',sn:'Druck',u:'bar',src:'neuer 0–5-V-Sensor (Typ offen)',min:0,max:12,step:0.1,v:9.4,d:1,st:x=>x<7?2:x<8.3?1:0,lim:'≥ 8,3 / 7–8,3 / < 7'},
+  comp:{n:'Kompressor',sn:'Kompr.',src:'Pressostat / Relais',min:0,max:1,step:1,v:0,d:0,st:()=>0,lim:'–',fmt:x=>x?'AN':'aus'},
+  tank:{n:'Tank',u:'%',src:'Tankgeber',min:0,max:100,step:1,v:64,d:0,st:x=>x<10?2:x<20?1:0,lim:'> 20 / 10–20 / < 10'},
+  fan:{n:'Lüfter',u:'%',src:'Relaisbox-Controller (CAN)',min:0,max:100,step:1,v:35,d:0,st:()=>0,lim:'–'},
+  fanman:{n:'Lüfter-Modus',sn:'Modus',src:'Panel-Schalter Auto/Manuell',min:0,max:1,step:1,v:0,d:0,st:x=>x?1:0,lim:'Auto / Manuell / –',fmt:x=>x?'MAN':'AUTO'},
+  map:{n:'MAP',u:'kPa',src:'Speeduino',min:10,max:105,step:1,v:38,d:0,st:()=>0,lim:'–'},
+  tps:{n:'Drossel',u:'%',src:'Speeduino',min:0,max:100,step:1,v:6,d:0,st:()=>0,lim:'–'},
+  adv:{n:'Zündung',sn:'Zünd.',u:'°',src:'Speeduino',min:-10,max:45,step:1,v:14,d:0,st:()=>0,lim:'–'},
+};
+const PAGES = [
+  [ {t:'MOTOR', big:'lambda', s:['iat','duty'], bar:'duty', extra:['sync']},
+    {t:'ANTRIEB', big:'gear', s:['press','comp'], bar:'press', extra:['shift']},
+    {t:'FAHRZEUG', big:'tank', s:['fan','fanman'], bar:'tank'} ],
+  [ {t:'LAST', big:'map', s:['tps','adv'], bar:'tps', extra:['sync']},
+    {t:'DRUCKLUFT', big:'press', s:['comp','gear'], bar:'press', extra:['shift']},
+    {t:'LÜFTER', big:'fan', s:['tank','fanman'], bar:'fan'} ],
+];
+const COL = ['#3ccf6e','#f2c230','#ff4d4d'];
+let page = 0, out = true, ring = 'status';
+
+const fmt = k => { const o=V[k]; return o.fmt ? o.fmt(o.v) : o.v.toFixed(o.d).replace('.',','); };
+const st = k => V[k].st(V[k].v);
+
+function draw(i){
+  const L = PAGES[page][i], g = document.getElementById('c'+i).getContext('2d');
+  const keys = [L.big, ...L.s, ...(L.extra||[])];
+  const worst = Math.max(...keys.map(st));
+  g.clearRect(0,0,240,240);
+  g.fillStyle='#000'; g.beginPath(); g.arc(120,120,120,0,7); g.fill();
+  const a0 = Math.PI*0.75, a1 = Math.PI*2.25;
+  g.lineCap='butt'; g.lineWidth = 12;
+  if (ring==='status'){
+    g.strokeStyle = COL[worst]; g.beginPath(); g.arc(120,120,112,a0,a1); g.stroke();
+  } else {
+    const o=V[L.bar], f=(o.v-o.min)/(o.max-o.min);
+    g.strokeStyle='#262626'; g.beginPath(); g.arc(120,120,112,a0,a1); g.stroke();
+    g.strokeStyle=COL[worst]; g.beginPath(); g.arc(120,120,112,a0,a0+(a1-a0)*Math.max(0.005,f)); g.stroke();
+  }
+  g.textAlign='center'; g.textBaseline='alphabetic';
+  g.fillStyle='#8a8a8a'; g.font='600 16px system-ui'; g.fillText(L.t,120,56);
+  const b=V[L.big], bs=st(L.big);
+  g.fillStyle= bs ? COL[bs] : '#fff'; g.font='700 64px system-ui';
+  g.fillText(fmt(L.big), 120, 124);
+  g.fillStyle='#8a8a8a'; g.font='600 15px system-ui';
+  g.fillText(b.u ? b.n+' '+b.u : b.n, 120, 150);
+  g.strokeStyle='#333'; g.lineWidth=1; g.beginPath(); g.moveTo(120,158); g.lineTo(120,200); g.stroke();
+  L.s.forEach((k,j)=>{
+    const x = j? 162:78, o=V[k], s=st(k);
+    g.fillStyle = s? COL[s] : '#eee'; g.font='700 24px system-ui'; g.fillText(fmt(k), x, 182);
+    g.fillStyle='#777'; g.font='500 12px system-ui'; const ln=o.sn||o.n; g.fillText(o.u? ln+' '+o.u : ln, x, 197);
+  });
+  for (let p=0;p<PAGES.length;p++){ g.fillStyle = p===page?'#ddd':'#444'; g.beginPath(); g.arc(112+p*16,222,4,0,7); g.fill(); }
+  (L.extra||[]).forEach(k=>{
+    if (!st(k)) return;
+    const txt = k==='sync' ? 'SYNC' : 'SCHALT';
+    g.fillStyle=COL[2]; g.font='700 13px system-ui';
+    const w=g.measureText(txt).width+14; g.fillRect(120-w/2,64,w,20);
+    g.fillStyle='#000'; g.fillText(txt,120,79);
+  });
+}
+const drawAll = () => { [0,1,2].forEach(draw); updState(); };
+
+function updState(){
+  document.getElementById('stage').classList.toggle('in', !out);
+  document.getElementById('state').textContent = out ? `Ausgefahren, Seite ${page+1} von ${PAGES.length}` : 'Eingefahren (Displays aus)';
+  document.querySelectorAll('#vals tr[data-k]').forEach(tr=>{
+    const k=tr.dataset.k; tr.querySelector('.v').innerHTML = `<span class="dot" style="background:${COL[st(k)]}"></span>${fmt(k)}`;
+  });
+}
+
+const tb = document.getElementById('vals');
+for (const [k,o] of Object.entries(V)){
+  const tr=document.createElement('tr'); tr.dataset.k=k;
+  tr.innerHTML=`<td>${o.n}${o.u?' ['+o.u+']':''}</td><td class="hint">${o.src}</td><td><input type="range" min="${o.min}" max="${o.max}" step="${o.step}" value="${o.v}"></td><td class="v"></td><td class="hint">${o.lim}</td>`;
+  tr.querySelector('input').oninput=e=>{o.v=+e.target.value; drawAll();};
+  tb.appendChild(tr);
+}
+
+const SC = {
+  'Alles ok': {lambda:0.98,iat:32,duty:28,sync:1,shift:1,press:9.4,tank:64,fanman:0},
+  'Mager unter Last': {lambda:1.19,duty:72,map:98,tps:85},
+  'Druck fällt': {press:7.6,comp:1},
+  'Druck zu tief': {press:6.4,comp:1},
+  'Schaltfehler': {shift:0},
+  'Sync weg': {sync:0},
+  'Tank leer': {tank:8},
+  'Lüfter manuell': {fanman:1,fan:100},
+};
+const sc=document.getElementById('scen');
+for (const [n,set] of Object.entries(SC)){
+  const b=document.createElement('button'); b.textContent=n;
+  b.onclick=()=>{ for(const[k,v] of Object.entries(set)) V[k].v=v;
+    document.querySelectorAll('#vals tr[data-k]').forEach(tr=>tr.querySelector('input').value=V[tr.dataset.k].v); out=true; drawAll(); };
+  sc.appendChild(b);
+}
+
+const knob=document.getElementById('knob'); let t0=0, holdT=null;
+knob.onpointerdown=()=>{ t0=Date.now(); holdT=setTimeout(()=>{ out=false; page=0; holdT=null; drawAll(); },600); };
+knob.onpointerup=()=>{ if(!holdT) return; clearTimeout(holdT); holdT=null;
+  if(!out){ out=true; page=0; } else page=(page+1)%PAGES.length; drawAll(); };
+
+function zoom(z){
+  document.querySelectorAll('canvas').forEach(c=>{ const s = z==='mm' ? '32.4mm' : (240*z)+'px'; c.style.width=s; c.style.height=s; });
+  document.querySelectorAll('[data-z]').forEach(b=>b.classList.toggle('on', b.dataset.z==String(z)));
+}
+document.querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>zoom(b.dataset.z==='mm'?'mm':+b.dataset.z));
+document.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{ ring=b.dataset.r; document.querySelectorAll('[data-r]').forEach(x=>x.classList.toggle('on',x===b)); drawAll(); });
+zoom(1.25); drawAll();
+</script>
+</body>
+</html>
