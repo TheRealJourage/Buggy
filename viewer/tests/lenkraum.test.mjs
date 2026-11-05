@@ -10,14 +10,21 @@ test('widths interpolate between the measuring lines', () => {
   assert.deepEqual(widths(P.lineGap * 2, P), { left: 190, right: 235 });
 });
 
-test('box inside the slab is green', () => {
+test('box inside the side space is green', () => {
   assert.equal(check(box(), P).status, 'green');
 });
 
-test('box sticking above the slab is yellow with sight height', () => {
-  const r = check(box({ h: 60 }), P);
+test('box taller than the side space is yellow with sight height', () => {
+  assert.equal(check(box({ h: 100 }), P).status, 'green');
+  const r = check(box({ h: P.sideH + 20 }), P);
   assert.equal(r.status, 'yellow');
-  assert.equal(r.sight, 60 - MEASURED.slabH);
+  assert.equal(r.sight, 20);
+});
+
+test('box under the column is green with cable-channel info', () => {
+  const r = check(box({ y: 0, h: MEASURED.cableH }), P);
+  assert.equal(r.status, 'green');
+  assert.match(r.info.join(), /Kabelkanal/);
 });
 
 test('left side ends earlier at the servo motor', () => {
@@ -25,7 +32,7 @@ test('left side ends earlier at the servo motor', () => {
   assert.equal(check(box({ u: 130, y: -100 }), P).status, 'green');
 });
 
-test('box in the centre strip above the slab collides with the column', () => {
+test('box reaching above the cable channel in the centre collides with the column', () => {
   const r = check(box({ y: 0, z: 50 }), P);
   assert.equal(r.status, 'red');
   assert.match(r.errors.join(), /Lenksäule/);

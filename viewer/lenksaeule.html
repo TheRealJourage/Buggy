@@ -72,14 +72,14 @@
   <textarea id="json" placeholder="JSON hier – zum Schicken an Claude kopieren"></textarea>
 </div>
 <div id="legend">
-  <b>Gemessen (Halle 2026-11-05):</b> vorne 29 + 3 + 31,5 cm, weiter hinten 19 + 3 + 23,5 cm, Länge 16 cm (links am Servomotor 14 cm), 4,5 cm unter dem Flachstahl bis zum Querbalken.<br>
+  <b>Gemessen (Halle 2026-11-05):</b> vorne 29 + 3 + 31,5 cm, weiter hinten 19 + 3 + 23,5 cm, Länge 16 cm (links am Servomotor 14 cm), 4,5 cm unter dem Flachstahl bis zum Querbalken (Kabelkanal unter der Lenksäule, blau). Gebaut wird links und rechts neben der Lenksäule.<br>
   <span style="color:#6c6">grün</span> = Freiraum (kostet keine Sicht) · <span class="warn">gelb</span> = ragt in die Sichtzone · <span style="color:#f66">rot</span> = passt nicht.<br>
-  <span class="note"><b>Hypothese</b> (grau, rechts einstellbar): Abstand der Messlinien, Lage von Lenksäule, Flachstahl und Servolenkung, Fahrerseite, alle Bauteil-Höhen. Freiraum oberhalb 4,5 cm nur als Sichtzone, Seitenbegrenzung dort wie unten angenommen.</span>
+  <span class="note"><b>Hypothese</b> (grau, rechts einstellbar): Höhe des Freiraums links/rechts, Abstand der Messlinien, Lage von Lenksäule, Flachstahl und Servolenkung, Fahrerseite, alle Bauteil-Höhen. Seitenbegrenzung über die ganze Höhe wie gemessen angenommen.</span>
 </div>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
-import { MEASURED as M, DEFAULT_PARAMS, PRESETS, widths, colAxisZ, colTopZ, check, defaultLayout, corners } from './lenkraum.js';
+import { MEASURED as M, DEFAULT_PARAMS, PRESETS, widths, colAxisZ, colTopZ, topZ, check, defaultLayout, corners } from './lenkraum.js';
 
 const KEY = 'buggy-lenkraum-v1';
 let view = 'iso';
@@ -87,7 +87,7 @@ let state = load() || fresh();
 let sel = state.boxes[0]?.id ?? null;
 
 function fresh() { return { params: { ...DEFAULT_PARAMS }, driverSide: 'vorne', boxes: defaultLayout(DEFAULT_PARAMS) }; }
-function load() { try { const s = JSON.parse(localStorage.getItem(KEY)); return s && s.boxes ? s : null; } catch { return null; } }
+function load() { try { const s = JSON.parse(localStorage.getItem(KEY)); return s && s.boxes ? { ...s, params: { ...DEFAULT_PARAMS, ...s.params } } : null; } catch { return null; } }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -143,16 +143,18 @@ function boxAt(u0, u1, y0, y1, z0, z1, color, opacity = 1) {
 function buildSpace() {
   space.clear();
   const p = state.params, h = M.steelW / 2;
-  const slab = new THREE.ExtrudeGeometry(planShape(p), { depth: M.slabH, bevelEnabled: false });
-  space.add(solid(slab, 0x22c55e, 0.12), edges(slab, 0x4ade80, 0.9));
+  const slab = new THREE.ExtrudeGeometry(planShape(p), { depth: p.sideH, bevelEnabled: false });
+  space.add(solid(slab, 0x22c55e, 0.10), edges(slab, 0x4ade80, 0.9));
+  const cw = Math.max(M.steelW, p.colDia) / 2;
+  space.add(boxAt(0, M.lenLeft, -cw, cw, 0, M.cableH, 0x38bdf8, 0.35));
   sightGroup = new THREE.Group();
   const sg = new THREE.ExtrudeGeometry(planShape(p), { depth: 220, bevelEnabled: false });
-  sg.translate(0, 0, M.slabH);
+  sg.translate(0, 0, topZ(p));
   sightGroup.add(solid(sg, 0xfacc15, 0.04), edges(sg, 0xfacc15, 0.25));
   sightGroup.visible = document.getElementById('sight').checked;
   space.add(sightGroup);
 
-  space.add(boxAt(p.uSteel - 4, p.uSteel + 4, -h, h, M.slabH, M.slabH + p.steelLen + p.colDia / 2, 0x8a8f98));
+  space.add(boxAt(p.uSteel - 4, p.uSteel + 4, -h, h, M.cableH, M.cableH + p.steelLen + p.colDia / 2, 0x8a8f98));
   const col = new THREE.Mesh(new THREE.CylinderGeometry(p.colDia / 2, p.colDia / 2, 420, 32), new THREE.MeshStandardMaterial({ color: 0x9aa3ad, metalness: 0.4, roughness: 0.5 }));
   col.rotation.z = Math.PI / 2; col.position.set(110, 0, colAxisZ(p)); space.add(col);
   space.add(boxAt(110, 170, -h - widths(150, p).right, h + widths(150, p).left, -30, 0, 0x6b5f4b));
@@ -167,7 +169,8 @@ function buildSpace() {
   space.add(label('19 cm', new THREE.Vector3(p.lineGap + 25, h + wb.left / 2, 0), '#8f8'));
   space.add(label('23,5 cm', new THREE.Vector3(p.lineGap + 25, -h - wb.right / 2, 0), '#8f8'));
   space.add(label('Messlinie „vorne“', new THREE.Vector3(-30, 0, -40), '#8f8'));
-  space.add(label('4,5 cm Freiraum', new THREE.Vector3(70, h + wf.left + 40, M.slabH / 2), '#8f8'));
+  space.add(label(`Freiraum ${p.sideH / 10} cm hoch (Hyp.)`, new THREE.Vector3(70, h + wf.left + 40, p.sideH / 2), '#8f8'));
+  space.add(label('4,5 cm Kabelkanal', new THREE.Vector3(-30, 0, M.cableH / 2), '#7dd3fc'));
   space.add(label('14 cm (links)', new THREE.Vector3(M.lenLeft / 2, h + wb.left + 30, 0), '#8f8'));
   space.add(label('16 cm (rechts)', new THREE.Vector3(M.lenRight / 2, -h - wb.right - 30, 0), '#8f8'));
   space.add(label('Servomotor (Lage Hyp.)', new THREE.Vector3(M.lenLeft + 55, h + 60, 115), '#aaa', 18));
@@ -211,7 +214,8 @@ function renderList() {
     const r = results[b.id]; maxSight = Math.max(maxSight, r.status === 'red' ? 0 : r.sight);
     const d = document.createElement('div'); d.className = 'item' + (b.id === sel ? ' sel' : '');
     const txt = r.status === 'red' ? `<div class="why">${r.errors.join(' · ')}</div>` : r.status === 'yellow' ? `<div class="warn" style="font-size:11px">+${r.sight} mm in der Sichtzone</div>` : '';
-    d.innerHTML = `<span class="dot" style="background:${hex(statusColor[r.status])}"></span><span><span style="color:${b.color}">■</span> ${b.name}${txt}</span>`;
+    const inf = r.info?.length ? `<div style="color:#7dd3fc;font-size:11px">${r.info.join(' · ')}</div>` : '';
+    d.innerHTML = `<span class="dot" style="background:${hex(statusColor[r.status])}"></span><span><span style="color:${b.color}">■</span> ${b.name}${txt}${inf}</span>`;
     d.onclick = () => { sel = b.id; buildBoxes(); renderFields(); };
     L.appendChild(d);
   }
@@ -239,7 +243,7 @@ function renderFields() {
 }
 $('name').oninput = () => { const b = state.boxes.find(x => x.id === sel); if (b) { b.name = $('name').value; save(); renderList(); } };
 
-const PARAMS = [['lineGap', 'Abstand Messlinien vorne → hinten'], ['colDia', 'Lenksäule Ø'], ['steelLen', 'Flachstahl sichtbar über 4,5 cm'], ['uSteel', 'Flachstahl ab Messlinie vorne']];
+const PARAMS = [['sideH', 'Höhe Freiraum links/rechts'], ['lineGap', 'Abstand Messlinien vorne → hinten'], ['colDia', 'Lenksäule Ø'], ['steelLen', 'Flachstahl zwischen Kabelkanal und Säule'], ['uSteel', 'Flachstahl ab Messlinie vorne']];
 function renderParams() {
   const P = $('params'); P.innerHTML = '';
   for (const [k, t] of PARAMS) {

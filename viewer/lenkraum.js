@@ -8,7 +8,7 @@ export const MEASURED = {
   back: { left: 190, right: 235 },
   lenLeft: 140,
   lenRight: 160,
-  slabH: 45,
+  cableH: 45,
 };
 
 export const DEFAULT_PARAMS = {
@@ -16,6 +16,7 @@ export const DEFAULT_PARAMS = {
   steelLen: 40,
   colDia: 50,
   uSteel: 70,
+  sideH: 135,
 };
 
 export function widths(u, p) {
@@ -28,11 +29,16 @@ export function widths(u, p) {
 }
 
 export function colAxisZ(p) {
-  return MEASURED.slabH + p.steelLen + p.colDia / 2;
+  return MEASURED.cableH + p.steelLen + p.colDia / 2;
 }
 
 export function colTopZ(p) {
-  return MEASURED.slabH + p.steelLen + p.colDia;
+  return MEASURED.cableH + p.steelLen + p.colDia;
+}
+
+// Top of the usable space; above it every mm costs sight.
+export function topZ(p) {
+  return Math.max(p.sideH, colTopZ(p));
 }
 
 export function corners(b) {
@@ -71,10 +77,10 @@ export function overlaps(a, b) {
   return overlap1(p.u0, p.u1, q.u0, q.u1) && overlap1(p.y0, p.y1, q.y0, q.y1) && overlap1(p.z0, p.z1, q.z0, q.z1);
 }
 
-// Above the slab the column and the flat steel block the centre strip up to the column top.
+// Column and flat steel block the centre strip from the cable channel up to the column top.
 export function centreStrip(p) {
   const half = Math.max(MEASURED.steelW, p.colDia) / 2;
-  return { y0: -half, y1: half, z0: MEASURED.slabH, z1: colTopZ(p) };
+  return { y0: -half, y1: half, z0: MEASURED.cableH, z1: colTopZ(p) };
 }
 
 export function check(b, p, others = []) {
@@ -91,8 +97,10 @@ export function check(b, p, others = []) {
   const r = aabb(b), cs = centreStrip(p);
   if (overlap1(r.y0, r.y1, cs.y0, cs.y1) && overlap1(r.z0, r.z1, cs.z0, cs.z1)) errors.push('kollidiert mit Lenksäule/Flachstahl');
   for (const o of others) if (o.id !== b.id && overlaps(b, o)) errors.push(`überlappt „${o.name}“`);
-  const sight = Math.max(0, r.z1 - m.slabH);
-  return { status: errors.length ? 'red' : sight > 0.5 ? 'yellow' : 'green', errors, sight: Math.round(sight) };
+  const info = [];
+  if (overlap1(r.y0, r.y1, cs.y0, cs.y1) && r.z0 < m.cableH) info.push('unter der Lenksäule (Kabelkanal)');
+  const sight = Math.max(0, r.z1 - p.sideH);
+  return { status: errors.length ? 'red' : sight > 0.5 ? 'yellow' : 'green', errors, info, sight: Math.round(sight) };
 }
 
 export const PRESETS = [
@@ -109,9 +117,9 @@ export function defaultLayout(p = DEFAULT_PARAMS) {
   const place = [
     { u: 50, y: 110, z: 0 },
     { u: 30, y: -80, z: 0 },
-    { u: 60, y: 0, z: 0 },
-    { u: 40, y: 0, z: colTopZ(p) },
-    { u: 30, y: -180, z: MEASURED.slabH },
+    { u: 50, y: -160, z: 40 },
+    { u: 40, y: 0, z: topZ(p) },
+    { u: 30, y: -180, z: 0 },
     { u: 30, y: 200, z: 0 },
   ];
   return PRESETS.map((pr, i) => ({ id: i + 1, tilt: 0, ...pr, ...place[i] }));
