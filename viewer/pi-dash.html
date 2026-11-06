@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Pi-Dashboard Entwürfe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@400;600;800&family=Chakra+Petch:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 12px 16px 40px; background: #161616; color: #e6e6e6; font-size: 16px; line-height: 1.45; }
+  main { max-width: 1720px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 4px 0 4px; }
+  .hint { color: #a8a8a8; font-size: 14px; max-width: 78ch; }
+  .ctl { position: sticky; top: 0; z-index: 5; background: #161616ee; padding: 10px 0; display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; border-bottom: 1px solid #2c2c2c; }
+  .ctl label { font-size: 14px; color: #ccc; display: flex; gap: 8px; align-items: center; }
+  .ctl input[type=range] { width: 170px; }
+  .ctl output { font-variant-numeric: tabular-nums; min-width: 4ch; display: inline-block; }
+  .ctl button { font-size: 14px; padding: 6px 12px; border-radius: 6px; border: 1px solid #444; background: #232323; color: #ddd; cursor: pointer; }
+  .ctl button.on { background: #2b6; border-color: #2b6; color: #fff; }
+  .ctl button:focus-visible, .ctl input:focus-visible { outline: 2px solid #8cf; outline-offset: 2px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 540px), 1fr)); gap: 26px; margin-top: 18px; }
+  figure { margin: 0; }
+  .screen { aspect-ratio: 800 / 480; width: 100%; border-radius: 6px; overflow: hidden; box-shadow: 0 0 0 10px #050505, 0 0 0 11px #333; }
+  .screen svg { display: block; width: 100%; height: 100%; }
+  figcaption { margin-top: 18px; }
+  figcaption b { font-size: 17px; }
+  figcaption .n { color: #8cf; font-size: 14px; margin-left: 8px; }
+  figcaption p { margin: 4px 0 0; color: #b4b4b4; font-size: 14px; max-width: 70ch; }
+  .notes { margin-top: 34px; max-width: 80ch; font-size: 14px; color: #bbb; }
+  .notes li { margin: 4px 0; }
+  @media (prefers-reduced-motion: reduce) { .flash { animation: none !important; } }
+  @keyframes flash { 50% { opacity: .15; } }
+  .flash { animation: flash .18s steps(1) infinite; }
+</style>
+</head>
+<body>
+<main>
+<h1>Pi-Dashboard – sechs Entwürfe (Waveshare 7", 800 × 480)</h1>
+<p class="hint">Vorschlag Claude, 2026-11-06, nicht festgelegt. Alle Werte kommen per USB vom Speeduino. Gang, Tank, Druckluft und Licht hat der Pi nicht, die stehen auf den Rund-Displays. Drehzahlskala 0–8000/min und Schaltbereich ab 6500/min sind Platzhalter, keine Werte aus dem Tune. Farbgrenzen für Öldruck, Kühlmittel und Volt sind ebenfalls Platzhalter.</p>
+
+<div class="ctl">
+  <label>Drehzahl <input id="rpm" type="range" min="0" max="8000" step="50" value="3450"><output id="rpmO"></output></label>
+  <label>km/h <input id="kmh" type="range" min="0" max="160" step="1" value="62"><output id="kmhO"></output></label>
+  <button id="anim" type="button">Gas geben</button>
+  <button id="oil" type="button">Öldruck-Warnung</button>
+  <button id="hot" type="button">Kühlmittel heiß</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<ul class="notes">
+  <li><b>Nicht drin, weil der Pi es nicht hat:</b> Gang, Tank, Tankdruck, Lüfter-PWM, Blinker/Licht.</li>
+  <li><b>Hypothese:</b> TunerStudio-Dashboards können Bögen, Balken, Zahlen und Warnfelder. Ob sich Felder ganz ausblenden lassen (Entwurf 6) oder segmentierte Bögen gehen (Entwurf 2), ist ungeprüft. Sonst eigene Anzeige-Software.</li>
+  <li>Schriften hier aus Google Fonts; auf dem Pi müssen sie lokal liegen (offline).</li>
+</ul>
+</main>
+
+<script>
+const S = { rpm: 3450, kmh: 62, oil: 3.2, clt: 88, volt: 13.9, lam: 0.98, lamT: 1.00, iat: 34, duty: 38, map: 62, tps: 22, adv: 24, trip: 12.4, sync: true };
+const MAX = 8000, SHIFT = 6500;
+const f1 = v => v.toFixed(1).replace('.', ',');
+const f2 = v => v.toFixed(2).replace('.', ',');
+const rad = d => d * Math.PI / 180;
+const P = (cx, cy, r, a) => [cx + r * Math.cos(rad(a)), cy + r * Math.sin(rad(a))];
+function arc(cx, cy, r, a0, a1) {
+  const [x0, y0] = P(cx, cy, r, a0), [x1, y1] = P(cx, cy, r, a1);
+  return `M${x0.toFixed(1)} ${y0.toFixed(1)} A${r} ${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`;
+}
+const lvl = {
+  oil: v => v < 1 ? 2 : v < 1.5 ? 1 : 0,
+  clt: v => v > 105 ? 2 : v > 98 ? 1 : 0,
+  volt: v => v < 12 ? 2 : v < 13 ? 1 : 0,
+};
+const anyWarn = () => lvl.oil(S.oil) || lvl.clt(S.clt) || lvl.volt(S.volt);
+const T = (x, y, s, txt, o = {}) => `<text x="${x}" y="${y}" font-size="${s}" fill="${o.c || '#fff'}" text-anchor="${o.a || 'middle'}" font-family="${o.f || 'Saira Condensed'}" font-weight="${o.w || 600}" ${o.ls ? `letter-spacing="${o.ls}"` : ''} ${o.cls ? `class="${o.cls}"` : ''}>${txt}</text>`;
+const shiftOn = () => S.rpm >= SHIFT;
+
+// 1 — Bogen: one thick arc, speed huge, three gauges
+function d1() {
+  const bg = '#0c1a24', c = '#ff8a1f', dim = '#21384a', tx = '#e8eef2';
+  const cx = 400, cy = 430, r = 330, a0 = 200, a1 = 340, a = a0 + (a1 - a0) * S.rpm / MAX;
+  const col = ['#e8eef2', '#ffc94a', '#ff4a3d'];
+  const box = (x, lab, val, unit, l) => `
+    ${T(x, 438, 46, val, { c: col[l], w: 800 })}
+    ${T(x, 462, 17, `${lab} ${unit}`, { c: '#86a2b6', f: 'Chakra Petch', w: 500 })}`;
+  return `<rect width="800" height="480" fill="${bg}"/>
+    <path d="${arc(cx, cy, r, a0, a1)}" stroke="${dim}" stroke-width="30" fill="none"/>
+    <path d="${arc(cx, cy, r, a0 + (a1 - a0) * SHIFT / MAX, a1)}" stroke="#4a2120" stroke-width="30" fill="none"/>
+    <path d="${arc(cx, cy, r, a0, Math.max(a, a0 + .5))}" stroke="${shiftOn() ? '#ff3b30' : c}" stroke-width="30" fill="none"/>
+    ${[0, 1, 2, 3, 4, 5, 6, 7, 8].map(k => { const [x, y] = P(cx, cy, r + 36, a0 + (a1 - a0) * k / 8); return T(x, y + 7, 20, k, { c: '#86a2b6', f: 'Chakra Petch', w: 700 }); }).join('')}
+    ${T(400, 300, 170, S.kmh, { c: tx, w: 800 })}
+    ${T(400, 336, 22, 'km/h', { c: '#86a2b6', f: 'Chakra Petch', w: 500 })}
+    ${T(400, 160, 34, S.rpm, { c: shiftOn() ? '#ff3b30' : c, w: 600 })}
+    <line x1="60" y1="378" x2="740" y2="378" stroke="${dim}" stroke-width="2"/>
+    ${box(170, 'Öl', f1(S.oil), 'bar', lvl.oil(S.oil))}
+    ${box(400, 'Kühlmittel', Math.round(S.clt), '°C', lvl.clt(S.clt))}
+    ${box(630, 'Batterie', f1(S.volt), 'V', lvl.volt(S.volt))}`;
+}
+
+// 2 — Shift-Leiste: segmented LED arc, flashes at shift point
+function d2() {
+  const cx = 400, cy = 430, r = 360, a0 = 214, a1 = 326, N = 30, lit = Math.round(N * S.rpm / MAX);
+  let seg = '';
+  for (let i = 0; i < N; i++) {
+    const s0 = a0 + (a1 - a0) * i / N + .6, s1 = a0 + (a1 - a0) * (i + 1) / N - .6, fr = (i + 1) / N;
+    const base = fr <= .6 ? '#2fd27a' : fr <= SHIFT / MAX ? '#ffd23f' : '#ff3b30';
+    const on = i < lit, sh = shiftOn();
+    seg += `<path d="${arc(cx, cy, r, s0, s1)}" stroke="${on ? (sh ? '#3d7bff' : base) : '#1c1c1c'}" stroke-width="44" fill="none" ${on && sh ? 'class="flash"' : ''}/>`;
+  }
+  const row = (x, y, lab, val, unit, l, al) => {
+    const c = ['#fff', '#ffd23f', '#ff3b30'][l];
+    return `${T(x, y, 15, lab, { c: '#8a8a8a', a: al, f: 'Chakra Petch', w: 500 })}${T(x, y + 40, 40, `${val}<tspan font-size="20" fill="#8a8a8a"> ${unit}</tspan>`, { c, a: al, w: 800 })}`;
+  };
+  return `<rect width="800" height="480" fill="#000"/>${seg}
+    ${T(400, 250, 62, S.rpm, { c: '#fff', w: 800 })}
+    ${T(400, 275, 16, '1/min', { c: '#8a8a8a', f: 'Chakra Petch', w: 500 })}
+    ${T(400, 420, 128, S.kmh, { c: '#fff', w: 800 })}
+    ${T(400, 452, 18, 'km/h', { c: '#8a8a8a', f: 'Chakra Petch', w: 500 })}
+    ${row(40, 262, 'Öl', f1(S.oil), 'bar', lvl.oil(S.oil), 'start')}
+    ${row(40, 332, 'Kühlmittel', Math.round(S.clt), '°C', lvl.clt(S.clt), 'start')}
+    ${row(40, 402, 'Batterie', f1(S.volt), 'V', lvl.volt(S.volt), 'start')}
+    ${row(760, 262, 'Lambda', f2(S.lam), '', 0, 'end')}
+    ${row(760, 332, 'Ansaugluft', S.iat, '°C', 0, 'end')}
+    ${row(760, 402, 'Duty', S.duty, '%', 0, 'end')}`;
+}
+
+// 3 — Telemetrie: thin arc, eight-value grid
+function d3() {
+  const bg = '#1a1d23', ac = '#4fd1e8', ln = '#2e333c';
+  const cx = 400, cy = 300, r = 250, a0 = 195, a1 = 345, a = a0 + (a1 - a0) * S.rpm / MAX;
+  const cells = [['Öl', f1(S.oil), 'bar', lvl.oil(S.oil)], ['Kühlmittel', Math.round(S.clt), '°C', lvl.clt(S.clt)], ['Batterie', f1(S.volt), 'V', lvl.volt(S.volt)], ['Lambda', f2(S.lam), `Soll ${f2(S.lamT)}`, 0],
+    ['Ansaugluft', S.iat, '°C', 0], ['Duty', S.duty, '%', 0], ['MAP', S.map, 'kPa', 0], ['Zündwinkel', S.adv, '°', 0]];
+  const cw = 190, ch = 70, x0 = 20, y0 = 324;
+  let g = '';
+  cells.forEach(([lab, v, u, l], i) => {
+    const x = x0 + (i % 4) * cw, y = y0 + Math.floor(i / 4) * (ch + 6), c = ['#e9edf2', '#ffcf4a', '#ff5247'][l];
+    g += `<rect x="${x}" y="${y}" width="${cw - 6}" height="${ch}" fill="${l ? (l === 2 ? '#4a1715' : '#3f3511') : '#20242b'}" stroke="${ln}"/>
+      <rect x="${x}" y="${y}" width="4" height="${ch}" fill="${l ? c : ac}"/>
+      ${T(x + 16, y + 22, 15, lab, { c: '#8d98a8', a: 'start', f: 'Chakra Petch', w: 500 })}
+      ${T(x + 16, y + 58, 34, v, { c, a: 'start', w: 800 })}${T(x + cw - 18, y + 58, 15, u, { c: '#8d98a8', a: 'end', f: 'Chakra Petch', w: 500 })}`;
+  });
+  let ticks = '';
+  for (let k = 0; k <= 16; k++) { const aa = a0 + (a1 - a0) * k / 16, [x1, y1] = P(cx, cy, r + 6, aa), [x2, y2] = P(cx, cy, r + (k % 2 ? 14 : 22), aa); ticks += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${k / 16 >= SHIFT / MAX ? '#ff5247' : '#5d6675'}" stroke-width="2"/>`; }
+  return `<rect width="800" height="480" fill="${bg}"/>
+    <path d="${arc(cx, cy, r, a0, a1)}" stroke="${ln}" stroke-width="12" fill="none"/>
+    <path d="${arc(cx, cy, r, a0, Math.max(a, a0 + .5))}" stroke="${shiftOn() ? '#ff5247' : ac}" stroke-width="12" fill="none"/>${ticks}
+    ${T(400, 205, 104, S.kmh, { c: '#e9edf2', w: 800 })}
+    ${T(400, 232, 17, 'km/h', { c: '#8d98a8', f: 'Chakra Petch', w: 500 })}
+    ${T(400, 290, 30, `${S.rpm}<tspan font-size="15" fill="#8d98a8"> 1/min</tspan>`, { c: shiftOn() ? '#ff5247' : ac, w: 600 })}
+    ${T(30, 40, 15, S.sync ? 'Sync ok' : 'Sync verloren', { c: S.sync ? '#5d6675' : '#ff5247', a: 'start', f: 'Chakra Petch' })}
+    ${T(770, 40, 15, `Trip ${f1(S.trip)} km`, { c: '#5d6675', a: 'end', f: 'Chakra Petch' })}${g}`;
+}
+
+// 4 — Tageslicht: light background for sun, wide semicircle frame
+function d4() {
+  const cx = 400, cy = 430, r = 400, a0 = 205, a1 = 335, a = a0 + (a1 - a0) * S.rpm / MAX;
+  const bar = (y, lab, val, unit, frac, l) => {
+    const c = ['#16181a', '#c98a00', '#e10600'][l];
+    return `${T(40, y, 16, lab, { c: '#55595e', a: 'start', f: 'Chakra Petch', w: 700 })}
+      ${T(300, y + 2, 34, `${val}<tspan font-size="16" fill="#55595e"> ${unit}</tspan>`, { c, a: 'end', w: 800 })}
+      <rect x="40" y="${y + 10}" width="260" height="8" fill="#d9d9d3"/><rect x="40" y="${y + 10}" width="${260 * Math.min(1, frac)}" height="8" fill="${l ? c : '#16181a'}"/>`;
+  };
+  return `<rect width="800" height="480" fill="#f1f0ea"/>
+    <path d="${arc(cx, cy, r, a0, a1)}" stroke="#dcdbd3" stroke-width="56" fill="none"/>
+    <path d="${arc(cx, cy, r, a0, Math.max(a, a0 + .5))}" stroke="${shiftOn() ? '#e10600' : '#16181a'}" stroke-width="56" fill="none" ${shiftOn() ? 'class="flash"' : ''}/>
+    <path d="${arc(cx, cy, r + 34, a0 + (a1 - a0) * SHIFT / MAX, a1)}" stroke="#e10600" stroke-width="6" fill="none"/>
+    ${T(400, 250, 120, S.rpm, { c: '#16181a', w: 800 })}
+    ${T(400, 280, 18, 'Umdrehungen pro Minute', { c: '#55595e', f: 'Chakra Petch', w: 500 })}
+    ${bar(340, 'Öl', f1(S.oil), 'bar', S.oil / 6, lvl.oil(S.oil))}
+    ${bar(386, 'Kühlmittel', Math.round(S.clt), '°C', (S.clt - 40) / 80, lvl.clt(S.clt))}
+    ${bar(432, 'Batterie', f1(S.volt), 'V', (S.volt - 10) / 5, lvl.volt(S.volt))}
+    ${T(760, 444, 150, S.kmh, { c: '#16181a', a: 'end', w: 800 })}
+    ${T(760, 468, 18, 'km/h', { c: '#55595e', a: 'end', f: 'Chakra Petch', w: 700 })}`;
+}
+
+// 5 — Nachtfahrt: amber, little light, needle dot on tick arc, mini gauges
+function d5() {
+  const am = '#ffb000', dm = '#5a3f00', cx = 400, cy = 400, r = 300, a0 = 205, a1 = 335, a = a0 + (a1 - a0) * S.rpm / MAX;
+  let ticks = '';
+  for (let k = 0; k <= 40; k++) {
+    const aa = a0 + (a1 - a0) * k / 40, big = k % 5 === 0, [x1, y1] = P(cx, cy, r, aa), [x2, y2] = P(cx, cy, r - (big ? 26 : 12), aa);
+    const red = k / 40 >= SHIFT / MAX, on = aa <= a;
+    ticks += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${red ? (on ? '#ff3a1a' : '#4a1208') : on ? am : dm}" stroke-width="${big ? 4 : 2}"/>`;
+    if (big) { const [tx, ty] = P(cx, cy, r - 46, aa); ticks += T(tx, ty + 7, 20, k / 5, { c: red ? '#a8321c' : '#9a6a00', f: 'Chakra Petch', w: 700 }); }
+  }
+  const [nx, ny] = P(cx, cy, r + 14, a);
+  const mini = (x, lab, val, unit, frac, l) => {
+    const c = l === 2 ? '#ff3a1a' : l ? '#ffd27a' : am, rr = 46;
+    return `<path d="${arc(x, 418, rr, 150, 390)}" stroke="${dm}" stroke-width="7" fill="none"/>
+      <path d="${arc(x, 418, rr, 150, 150 + 240 * Math.max(.01, Math.min(1, frac)))}" stroke="${c}" stroke-width="7" fill="none"/>
+      ${T(x, 426, 30, val, { c, w: 800 })}${T(x, 476, 15, `${lab} ${unit}`, { c: '#9a6a00', f: 'Chakra Petch', w: 500 })}`;
+  };
+  return `<rect width="800" height="480" fill="#000"/>${ticks}
+    <circle cx="${nx}" cy="${ny}" r="9" fill="${shiftOn() ? '#ff3a1a' : am}"/>
+    ${T(400, 270, 140, S.kmh, { c: am, w: 800 })}
+    ${T(400, 300, 18, `km/h · ${S.rpm} 1/min`, { c: '#9a6a00', f: 'Chakra Petch', w: 500 })}
+    ${mini(110, 'Öl', f1(S.oil), 'bar', S.oil / 6, lvl.oil(S.oil))}
+    ${mini(690, 'Kühlmittel', Math.round(S.clt), '°C', (S.clt - 40) / 80, lvl.clt(S.clt))}
+    ${T(400, 446, 26, `${f1(S.volt)}<tspan font-size="15" fill="#9a6a00"> V</tspan>`, { c: lvl.volt(S.volt) ? '#ff3a1a' : am, w: 700 })}
+    ${T(400, 472, 15, 'Batterie', { c: '#9a6a00', f: 'Chakra Petch', w: 500 })}`;
+}
+
+// 6 — Nur bei Bedarf: arc + speed, everything else appears only when out of range
+function d6() {
+  const cx = 400, cy = 420, r = 340, a0 = 200, a1 = 340, a = a0 + (a1 - a0) * S.rpm / MAX;
+  const w = [];
+  if (lvl.oil(S.oil)) w.push(['Öldruck', `${f1(S.oil)} bar`, lvl.oil(S.oil)]);
+  if (lvl.clt(S.clt)) w.push(['Kühlmittel', `${Math.round(S.clt)} °C`, lvl.clt(S.clt)]);
+  if (lvl.volt(S.volt)) w.push(['Batterie', `${f1(S.volt)} V`, lvl.volt(S.volt)]);
+  let low = '';
+  if (!w.length) {
+    low = `${T(400, 440, 20, `Öl ${f1(S.oil)} bar     Kühlmittel ${Math.round(S.clt)} °C     Batterie ${f1(S.volt)} V`, { c: '#4d5966', f: 'Chakra Petch', w: 500 })}`;
+  } else {
+    const bw = 720 / w.length;
+    w.forEach(([lab, v, l], i) => {
+      const x = 40 + i * bw, c = l === 2 ? '#ff3b30' : '#ffc400';
+      low += `<rect x="${x + 4}" y="370" width="${bw - 8}" height="96" fill="${c}" ${l === 2 ? 'class="flash"' : ''}/>
+        ${T(x + bw / 2, 408, 22, lab, { c: '#000', f: 'Chakra Petch', w: 700 })}${T(x + bw / 2, 452, 44, v, { c: '#000', w: 800 })}`;
+    });
+  }
+  return `<rect width="800" height="480" fill="#0f1419"/>
+    <path d="${arc(cx, cy, r, a0, a1)}" stroke="#1f2a35" stroke-width="22" fill="none"/>
+    <path d="${arc(cx, cy, r, a0, Math.max(a, a0 + .5))}" stroke="${shiftOn() ? '#ff3b30' : '#9fb3c8'}" stroke-width="22" fill="none"/>
+    ${T(400, 300, 190, S.kmh, { c: '#eef3f8', w: 800 })}
+    ${T(400, 340, 20, `km/h      ${S.rpm} 1/min`, { c: '#6b7c8d', f: 'Chakra Petch', w: 500 })}${low}`;
+}
+
+const designs = [
+  ['Bogen', 3, 'Ein dicker Drehzahlbogen, km/h riesig, darunter die drei Werte der weggefallenen Analoginstrumente. Ruhig, schnell erfassbar.', d1],
+  ['Shift-Leiste', 6, 'Segmentierter LED-Bogen grün/gelb/rot, blinkt blau am Schaltpunkt (wie Shift-Lights im Rennsport). Links Motor-Grundwerte, rechts Gemisch.', d2],
+  ['Telemetrie', 8, 'Dünner Bogen mit Skala, km/h in der Mitte, darunter acht Werte in Kacheln. Viel Information, kleinste Schrift.', d3],
+  ['Tageslicht', 3, 'Heller Hintergrund für Sonne (offenes Fahrzeug). Drehzahl als großer Bogen und große Zahl, km/h rechts unten, Werte als Balken.', d4],
+  ['Nachtfahrt', 3, 'Bernstein auf Schwarz, wenig Licht, blendet nachts nicht. Skalenbogen mit Leuchtpunkt, zwei Mini-Rundinstrumente.', d5],
+  ['Nur bei Bedarf', 3, 'Nur Bogen und km/h. Die drei Werte stehen klein unten und springen als volle Warnfläche hoch, wenn einer aus dem Bereich läuft.', d6],
+];
+
+const grid = document.getElementById('grid');
+const svgs = designs.map(([name, n, desc], i) => {
+  const fig = document.createElement('figure');
+  fig.innerHTML = `<div class="screen"><svg viewBox="0 0 800 480" role="img" aria-label="Entwurf ${i + 1}: ${name}"></svg></div>
+    <figcaption><b>${i + 1} ${name}</b><span class="n">${n} Werte + Drehzahl + km/h</span><p>${desc}</p></figcaption>`;
+  grid.appendChild(fig);
+  return fig.querySelector('svg');
+});
+function draw() {
+  document.getElementById('rpmO').textContent = S.rpm;
+  document.getElementById('kmhO').textContent = S.kmh;
+  designs.forEach((d, i) => { svgs[i].innerHTML = d[3](); });
+}
+const $ = id => document.getElementById(id);
+$('rpm').oninput = e => { S.rpm = +e.target.value; draw(); };
+$('kmh').oninput = e => { S.kmh = +e.target.value; draw(); };
+$('oil').onclick = e => { const on = e.target.classList.toggle('on'); S.oil = on ? 0.6 : 3.2; draw(); };
+$('hot').onclick = e => { const on = e.target.classList.toggle('on'); S.clt = on ? 103 : 88; draw(); };
+let timer = null;
+$('anim').onclick = e => {
+  if (timer) { clearInterval(timer); timer = null; e.target.classList.remove('on'); return; }
+  e.target.classList.add('on');
+  let t = 0;
+  timer = setInterval(() => {
+    t = (t + 1) % 120;
+    const p = t < 90 ? t / 90 : 1 - (t - 90) / 30;
+    S.rpm = Math.round((900 + 6100 * p) / 50) * 50; S.kmh = Math.round(20 + 60 * p);
+    $('rpm').value = S.rpm; $('kmh').value = S.kmh; draw();
+  }, 50);
+};
+draw();
+</script>
+</body>
+</html>
