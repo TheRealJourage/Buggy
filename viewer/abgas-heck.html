@@ -215,7 +215,7 @@ function report(r, hc) {
   const dmpWhere = { B: 'quer über dem Heck', N2: 'quer oben hinter dem Käfig-Querrohr, 2 Endrohre nach hinten', N3: 'quer oben hinter dem Käfig-Querrohr, 2 Endrohre nach hinten', N1: 'stehend in der linken Ecke' }[state.v] ?? 'senkrecht über dem Kat';
   rows.push(['Kat', `Ø ${p.dkat} × ${p.lkat} ${katWhere}, zwischen V-Bändern <span class="muted">(Platzhalter, Mustang-Kat 16399 messen)</span>`]);
   if (twin) {
-    rows.push(['Y-Teiler', `1 × 76,2 → 2 × ${p.dSplit} direkt über dem Kat <span class="muted">(Fläche 2 × 57er ≈ 1,2 × 76er, Hypothese bis Recherche)</span>`]);
+    rows.push(['Y-Teiler', `1 × 76,2 → 2 × ${p.dSplit} direkt über dem Kat <span class="muted">(Fläche 2 × 57er ≈ 1,09 × 76er wie Borla am Golf R „3″ into dual 2.25″“; Zweige flach ≤ 15–22°, danach Bögen R/D ≥ 2 – Recherche 2026-11-06. Teilen kostet ≈ 0,3–0,6 kPa, bringt aber auch nichts)</span>`]);
     rows.push(['Dämpfer', `2 × Ø ${p.d2} × ${p.l2}, ${state.v === 'N4' ? 'stehend in den unteren Ecken, je ein Endrohr tief nach hinten' : 'quer nebeneinander hinter dem Käfig-Querrohr, Endrohre als Paar rechts oben'} <span class="muted">(Marke + Typ je Dämpfer nötig → Prüfer)</span>`]);
   } else rows.push(['Dämpfer', `Ø ${p.ddmp} × ${p.ldmp}, ${dmpWhere} <span class="muted">(Marke + Typ nötig; z. B. MagnaFlow 12266 127 × 203 × 457 als Querdämpfer, ohne E-Zeichen → Prüfer)</span>`]);
   rows.push(['Halle-Maße', `oben ${cmp(hc.top, H.HALLE.top)} · links ${cmp(hc.left, H.HALLE.left)} · rechts ${cmp(hc.right, H.HALLE.right)} · hinten ${cmp(hc.rear, H.HALLE.rear)}

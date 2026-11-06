@@ -144,7 +144,7 @@ export const LAYOUT = {
   N2: { yRun: 1030, lift: 70, xY: 175, zY: -1500, straight: 150, yDmp: 1640 },
   N3: { yRun: 1030, lift: 64, xY: 230, zY: -1500, straight: 150, yDmp: 1640 },
   N4: { yRun: 1030, lift: 70, xY: 175, zY: -1500, yInOff: 10, straight: 150, dTwin: 245, zTwin: -1430, yTop: 1830 },
-  N5: { yRun: 1030, lift: 70, xY: 175, zY: -1500, yInOff: 10, straight: 150, yTwin: 1870, zFront: -1410, zRear: -1530 },
+  N5: { yRun: 1030, lift: 70, xY: 175, zY: -1500, yInOff: 10, straight: 150, yTwin: 1915, zFront: -1410, zRear: -1530 },
 };
 export const VARIANTS = {
   A: { title: 'A · Fächer 6-2-1, Stack links' },
@@ -353,7 +353,7 @@ export function build(v, o = {}) {
   };
   const twinDamper = (a, dir, side) => { const b = add(a, mul(dir, p.l2)); cyl(`Dämpfer ${side} (gerader Durchgang, Platzhalter Ø ${p.d2} × ${p.l2}, mit Marke + Typ)`, a, b, p.d2, 'dmp'); return b; };
   const tip = (from, to, side, extra = {}) => part(`Endrohr ${side} (${p.dSplit} × 1,5, Mündung hinten)`, [from, to], p.dSplit, 't', extra);
-  const RS = 1.5 * p.dSplit;
+  const RS = 2 * p.dSplit; // after a split: R/D ≥ 2 (.research-exhaust-dual.md)
 
   if (v === 'N4') {
     // cat upright left of the beam, Y-split on top, two goosenecks down to upright dampers in the lower corners,
@@ -390,7 +390,7 @@ export function build(v, o = {}) {
       part(`Strang ${side} (${p.dSplit} × 1,5)`, fillet([o, [o[0], Y, o[2]], [o[0], Y, z], [xd0, Y, z]], RS), p.dSplit, 's', { group: i, skipStart: 30, skipEnd: 30, strand: true });
       cyl(`Querdämpfer ${side} (gerader Durchgang, Platzhalter Ø ${p.d2} × ${fmt0(len)}, mit Marke + Typ)`, [xd0, Y, z], [xd1, Y, z], p.d2, 'dmp');
       const xt = xd1 - RS - (i ? 0 : 70);
-      part(`Endrohr ${side} (${p.dSplit} × 1,5, Mündung hinten)`, fillet([[xd1, Y, z], [xt, Y, z], [xt, Y, -1630]], RS), p.dSplit, 't');
+      part(`Endrohr ${side} (${p.dSplit} × 1,5, Mündung hinten)`, fillet([[xd1, Y, z], [xt, Y, z], [xt, Y, -1630]], 1.5 * p.dSplit), p.dSplit, 't');
     });
     branchFin(sec, c);
     out.sondePath = c.runners.map((q, ci) => q.len + sec[grpOf(ci)].len + YCONE + p.straight / 2);
