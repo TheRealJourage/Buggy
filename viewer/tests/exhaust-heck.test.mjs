@@ -19,20 +19,42 @@ for (const v of ['A', 'B', 'C']) {
   });
 }
 
-test('A and B primaries reach the Bell length for 5500/min', () => {
+test('A and B primaries reach the Bell length for 4500/min', () => {
   for (const v of ['A', 'B']) {
-    const o = H.build(v, { rpm: 5500 });
-    assert.ok(Math.abs(o.tunedRpm - 5500) < 30, `${v} → ${o.tunedRpm}`);
+    const o = H.build(v, { rpm: 4500 });
+    assert.ok(Math.abs(o.tunedRpm - 4500) < 30, `${v} → ${o.tunedRpm}`);
   }
 });
 
-test('longer primaries (5000/min) run into the cage cross tube', () => {
+test('optimised layouts (2026-11-06): default 4500/min clear of everything incl. the guessed middle beam, ±20 mm reserve', () => {
+  const clean = (o) => [...o.coll, ...o.viol, ...o.notes, ...o.hyp];
   for (const v of ['A', 'B']) {
-    const o = H.build(v, { rpm: 5000 });
-    assert.ok(o.coll.some((c) => c.includes('Oberes Querrohr')), v);
+    for (const cyl1 of ['r', 'l']) assert.deepEqual(clean(H.build(v, { cyl1 })), [], `${v} ${cyl1}`);
+    for (const [k, x] of Object.entries(H.LAYOUT[v])) for (const d of [-20, 20]) {
+      assert.deepEqual(clean(H.build(v, { [k]: x + d })), [], `${v} ${k}${d}`);
+    }
+  }
+});
+
+test('A and B: tuning far below the limit runs into the frame or the beam', () => {
+  for (const v of ['A', 'B']) {
+    const o = H.build(v, { rpm: 3800 });
+    assert.ok(o.coll.length + o.hyp.length + o.notes.length > 0, v);
   }
 });
 
 test('nothing runs through the engine envelope', () => {
   for (const v of ['A', 'B', 'C']) assert.ok(!H.build(v).coll.some((c) => c.includes('Motor')), v);
+});
+
+test('default engine offset reproduces the Halle gaps (top/rear exact, sides within 15 mm)', () => {
+  const c = H.halleCheck();
+  assert.ok(Math.abs(c.top - H.HALLE.top) <= 1 && Math.abs(c.rear - H.HALLE.rear) <= 1, JSON.stringify(c));
+  assert.ok(Math.abs(c.left - H.HALLE.left) <= 15 && Math.abs(c.right - H.HALLE.right) <= 15, JSON.stringify(c));
+  assert.ok(H.OFFSET.dy < 0, 'engine sits lower than in the model');
+});
+
+test('offset zero reproduces the old model gaps (≈ 23 cm above the manifold)', () => {
+  const c = H.halleCheck({ dx: 0, dy: 0, dz: 0 });
+  assert.ok(Math.abs(c.top - 231) < 2, String(c.top));
 });

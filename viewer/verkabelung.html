@@ -215,7 +215,7 @@
 <ul>
 <li><b>Nicht am 40-Pin-Adapter.</b> Der Geschwindigkeitseingang (VSS) ist Mega D20, die Firmware nimmt beim v0.4 standardmäßig Pin 20 (<code>pinMapping.cpp</code>, <code>pinVSS = 20</code>). Im v0.4.3d-Schaltplan (<code>proto.sch</code>) liegt D20 auf der <b>4-poligen Stiftleiste J5</b> (2,54 mm) im Proto-Bereich, zusammen mit D21, A9 und A10. Auf dem Board sitzen schon 1 kΩ Pull-up nach 5 V und 100 nF gegen Masse, aber kein Vorwiderstand und keine Schutzdiode.</li>
 <li>Am Board prüfen: Revision v0.4.3d? J5 bestückt? Welcher J5-Pin ist VSS (mit dem Durchgangsprüfer von D20 am Mega aus suchen)?</li>
-<li>Leitungen, Vorschlag: G22 Pin 2 (Signal) → <b>neue Ader zu J5/VSS</b>. G22 Pin 1 → +12 V Kl. 15 mit Sicherung (bei VW Zünd-Plus). G22 Pin 3 → Masse am Motorblock, gleicher Punkt wie Pin 36. Belegung aus dem VW-Stromlaufplan Golf 3 VR6, am Geber nicht geprüft.</li>
+<li>Leitungen, Vorschlag: G22 Pin 2 (Signal) → <b>neue Ader zu J5/VSS</b>. G22 Pin 1 → +12 V Kl. 15 mit Sicherung (bei VW Zünd-Plus). G22 Pin 3 → Masse am Motorblock, gleicher Punkt wie Pin 36. Belegung aus dem VW-Stromlaufplan Golf 3 VR6, am Geber nicht geprüft. VW-Pigtail (User 2026-11-05): Pin 1 sw/ws, Pin 2 bl/ws, Pin 3 br.</li>
 <li><b>5 V als Versorgung:</b> nicht belegt, VW versorgt mit 12 V. Die 5 V von Pin 25/26 bleiben für die Sensoren.</li>
 <li><b>Vor dem Anschließen messen:</b> Pin 1 an 12 V, Pin 3 an Masse, Rad drehen, Pin 2 gegen Masse, ohne und mit 4,7 kΩ nach 5 V. Open Collector → direkt an J5, <b>ohne Vorwiderstand</b> (mit dem 1-kΩ-Pull-up auf dem Board würde Low auf etwa 2,5 V steigen). Liefert Pin 2 selbst 12 V → <b>nicht direkt</b>, dann Pegelwandler (Transistor oder Optokoppler), nach der Messung festlegen.</li>
 <li>TunerStudio: <code>vssMode</code> = Pulses per KM, <code>vssPin</code> = Board Default (ältere Firmware hat das Feld evtl. nicht, D20 bleibt trotzdem Standard), <code>vssPulsesPerKm</code> Startwert ≈ 6769 / Abrollumfang in m (Annahme 4 Impulse je Geberumdrehung), dann auf bekannter Strecke einmessen, <code>vssSmoothing</code> 50.</li>
@@ -317,7 +317,7 @@ const SOLL = FIXED.concat([
  {id:'wide', side:'R', st:'ext', name:'Wideband-Controller', sub:'offene Enden rot/grün/schwarz', rows:[
    {pin:40, lab:'Analog · blau ↔ grün', c:'blau'}], notes:['rot → +12 V geschaltet, Sicherung', 'schwarz → Masse wie Pin 36']},
  {id:'vss', side:'R', st:'new', name:'Geschwindigkeit G22', sub:'Hall, 3-pol · 191 919 149 E · am Getriebe', rows:[
-   {pin:'J5-VSS', lab:'G22 Pin 2 · Signal · orange', c:'orange', isnew:true}],
+   {pin:'J5-VSS', lab:'G22 Pin 2 (bl/ws) · Signal · orange', c:'orange', isnew:true}],
    notes:['Pin 1 → +12 V Kl. 15, Sicherung', 'Pin 3 → Masse Motorblock (wie Pin 36)',
           'J5 am Board, nicht am Adapter', 'erst messen: nur Open Collector direkt', 'kein Vorwiderstand, nie 12 V an J5']},
  {id:'oil', side:'R', st:'new', name:'Öldrucksensor', sub:'Flylin JY202216 · 200 PSI · 0,5–4,5 V', rows:[

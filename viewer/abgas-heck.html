@@ -41,12 +41,17 @@
 </div>
 
 <div id="params">
+  <h3>Motor-Lage (aus Halle-Maßen 2026-11-05)</h3>
+  <label title="+ = nach links">Motor seitlich <input type="range" id="dx" min="-60" max="160" step="1"><span class="v" id="dx_v"></span></label>
+  <label title="− = tiefer als im Modell">Motor Höhe <input type="range" id="dy" min="-250" max="50" step="1"><span class="v" id="dy_v"></span></label>
+  <label title="+ = weiter nach vorn">Motor vor/zurück <input type="range" id="dz" min="-100" max="200" step="1"><span class="v" id="dz_v"></span></label>
+  <button id="reset" style="margin:3px 0">auf Halle-Maße zurücksetzen</button>
   <h3>Motor (Hypothese)</h3>
-  <label>Kanalmitte Höhe Y <input type="range" id="yp" min="1450" max="1550" step="10" value="1500"><span class="v" id="yp_v"></span></label>
+  <label>Kanalmitte im Modell Y <input type="range" id="yp" min="1450" max="1550" step="10" value="1500"><span class="v" id="yp_v"></span></label>
   <label>Kanal-Abstand <input type="range" id="pitch" min="55" max="85" step="1" value="65"><span class="v" id="pitch_v"></span></label>
   <label>Zyl. 1 sitzt <select id="cyl1"><option value="r">rechts</option><option value="l">links</option></select></label>
   <h3>Primärrohre</h3>
-  <label id="l_rpm">abstimmen auf /min <input type="range" id="rpm" min="4800" max="6500" step="100" value="5500"><span class="v" id="rpm_v"></span></label>
+  <label id="l_rpm">abstimmen auf /min <input type="range" id="rpm" min="3800" max="6500" step="100" value="4500"><span class="v" id="rpm_v"></span></label>
   <label>Auslass öffnet v. UT (Hyp.) <input type="range" id="eo" min="40" max="70" step="1" value="56"><span class="v" id="eo_v"></span></label>
   <h3>Kat / Dämpfer (Platzhalter)</h3>
   <label>Kat-Länge <input type="range" id="lkat" min="150" max="450" step="10" value="300"><span class="v" id="lkat_v"></span></label>
@@ -71,7 +76,7 @@ import * as H from './exhaust-heck.js';
 
 const state = { v: 'A' };
 const $ = (id) => document.getElementById(id);
-const NUM = ['yp', 'pitch', 'rpm', 'eo', 'lkat', 'dkat', 'ldmp', 'ddmp'];
+const NUM = ['dx', 'dy', 'dz', 'yp', 'pitch', 'rpm', 'eo', 'lkat', 'dkat', 'ldmp', 'ddmp'];
 const P = () => ({ ...Object.fromEntries(NUM.map((k) => [k, +$(k).value])), cyl1: $('cyl1').value, upperBeam: $('upperBeam').checked });
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -131,8 +136,8 @@ function build() {
     if (f.square) { const h = f.square / 2; boxMM([f.a[0] - h, f.a[1], f.a[2] - h], [f.b[0] + h, f.b[1], f.b[2] + h], m, f.name); }
     else rod(f.a, f.b, f.r, m, f.name);
   }
-  if ($('env').checked) for (const e of H.ENGINE) boxMM(e.min, e.max, M.engine, e.name);
-  stepGroup.visible = $('step').checked;
+  if ($('env').checked) for (const e of r.engine) boxMM(e.min, e.max, M.engine, e.name);
+  stepGroup.visible = $('step').checked; stepGroup.position.set(p.dx, p.dy, p.dz);
   r.ports.forEach((q, i) => { rod(q, [q[0], q[1], q[2] + 6], 18, M.vband, `Auslasskanal Zyl. ${i + 1}`); label(`${i + 1}`, [q[0], q[1] + 60, q[2] + 30], '#ffd27a', 0.7); });
 
   r.parts.forEach((q, i) => {
@@ -152,43 +157,47 @@ function build() {
   const dmp = r.parts.find((q) => q.kind === 'dmp'); if (dmp) label('Dämpfer', [(dmp.pts[0][0] + dmp.pts[1][0]) / 2, (dmp.pts[0][1] + dmp.pts[1][1]) / 2, dmp.pts[0][2] - 140], '#ccc', 0.8);
   label('Heck (Rahmenende)', [1020, 900, -1700], '#ffb070', 0.9);
   label('vorn (Tank, Sitze)', [1020, 1700, -600], '#aaa', 0.8);
-  label('VR6 (STEP)', [900, 1680, -1000], '#e0a060', 0.8);
+  label('VR6 (STEP, verschoben)', [900 + p.dx, 1680 + p.dy, -1000 + p.dz], '#e0a060', 0.8);
   label('Käfig-Querrohr', [1500, 1880, -1265], '#aaa', 0.7);
   label('links', [1550, 1000, -1100], '#aaa', 0.7); label('rechts', [470, 1000, -1100], '#aaa', 0.7);
   label('oberer Balken? (geraten)', [1020, 1650, -1430], '#ffb070', 0.7);
   label('Heckbalken AHK (real)', [1020, 1420, -1680], '#ffb070', 0.7);
   for (const s of labels) s.visible = $('lbl').checked;
-  report(r);
+  report(r, H.halleCheck(p));
 }
 
 const fmt = (n) => Math.round(n).toLocaleString('de-DE');
-function report(r) {
+const cmp = (got, want) => { const d = got - want; return `${fmt(got)} mm <span class="${Math.abs(d) <= 15 ? 'ok' : 'warn'}">(gemessen ${want}${Math.abs(d) > 2 ? `, ${d > 0 ? '+' : ''}${fmt(d)}` : ''})</span>`; };
+function report(r, hc) {
   const p = r.p, rows = [];
   const L = r.primLen, Lm = L.reduce((a, b) => a + b, 0) / L.length;
   if (r.cast) {
-    rows.push(['Krümmer', 'Serien-Guss 022 253 033 (1–3) / 034 (4–6), keine Abstimmung. Ausgang schematisch ≈ 170 mm unter der Kanalmitte, hinter dem Block, nach unten (Hypothese) <span class="muted">– welche Krümmer verbaut sind: offen (Halle)</span>']);
+    rows.push(['Krümmer', 'Serien-Guss VW (verbaut, User 2026-11-05), Teilenummer laut Recherche 022 253 033 (1–3) / 034 (4–6), keine Abstimmung. Ausgang schematisch ≈ 170 mm unter der Kanalmitte, hinter dem Block, nach unten (Hypothese) <span class="muted">– Ausgangs-Ø und Lage messen</span>']);
     rows.push(['Hosenrohre', `2 × ${fmt(r.secLen[0])} mm (57 × 1,5, gleich lang) <span class="muted">(Ø vor dem Y: Claude 55–57, Codex 45–48 ID → Krümmer-Ausgang messen)</span>`]);
   } else {
-    rows.push(['Primärrohre', `6 × ${fmt(Lm)} mm (38 × 1,5, ID 35), gleich lang → Bell ≈ <b>${fmt(r.tunedRpm)} /min</b> <span class="muted">(ED ${r.ED}°, Hypothese). Länger geht nicht: das Käfig-Querrohr (Y 1816) begrenzt die Höhe über dem Kopf.</span>`]);
+    rows.push(['Primärrohre', `6 × ${fmt(Lm)} mm (38 × 1,5, ID 35), gleich lang → Bell ≈ <b>${fmt(r.tunedRpm)} /min</b> <span class="muted">(ED ${r.ED}°, Hypothese). Die Rohre steigen erst ${state.v === 'A' ? 140 : 110} mm hinter dem Flansch auf (hinter dem Käfig-Querrohr) und jede Gruppe weicht ${state.v === 'A' ? 95 : 100} mm zur Seite aus, damit das Mittelrohr frei bleibt. Ohne jede Berührung (auch am geratenen Mittelrohr) geht es bis ≈ ${state.v === 'A' ? 4100 : 4400}/min; Standard 4500/min hat ±20 mm Reserve bei allen Sammler-Lagen.</span>`]);
     if (r.secLen) rows.push(['Sekundärrohre', `2 × ${fmt(r.secLen[0])} mm (63,5 × 1,5)`]);
   }
   rows.push(['Sammelrohr', '76,2 (3″) wie der Mustang-Kat-Anschluss, unten im Schacht hinter dem Block <span class="muted">(Faustregel 56–60 ID → Widerspruch offen)</span>']);
   rows.push(['Sonde', `sieht alle 6 Zylinder, ≈ ${fmt(Math.min(...r.sondePath))} mm Rohrweg ab Auslass <span class="muted">(AEM ≥ 457, 14Point7 ≈ 600)</span>`]);
   rows.push(['Kat', `Ø ${p.dkat} × ${p.lkat} senkrecht im Steigrohr links hinten, zwischen V-Bändern <span class="muted">(Platzhalter, Mustang-Kat 16399 messen)</span>`]);
   rows.push(['Dämpfer', `Ø ${p.ddmp} × ${p.ldmp}, ${state.v === 'B' ? 'quer über dem Heck' : 'senkrecht über dem Kat'} <span class="muted">(Marke + Typ nötig, Maße des echten Teils einsetzen)</span>`]);
+  rows.push(['Halle-Maße', `oben ${cmp(hc.top, H.HALLE.top)} · links ${cmp(hc.left, H.HALLE.left)} · rechts ${cmp(hc.right, H.HALLE.right)} · hinten ${cmp(hc.rear, H.HALLE.rear)}
+    <span class="muted">(Krümmer-Oberkante → Käfig-Querrohr; äußerstes Krümmerrohr → Rahmenrohr daneben; Motor → Rahmenende innen auf Krümmerhöhe)</span>`]);
+  if (hc.cuts.length) rows.push(['Modell-Widerspruch', `<span class="warn">STEP-Motor schneidet bei dieser Lage: ${hc.cuts.join(', ')}</span> <span class="muted">(Getriebe im Modell zu breit/tief oder Motor real weniger tief – Höhe Kanalmitte über unterem Längsrohr messen)</span>`]);
   rows.push(['Belegter Raum', `Y ${fmt(r.minY)} … ${fmt(r.maxY)} · hinten bis Z ${fmt(r.minZ)} (Rahmenende −1639) · Käfig oben Y ≈ 1990`]);
   rows.push(['Grenzen', r.viol.length ? `<span class="bad">überschritten:</span> ${r.viol.slice(0, 3).join('; ')}` : '<span class="ok">eingehalten</span> <span class="muted">(Boden Y 989, innen X 654–1386, Rahmenende)</span>']);
   rows.push(['Kollisionen', r.coll.length ? `<span class="bad">${r.coll.length}:</span> ${r.coll.slice(0, 4).join('; ')} (rot)` : '<span class="ok">keine</span> <span class="muted">(gegen CAD-Rahmen + Motor/Getriebe-Hülle aus dem STEP, 4–5 mm Luft)</span>']);
   rows.push(['Hypothese-Teile', r.hyp.length ? `<span class="warn">berührt: ${r.hyp.join('; ')}</span>` : '<span class="ok">frei</span> <span class="muted">(AHK-Balken real, oberer Balken geraten)</span>']);
   const desc = {
-    A: '<b>A · Fächer 6-2-1, Stack links (Vorschlag Claude, Leistung):</b> Die Primärrohre steigen direkt hinter dem Auslassflansch auf, laufen unter dem Käfig-Querrohr über den Block nach hinten und fallen in den Schacht zwischen Block und Heck. Dort sitzen zwei 3-in-1 {1,2,3}/{4,5,6} (gleichmäßig 240°), kurze Sekundärrohre und der Y-Sammler. Das Sammelrohr läuft unten nach links (Sonde) und steigt links hinten mit Kat und Dämpfer auf, Mündung oben.',
+    A: '<b>A · Fächer 6-2-1, Stack links (Vorschlag Claude, Leistung):</b> Die Primärrohre steigen hinter dem Käfig-Querrohr auf, je Gruppe seitlich am Mittelrohr vorbei, laufen über den Kopf nach hinten und fallen in den Schacht zwischen Block und Heck. Dort sitzen zwei 3-in-1 {1,2,3}/{4,5,6} (gleichmäßig 240°), kurze Sekundärrohre und der Y-Sammler. Das Sammelrohr läuft unten nach links (Sonde) und steigt links hinten mit Kat und Dämpfer auf, Mündung oben.',
     B: '<b>B · Fächer 6-1, Querdämpfer, 2 Rohre hinten (Vorschlag Claude, Optik):</b> Gleiche Primärführung, alle 6 in einen 6-in-1-Sammler unten im Schacht. Steigrohr links hinten mit Kat, oben ein Querdämpfer über dem Heck, zwei Endrohre waagrecht nach hinten. Spitze oben, Mitte schwächer (Forum, keine VR6-Messung).',
     C: '<b>C · Serien-Gusskrümmer + Y (Vorschlag Claude, geringster Aufwand):</b> Beide Serien-Krümmer bleiben, zwei gleich lange Hosenrohre laufen hinter dem Block nach unten in den Y-Sammler. Danach wie A: Sonde unten, Steigrohr links hinten mit Kat und Dämpfer, Endrohr oben 30° nach hinten-links gebogen (§ 47c zulässig). Keine Abstimmung, aber Serien-Dichtungen und -Stehbolzen.',
   }[state.v];
-  $('info').innerHTML = `<h3>Stand 2026-11-04 · Motor aus dem STEP, Auslass hinten (User) · Vorschlag, nichts festgelegt</h3>${desc}
+  $('info').innerHTML = `<h3>Stand 2026-11-05 · Rahmen aus dem STEP, Motor nach Halle-Maßen verschoben (${p.dx > 0 ? '+' : ''}${p.dx} seitl. / ${fmt(p.dy)} Höhe / ${p.dz} vorn) · Auslass hinten (User) · Vorschlag, nichts festgelegt</h3>${desc}
     <table>${rows.map(([a, c]) => `<tr><td>${a}</td><td>${c}</td></tr>`).join('')}</table>
     ${r.notes.length ? `<div class="warn">${r.notes.join('<br>')}</div>` : ''}
-    <div class="muted">Rahmen und Motor aus dem groben STEP-Modell 2022 (Maße nicht verlässlich). Auslassflansch im Modell bei Z −1185, Kanalhöhe und -abstand Hypothese; Zyl. 1 an der Riemenseite (Hypothese). +X = links (Hypothese, passt zur Getriebeseite wie im Golf). Heckbalken real quadratisch, Kante 50 angenommen; oberer Balken fehlt im Modell, Lage geraten. Recht T3b: 85 dB(A), Fahrerohr 86/90 dB(A), Endrohr nicht nach rechts (§ 47c). Farben: orange/blau = Gruppen, rot = Kollision, orange-transparent = Hypothese bzw. STEP-Motor.</div>`;
+    <div class="muted">Rahmen aus dem groben STEP-Modell 2022 (laut User so verbaut). Der Motor sitzt real tiefer und weiter drinnen als im Modell (User 2026-11-05): Form aus dem STEP, Lage aus den Halle-Maßen zurückgerechnet (Annahmen: Krümmer-Oberkante = Oberkante Kopfflansch im Modell, äußerstes Krümmerrohr = Kanalmitte ± 22). Kanalhöhe und -abstand Hypothese; Zyl. 1 an der Riemenseite (Hypothese). +X = links (Hypothese, passt zur Getriebeseite wie im Golf). Heckbalken 35 × 35 mit 50 mm lichtem Abstand (gemessen), Höhe/Tiefe aus dem Modell; oberer Balken fehlt im Modell, Lage geraten. Recht T3b: 85 dB(A), Fahrerohr 86/90 dB(A), Endrohr nicht nach rechts (§ 47c). Farben: orange/blau = Gruppen, rot = Kollision, orange-transparent = Hypothese bzw. STEP-Motor.</div>`;
 }
 
 const TGT = new THREE.Vector3(1000, 1450, -1350);
@@ -202,6 +211,9 @@ function syncUi() {
   for (const k of NUM) $(k + '_v').textContent = $(k).value + (k === 'eo' ? '°' : '');
   $('l_rpm').classList.toggle('dis', state.v === 'C');
 }
+function resetOffset() { for (const k of ['dx', 'dy', 'dz']) $(k).value = Math.round(H.OFFSET[k]); }
+$('reset').onclick = () => { resetOffset(); syncUi(); build(); };
+resetOffset();
 for (const el of document.querySelectorAll('#params input, #params select')) el.addEventListener('input', () => { syncUi(); build(); });
 
 const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(), hover = $('hover');
