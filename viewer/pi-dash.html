@@ -35,7 +35,7 @@
 </head>
 <body>
 <main>
-<h1>Pi-Dashboard – sechs Entwürfe (Waveshare 7", 800 × 480)</h1>
+<h1>Pi-Dashboard – Entwürfe (Waveshare 7", 800 × 480)</h1>
 <p class="hint">Vorschlag Claude, 2026-11-06, nicht festgelegt. Alle Werte kommen per USB vom Speeduino. Gang, Tank, Druckluft und Licht hat der Pi nicht, die stehen auf den Rund-Displays. Drehzahlskala 0–8000/min und Schaltbereich ab 6500/min sind Platzhalter, keine Werte aus dem Tune. Farbgrenzen für Öldruck, Kühlmittel und Volt sind ebenfalls Platzhalter.</p>
 
 <div class="ctl">
@@ -44,6 +44,7 @@
   <button id="anim" type="button">Gas geben</button>
   <button id="oil" type="button">Öldruck-Warnung</button>
   <button id="hot" type="button">Kühlmittel heiß</button>
+  <button id="bat" type="button">Batterie schwach</button>
 </div>
 
 <div class="grid" id="grid"></div>
@@ -225,6 +226,96 @@ function d6() {
     ${T(400, 340, 20, `km/h      ${S.rpm} 1/min`, { c: '#6b7c8d', f: 'Chakra Petch', w: 500 })}${low}`;
 }
 
+// ---- second round: sweep band, values only when out of range ----
+const SW = (() => {
+  const pts = [], P0 = [46, 330], P1 = [70, 62], P2 = [300, 62];
+  for (let i = 0; i <= 60; i++) { const t = i / 60, u = 1 - t; pts.push([u * u * P0[0] + 2 * u * t * P1[0] + t * t * P2[0], u * u * P0[1] + 2 * u * t * P1[1] + t * t * P2[1]]); }
+  for (let i = 1; i <= 60; i++) pts.push([300 + 470 * i / 60, 62]);
+  const L = [0];
+  for (let i = 1; i < pts.length; i++) L.push(L[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+  const tot = L[L.length - 1];
+  const at = s => { s *= tot; let i = 1; while (i < L.length - 1 && L[i] < s) i++; const k = (s - L[i - 1]) / (L[i] - L[i - 1] || 1), a = pts[i - 1], b = pts[i]; const dx = b[0] - a[0], dy = b[1] - a[1], n = Math.hypot(dx, dy) || 1; return { x: a[0] + dx * k, y: a[1] + dy * k, nx: dy / n, ny: -dx / n }; };
+  return at;
+})();
+function sweep(pal, N = 44) {
+  const lit = S.rpm / MAX, sh = shiftOn();
+  let g = '';
+  for (let i = 0; i < N; i++) {
+    const t0 = i / N + .004, t1 = (i + 1) / N - .004, h0 = 16 + 30 * t0, h1 = 16 + 30 * t1, a = SW(t0), b = SW(t1);
+    const q = [[a.x + a.nx * h0, a.y + a.ny * h0], [b.x + b.nx * h1, b.y + b.ny * h1], [b.x - b.nx * h1, b.y - b.ny * h1], [a.x - a.nx * h0, a.y - a.ny * h0]];
+    const red = (i + 1) / N > SHIFT / MAX, on = (i + .5) / N <= lit;
+    const c = on ? (sh ? pal.lim : red ? pal.red : pal.on) : red ? pal.redOff : pal.off;
+    g += `<polygon points="${q.map(p => p.map(v => v.toFixed(1)).join(',')).join(' ')}" fill="${c}" ${on && sh ? 'class="flash"' : ''}/>`;
+  }
+  for (let k = 1; k <= 8; k++) { const t = k / 8 - .02, p = SW(t), o = 16 + 30 * t + 20; g += T(p.x - p.nx * o, p.y - p.ny * o + 8, 22, k, { c: pal.num, f: 'Chakra Petch', w: 700 }); }
+  return g;
+}
+function warns() {
+  const w = [];
+  if (lvl.oil(S.oil)) w.push(['Öldruck', f1(S.oil), 'bar', lvl.oil(S.oil)]);
+  if (lvl.clt(S.clt)) w.push(['Kühlmittel', Math.round(S.clt), '°C', lvl.clt(S.clt)]);
+  if (lvl.volt(S.volt)) w.push(['Batterie', f1(S.volt), 'V', lvl.volt(S.volt)]);
+  return w;
+}
+function popTiles(x, y, wd, ht, pal) {
+  const w = warns();
+  if (!w.length) return pal.calm ? T(x + wd / 2, y + ht / 2 + 6, 17, pal.calm, { c: pal.quiet, f: 'Chakra Petch', w: 500 }) : '';
+  const bw = wd / w.length;
+  return w.map(([lab, v, u, l], i) => {
+    const c = l === 2 ? pal.bad : pal.warn, xx = x + i * bw;
+    return `<rect x="${xx + 4}" y="${y}" width="${bw - 8}" height="${ht}" rx="4" fill="${c}" ${l === 2 ? 'class="flash"' : ''}/>
+      ${T(xx + bw / 2, y + 26, 19, lab, { c: pal.ink, f: 'Chakra Petch', w: 700 })}
+      ${T(xx + bw / 2, y + ht - 14, 46, `${v}<tspan font-size="20"> ${u}</tspan>`, { c: pal.ink, w: 800 })}`;
+  }).join('');
+}
+
+// 7 — Sweep Tag
+function d7() {
+  const pal = { on: '#16181a', off: '#dcdbd3', red: '#e10600', redOff: '#f0c9c4', lim: '#e10600', num: '#8a8b86' };
+  return `<rect width="800" height="480" fill="#f1f0ea"/>${sweep(pal)}
+    ${T(560, 300, 210, S.kmh, { c: '#16181a', w: 800 })}
+    ${T(560, 336, 20, 'km/h', { c: '#55595e', f: 'Chakra Petch', w: 700 })}
+    ${T(250, 300, 44, `${S.rpm}<tspan font-size="17" fill="#55595e"> 1/min</tspan>`, { c: shiftOn() ? '#e10600' : '#16181a', w: 700 })}
+    ${popTiles(130, 372, 650, 96, { bad: '#e10600', warn: '#f2b400', ink: '#16181a', quiet: '#a3a59e', calm: '' })}`;
+}
+// 8 — Sweep Nacht (eisblau)
+function d8() {
+  const pal = { on: '#9fdcff', off: '#0f1a22', red: '#ff3b30', redOff: '#2a0c0a', lim: '#ff3b30', num: '#2f5164' };
+  return `<rect width="800" height="480" fill="#000"/>${sweep(pal)}
+    ${T(560, 300, 210, S.kmh, { c: '#d8f1ff', w: 800 })}
+    ${T(560, 336, 20, 'km/h', { c: '#3f6a80', f: 'Chakra Petch', w: 700 })}
+    ${T(250, 300, 44, `${S.rpm}<tspan font-size="17" fill="#3f6a80"> 1/min</tspan>`, { c: shiftOn() ? '#ff3b30' : '#9fdcff', w: 700 })}
+    ${popTiles(130, 372, 650, 96, { bad: '#ff3b30', warn: '#ffb02e', ink: '#000', quiet: '#22394a', calm: '' })}`;
+}
+// 9 — Tageslicht ruhig
+function d9() {
+  const cx = 400, cy = 430, r = 400, a0 = 205, a1 = 335, a = a0 + (a1 - a0) * S.rpm / MAX;
+  return `<rect width="800" height="480" fill="#f1f0ea"/>
+    <path d="${arc(cx, cy, r, a0, a1)}" stroke="#dcdbd3" stroke-width="56" fill="none"/>
+    <path d="${arc(cx, cy, r, a0 + (a1 - a0) * SHIFT / MAX, a1)}" stroke="#f0c9c4" stroke-width="56" fill="none"/>
+    <path d="${arc(cx, cy, r, a0, Math.max(a, a0 + .5))}" stroke="${shiftOn() ? '#e10600' : '#16181a'}" stroke-width="56" fill="none" ${shiftOn() ? 'class="flash"' : ''}/>
+    ${T(400, 300, 200, S.kmh, { c: '#16181a', w: 800 })}
+    ${T(400, 336, 20, `km/h      ${S.rpm} 1/min`, { c: '#55595e', f: 'Chakra Petch', w: 700 })}
+    ${popTiles(60, 372, 680, 96, { bad: '#e10600', warn: '#f2b400', ink: '#16181a', quiet: '#a3a59e', calm: '' })}`;
+}
+// 10 — Nacht rot
+function d10() {
+  const rd = '#ff4a3a', dm = '#3a0d08', cx = 400, cy = 400, r = 300, a0 = 205, a1 = 335, a = a0 + (a1 - a0) * S.rpm / MAX;
+  let ticks = '';
+  for (let k = 0; k <= 40; k++) {
+    const aa = a0 + (a1 - a0) * k / 40, big = k % 5 === 0, [x1, y1] = P(cx, cy, r, aa), [x2, y2] = P(cx, cy, r - (big ? 26 : 12), aa);
+    const lim = k / 40 >= SHIFT / MAX, on = aa <= a;
+    ticks += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${on ? (lim ? '#fff' : rd) : lim ? '#4a4a4a' : dm}" stroke-width="${big ? 4 : 2}" ${on && shiftOn() ? 'class="flash"' : ''}/>`;
+    if (big) { const [tx, ty] = P(cx, cy, r - 46, aa); ticks += T(tx, ty + 7, 20, k / 5, { c: '#7a2219', f: 'Chakra Petch', w: 700 }); }
+  }
+  const [nx, ny] = P(cx, cy, r + 14, a);
+  return `<rect width="800" height="480" fill="#000"/>${ticks}
+    <circle cx="${nx}" cy="${ny}" r="9" fill="${shiftOn() ? '#fff' : rd}"/>
+    ${T(400, 290, 160, S.kmh, { c: rd, w: 800 })}
+    ${T(400, 322, 18, `km/h      ${S.rpm} 1/min`, { c: '#7a2219', f: 'Chakra Petch', w: 500 })}
+    ${popTiles(60, 372, 680, 96, { bad: '#ff4a3a', warn: '#ff8a3a', ink: '#000', quiet: '#3a0d08', calm: '' })}`;
+}
+
 const designs = [
   ['Bogen', 3, 'Ein dicker Drehzahlbogen, km/h riesig, darunter die drei Werte der weggefallenen Analoginstrumente. Ruhig, schnell erfassbar.', d1],
   ['Shift-Leiste', 6, 'Segmentierter LED-Bogen grün/gelb/rot, blinkt blau am Schaltpunkt (wie Shift-Lights im Rennsport). Links Motor-Grundwerte, rechts Gemisch.', d2],
@@ -232,13 +323,17 @@ const designs = [
   ['Tageslicht', 3, 'Heller Hintergrund für Sonne (offenes Fahrzeug). Drehzahl als großer Bogen und große Zahl, km/h rechts unten, Werte als Balken.', d4],
   ['Nachtfahrt', 3, 'Bernstein auf Schwarz, wenig Licht, blendet nachts nicht. Skalenbogen mit Leuchtpunkt, zwei Mini-Rundinstrumente.', d5],
   ['Nur bei Bedarf', 3, 'Nur Bogen und km/h. Die drei Werte stehen klein unten und springen als volle Warnfläche hoch, wenn einer aus dem Bereich läuft.', d6],
+  ['Sweep Tag', 0, 'Runde 2. Drehzahl als Band, das links unten startet und oben nach rechts läuft (wie im Bild). Nur km/h und Drehzahl; Öl, Kühlmittel, Batterie erscheinen erst bei Warnung unten.', d7],
+  ['Sweep Nacht', 0, 'Runde 2. Wie 7, schwarz mit Eisblau statt Gelb, Begrenzer rot blinkend.', d8],
+  ['Tageslicht ruhig', 0, 'Runde 2. Entwurf 4 ohne Balken: Bogen, km/h groß, Drehzahl klein. Unten frei, dort springen Warnungen hoch.', d9],
+  ['Nacht rot', 0, 'Runde 2. Nachtfahrt-Skala in Rot (stört die Nachtsicht am wenigsten, Hypothese), Begrenzerbereich weiß blinkend, Warnungen unten.', d10],
 ];
 
 const grid = document.getElementById('grid');
 const svgs = designs.map(([name, n, desc], i) => {
   const fig = document.createElement('figure');
   fig.innerHTML = `<div class="screen"><svg viewBox="0 0 800 480" role="img" aria-label="Entwurf ${i + 1}: ${name}"></svg></div>
-    <figcaption><b>${i + 1} ${name}</b><span class="n">${n} Werte + Drehzahl + km/h</span><p>${desc}</p></figcaption>`;
+    <figcaption><b>${i + 1} ${name}</b><span class="n">${n ? `${n} Werte + Drehzahl + km/h` : 'nur Drehzahl + km/h, Rest bei Warnung'}</span><p>${desc}</p></figcaption>`;
   grid.appendChild(fig);
   return fig.querySelector('svg');
 });
@@ -252,6 +347,10 @@ $('rpm').oninput = e => { S.rpm = +e.target.value; draw(); };
 $('kmh').oninput = e => { S.kmh = +e.target.value; draw(); };
 $('oil').onclick = e => { const on = e.target.classList.toggle('on'); S.oil = on ? 0.6 : 3.2; draw(); };
 $('hot').onclick = e => { const on = e.target.classList.toggle('on'); S.clt = on ? 103 : 88; draw(); };
+const q = new URLSearchParams(location.search);
+if (q.has('rpm')) { S.rpm = +q.get('rpm'); $('rpm').value = S.rpm; }
+if (q.has('warn')) { S.oil = 0.6; S.clt = 103; }
+$('bat').onclick = e => { const on = e.target.classList.toggle('on'); S.volt = on ? 11.6 : 13.9; draw(); };
 let timer = null;
 $('anim').onclick = e => {
   if (timer) { clearInterval(timer); timer = null; e.target.classList.remove('on'); return; }
