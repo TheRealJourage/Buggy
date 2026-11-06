@@ -387,7 +387,7 @@ function d13() {
   const pal = { bg: '#f1f0ea', on: '#16181a', off: '#dcdbd3', red: '#e10600', redOff: '#f0c9c4', num: '#8a8b86' };
   const q = { lab: '#85887f', val: '#4a4d50', track: '#e2e1d9', fill: '#8e918a', warn: '#f2b400', bad: '#e10600' };
   const fault = S.gear === 'F';
-  const gx = 244, gy = 222;
+  const gx = 278, gy = 246;
   let g = `<rect width="800" height="480" fill="${pal.bg}"/>${band(false, pal)}
     <rect x="${gx - 62}" y="${gy - 84}" width="124" height="150" rx="6" fill="${fault ? '#e10600' : 'none'}" stroke="${fault ? '#e10600' : '#c9c8c0'}" stroke-width="3" ${fault ? 'class="flash"' : ''}/>
     ${T(gx, gy + 46, 150, S.gear, { c: fault ? '#fff' : '#16181a', w: 800 })}
