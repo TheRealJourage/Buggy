@@ -232,6 +232,15 @@
 <li>Offen: Einbauort am Block, J5 am Board prüfen (gleiche Prüfung wie beim G22).</li>
 </ul>
 
+<h3>Serial3 → Relaisbox-STM32 (Brücke auf CAN), NEU</h3>
+<ul>
+<li><b>Festgelegt (User, 2026-11-06):</b> Variante B, der Relaisbox-STM32 legt die Motordaten auf den CAN. Der Pi liest nur vom CAN.</li>
+<li><b>D14 = TX3, D15 = RX3</b>, 115200 Baud. <b>Nicht am 40-Pin-Adapter und nicht auf J5</b>: auf dem v0.4.3d nirgends herausgeführt (Platinendatei + Speeduino-Wiki). Zugang nur am Header-Stift, mittig, ca. 4–6 mm neben J8 (12 V).</li>
+<li>Pegel, Vorschlag: Mega-TX3 (5 V) → 5-V-toleranter STM32-RX mit 1–10 kΩ in Reihe. STM32-TX (3,3 V) → Mega-RX3 über Pegelwandler (Mega braucht laut Datenblatt mindestens 3,0 V).</li>
+<li>TunerStudio: Secondary Serial auf <b>Enable</b>, Protokoll <b>CAN</b> (Start-Tune steht auf Disable).</li>
+<li>Offen: Stifte 14/15 eingelötet? Aderfarben, STM32-Board.</li>
+</ul>
+
 <h2>6. Reihenfolge beim Umbau</h2>
 <ol>
 <li>Batterie ab, ECU abstecken.</li>
