@@ -223,7 +223,7 @@
 
 <h3>Öldrucksensor – 3-Draht, 0,5–4,5 V, NEU</h3>
 <ul>
-<li><b>Festgelegt (User, 2026-10-31):</b> ein Öldrucksensor am Speeduino, der Wert geht über Pi/CAN nach vorn (Variante B). Kein eigener Widerstandsgeber für ein Rundinstrument. Ob das Rundinstrument Öldruck entfällt oder elektronisch angesteuert wird, ist offen.</li>
+<li><b>Festgelegt (User, 2026-10-31):</b> ein Öldrucksensor am Speeduino, der Wert geht über Pi/CAN nach vorn (Variante B). Kein eigener Widerstandsgeber für ein Rundinstrument. Analoge Rundinstrumente entfallen (Festgelegt User, 2026-11-06); Öldruck kommt per USB auf den Tacho-Pi, im Notbetrieb auf ein Rund-Display.</li>
 <li>Firmware 202501.7 (ini): Menü „Oil Pressure“, Pin wählbar A0–A15, lineare Kennlinie 0 V / 5 V, Vorlagen 0-10 BAR, 0-100 PSI, 0-150 PSI. Dazu der Öldruck-Schutz (Mindestdruck über Drehzahl, mit Verzögerung).</li>
 <li>Sensor (vorhanden): <b>Flylin JY202216</b>, 200 PSI, 5 V, 0,5–4,5 V, 1/8"-27 NPT, Gewindeadapter vorhanden. Pigtail: rot +5 V, schwarz Masse, blau Signal.</li>
 <li>Leitungen, Vorschlag: Sensor <b>blau → J5/A9</b> (A10 bleibt frei; am 40-Pin-Adapter ist kein Analogeingang mehr frei), <b>rot → J1 (5 V)</b>, <b>schwarz → J6 (GND)</b>. Aderfarben der Leitung zur ECU (User 2026-11-05): Signal <b>lila</b>, +5 V <b>rot</b>, Masse <b>braun</b>; G22-Signal <b>orange</b>; beide Stiftleisten liegen direkt neben J5 (Platinendatei v0.4.3d), der 40-Pin-Adapter bleibt unberührt (User 2026-10-31).</li>
