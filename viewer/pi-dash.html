@@ -46,6 +46,8 @@
   <button id="hot" type="button">Kühlmittel heiß</button>
   <button id="bat" type="button">Batterie schwach</button>
   <button id="page" type="button">Seite unten: 1/3</button>
+  <button id="gear" type="button">Gang: 3</button>
+  <button id="tank" type="button">Tank fast leer</button>
 </div>
 
 <div class="grid" id="grid"></div>
@@ -377,6 +379,42 @@ function dayBand(grow) {
 }
 const d11 = () => dayBand(false), d12 = () => dayBand(true);
 
+// ---- round 4: Fahrdisplay = 11 + gear (UART from RP2040) + fixed row ----
+S.gear = '3'; S.tank = 64;
+const GEARS = ['R', 'N', '1', '2', '3', '4', '5', 'F'];
+lvl.tank = v => v < 10 ? 2 : v < 20 ? 1 : 0;
+function d13() {
+  const pal = { bg: '#f1f0ea', on: '#16181a', off: '#dcdbd3', red: '#e10600', redOff: '#f0c9c4', num: '#8a8b86' };
+  const q = { lab: '#85887f', val: '#4a4d50', track: '#e2e1d9', fill: '#8e918a', warn: '#f2b400', bad: '#e10600' };
+  const fault = S.gear === 'F';
+  const gx = 244, gy = 222;
+  let g = `<rect width="800" height="480" fill="${pal.bg}"/>${band(false, pal)}
+    <rect x="${gx - 62}" y="${gy - 84}" width="124" height="150" rx="6" fill="${fault ? '#e10600' : 'none'}" stroke="${fault ? '#e10600' : '#c9c8c0'}" stroke-width="3" ${fault ? 'class="flash"' : ''}/>
+    ${T(gx, gy + 46, 150, S.gear, { c: fault ? '#fff' : '#16181a', w: 800 })}
+    ${T(gx, gy + 92, 15, 'Gang', { c: '#85887f', f: 'Chakra Petch', w: 500 })}
+    ${T(560, 300, 220, S.kmh, { c: '#16181a', w: 800 })}
+    ${T(560, 334, 20, `km/h      <tspan fill="${shiftOn() ? '#e10600' : '#4a4d50'}" font-weight="700">${S.rpm}</tspan> 1/min`, { c: '#55595e', f: 'Chakra Petch', w: 500 })}`;
+  const row = [['Kühlmittel', Math.round(S.clt), '°C', (S.clt - 40) / 80, lvl.clt(S.clt)], ['Öldruck', f1(S.oil), 'bar', S.oil / 6, lvl.oil(S.oil)], ['Tank', S.tank, '%', S.tank / 100, lvl.tank(S.tank)]];
+  const x0 = 40, wd = 720, cw = wd / 3, y = 398;
+  g += `<line x1="${x0}" y1="${y - 14}" x2="${x0 + wd}" y2="${y - 14}" stroke="#dcdbd3" stroke-width="1.5"/>`;
+  row.forEach(([lab, v, u, frac, l], i) => {
+    const x = x0 + i * cw + 10, w = cw - 20, ink = l ? '#16181a' : q.val, sub = l ? '#16181a' : q.lab;
+    if (l) g += `<rect x="${x - 8}" y="${y - 6}" width="${w + 16}" height="80" rx="4" fill="${l === 2 ? q.bad : q.warn}" ${l === 2 ? 'class="flash"' : ''}/>`;
+    g += T(x, y + 16, 16, lab, { c: sub, a: 'start', f: 'Chakra Petch', w: 500 });
+    g += T(x + w, y + 42, 36, `${v}<tspan font-size="16" fill="${sub}"> ${u}</tspan>`, { c: ink, a: 'end', w: 700 });
+    g += `<rect x="${x}" y="${y + 56}" width="${w}" height="8" fill="${l ? '#ffffff88' : q.track}"/><rect x="${x}" y="${y + 56}" width="${w * Math.max(0.01, Math.min(1, frac))}" height="8" fill="${l ? '#16181a' : q.fill}"/>`;
+  });
+  // monitored only: pill above the row
+  const extra = [];
+  if (lvl.volt(S.volt)) extra.push([`Batterie ${f1(S.volt)} V`, lvl.volt(S.volt)]);
+  if (!S.sync) extra.push(['Sync verloren', 2]);
+  extra.forEach(([txt, l], i) => {
+    const w = 190, x = 760 - w - i * (w + 10);
+    g += `<rect x="${x}" y="${y - 52}" width="${w}" height="28" rx="15" fill="${l === 2 ? q.bad : q.warn}" ${l === 2 ? 'class="flash"' : ''}/>${T(x + w / 2, y - 32, 16, txt, { c: '#16181a', f: 'Chakra Petch', w: 700 })}`;
+  });
+  return g;
+}
+
 const designs = [
   ['Bogen', 3, 'Ein dicker Drehzahlbogen, km/h riesig, darunter die drei Werte der weggefallenen Analoginstrumente. Ruhig, schnell erfassbar.', d1],
   ['Shift-Leiste', 6, 'Segmentierter LED-Bogen grün/gelb/rot, blinkt blau am Schaltpunkt (wie Shift-Lights im Rennsport). Links Motor-Grundwerte, rechts Gemisch.', d2],
@@ -390,6 +428,7 @@ const designs = [
   ['Nacht rot', 0, 'Runde 2. Nachtfahrt-Skala in Rot (stört die Nachtsicht am wenigsten, Hypothese), Begrenzerbereich weiß blinkend, Warnungen unten.', d10],
   ['Sweep-Band Tag', 3, 'Runde 3. Durchgehendes Band in gleicher Dicke, Zahlen innen. km/h groß, Drehzahl klein. Unten dauerhaft drei ruhige Anzeigen mit Balken; Seite per Knopf wechseln (1 Öl/Kühlmittel/Lambda, 2 Ansaugluft/Duty/Batterie, 3 Trip/Motorstunden/Uhrzeit). Warnung färbt die Anzeige ein und holt sie auf jede Seite.', d11],
   ['Sweep-Band Tag, wachsend', 3, 'Runde 3. Wie 11, nur wird das Band nach rechts dicker (wie im Bild). Zum Vergleich.', d12],
+  ['Fahrdisplay', 3, 'Runde 4, Basis 11. Gang groß innen in der Kurve (Schaltbox → CAN → RP2040 → UART), „F“ rot blinkend bei Schaltfehler. km/h groß, Drehzahl klein darunter. Unten fest Kühlmittel · Öldruck · Tank. Batterie und Sync nur als Hinweis bei Warnung.', d13],
 ];
 
 const grid = document.getElementById('grid');
@@ -415,6 +454,10 @@ if (q.has('rpm')) { S.rpm = +q.get('rpm'); $('rpm').value = S.rpm; }
 if (q.has('warn')) { S.oil = 0.6; S.clt = 103; }
 $('bat').onclick = e => { const on = e.target.classList.toggle('on'); S.volt = on ? 11.6 : 13.9; draw(); };
 $('page').onclick = e => { S.page = (S.page + 1) % 3; e.target.textContent = `Seite unten: ${S.page + 1}/3`; draw(); };
+$('gear').onclick = e => { S.gear = GEARS[(GEARS.indexOf(S.gear) + 1) % GEARS.length]; e.target.textContent = `Gang: ${S.gear}`; draw(); };
+$('tank').onclick = e => { const on = e.target.classList.toggle('on'); S.tank = on ? 8 : 64; draw(); };
+if (q.has('gear')) S.gear = q.get('gear');
+if (q.has('warn')) { S.volt = 11.6; S.tank = 15; }
 if (q.has('page')) S.page = (+q.get('page') - 1) % 3;
 let timer = null;
 $('anim').onclick = e => {
