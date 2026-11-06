@@ -34,17 +34,17 @@
 </head>
 <body>
 <h1>Relaistreiber ULN2003AN – Schaltplan</h1>
-<p class="hint">Stand 2026-11-02. Quelle der Festlegungen: <code>Relaisbox.md</code> (Relais-Belegung, „Festgelegt 2026-11-01“) und <code>Bordnetz-Konzept.md</code>. <span class="hyp">Gelb = Vorschlag Claude / Hypothese, nicht festgelegt.</span> Teensy-Pins sind bewusst nicht belegt (Firmware-Thema, <code>OUTnn</code> = logischer Signalname).</p>
+<p class="hint">Stand 2026-11-06 (Controller STM32 statt Teensy). Quelle der Festlegungen: <code>Relaisbox.md</code> (Relais-Belegung, „Festgelegt 2026-11-01“) und <code>Bordnetz-Konzept.md</code>. <span class="hyp">Gelb = Vorschlag Claude / Hypothese, nicht festgelegt.</span> Controller-Pins sind bewusst nicht belegt (Firmware-Thema, <code>OUTnn</code> = logischer Signalname).</p>
 
 <div class="warn"><b>Offen vor dem Aufbau:</b> Spulenwiderstand der Hella-Relais ist noch nicht gemessen (To-Do Halle, 85 ↔ 86). Alle Stromangaben unten sind <b>Annahmen</b>, bis das gemessen ist.</div>
 
 <h2>1. Das Prinzip (pro Kanal)</h2>
 <ol>
-  <li><b>Teensy-Pin</b> (3,3 V) → <b>ULN-Eingang</b> (Pin 1–7), dazu <b>100 kΩ nach Masse</b>: Relais bleibt aus, solange der Teensy startet oder hängt.</li>
+  <li><b>STM32-Pin</b> (3,3 V) → <b>ULN-Eingang</b> (Pin 1–7), dazu <b>100 kΩ nach Masse</b>: Relais bleibt aus, solange der STM32 startet oder hängt.</li>
   <li><b>ULN-Ausgang</b> (Pin 16–10) zieht <b>Spule Pin 85 nach Masse</b> (Low-Side).</li>
   <li><b>Spule Pin 86</b> hängt an <b>+12V_STEUER</b> (Kl. 30 über eine eigene Sicherung).</li>
   <li><b>COM (Pin 9)</b> an <b>+12V_STEUER</b>: die internen Freilaufdioden des ULN2003 fangen die Abschaltspitze der Spule. Keine externen Dioden nötig.</li>
-  <li><b>Pin 8</b> an Masse, gemeinsam mit dem Teensy.</li>
+  <li><b>Pin 8</b> an Masse, gemeinsam mit dem STM32.</li>
 </ol>
 <p>20 Sockel im Relaisträger, davon <b>Sockel 5 (Motor-Relais) nicht am ULN</b> (festgelegt: Spulen-Plus über Motor-Schalter, Spulen-Masse Speeduino Pin 31). Bleiben <b>19 Kanäle → 3 × ULN2003AN</b> (7 + 7 + 5, zwei Kanäle frei).</p>
 
@@ -74,7 +74,7 @@
 
 <h2>6. Was belegt ist und was nicht</h2>
 <ul>
-  <li><b>Festgelegt (User, 2026-11-01):</b> Teensy 4.0 → ULN2003AN → Hella-Relais, alles über Relais, Schiene an Kl. 30, Motor-Relais mit Spulen-Masse am Speeduino.</li>
+  <li><b>Festgelegt (User, 2026-11-01):</b> Relaisbox-Controller → ULN2003AN → Hella-Relais, alles über Relais, Schiene an Kl. 30, Motor-Relais mit Spulen-Masse am Speeduino. <b>Festgelegt (User, 2026-11-06):</b> Controller = STM32 (Board offen), nicht Teensy.</li>
   <li><b>Datenblatt TI SLRS027T</b> (laut <code>Controller-Inventar.md</code>): ULN2003 Eingangswiderstand 2,7 kΩ, VI(on) max. 2,7 V bei 250 mA, 500 mA je Kanal; passt damit an 3,3 V. Der ULN2004 nicht.</li>
   <li class="hyp"><b>Annahme Spulenstrom:</b> typische 12-V-Mikrorelais haben etwa 90 Ω → 0,13 A bei 12 V, 0,16 A bei 14,4 V (Kenntnisstand, nicht gemessen). Das ist weit unter 250 mA je Kanal.</li>
   <li class="hyp"><b>Annahme Wärme:</b> bei 7 Kanälen gleichzeitig an liegt die Verlustleistung im DIP-16 im Bereich von 1 W (Spannungsabfall je Kanal ca. 1 V, Kenntnisstand). Die Grenze steht im Datenblatt (Abschnitt Power Dissipation) und ist hier nicht geprüft. Im Betrieb sind selten alle Relais gleichzeitig an.</li>
@@ -101,9 +101,9 @@ function chipSVG(chip) {
   let s = '';
   const top = Y0 - 40, bot = Y0 + 6 * DY + 70;
   s += `<text class="title" x="20" y="28">${chip.name} – ULN2003AN</text>`;
-  s += `<text class="small" x="20" y="46">Teensy 4.0 (3,3 V) → Eingang · Ausgang → Spule Pin 85 · Spule Pin 86 → +12V_STEUER</text>`;
+  s += `<text class="small" x="20" y="46">STM32 (3,3 V) → Eingang · Ausgang → Spule Pin 85 · Spule Pin 86 → +12V_STEUER</text>`;
   s += `<rect class="part" x="20" y="${top}" width="130" height="${bot - top}" rx="6"/>`;
-  s += `<text x="85" y="${top + 20}" text-anchor="middle">Teensy 4.0</text><text class="small" x="85" y="${bot - 8}" text-anchor="middle">GPIO 3,3 V</text>`;
+  s += `<text x="85" y="${top + 20}" text-anchor="middle">STM32</text><text class="small" x="85" y="${bot - 8}" text-anchor="middle">GPIO 3,3 V</text>`;
   s += `<rect class="part" x="420" y="${top}" width="120" height="${bot - top}" rx="4"/>`;
   s += `<text x="480" y="${top + 20}" text-anchor="middle" style="font-weight:700">${chip.name}</text><text class="small" x="480" y="${top + 34}" text-anchor="middle">ULN2003AN</text>`;
   chip.rows.forEach((r, i) => {
@@ -142,7 +142,7 @@ function chipSVG(chip) {
   s += `<text class="small" x="640" y="${yb - 5}" text-anchor="middle">COM (Freilaufdioden)</text>`;
   s += `<line class="pwr" x1="740" y1="${Y0 - 30}" x2="740" y2="${yb}"/>`;
   s += `<text class="y" x="740" y="${Y0 - 38}" text-anchor="middle">+12V_STEUER</text>`;
-  s += `<text class="small" x="20" y="${bot + 18}">Teensy-GND, Pin 8 und alle Pull-downs an einer Masse. Unbenutzte Eingänge fest an Masse.</text>`;
+  s += `<text class="small" x="20" y="${bot + 18}">STM32-GND, Pin 8 und alle Pull-downs an einer Masse. Unbenutzte Eingänge fest an Masse.</text>`;
   return `<svg viewBox="0 0 980 ${bot + 28}" width="100%" role="img" aria-label="${chip.name}">${s}</svg>`;
 }
 
