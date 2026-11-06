@@ -383,26 +383,41 @@ const d11 = () => dayBand(false), d12 = () => dayBand(true);
 S.gear = '3'; S.tank = 64;
 const GEARS = ['R', 'N', '1', '2', '3', '4', '5', 'F'];
 lvl.tank = v => v < 10 ? 2 : v < 20 ? 1 : 0;
-function d13() {
-  const pal = { bg: '#f1f0ea', on: '#16181a', off: '#dcdbd3', red: '#e10600', redOff: '#f0c9c4', num: '#8a8b86' };
-  const q = { lab: '#85887f', val: '#4a4d50', track: '#e2e1d9', fill: '#8e918a', warn: '#f2b400', bad: '#e10600' };
+const DAY = {
+  bg: '#f1f0ea', on: '#16181a', off: '#dcdbd3', red: '#e10600', redOff: '#f0c9c4', num: '#8a8b86',
+  big: '#16181a', box: '#c9c8c0', rpm: '#4a4d50', unit: '#55595e', rule: '#dcdbd3',
+  lab: '#85887f', val: '#4a4d50', track: '#e2e1d9', fill: '#8e918a', warn: '#f2b400', bad: '#e10600', ink: '#16181a', faultInk: '#fff',
+};
+const NIGHT = {
+  bg: '#000000', on: '#aeb8c2', off: '#13171b', red: '#c8261c', redOff: '#2a0c0a', num: '#3c4550',
+  big: '#cdd5dc', box: '#262c33', rpm: '#87929d', unit: '#56606b', rule: '#161a1f',
+  lab: '#56606b', val: '#9aa5b0', track: '#161b20', fill: '#47525d', warn: '#b8600f', bad: '#c8261c', ink: '#000', faultInk: '#000',
+};
+const NIGHT_RED = {
+  bg: '#000000', on: '#b8281b', off: '#1d0805', red: '#e8e8e8', redOff: '#262626', num: '#5c1a12',
+  big: '#d8382a', box: '#3a0f0a', rpm: '#9a2a1e', unit: '#6e2016', rule: '#1d0805',
+  lab: '#6e2016', val: '#b8382a', track: '#1d0805', fill: '#6e2016', warn: '#ff7a2a', bad: '#ff3b2f', ink: '#000', faultInk: '#000',
+};
+const d13 = () => drive(DAY), d14 = () => drive(NIGHT), d15 = () => drive(NIGHT_RED);
+function drive(C) {
+  const pal = C, q = C;
   const fault = S.gear === 'F';
   const gx = 278, gy = 246;
-  let g = `<rect width="800" height="480" fill="${pal.bg}"/>${band(false, pal)}
-    <rect x="${gx - 62}" y="${gy - 84}" width="124" height="150" rx="6" fill="${fault ? '#e10600' : 'none'}" stroke="${fault ? '#e10600' : '#c9c8c0'}" stroke-width="3" ${fault ? 'class="flash"' : ''}/>
-    ${T(gx, gy + 46, 150, S.gear, { c: fault ? '#fff' : '#16181a', w: 800 })}
-    ${T(gx, gy + 92, 15, 'Gang', { c: '#85887f', f: 'Chakra Petch', w: 500 })}
-    ${T(560, 300, 220, S.kmh, { c: '#16181a', w: 800 })}
-    ${T(560, 334, 20, `km/h      <tspan fill="${shiftOn() ? '#e10600' : '#4a4d50'}" font-weight="700">${S.rpm}</tspan> 1/min`, { c: '#55595e', f: 'Chakra Petch', w: 500 })}`;
+  let g = `<rect width="800" height="480" fill="${C.bg}"/>${band(false, pal)}
+    <rect x="${gx - 62}" y="${gy - 84}" width="124" height="150" rx="6" fill="${fault ? C.bad : 'none'}" stroke="${fault ? C.bad : C.box}" stroke-width="3" ${fault ? 'class="flash"' : ''}/>
+    ${T(gx, gy + 46, 150, S.gear, { c: fault ? C.faultInk : C.big, w: 800 })}
+    ${T(gx, gy + 92, 15, 'Gang', { c: C.lab, f: 'Chakra Petch', w: 500 })}
+    ${T(560, 300, 220, S.kmh, { c: C.big, w: 800 })}
+    ${T(560, 334, 20, `km/h      <tspan fill="${shiftOn() ? (C === NIGHT_RED ? C.red : C.bad) : C.rpm}" font-weight="700">${S.rpm}</tspan> 1/min`, { c: C.unit, f: 'Chakra Petch', w: 500 })}`;
   const row = [['Kühlmittel', Math.round(S.clt), '°C', (S.clt - 40) / 80, lvl.clt(S.clt)], ['Öldruck', f1(S.oil), 'bar', S.oil / 6, lvl.oil(S.oil)], ['Tank', S.tank, '%', S.tank / 100, lvl.tank(S.tank)]];
   const x0 = 40, wd = 720, cw = wd / 3, y = 398;
-  g += `<line x1="${x0}" y1="${y - 14}" x2="${x0 + wd}" y2="${y - 14}" stroke="#dcdbd3" stroke-width="1.5"/>`;
+  g += `<line x1="${x0}" y1="${y - 14}" x2="${x0 + wd}" y2="${y - 14}" stroke="${C.rule}" stroke-width="1.5"/>`;
   row.forEach(([lab, v, u, frac, l], i) => {
-    const x = x0 + i * cw + 10, w = cw - 20, ink = l ? '#16181a' : q.val, sub = l ? '#16181a' : q.lab;
+    const x = x0 + i * cw + 10, w = cw - 20, ink = l ? C.ink : q.val, sub = l ? C.ink : q.lab;
     if (l) g += `<rect x="${x - 8}" y="${y - 6}" width="${w + 16}" height="80" rx="4" fill="${l === 2 ? q.bad : q.warn}" ${l === 2 ? 'class="flash"' : ''}/>`;
     g += T(x, y + 16, 16, lab, { c: sub, a: 'start', f: 'Chakra Petch', w: 500 });
     g += T(x + w, y + 42, 36, `${v}<tspan font-size="16" fill="${sub}"> ${u}</tspan>`, { c: ink, a: 'end', w: 700 });
-    g += `<rect x="${x}" y="${y + 56}" width="${w}" height="8" fill="${l ? '#ffffff88' : q.track}"/><rect x="${x}" y="${y + 56}" width="${w * Math.max(0.01, Math.min(1, frac))}" height="8" fill="${l ? '#16181a' : q.fill}"/>`;
+    g += `<rect x="${x}" y="${y + 56}" width="${w}" height="8" fill="${l ? '#ffffff88' : q.track}"/><rect x="${x}" y="${y + 56}" width="${w * Math.max(0.01, Math.min(1, frac))}" height="8" fill="${l ? C.ink : q.fill}"/>`;
   });
   // monitored only: pill above the row
   const extra = [];
@@ -410,7 +425,7 @@ function d13() {
   if (!S.sync) extra.push(['Sync verloren', 2]);
   extra.forEach(([txt, l], i) => {
     const w = 190, x = 760 - w - i * (w + 10);
-    g += `<rect x="${x}" y="${y - 52}" width="${w}" height="28" rx="15" fill="${l === 2 ? q.bad : q.warn}" ${l === 2 ? 'class="flash"' : ''}/>${T(x + w / 2, y - 32, 16, txt, { c: '#16181a', f: 'Chakra Petch', w: 700 })}`;
+    g += `<rect x="${x}" y="${y - 52}" width="${w}" height="28" rx="15" fill="${l === 2 ? q.bad : q.warn}" ${l === 2 ? 'class="flash"' : ''}/>${T(x + w / 2, y - 32, 16, txt, { c: C.ink, f: 'Chakra Petch', w: 700 })}`;
   });
   return g;
 }
@@ -428,7 +443,9 @@ const designs = [
   ['Nacht rot', 0, 'Runde 2. Nachtfahrt-Skala in Rot (stört die Nachtsicht am wenigsten, Hypothese), Begrenzerbereich weiß blinkend, Warnungen unten.', d10],
   ['Sweep-Band Tag', 3, 'Runde 3. Durchgehendes Band in gleicher Dicke, Zahlen innen. km/h groß, Drehzahl klein. Unten dauerhaft drei ruhige Anzeigen mit Balken; Seite per Knopf wechseln (1 Öl/Kühlmittel/Lambda, 2 Ansaugluft/Duty/Batterie, 3 Trip/Motorstunden/Uhrzeit). Warnung färbt die Anzeige ein und holt sie auf jede Seite.', d11],
   ['Sweep-Band Tag, wachsend', 3, 'Runde 3. Wie 11, nur wird das Band nach rechts dicker (wie im Bild). Zum Vergleich.', d12],
-  ['Fahrdisplay', 3, 'Runde 4, Basis 11. Gang groß innen in der Kurve (Schaltbox → CAN → RP2040 → UART), „F“ rot blinkend bei Schaltfehler. km/h groß, Drehzahl klein darunter. Unten fest Kühlmittel · Öldruck · Tank. Batterie und Sync nur als Hinweis bei Warnung.', d13],
+  ['Fahrdisplay', 3, 'Runde 4, Basis 11. Gang groß innen in der Kurve (Schaltbox → CAN → RP2040 → UART), „F“ rot blinkend bei Schaltfehler. km/h groß, Drehzahl klein darunter. Unten fest Kühlmittel · Öldruck · Tank. Batterie und Sync nur als Hinweis bei Warnung. Festgelegt als Fahrdisplay (Tag) 2026-11-06.', d13],
+  ['Fahrdisplay Nacht', 3, 'Gleiches Layout. Schwarz, Band und Zahlen in gedämpftem kühlem Grau statt Weiß (keine großen hellen Flächen), Wertezeile noch dunkler. Rot nur für Begrenzer und kritisch, Warnung orange statt gelb.', d14],
+  ['Fahrdisplay Nacht rot', 3, 'Zum Vergleich: alles in Rot (wie Cockpit-Nachtbeleuchtung), Begrenzer weiß blinkend. Warnung orange, kritisch hellrot. Dass Rot die Nachtsicht schont, ist eine Hypothese.', d15],
 ];
 
 const grid = document.getElementById('grid');
@@ -436,7 +453,8 @@ const svgs = designs.map(([name, n, desc], i) => {
   const fig = document.createElement('figure');
   fig.innerHTML = `<div class="screen"><svg viewBox="0 0 800 480" role="img" aria-label="Entwurf ${i + 1}: ${name}"></svg></div>
     <figcaption><b>${i + 1} ${name}</b><span class="n">${n ? `${n} Werte + Drehzahl + km/h` : 'nur Drehzahl + km/h, Rest bei Warnung'}</span><p>${desc}</p></figcaption>`;
-  grid.appendChild(fig);
+  const only = new URLSearchParams(location.search).get('nur');
+  if (!only || only.split(',').includes(String(i + 1))) grid.appendChild(fig);
   return fig.querySelector('svg');
 });
 function draw() {
