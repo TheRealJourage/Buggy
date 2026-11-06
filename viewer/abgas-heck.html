@@ -30,10 +30,15 @@
 </head>
 <body>
 <div id="bar">
-  <b>Abgasanlage hinter dem VR6 (CAD)</b>
-  <button data-v="A" class="active">A · Fächer, Stack</button>
-  <button data-v="B">B · Querdämpfer</button>
-  <button data-v="C">C · Serien-Guss</button>
+  <b>Abgas hinter dem VR6</b>
+  <span>Neu (Serien-Guss):</span>
+  <button data-v="N1">N1 · quer tief</button>
+  <button data-v="N2" class="active">N2 · Y stehend</button>
+  <button data-v="N3">N3 · gleich lang</button>
+  <span>Alt:</span>
+  <button data-v="A">A · Fächer</button>
+  <button data-v="B">B · Fächer 6-1</button>
+  <button data-v="C">C · Guss + Y</button>
   <span>Ansicht:</span>
   <button data-cam="iso">Gesamt</button><button data-cam="rear">Von hinten</button><button data-cam="side">Seite</button><button data-cam="top">Oben</button>
   <a href="cad-heck.html">Heckansicht STEP</a>
@@ -50,6 +55,9 @@
   <label>Kanalmitte im Modell Y <input type="range" id="yp" min="1450" max="1550" step="10" value="1500"><span class="v" id="yp_v"></span></label>
   <label>Kanal-Abstand <input type="range" id="pitch" min="55" max="85" step="1" value="65"><span class="v" id="pitch_v"></span></label>
   <label>Zyl. 1 sitzt <select id="cyl1"><option value="r">rechts</option><option value="l">links</option></select></label>
+  <h3>Krümmer-Ausgang (Hypothese, messen)</h3>
+  <label id="l_oDown" title="Ausgang unter der Kanalmitte">unter Kanalmitte <input type="range" id="oDown" min="100" max="250" step="5" value="170"><span class="v" id="oDown_v"></span></label>
+  <label id="l_oBack" title="Ausgang hinter der Flanschfläche am Kopf">hinter dem Flansch <input type="range" id="oBack" min="80" max="260" step="5" value="200"><span class="v" id="oBack_v"></span></label>
   <h3>Primärrohre</h3>
   <label id="l_rpm">abstimmen auf /min <input type="range" id="rpm" min="3800" max="6500" step="100" value="4500"><span class="v" id="rpm_v"></span></label>
   <label>Auslass öffnet v. UT (Hyp.) <input type="range" id="eo" min="40" max="70" step="1" value="56"><span class="v" id="eo_v"></span></label>
@@ -74,9 +82,9 @@ import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
 import * as H from './exhaust-heck.js';
 
-const state = { v: 'A' };
+const state = { v: 'N2' };
 const $ = (id) => document.getElementById(id);
-const NUM = ['dx', 'dy', 'dz', 'yp', 'pitch', 'rpm', 'eo', 'lkat', 'dkat', 'ldmp', 'ddmp'];
+const NUM = ['dx', 'dy', 'dz', 'oDown', 'oBack', 'yp', 'pitch', 'rpm', 'eo', 'lkat', 'dkat', 'ldmp', 'ddmp'];
 const P = () => ({ ...Object.fromEntries(NUM.map((k) => [k, +$(k).value])), cyl1: $('cyl1').value, upperBeam: $('upperBeam').checked });
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -153,7 +161,7 @@ function build() {
     if (mk.kind === 'flange') rod([mk.at[0], mk.at[1] - 5, mk.at[2]], [mk.at[0], mk.at[1] + 5, mk.at[2]], 48, M.vband, mk.name);
     if (mk.kind === 'vband') rod([mk.at[0], mk.at[1] - 4, mk.at[2]], [mk.at[0], mk.at[1] + 4, mk.at[2]], mk.r, M.vband, 'V-Band-Flansch');
   }
-  const kat = r.parts.find((q) => q.kind === 'kat'); if (kat) label('Kat', [kat.pts[1][0] + (state.v === 'A' ? 0 : 0), (kat.pts[0][1] + kat.pts[1][1]) / 2, kat.pts[0][2] - 120], '#f99', 0.8);
+  const kat = r.parts.find((q) => q.kind === 'kat'); if (kat) label('Kat', [(kat.pts[0][0] + kat.pts[1][0]) / 2, (kat.pts[0][1] + kat.pts[1][1]) / 2, kat.pts[0][2] - 120], '#f99', 0.8);
   const dmp = r.parts.find((q) => q.kind === 'dmp'); if (dmp) label('Dämpfer', [(dmp.pts[0][0] + dmp.pts[1][0]) / 2, (dmp.pts[0][1] + dmp.pts[1][1]) / 2, dmp.pts[0][2] - 140], '#ccc', 0.8);
   label('Heck (Rahmenende)', [1020, 900, -1700], '#ffb070', 0.9);
   label('vorn (Tank, Sitze)', [1020, 1700, -600], '#aaa', 0.8);
@@ -173,15 +181,18 @@ function report(r, hc) {
   const L = r.primLen, Lm = L.reduce((a, b) => a + b, 0) / L.length;
   if (r.cast) {
     rows.push(['Krümmer', 'Serien-Guss VW (verbaut, User 2026-11-05), Teilenummer laut Recherche 022 253 033 (1–3) / 034 (4–6), keine Abstimmung. Ausgang schematisch ≈ 170 mm unter der Kanalmitte, hinter dem Block, nach unten (Hypothese) <span class="muted">– Ausgangs-Ø und Lage messen</span>']);
-    rows.push(['Hosenrohre', `2 × ${fmt(r.secLen[0])} mm (57 × 1,5, gleich lang) <span class="muted">(Ø vor dem Y: Claude 55–57, Codex 45–48 ID → Krümmer-Ausgang messen)</span>`]);
+    rows.push(['Hosenrohre', `${fmt(r.secLen[0])} / ${fmt(r.secLen[1])} mm (57 × 1,5${Math.abs(r.secLen[0] - r.secLen[1]) < 12 ? ', gleich lang' : ''}) <span class="muted">(57 → 76 oder 48 → 63,5 stimmig, Recherche 2026-11-06 → Innen-Ø am Krümmer-Ausgang messen)</span>`]);
+    rows.push(['Umlenkung', `Hosenrohre je ≈ ${r.turnSec.map(fmt).join(' / ')}° · nach dem Y gesamt ≈ ${fmt(r.turnMain)}° <span class="muted">${{ C: '– direkt hinter dem Y 90° zur Seite, dann 90° hoch (die „Wand“)', N1: '– 150 mm gerade hinter dem Y, dann je 90° nach links und hoch', N2: '– Y zeigt schon nach oben, 150 mm gerade, Kat gerade angeströmt, erst danach 90° in den Dämpfer', N3: '– wie N2' }[state.v] ?? ''}</span>`]);
   } else {
     rows.push(['Primärrohre', `6 × ${fmt(Lm)} mm (38 × 1,5, ID 35), gleich lang → Bell ≈ <b>${fmt(r.tunedRpm)} /min</b> <span class="muted">(ED ${r.ED}°, Hypothese). Die Rohre steigen erst ${state.v === 'A' ? 140 : 110} mm hinter dem Flansch auf (hinter dem Käfig-Querrohr) und jede Gruppe weicht ${state.v === 'A' ? 95 : 100} mm zur Seite aus, damit das Mittelrohr frei bleibt. Ohne jede Berührung (auch am geratenen Mittelrohr) geht es bis ≈ ${state.v === 'A' ? 4100 : 4400}/min; Standard 4500/min hat ±20 mm Reserve bei allen Sammler-Lagen.</span>`]);
     if (r.secLen) rows.push(['Sekundärrohre', `2 × ${fmt(r.secLen[0])} mm (63,5 × 1,5)`]);
   }
-  rows.push(['Sammelrohr', '76,2 (3″) wie der Mustang-Kat-Anschluss, unten im Schacht hinter dem Block <span class="muted">(Faustregel 56–60 ID → Widerspruch offen)</span>']);
+  rows.push(['Sammelrohr', `76,2 (3″) wie der Mustang-Kat-Anschluss, ${{ N1: 'hinter dem Y nach hinten, dann quer nach links', N2: 'steht hinter dem Motor links vom Mittelrohr', N3: 'steht hinter dem Motor links vom Mittelrohr' }[state.v] ?? 'unten im Schacht hinter dem Block'} <span class="muted">(Supersprint: 65 mm für den Serienmotor, Recherche 2026-11-06)</span>`]);
   rows.push(['Sonde', `sieht alle 6 Zylinder, ≈ ${fmt(Math.min(...r.sondePath))} mm Rohrweg ab Auslass <span class="muted">(AEM ≥ 457, 14Point7 ≈ 600)</span>`]);
-  rows.push(['Kat', `Ø ${p.dkat} × ${p.lkat} senkrecht im Steigrohr links hinten, zwischen V-Bändern <span class="muted">(Platzhalter, Mustang-Kat 16399 messen)</span>`]);
-  rows.push(['Dämpfer', `Ø ${p.ddmp} × ${p.ldmp}, ${state.v === 'B' ? 'quer über dem Heck' : 'senkrecht über dem Kat'} <span class="muted">(Marke + Typ nötig, Maße des echten Teils einsetzen)</span>`]);
+  const katWhere = { N1: 'quer am Rahmenende nach links', N2: 'stehend direkt über dem Sonden-Stück', N3: 'stehend direkt über dem Sonden-Stück' }[state.v] ?? 'senkrecht im Steigrohr links hinten';
+  const dmpWhere = { B: 'quer über dem Heck', N2: 'quer oben hinter dem Käfig-Querrohr, 2 Endrohre nach hinten', N3: 'quer oben hinter dem Käfig-Querrohr, 2 Endrohre nach hinten', N1: 'stehend in der linken Ecke' }[state.v] ?? 'senkrecht über dem Kat';
+  rows.push(['Kat', `Ø ${p.dkat} × ${p.lkat} ${katWhere}, zwischen V-Bändern <span class="muted">(Platzhalter, Mustang-Kat 16399 messen)</span>`]);
+  rows.push(['Dämpfer', `Ø ${p.ddmp} × ${p.ldmp}, ${dmpWhere} <span class="muted">(Marke + Typ nötig; z. B. MagnaFlow 12266 127 × 203 × 457 als Querdämpfer, ohne E-Zeichen → Prüfer)</span>`]);
   rows.push(['Halle-Maße', `oben ${cmp(hc.top, H.HALLE.top)} · links ${cmp(hc.left, H.HALLE.left)} · rechts ${cmp(hc.right, H.HALLE.right)} · hinten ${cmp(hc.rear, H.HALLE.rear)}
     <span class="muted">(Krümmer-Oberkante → Käfig-Querrohr; äußerstes Krümmerrohr → Rahmenrohr daneben; Motor → Rahmenende innen auf Krümmerhöhe)</span>`]);
   if (hc.cuts.length) rows.push(['Modell-Widerspruch', `<span class="warn">STEP-Motor schneidet bei dieser Lage: ${hc.cuts.join(', ')}</span> <span class="muted">(Getriebe im Modell zu breit/tief oder Motor real weniger tief – Höhe Kanalmitte über unterem Längsrohr messen)</span>`]);
@@ -192,9 +203,12 @@ function report(r, hc) {
   const desc = {
     A: '<b>A · Fächer 6-2-1, Stack links (Vorschlag Claude, Leistung):</b> Die Primärrohre steigen hinter dem Käfig-Querrohr auf, je Gruppe seitlich am Mittelrohr vorbei, laufen über den Kopf nach hinten und fallen in den Schacht zwischen Block und Heck. Dort sitzen zwei 3-in-1 {1,2,3}/{4,5,6} (gleichmäßig 240°), kurze Sekundärrohre und der Y-Sammler. Das Sammelrohr läuft unten nach links (Sonde) und steigt links hinten mit Kat und Dämpfer auf, Mündung oben.',
     B: '<b>B · Fächer 6-1, Querdämpfer, 2 Rohre hinten (Vorschlag Claude, Optik):</b> Gleiche Primärführung, alle 6 in einen 6-in-1-Sammler unten im Schacht. Steigrohr links hinten mit Kat, oben ein Querdämpfer über dem Heck, zwei Endrohre waagrecht nach hinten. Spitze oben, Mitte schwächer (Forum, keine VR6-Messung).',
+    N1: '<b>N1 · Serien-Guss, Y mittig, Kat quer am Rahmenende (Vorschlag aus der Recherche 2026-11-06):</b> Je Krümmer-Ausgang ein 90°-Bogen nach hinten, Zweige laufen zur Mitte, Y zeigt nach hinten, 150 mm gerade mit Sonde, dann 90° nach links, Kat quer, 90° hoch in einen stehenden Dämpfer. <span class="bad">Passt im Modell nicht:</span> Hinter dem Krümmer-Ausgang fehlen ≈ 38 cm Tiefe, auch quer ist für Kat + Dämpfer hintereinander zu wenig Breite. Nur sinnvoll, wenn der Ausgang real deutlich weiter vorn sitzt (Schieber „hinter dem Flansch“).',
+    N2: '<b>N2 · Serien-Guss, Y stehend, Kat hoch, Querdämpfer oben (Vorschlag Claude nach Recherche 2026-11-06):</b> Beide Ausgänge gehen nach unten, die Hosenrohre laufen flach unter die Y-Stelle (links vom Mittelrohr) und biegen nach oben. Das Y steht senkrecht und zeigt schon in die Endrichtung, danach 150 mm gerade (Sonde), der Kat steht gerade darüber. Erst nach dem Kat ein 90°-Bogen in den Querdämpfer hinter dem Käfig-Querrohr, zwei Endrohre nach hinten. Hosenrohre nicht gleich lang (Serien-Guss ist ohnehin nicht abgestimmt).',
+    N3: '<b>N3 · wie N2, aber gleich lange Hosenrohre (Vorschlag Claude):</b> Y weiter links, das ferne Hosenrohr läuft etwas höher, damit beide gleich lang sind (≈ 0,42 m). Die in der Recherche genannten 0,5–0,6 m passen im Modell nicht. Gewinn gegenüber N2 unbelegt (Recherche: 0–3 % in der Mitte, Hypothese).',
     C: '<b>C · Serien-Gusskrümmer + Y (Vorschlag Claude, geringster Aufwand):</b> Beide Serien-Krümmer bleiben, zwei gleich lange Hosenrohre laufen hinter dem Block nach unten in den Y-Sammler. Danach wie A: Sonde unten, Steigrohr links hinten mit Kat und Dämpfer, Endrohr oben 30° nach hinten-links gebogen (§ 47c zulässig). Keine Abstimmung, aber Serien-Dichtungen und -Stehbolzen.',
   }[state.v];
-  $('info').innerHTML = `<h3>Stand 2026-11-05 · Rahmen aus dem STEP, Motor nach Halle-Maßen verschoben (${p.dx > 0 ? '+' : ''}${p.dx} seitl. / ${fmt(p.dy)} Höhe / ${p.dz} vorn) · Auslass hinten (User) · Vorschlag, nichts festgelegt</h3>${desc}
+  $('info').innerHTML = `<h3>Stand 2026-11-06 · Rahmen aus dem STEP, Motor nach Halle-Maßen verschoben (${p.dx > 0 ? '+' : ''}${p.dx} seitl. / ${fmt(p.dy)} Höhe / ${p.dz} vorn) · Auslass hinten (User) · Vorschlag, nichts festgelegt</h3>${desc}
     <table>${rows.map(([a, c]) => `<tr><td>${a}</td><td>${c}</td></tr>`).join('')}</table>
     ${r.notes.length ? `<div class="warn">${r.notes.join('<br>')}</div>` : ''}
     <div class="muted">Rahmen aus dem groben STEP-Modell 2022 (laut User so verbaut). Der Motor sitzt real tiefer und weiter drinnen als im Modell (User 2026-11-05): Form aus dem STEP, Lage aus den Halle-Maßen zurückgerechnet (Annahmen: Krümmer-Oberkante = Oberkante Kopfflansch im Modell, äußerstes Krümmerrohr = Kanalmitte ± 22). Kanalhöhe und -abstand Hypothese; Zyl. 1 an der Riemenseite (Hypothese). +X = links (Hypothese, passt zur Getriebeseite wie im Golf). Heckbalken 35 × 35 mit 50 mm lichtem Abstand (gemessen), Höhe/Tiefe aus dem Modell; oberer Balken fehlt im Modell, Lage geraten. Recht T3b: 85 dB(A), Fahrerohr 86/90 dB(A), Endrohr nicht nach rechts (§ 47c). Farben: orange/blau = Gruppen, rot = Kollision, orange-transparent = Hypothese bzw. STEP-Motor.</div>`;
@@ -209,7 +223,9 @@ for (const b of document.querySelectorAll('[data-v]')) b.onclick = () => { state
 for (const b of document.querySelectorAll('[data-cam]')) b.onclick = () => setCam(b.dataset.cam);
 function syncUi() {
   for (const k of NUM) $(k + '_v').textContent = $(k).value + (k === 'eo' ? '°' : '');
-  $('l_rpm').classList.toggle('dis', state.v === 'C');
+  const cast = ['C', 'N1', 'N2', 'N3'].includes(state.v);
+  $('l_rpm').classList.toggle('dis', cast);
+  for (const k of ['l_oDown', 'l_oBack']) $(k).classList.toggle('dis', !cast);
 }
 function resetOffset() { for (const k of ['dx', 'dy', 'dz']) $(k).value = Math.round(H.OFFSET[k]); }
 $('reset').onclick = () => { resetOffset(); syncUi(); build(); };
@@ -225,7 +241,7 @@ renderer.domElement.addEventListener('pointermove', (e) => {
 });
 function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
 addEventListener('resize', resize); resize();
-const q = new URLSearchParams(location.search).get('v'); if (q && 'ABC'.includes(q)) document.querySelector(`[data-v="${q}"]`).click();
+const q = new URLSearchParams(location.search).get('v'); if (q && document.querySelector(`[data-v="${q}"]`)) document.querySelector(`[data-v="${q}"]`).click();
 syncUi(); build(); setCam('iso');
 renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
 </script>

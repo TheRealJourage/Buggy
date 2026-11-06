@@ -58,3 +58,24 @@ test('offset zero reproduces the old model gaps (≈ 23 cm above the manifold)',
   const c = H.halleCheck({ dx: 0, dy: 0, dz: 0 });
   assert.ok(Math.abs(c.top - 231) < 2, String(c.top));
 });
+
+test('N2/N3 (stock manifolds, standing Y): no contact incl. the guessed beam, straight behind the Y, sonde far enough', () => {
+  for (const v of ['N2', 'N3']) for (const cyl1 of ['r', 'l']) {
+    const o = H.build(v, { cyl1 });
+    assert.deepEqual([...o.coll, ...o.viol, ...o.notes, ...o.hyp], [], `${v} ${cyl1}`);
+    assert.ok(Math.min(...o.sondePath) >= 600, `${v} sonde ${Math.min(...o.sondePath)}`);
+    assert.ok(o.turnMain < 100, `${v} turning after the Y ${o.turnMain}`);
+  }
+  const n3 = H.build('N3');
+  assert.ok(Math.abs(n3.secLen[0] - n3.secLen[1]) < 12, String(n3.secLen));
+});
+
+test('N1 (Y pointing rearward, cat across) does not fit the depth behind the outlets in the model', () => {
+  const o = H.build('N1');
+  assert.ok(o.viol.some((x) => x.startsWith('hinten')), o.viol.join('; '));
+});
+
+test('C turns about 180° right behind the Y, N2 only 90° after the cat', () => {
+  assert.ok(H.build('C').turnMain > 170);
+  assert.ok(Math.abs(H.build('N2').turnMain - 90) < 5);
+});
