@@ -45,6 +45,7 @@
   <button id="oil" type="button">Öldruck-Warnung</button>
   <button id="hot" type="button">Kühlmittel heiß</button>
   <button id="bat" type="button">Batterie schwach</button>
+  <button id="page" type="button">Seite unten: 1/3</button>
 </div>
 
 <div class="grid" id="grid"></div>
@@ -316,6 +317,66 @@ function d10() {
     ${popTiles(60, 372, 680, 96, { bad: '#ff4a3a', warn: '#ff8a3a', ink: '#000', quiet: '#3a0d08', calm: '' })}`;
 }
 
+// ---- round 3: continuous sweep band (day), quiet gauges always visible ----
+S.page = 0; S.iatC = 34; S.hours = 41.7; S.clock = '14:32';
+function band(grow, pal) {
+  const N = 140, frac = S.rpm / MAX, sh = shiftOn(), hw = t => grow ? 16 + 26 * t : 26;
+  const poly = (t0, t1) => {
+    const o = [], i = [];
+    for (let k = 0; k <= N; k++) { const t = t0 + (t1 - t0) * k / N, p = SW(t), h = hw(t); o.push([p.x + p.nx * h, p.y + p.ny * h]); i.push([p.x - p.nx * h, p.y - p.ny * h]); }
+    return o.concat(i.reverse()).map(p => p.map(v => v.toFixed(1)).join(',')).join(' ');
+  };
+  const z = SHIFT / MAX;
+  let g = `<polygon points="${poly(0, z)}" fill="${pal.off}"/><polygon points="${poly(z, 1)}" fill="${pal.redOff}"/>`;
+  if (frac > 0.002) {
+    g += `<polygon points="${poly(0, Math.min(frac, z))}" fill="${sh ? pal.red : pal.on}" ${sh ? 'class="flash"' : ''}/>`;
+    if (frac > z) g += `<polygon points="${poly(z, Math.min(frac, 1))}" fill="${pal.red}" class="flash"/>`;
+  }
+  for (let k = 1; k <= 7; k++) { const t = k / 8, a = SW(t), h = hw(t); g += `<line x1="${a.x + a.nx * h}" y1="${a.y + a.ny * h}" x2="${a.x - a.nx * h}" y2="${a.y - a.ny * h}" stroke="${pal.bg}" stroke-width="2"/>`; }
+  for (let k = 1; k <= 8; k++) { const t = k / 8 - .02, p = SW(t), o = hw(t) + 20; g += T(p.x - p.nx * o, p.y - p.ny * o + 8, 22, k, { c: pal.num, f: 'Chakra Petch', w: 700 }); }
+  return g;
+}
+const PAGES = [
+  () => [['Öldruck', f1(S.oil), 'bar', S.oil / 6, lvl.oil(S.oil)], ['Kühlmittel', Math.round(S.clt), '°C', (S.clt - 40) / 80, lvl.clt(S.clt)], ['Lambda', f2(S.lam), `Soll ${f2(S.lamT)}`, null, 0]],
+  () => [['Ansaugluft', S.iat, '°C', S.iat / 80, 0], ['Einspritz-Duty', S.duty, '%', S.duty / 100, 0], ['Batterie', f1(S.volt), 'V', (S.volt - 10) / 5, lvl.volt(S.volt)]],
+  () => [['Trip', f1(S.trip), 'km', null, 0], ['Motorstunden', f1(S.hours), 'h', null, 0], ['Uhrzeit', S.clock, '', null, 0]],
+];
+function quiet(pal) {
+  let items = PAGES[S.page]();
+  // a warning always takes its slot even on another page
+  const pinned = warns().map(([lab]) => lab);
+  if (pinned.length) items = PAGES[0]().concat(PAGES[1]()).filter(x => x[4]).concat(items.filter(x => !x[4])).slice(0, 3);
+  const x0 = 40, wd = 720, cw = wd / 3, y = 382;
+  let g = `<line x1="${x0}" y1="${y - 14}" x2="${x0 + wd}" y2="${y - 14}" stroke="${pal.rule}" stroke-width="1.5"/>`;
+  items.forEach(([lab, v, u, frac, l], i) => {
+    const x = x0 + i * cw + 10, w = cw - 20;
+    if (l) g += `<rect x="${x - 8}" y="${y - 6}" width="${w + 16}" height="94" rx="4" fill="${l === 2 ? pal.bad : pal.warn}" ${l === 2 ? 'class="flash"' : ''}/>`;
+    const ink = l ? '#16181a' : pal.val, sub = l ? '#16181a' : pal.lab;
+    g += T(x, y + 16, 16, lab, { c: sub, a: 'start', f: 'Chakra Petch', w: 500 });
+    g += T(x + w, y + 46, 38, `${v}<tspan font-size="16" fill="${sub}"> ${u}</tspan>`, { c: ink, a: 'end', w: 700 });
+    if (lab === 'Lambda') {
+      const d = Math.max(-1, Math.min(1, (S.lam - S.lamT) / 0.15)), mid = x + w / 2;
+      g += `<rect x="${x}" y="${y + 62}" width="${w}" height="8" fill="${pal.track}"/><rect x="${mid - 1}" y="${y + 58}" width="2" height="16" fill="${pal.lab}"/>
+        <rect x="${Math.min(mid, mid + d * w / 2)}" y="${y + 62}" width="${Math.abs(d * w / 2) || 2}" height="8" fill="${pal.fill}"/>
+        ${T(x, y + 86, 12, 'fett', { c: pal.lab, a: 'start', f: 'Chakra Petch', w: 500 })}${T(x + w, y + 86, 12, 'mager', { c: pal.lab, a: 'end', f: 'Chakra Petch', w: 500 })}`;
+    } else if (frac !== null) {
+      g += `<rect x="${x}" y="${y + 62}" width="${w}" height="8" fill="${l ? '#ffffff88' : pal.track}"/><rect x="${x}" y="${y + 62}" width="${w * Math.max(0.01, Math.min(1, frac))}" height="8" fill="${l ? '#16181a' : pal.fill}"/>`;
+    }
+  });
+  g += [0, 1, 2].map(k => `<circle cx="${764 + k * 12 - 24}" cy="${y - 28}" r="3.5" fill="${k === S.page ? pal.val : pal.track}"/>`).join('');
+  return g;
+}
+function dayBand(grow) {
+  const pal = { bg: '#f1f0ea', on: '#16181a', off: '#dcdbd3', red: '#e10600', redOff: '#f0c9c4', num: '#8a8b86' };
+  const q = { rule: '#dcdbd3', lab: '#85887f', val: '#4a4d50', track: '#e2e1d9', fill: '#8e918a', warn: '#f2b400', bad: '#e10600' };
+  return `<rect width="800" height="480" fill="${pal.bg}"/>${band(grow, pal)}
+    ${T(560, 300, 220, S.kmh, { c: '#16181a', w: 800 })}
+    ${T(560, 334, 20, 'km/h', { c: '#55595e', f: 'Chakra Petch', w: 700 })}
+    ${T(225, 290, 36, `${S.rpm}<tspan font-size="15" fill="#85887f"> 1/min</tspan>`, { c: shiftOn() ? '#e10600' : '#4a4d50', w: 700 })}
+    ${quiet(q)}`;
+}
+const d11 = () => dayBand(false), d12 = () => dayBand(true);
+
 const designs = [
   ['Bogen', 3, 'Ein dicker Drehzahlbogen, km/h riesig, darunter die drei Werte der weggefallenen Analoginstrumente. Ruhig, schnell erfassbar.', d1],
   ['Shift-Leiste', 6, 'Segmentierter LED-Bogen grün/gelb/rot, blinkt blau am Schaltpunkt (wie Shift-Lights im Rennsport). Links Motor-Grundwerte, rechts Gemisch.', d2],
@@ -327,6 +388,8 @@ const designs = [
   ['Sweep Nacht', 0, 'Runde 2. Wie 7, schwarz mit Eisblau statt Gelb, Begrenzer rot blinkend.', d8],
   ['Tageslicht ruhig', 0, 'Runde 2. Entwurf 4 ohne Balken: Bogen, km/h groß, Drehzahl klein. Unten frei, dort springen Warnungen hoch.', d9],
   ['Nacht rot', 0, 'Runde 2. Nachtfahrt-Skala in Rot (stört die Nachtsicht am wenigsten, Hypothese), Begrenzerbereich weiß blinkend, Warnungen unten.', d10],
+  ['Sweep-Band Tag', 3, 'Runde 3. Durchgehendes Band in gleicher Dicke, Zahlen innen. km/h groß, Drehzahl klein. Unten dauerhaft drei ruhige Anzeigen mit Balken; Seite per Knopf wechseln (1 Öl/Kühlmittel/Lambda, 2 Ansaugluft/Duty/Batterie, 3 Trip/Motorstunden/Uhrzeit). Warnung färbt die Anzeige ein und holt sie auf jede Seite.', d11],
+  ['Sweep-Band Tag, wachsend', 3, 'Runde 3. Wie 11, nur wird das Band nach rechts dicker (wie im Bild). Zum Vergleich.', d12],
 ];
 
 const grid = document.getElementById('grid');
@@ -351,6 +414,8 @@ const q = new URLSearchParams(location.search);
 if (q.has('rpm')) { S.rpm = +q.get('rpm'); $('rpm').value = S.rpm; }
 if (q.has('warn')) { S.oil = 0.6; S.clt = 103; }
 $('bat').onclick = e => { const on = e.target.classList.toggle('on'); S.volt = on ? 11.6 : 13.9; draw(); };
+$('page').onclick = e => { S.page = (S.page + 1) % 3; e.target.textContent = `Seite unten: ${S.page + 1}/3`; draw(); };
+if (q.has('page')) S.page = (+q.get('page') - 1) % 3;
 let timer = null;
 $('anim').onclick = e => {
   if (timer) { clearInterval(timer); timer = null; e.target.classList.remove('on'); return; }
