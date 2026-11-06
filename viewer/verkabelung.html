@@ -239,7 +239,9 @@
 <li>Pegel, Vorschlag: Mega-TX3 (5 V) → 5-V-toleranter STM32-RX mit 1–10 kΩ in Reihe. STM32-TX (3,3 V) → Mega-RX3 über Pegelwandler (Mega braucht laut Datenblatt mindestens 3,0 V).</li>
 <li>TunerStudio: Secondary Serial auf <b>Enable</b>, Protokoll <b>CAN</b> (Start-Tune steht auf Disable).</li>
 <li><b>Herausgeführt (User, 2026-11-06):</b> D14 (TX3) = <b>rot</b>, D15 (RX3) = <b>weiß</b>, verdrilltes Paar.</li>
-<li>Offen: Masse-Ader zum STM32, Pegelwandler, STM32-Board.</li>
+<li><b>Masse, festgelegt (User, 2026-11-06):</b> zentraler Massepunkt in der Box, alle Massen (Speeduino, STM32, weitere) dorthin. Keine direkte Ader.</li>
+<li><b>Testaufbau Pico, Vorschlag (noch nicht gebaut):</b> rot → Teiler 1 kΩ in Reihe / 2 kΩ nach GND → GP1 (RX). Weiß ← GP0 (TX) direkt (knapp, nur Tischtest). Nie 5 V direkt an den RP2040.</li>
+<li>Offen: Pegelwandler, STM32-Board, Ausführung Massepunkt.</li>
 </ul>
 
 <h2>6. Reihenfolge beim Umbau</h2>
