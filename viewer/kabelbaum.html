@@ -153,9 +153,9 @@
   <!-- LIN Lenkrad -->
   <path data-c="lin" d="M 265 200 L 265 182" stroke="var(--lin)" stroke-width="2.5"/>
   <text data-c="lin" class="small" x="270" y="195">LIN</text>
-  <!-- Speeduino Serial → Tacho-Pi -->
-  <path data-c="lin" d="M 212 400 L 170 400 L 170 228" stroke="var(--lin)" stroke-width="1.5" stroke-dasharray="3 3"/>
-  <text data-c="lin" class="small" x="176" y="320">Serial3</text>
+  <!-- Speeduino Serial3 → Relaisbox-STM32 (bridge to CAN, Variante B 2026-11-06) -->
+  <path data-c="lin" d="M 292 394 L 300 394" stroke="var(--lin)" stroke-width="2.5"/>
+  <text data-c="lin" class="small" x="262" y="378">Serial3</text>
 </svg>
 </div>
 
@@ -167,8 +167,8 @@
   <button data-k="x2"><i style="border-color:var(--x2)"></i><span>X2: 16 mm² <small>Box → Front-Verteiler (ABS, Unterdruck, Servo). Ebene Kl. 30 / 15 offen</small></span></button>
   <button data-k="x1"><i style="border-color:var(--x1)"></i><span>X1: DT 12-pol <small>Licht, Blinker, Bremslicht, Meldeleitungen</small></span></button>
   <button data-k="kamera"><i style="border-color:var(--kam)"></i><span>Kamera AV <small>eigener kleiner Stecker X4, zum CarPlay-Pi</small></span></button>
-  <button data-k="can"><i class="dash" style="border-color:var(--can)"></i><span>CAN-Rückgrat <small>Front-Controller ↔ Relaisbox (↔ Heck offen). Speeduino nicht am CAN</small></span></button>
-  <button data-k="lin"><i style="border-color:var(--lin)"></i><span>LIN / Serial <small>Lenkrad ↔ Front-Controller; Speeduino → Tacho-Pi</small></span></button>
+  <button data-k="can"><i class="dash" style="border-color:var(--can)"></i><span>CAN-Rückgrat <small>Front-Controller ↔ Relaisbox (↔ Heck offen). Speeduino nicht direkt am CAN, Motordaten über den Relaisbox-STM32</small></span></button>
+  <button data-k="lin"><i style="border-color:var(--lin)"></i><span>LIN / Serial <small>Lenkrad ↔ Front-Controller; Speeduino Serial3 → Relaisbox-STM32 (Brücke auf CAN, festgelegt 2026-11-06)</small></span></button>
 </div>
 </div>
 
@@ -206,9 +206,9 @@
 <tr><td>Lenkrad</td><td>Lenkrad</td><td>RP2040-Tiny</td><td>Tasten, Paddel, Hupe, Code (LIN-Slave)</td><td>verbaut</td></tr>
 <tr><td>Front-Controller</td><td>Lenksäule</td><td>Nucleo-F446RE (geplant)</td><td>Lenkstockschalter, LIN-Master, LEDs vorn, CAN nach hinten</td><td>Firmware in Arbeit</td></tr>
 <tr><td>Panel-Controller</td><td>Schaltpanel seitlich</td><td>kleiner RP2040 o. ä.</td><td>Potis + Schalter → UART an Front-Controller oder direkt CAN</td><td class="open">offen</td></tr>
-<tr><td>Relaisbox-Controller</td><td>Box Beifahrersitz</td><td>STM32 (festgelegt 2026-11-06)</td><td>Freigabe Kl. 15/50/Last, Relais, Panel-Befehle</td><td class="open">Board offen</td></tr>
+<tr><td>Relaisbox-Controller</td><td>Box Beifahrersitz</td><td>STM32 (festgelegt 2026-11-06)</td><td>Freigabe Kl. 15/50/Last, Relais, Panel-Befehle, Brücke Speeduino Serial3 → CAN</td><td class="open">Board offen</td></tr>
 <tr><td>Heck-Controller</td><td>hinten oben (vermutlich)</td><td>offen</td><td>Lichter hinten, evtl. Kamera</td><td class="open">ob nötig, offen</td></tr>
-<tr><td>Tacho-Pi</td><td>mittig über Lenkstock</td><td>Raspberry Pi</td><td>Tacho + Eckdaten, Serial am Speeduino</td><td>geplant</td></tr>
+<tr><td>Tacho-Pi</td><td>mittig über Lenkstock</td><td>Raspberry Pi</td><td>Tacho + Eckdaten, liest Motordaten vom CAN (Variante B, 2026-11-06)</td><td>geplant</td></tr>
 <tr><td>CarPlay-Pi</td><td>links oder rechts vom Tacho</td><td>Raspberry Pi</td><td>CarPlay, Navi, Rückfahrkamera</td><td>geplant</td></tr>
 </table></div>
 

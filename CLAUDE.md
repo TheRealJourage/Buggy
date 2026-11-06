@@ -50,7 +50,7 @@ genannten Datei; andere Notizen und Memory verlinken, statt zu wiederholen.
   - Warnblinker ohne Zündung über Schalter an der Relaisbox; mit Zündung gelbe Lenkradtaste.
   - Lüfter RIDEX 508R0028, PWM vom Relaisbox-Controller (Speeduino-Mega kann kein PWM, D47 nur Ein/Aus).
   - Ausgleichsbehälter nur am Kühlernippel. Front-Lampen LED außer Zusatz-Fernlicht. X1-Belegung wie gecrimpt 2026-10-19.
-  - Pi ist die Brücke Speeduino ↔ CAN (Variante A). Heck-Controller = Relaisbox-Controller.
+  - Brücke Speeduino ↔ CAN = Relaisbox-STM32 über Serial3 (Variante B, 2026-11-06, ersetzt A); Pi nur CAN-Zuhörer, TunerStudio per USB. Heck-Controller = Relaisbox-Controller = STM32 (Board offen, Teensy nur bei hoher Rechenlast).
   - ABS an Kl. 15 (X2). Hub vorn über die kleine 5-V-Leitung aus dem Heck (große Schiene nur per Dioden-ODER parallel), X1/8 nicht für den Hub.
   - Hupe = Drucklufthorn, Megafon zusätzlich; R28-Horn für die Abnahme offen. Hauptschalter-Seite (Plus/Minus) bewusst offen, nicht nachfragen.
 - Eigene Vorschläge heißen **Vorschlag Claude** und kommen nicht in „Offen"-Listen, solange der User sie nicht aufgreift.
