@@ -79,3 +79,23 @@ test('C turns about 180° right behind the Y, N2 only 90° after the cat', () =>
   assert.ok(H.build('C').turnMain > 170);
   assert.ok(Math.abs(H.build('N2').turnMain - 90) < 5);
 });
+
+test('N4/N5 (two tailpipes from a Y-split after the cat): no contact, two dampers, two tailpipes', () => {
+  for (const v of ['N4', 'N5']) for (const cyl1 of ['r', 'l']) {
+    const o = H.build(v, { cyl1 });
+    assert.deepEqual([...o.coll, ...o.viol, ...o.notes, ...o.hyp], [], `${v} ${cyl1}`);
+    assert.equal(o.parts.filter((q) => q.kind === 't').length, 2, v);
+    assert.equal(o.parts.filter((q) => q.kind === 'dmp').length, 2, v);
+    assert.ok(o.parts.some((q) => q.name.startsWith('Y-Teiler')), v);
+    assert.ok(Math.min(...o.sondePath) >= 600, `${v} sonde`);
+  }
+  const tips = H.build('N4').parts.filter((q) => q.kind === 't').map((q) => q.pts.at(-1)[0]);
+  assert.ok(Math.abs((tips[0] + tips[1]) / 2 - 1020) < 5, `N4 tips symmetric to the frame centre: ${tips}`);
+});
+
+test('tailpipes never point to the right (§ 47c)', () => {
+  for (const v of ['A', 'B', 'C', 'N1', 'N2', 'N3', 'N4', 'N5']) for (const q of H.build(v).parts.filter((x) => x.kind === 't')) {
+    const a = q.pts.at(-2), b = q.pts.at(-1), d = [b[0] - a[0], b[2] - a[2]], n = Math.hypot(...d);
+    assert.ok(d[0] / n > -0.2, `${v} ${q.name}`);
+  }
+});

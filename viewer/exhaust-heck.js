@@ -13,6 +13,7 @@ const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a
 
 export const TUBE = { prim: 38, sec: 63.5, main: 76.2, down: 57, cast: 44 }; // OD; wall 1.5 → ID 35 / 60.5 / 73.2 / 54
 const FR = 24.15; // frame tube radius (48.3 mm)
+const fmt0 = (n) => String(Math.round(n));
 
 // frame members near the engine bay, centre lines from the STEP bounding boxes
 export function frame(opt = {}) {
@@ -142,6 +143,8 @@ export const LAYOUT = {
   N1: { yRun: 1050, yX: 0, straight: 150, katX: 120 },
   N2: { yRun: 1030, lift: 70, xY: 175, zY: -1500, straight: 150, yDmp: 1640 },
   N3: { yRun: 1030, lift: 64, xY: 230, zY: -1500, straight: 150, yDmp: 1640 },
+  N4: { yRun: 1030, lift: 70, xY: 175, zY: -1500, yInOff: 10, straight: 150, dTwin: 245, zTwin: -1430, yTop: 1830 },
+  N5: { yRun: 1030, lift: 70, xY: 175, zY: -1500, yInOff: 10, straight: 150, yTwin: 1870, zFront: -1410, zRear: -1530 },
 };
 export const VARIANTS = {
   A: { title: 'A · Fächer 6-2-1, Stack links' },
@@ -150,10 +153,12 @@ export const VARIANTS = {
   N1: { title: 'N1 · Serien-Guss, Y mittig, Kat quer am Rahmenende' },
   N2: { title: 'N2 · Serien-Guss, Y stehend, Kat hoch, Querdämpfer oben' },
   N3: { title: 'N3 · Serien-Guss, gleich lange Hosenrohre, Y weiter links, Querdämpfer oben' },
+  N4: { title: 'N4 · Serien-Guss, Y-Teiler über dem Kat, zwei Dämpfer stehend, Endrohre unten links/rechts der AHK' },
+  N5: { title: 'N5 · Serien-Guss, Y-Teiler über dem Kat, zwei Querdämpfer oben, Doppelrohr hinten' },
 };
 
 export function build(v, o = {}) {
-  const p = { yp: FLANGE.y, pitch: 65, cyl1: 'r', rpm: 4500, eo: 56, oDown: 170, oBack: 200, lkat: 300, dkat: 130, ldmp: 320, ddmp: 110, upperBeam: true, ...OFFSET, ...LAYOUT[v], ...o };
+  const p = { yp: FLANGE.y, pitch: 65, cyl1: 'r', rpm: 4500, eo: 56, oDown: 170, oBack: 200, d2: 100, l2: 250, dSplit: 57, lkat: 300, dkat: 130, ldmp: 320, ddmp: 110, upperBeam: true, ...OFFSET, ...LAYOUT[v], ...o };
   const ED = 180 + p.eo, Lp = bellLength(p.rpm, ED);
   const s1 = p.cyl1 === 'r' ? 1 : -1; // cyl 1 at low X (= right, pulley side) when s1 = 1
   const Z0 = FLANGE.z + p.dz, XC = FLANGE.x + p.dx, YP = p.yp + p.dy; // yp = channel height in the model, dx/dy/dz = engine shift
@@ -302,7 +307,7 @@ export function build(v, o = {}) {
 
   // standing Y behind the manifolds, fed from below: each branch goes down, runs flat (diagonal) to below its Y inlet, turns up
   const standingY = (O, t = 0) => {
-    const YR = p.yRun, yIn = [XC + p.xY, YR + RB + 70, p.zY];
+    const YR = p.yRun, yIn = [XC + p.xY, YR + RB + (p.yInOff ?? 70), p.zY];
     const far = Math.abs(O[0][0] - yIn[0]) > Math.abs(O[1][0] - yIn[0]) ? 0 : 1;
     const slot = (gi) => add(yIn, [gi === far ? -33 : 33, 0, 0]);
     // the far branch runs `lift` higher so the two flat runs can cross; a higher run is shorter
@@ -339,6 +344,58 @@ export function build(v, o = {}) {
     out.sondePath = c.runners.map((q, ci) => q.len + sec[grpOf(ci)].len + YCONE + p.straight / 2);
   }
 
+  // ---- N4/N5 (2026-11-06): two tailpipes from a Y-split (1 → 2) after the cat, each strand with its own damper
+  const splitAbove = (k1) => {
+    const a = add(k1, [0, 15, 0]), b = add(a, [0, YCONE, 0]);
+    part('Rohr 76,2', [k1, a], TUBE.main, 'm');
+    cone(`Y-Teiler 1 → 2 (2 × ${p.dSplit}, Winkel ≈ 15°)`, a, b, TUBE.main / 2, 33 + p.dSplit / 2);
+    return b;
+  };
+  const twinDamper = (a, dir, side) => { const b = add(a, mul(dir, p.l2)); cyl(`Dämpfer ${side} (gerader Durchgang, Platzhalter Ø ${p.d2} × ${p.l2}, mit Marke + Typ)`, a, b, p.d2, 'dmp'); return b; };
+  const tip = (from, to, side, extra = {}) => part(`Endrohr ${side} (${p.dSplit} × 1,5, Mündung hinten)`, [from, to], p.dSplit, 't', extra);
+  const RS = 1.5 * p.dSplit;
+
+  if (v === 'N4') {
+    // cat upright left of the beam, Y-split on top, two goosenecks down to upright dampers in the lower corners,
+    // tailpipes low to the rear, left and right of the tow-hitch beams (symmetric about the frame centre)
+    const c = castFront(), sy = standingY(c.O), sec = castBranches(c.O, sy, false, 'kurz, Bogen nach oben');
+    const s0 = straightSonde(yMerge(sy.yIn, [0, 1, 0], 'steht senkrecht'), [0, 1, 0], 'im geraden Stück über dem Y, seitlich');
+    const k1 = katAt(s0, [0, 1, 0]), sp = splitAbove(k1);
+    const XM = 1020, xs = [XM - p.dTwin, XM + p.dTwin], yD1 = 1350, yTail = 1050;
+    [-1, 1].forEach((sg, i) => {
+      const side = sg < 0 ? 'rechts' : 'links', o = add(sp, [sg * 33, 0, 0]), x = xs[i], z = p.zTwin;
+      const top = Math.max(p.yTop, o[1] + RS + 20);
+      part(`Strang ${side} (${p.dSplit} × 1,5, Schwanenhals)`, fillet([o, [o[0], top, o[2]], [x, top, z], [x, yD1, z]], RS), p.dSplit, 's', { group: i, skipStart: 30, skipEnd: 30, strand: true });
+      const d1 = twinDamper([x, yD1, z], [0, -1, 0], side);
+      tip(d1, d1, side); parts.pop();
+      part(`Endrohr ${side} (${p.dSplit} × 1,5, Mündung hinten)`, fillet([d1, [x, yTail, z], [x, yTail, -1630]], RS), p.dSplit, 't');
+    });
+    branchFin(sec, c);
+    out.sondePath = c.runners.map((q, ci) => q.len + sec[grpOf(ci)].len + YCONE + p.straight / 2);
+  }
+
+  if (v === 'N5') {
+    // cat upright left of the beam, Y-split on top with the outlets front/rear, both strands bend to the right into
+    // two transverse dampers side by side, tailpipes to the rear as a pair on the right
+    const c = castFront(), sy = standingY(c.O), sec = castBranches(c.O, sy, false, 'kurz, Bogen nach oben');
+    const s0 = straightSonde(yMerge(sy.yIn, [0, 1, 0], 'steht senkrecht'), [0, 1, 0], 'im geraden Stück über dem Y, seitlich');
+    const k1 = katAt(s0, [0, 1, 0]);
+    const a = add(k1, [0, 15, 0]), b = add(a, [0, YCONE, 0]);
+    part('Rohr 76,2', [k1, a], TUBE.main, 'm');
+    cone(`Y-Teiler 1 → 2 (2 × ${p.dSplit}, vorn/hinten)`, a, b, TUBE.main / 2, 33 + p.dSplit / 2);
+    const zs = [p.zFront, p.zRear], Y = p.yTwin;
+    zs.forEach((z, i) => {
+      const side = i ? 'hinten' : 'vorn', o = add(b, [0, 0, i ? -33 : 33]);
+      const xd0 = o[0] - RS - 40 - (i ? 0 : 30), len = p.l2 - (i ? 50 : 0), xd1 = xd0 - len;
+      part(`Strang ${side} (${p.dSplit} × 1,5)`, fillet([o, [o[0], Y, o[2]], [o[0], Y, z], [xd0, Y, z]], RS), p.dSplit, 's', { group: i, skipStart: 30, skipEnd: 30, strand: true });
+      cyl(`Querdämpfer ${side} (gerader Durchgang, Platzhalter Ø ${p.d2} × ${fmt0(len)}, mit Marke + Typ)`, [xd0, Y, z], [xd1, Y, z], p.d2, 'dmp');
+      const xt = xd1 - RS - (i ? 0 : 70);
+      part(`Endrohr ${side} (${p.dSplit} × 1,5, Mündung hinten)`, fillet([[xd1, Y, z], [xt, Y, z], [xt, Y, -1630]], RS), p.dSplit, 't');
+    });
+    branchFin(sec, c);
+    out.sondePath = c.runners.map((q, ci) => q.len + sec[grpOf(ci)].len + YCONE + p.straight / 2);
+  }
+
   // total turning of each pipe (sum of direction changes along the polyline) and turning after the Y
   const turn = (q) => {
     const P = q.pts.filter((pt, k) => !k || dist(pt, q.pts[k - 1]) > 1e-6);
@@ -346,7 +403,8 @@ export function build(v, o = {}) {
     for (let k = 2; k < P.length; k++) a += Math.acos(Math.max(-1, Math.min(1, dot(norm(sub(P[k - 1], P[k - 2])), norm(sub(P[k], P[k - 1]))))));
     return (a * 180) / Math.PI;
   };
-  out.turnSec = parts.filter((q) => q.kind === 's').map(turn);
+  out.turnSec = parts.filter((q) => q.kind === 's' && !q.strand).map(turn);
+  out.turnStrand = parts.filter((q) => q.strand).map(turn);
   out.turnMain = parts.filter((q) => q.kind === 'm' || q.kind === 't').reduce((a, q) => a + (q.solid ? 0 : turn(q)), 0);
   check(out, frame({ upperBeam: p.upperBeam }));
   if (out.cast) out.tunedRpm = null;
