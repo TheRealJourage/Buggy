@@ -20,12 +20,19 @@ export const HYP = {
   disp: [193, 111], dispHousing: { l: 45, rim: 6, tilt: 20 },
   pi4: [85, 56, 25],
   tube: 16,
+  btnCap: 16, btnBody: [12, 20], btnGap: 22, // steering wheel style push buttons, not measured
 };
 
 export const BEDS = {
   'Bambu Lab A1': [256, 256, 256],
   'Anycubic M7 Max (Hersteller, ungeprüft)': [298, 164, 300],
 };
+
+// Idea user 2026-11-07: two push buttons stacked at the inner end of the left front.
+export const LEFT_BUTTONS = [
+  { label: 'Touch aus/an', color: '#eab308', note: 'sperrt Touch an Tacho-Pi und CarPlay-Pi (Regen); Leitungsweg offen' },
+  { label: 'Display-Modus', color: '#2563eb', note: 'schaltet die Modi der Rund-Displays durch (Nucleo → CAN → Pico)' },
+];
 
 // Panel "Motor" in one row, from the left in driver view (Bordnetz-Konzept 2026-11-07).
 export const MOTOR_ROW = [
@@ -89,6 +96,12 @@ export function design(p) {
     const y = yc + k * H.rdPitch;
     add('innen', `Rund-Display ${i + 1} (Platine)`, box({ u: H.frontT + 4, l: 8, y, w: H.rdBoard[0], z: zc - H.rdBoard[1] / 2, h: H.rdBoard[1] }), { color: '#f59e0b', check: true });
     add('front', `Rund-Display ${i + 1} Glas`, { kind: 'cyl', axis: 'u', u: -0.6, y, z: zc, r: H.rdWindow / 2, len: 1.2 }, { color: '#0b1220' });
+  });
+  const yb = L.inner + H.wall + 2 + H.btnCap / 2 + 6;
+  LEFT_BUTTONS.forEach((b, i) => {
+    const z = zc + (i === 0 ? 1 : -1) * H.btnGap / 2;
+    add('front', `${b.label} Knopf`, { kind: 'cyl', axis: 'u', u: -3, y: yb, z, r: H.btnCap / 2, len: 6 }, { color: b.color, button: b.label, note: b.note + ' (Überlegung User 2026-11-07, Größe Hypothese)' });
+    add('innen', `${b.label} Körper`, box({ u: H.frontT + H.btnBody[1] / 2, l: H.btnBody[1], y: yb, w: H.btnBody[0], z: z - H.btnBody[0] / 2, h: H.btnBody[0] }), { color: '#a3a3a3', check: true });
   });
   const [pl, pw, ph] = H.pico;
   add('innen', 'Display-Pico', box({ u: 28 + pl / 2, l: pl, y: 80, w: pw, z: ceil - ph, h: ph }), { color: '#22c55e', check: true });

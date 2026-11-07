@@ -227,6 +227,7 @@ function buildDraft() {
   on.add('kabel');
   for (const q of d.parts) if (on.has(q.group)) draft.add(partMesh(q));
   if (on.has('front')) for (const q of d.parts.filter(x => x.label)) draft.add(label(q.label, new THREE.Vector3(-30, q.y, -12), '#fca5a5', 15));
+  if (on.has('front')) d.parts.filter(x => x.button).forEach((q, i) => draft.add(label(q.button, new THREE.Vector3(-30, q.y, i ? -12 : p.faceH + 12), '#fde68a', 15)));
   const L = sideGeom('left', p), R = sideGeom('right', p);
   const tag = [['Rund-Displays (fest, eingeklebt)', -30, (L.inner + L.outer(0)) / 2, p.faceH + 14, '#fcd34d', 'front'],
     ['Panel „Motor“ in einer Reihe', -30, -(R.inner + R.outer(0)) / 2, p.faceH + 14, '#fca5a5', 'front'],

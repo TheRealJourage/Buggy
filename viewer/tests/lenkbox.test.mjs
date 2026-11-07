@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { design, bedFit, sideGeom, shellDims, MOTOR_ROW, BEDS } from '../lenkbox.js';
+import { design, bedFit, sideGeom, shellDims, MOTOR_ROW, LEFT_BUTTONS, BEDS } from '../lenkbox.js';
 import { check, widths, DEFAULT_PARAMS, MEASURED } from '../lenkraum.js';
 
 const P = { ...DEFAULT_PARAMS, faceH: 45 };
@@ -49,4 +49,15 @@ test('bed fit finds rotations and rejects parts that are too big', () => {
 
 test('both shells fit the A1 in one piece', () => {
   for (const side of ['left', 'right']) assert.ok(bedFit(shellDims(side, P), BEDS['Bambu Lab A1']), side);
+});
+
+test('two buttons stacked on the left front, inside the face and clear of the displays', () => {
+  const { parts } = design(P);
+  const btn = parts.filter((x) => x.button);
+  assert.deepEqual(btn.map((x) => x.button), LEFT_BUTTONS.map((b) => b.label));
+  assert.equal(btn[0].y, btn[1].y);
+  for (const b of btn) assert.ok(b.y > 0 && b.z - b.r >= 0 && b.z + b.r <= P.faceH, b.name);
+  const rd = parts.filter((x) => /Rund-Display \d \(Platine\)/.test(x.name));
+  const minRd = Math.min(...rd.map((x) => x.y - x.w / 2));
+  assert.ok(btn[0].y + btn[0].r < minRd, 'button overlaps a display');
 });
