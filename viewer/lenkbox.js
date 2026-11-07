@@ -31,9 +31,9 @@ export const BEDS = {
 export const MOTOR_ROW = [
   { label: 'Zündung', type: 'A', cap: true },
   { label: 'Motor', type: 'A', cap: true },
-  { label: 'Lüfter A/M', type: 'A/C', cap: false },
   { label: 'Start', type: 'T', cap: true },
   { label: 'Kompressor', type: 'B', cap: true },
+  { label: 'Lüfter A/M', type: 'A/C', cap: false },
   { label: 'Lüfter-Poti', type: 'Poti', cap: false, pot: true },
 ];
 
