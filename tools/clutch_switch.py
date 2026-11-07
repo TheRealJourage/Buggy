@@ -26,8 +26,8 @@ LEVER_REST, LEVER_TRIP = 4.2, 1.0                        # lever tip below the p
 PIN = 8.0              # square pin, cannot turn
 CLR = 0.25             # per side
 TUN = PIN + 2 * CLR
-PIN_W = PIN - 0.2       # printed pin slightly smaller: first print sat too tight in the tunnel (user 2026-11-07)
-PIN_H = PIN - 0.1       # height less, it sets how far the switch levers are pushed
+PIN_W = PIN - 0.1       # printed pin slightly smaller: first print sat too tight in the tunnel (user 2026-11-07)
+PIN_H = PIN - 0.1       # also sets how far the switch levers are pushed
 GAP = 0.6              # plunger edge above the pin top -> lever pushed to 0.6, 0.4 beyond the trip point
 LEAD = (2.5, 30.0)     # chamfer on the pin's leading top edge (height, angle to the top): rides over a lever
                        # or switch that sits a bit low, or a step in the tunnel (user 2026-10-31)
