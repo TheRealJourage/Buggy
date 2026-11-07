@@ -94,7 +94,7 @@
   <div><h3 style="margin:6px 0">CN7 (links)</h3><table id="cn7"></table></div>
   <div><h3 style="margin:6px 0">CN10 (rechts)</h3><table id="cn10"></table></div>
 </div>
-<p class="hint">Grau hinterlegt = Versorgung/Masse/nicht verwenden. PA2/PA3 (USB-Seriell), PA13/PA14 (SWD), PC14/PC15 und PH0 (Board ab Rev. C-02) bleiben frei. Reserve: PC13 (Taster B1), PH1 (nur ab Rev. C-02). Budget: 41 von 42 nutzbaren GPIOs belegt.</p>
+<p class="hint">Grau hinterlegt = Versorgung/Masse/nicht verwenden. PA2/PA3 (USB-Seriell), PA13/PA14 (SWD), PC14/PC15 und PH0 (Board ab Rev. C-02) bleiben frei. Reserve: PC13 (Taster B1), PH1 (nur ab Rev. C-02) und seit 2026-11-07 die 8 früheren EPB-Pins. Budget: 33 von 42 nutzbaren GPIOs belegt. <b>Festgelegt (User, 2026-11-07):</b> Feststellbremse (EPB) läuft auf dem Gangschaltungs-Controller; Lüfter-PWM und Tankgeber bleiben hier.</p>
 
 <script>
 // Nucleo-F446RE morpho headers (UM1724 Rev 17, Table 29) with proposed use (Vorschlag Claude 2026-11-07)
@@ -107,8 +107,8 @@
     PA11: 'CAN1 RX → Transceiver', PA12: 'CAN1 TX → Transceiver',
     PC11: 'UART4 RX ← Speeduino TX3 (D14 rot, 5 V über Reihenwiderstand/Pegelwandler)', PC10: 'UART4 TX → Pegelwandler → Speeduino RX3 (D15 weiß)',
     PA15: 'Lüfter-PWM 25 Hz (TIM2_CH1) → 12-V-Stufe',
-    PC6: 'EPB links RPWM (TIM3_CH1)', PC7: 'EPB links LPWM (TIM3_CH2)', PC8: 'EPB rechts RPWM (TIM3_CH3)', PC9: 'EPB rechts LPWM (TIM3_CH4)',
-    PC12: 'EPB links Enable', PD2: 'EPB rechts Enable', PC2: 'EPB links Strom (ADC)', PC3: 'EPB rechts Strom (ADC)',
+    PC6: 'Reserve (PWM, TIM3_CH1)', PC7: 'Reserve (PWM, TIM3_CH2)', PC8: 'Reserve (PWM, TIM3_CH3)', PC9: 'Reserve (PWM, TIM3_CH4)',
+    PC12: 'Reserve', PD2: 'Reserve', PC2: 'Reserve (ADC)', PC3: 'Reserve (ADC)',
     PC0: 'Batteriespannung (ADC, Teiler)', PC1: 'Tankgeber (ADC)',
     PA0: 'Speeduino D47 Lüfter-Signal (Pull-up 3,3 V)', PA1: 'Warnblinkschalter Box', PB0: 'Zündschalter-Zustand', PA4: 'Kl.-15-Rückmeldung (nur Teiler, nicht 5-V-fest)',
     PB7: 'ZL180-Spule Low-Side (MOSFET)', PC13: 'Reserve (Taster B1)', PH1: 'Reserve (ab Rev. C-02)'
