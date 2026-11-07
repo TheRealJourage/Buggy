@@ -87,14 +87,14 @@ PIN_L = P0 + STROKE_MAX + 5.0                         # square part; the eye sta
 EYE_R = 7.0
 CLEVIS_X = TUN_L + 7.0
 OUT_Y = TUN / 2 + WALL
-WALL_Y0 = SW_T / 2 + 0.15                         # switch face, window edge
+WALL_Y0 = SW_T / 2 + 0.25                         # switch face, window edge; walls on both sides, the screws pull them in
 
 assert REST_IN < U_TOUCH
 assert X2 - (X1 + SW_L) >= 1.0, f'stroke {STROKE} too short for two switches in a row'
 
 
 def rail():
-    """One window for both switch bodies, one screw slot and one nut channel along the whole rail."""
+    """One window for both switch bodies, one screw slot through both walls and one nut channel along the whole rail."""
     x0, x1 = RAIL
     h0 = x0 + (SW_L - SW_HOLE_PITCH) / 2              # first possible hole centre
     h1 = x1 - (SW_L - SW_HOLE_PITCH) / 2
@@ -102,8 +102,8 @@ def rail():
     with BuildPart() as cut:
         with Locations((x0 - 0.3, -WALL_Y0, TUN - 0.1)):
             Box(x1 - x0 + 0.6, 2 * WALL_Y0, CEIL + SW_H + 2, align=(Align.MIN, Align.MIN, Align.MIN))
-        with Locations(((h0 + h1) / 2, WALL_Y0 - 0.1, z)):
-            Box(h1 - h0 + 2.4, OUT_Y - WALL_Y0 + 0.2, 2.4, align=(Align.CENTER, Align.MIN, Align.CENTER))
+        with Locations(((h0 + h1) / 2, -OUT_Y - 0.1, z)):
+            Box(h1 - h0 + 2.4, 2 * OUT_Y + 0.2, 2.4, align=(Align.CENTER, Align.MIN, Align.CENTER))
         with Locations(((h0 + h1) / 2, OUT_Y - M2_NUT[1], z)):
             Box(h1 - h0 + M2_NUT[0], M2_NUT[1] + 0.1, M2_NUT[0], align=(Align.CENTER, Align.MIN, Align.CENTER))
     return cut.part
@@ -114,8 +114,9 @@ def build_block():
     with BuildPart() as p:
         with Locations((0, -OUT_Y, -FLOOR)):
             Box(TUN_L, 2 * OUT_Y, FLOOR + TUN + CEIL, align=(Align.MIN, Align.MIN, Align.MIN))
-        with Locations((0, WALL_Y0, TUN)):
-            Box(TUN_L, OUT_Y - WALL_Y0, top - TUN, align=(Align.MIN, Align.MIN, Align.MIN))
+        for y0 in (WALL_Y0, -OUT_Y):                   # switches clamped between two walls (user 2026-11-07)
+            with Locations((0, y0, TUN)):
+                Box(TUN_L, OUT_Y - WALL_Y0, top - TUN, align=(Align.MIN, Align.MIN, Align.MIN))
         for side in (-1, 1):
             y0 = TUN / 2 if side > 0 else -OUT_Y
             with Locations((TUN_L - 1, y0, -FLOOR)):
