@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Buggy – Lenksäulen-Gehäuse</title>
+<title>Buggy – Lenksäulen-Box</title>
 <style>
   html, body { margin: 0; height: 100%; background: #1a1a1c; color: #ddd; font-family: system-ui, sans-serif; overflow: hidden; }
   #bar { position: fixed; top: 0; left: 0; right: 0; padding: 6px 10px; background: #151517e6; display: flex; gap: 8px; align-items: center; font-size: 13px; z-index: 2; flex-wrap: wrap; }
@@ -36,16 +36,24 @@
 </head>
 <body>
 <div id="bar">
-  <b>Lenksäulen-Gehäuse · Bauraum</b>
+  <b>Lenksäulen-Box · Entwurf 2026-11-07</b>
   <button data-view="iso" class="active">3D</button>
   <button data-view="top">oben</button>
   <button data-view="driver">Fahrerblick</button>
   <button data-view="side">seitlich</button>
-  <label><input type="checkbox" id="sight" checked> Sichtzone</label>
+  <label><input type="checkbox" id="sight"> Sichtzone</label>
+  <label><input type="checkbox" class="layer" value="schale" checked> PETG</label>
+  <label><input type="checkbox" class="layer" value="front" checked> Front</label>
+  <label><input type="checkbox" class="layer" value="innen" checked> innen</label>
+  <label><input type="checkbox" class="layer" value="oben" checked> 7"</label>
+  <label><input type="checkbox" class="layer" value="alu" checked> Alu</label>
+  <label><input type="checkbox" id="showBoxes"> Spiel-Boxen</label>
   <button id="togglePanel">Liste</button>
 </div>
 <div id="panel">
-  <h3>Boxen</h3>
+  <h3>Entwurf (User 2026-11-07)</h3>
+  <div id="draftInfo" class="note" style="color:#bbb;line-height:1.45"></div>
+  <h3>Spiel-Boxen (Haken „Spiel-Boxen“)</h3>
   <div id="list"></div>
   <div style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap">
     <select id="preset"></select>
@@ -74,14 +82,16 @@
 <div id="legend">
   <b>Gemessen (Halle 2026-11-05):</b> vorne 29 + 3 + 31,5 cm, weiter hinten 19 + 3 + 23,5 cm, Länge 16 cm (links am Servomotor 14 cm), Freiraum 4,5 cm hoch (gesetzt), Lenksäule mittig darin. Gebaut wird links und rechts neben der Lenksäule, darunter (blau) nur Kabel.<br>
   <span style="color:#6c6">grün</span> = Freiraum (kostet keine Sicht) · <span class="warn">gelb</span> = ragt in die Sichtzone · <span style="color:#f66">rot</span> = passt nicht.<br>
-  <span class="note"><b>Hypothese</b> (grau, rechts einstellbar): Abstand der Messlinien, Ø und Höhenlage der Lenksäule, Lage von Flachstahl und Servolenkung, Fahrerseite, alle Bauteil-Höhen. Seitenbegrenzung über die ganze Höhe wie gemessen angenommen.</span>
+  Fahrer sitzt an der Messlinie „vorne“ (User 2026-11-07).<br>
+  <span class="note"><b>Hypothese</b> (grau, rechts einstellbar): Abstand der Messlinien, Ø und Höhenlage der Lenksäule, Lage von Flachstahl und Servolenkung, alle Bauteil-Maße des Entwurfs. Seitenbegrenzung über die ganze Höhe wie gemessen angenommen.</span>
 </div>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
 import { MEASURED as M, DEFAULT_PARAMS, PRESETS, widths, colBottomZ, colTopZ, check, defaultLayout, corners } from './lenkraum.js';
+import { design, bedFit, shellDims, sideGeom, BEDS, HYP } from './lenkbox.js';
 
-const KEY = 'buggy-lenkraum-v3';
+const KEY = 'buggy-lenkraum-v4';
 let view = 'iso';
 let state = load() || fresh();
 let sel = state.boxes[0]?.id ?? null;
@@ -103,6 +113,8 @@ const sun = new THREE.DirectionalLight(0xffffff, 1.6); sun.position.set(-300, 40
 
 const space = new THREE.Group(); scene.add(space);
 const boxes = new THREE.Group(); scene.add(boxes);
+const draft = new THREE.Group(); scene.add(draft);
+boxes.visible = false;
 let sightGroup, driverLabel;
 
 function label(text, pos, color = '#ddd', size = 22) {
@@ -186,6 +198,68 @@ function buildSpace() {
   space.add(driverLabel);
 }
 
+
+function partMesh(q) {
+  const op = q.opacity ?? 1, grp = new THREE.Group();
+  let g;
+  if (q.kind === 'prism') {
+    g = new THREE.ExtrudeGeometry(new THREE.Shape(q.pts.map(([u, y]) => new THREE.Vector2(u, y))), { depth: q.z1 - q.z0, bevelEnabled: false });
+    g.translate(0, 0, q.z0);
+  } else if (q.kind === 'cyl') {
+    g = new THREE.CylinderGeometry(q.r, q.r, q.len, 40);
+    if (q.axis === 'u') g.rotateZ(Math.PI / 2);
+    grp.position.set(q.u, q.y, q.z);
+  } else {
+    g = new THREE.BoxGeometry(q.l, q.w, q.h);
+    grp.position.set(q.u, q.y, q.z + q.h / 2);
+    grp.rotation.y = (q.tilt || 0) * Math.PI / 180;
+  }
+  const m = solid(g, new THREE.Color(q.color), op); m.userData.part = q;
+  grp.add(m, edges(g, 0x000000, 0.35));
+  return grp;
+}
+
+let lastDraft = null;
+function buildDraft() {
+  draft.clear();
+  const p = state.params, d = design(p); lastDraft = d;
+  const on = new Set([...document.querySelectorAll('.layer')].filter(c => c.checked).map(c => c.value));
+  on.add('kabel');
+  for (const q of d.parts) if (on.has(q.group)) draft.add(partMesh(q));
+  if (on.has('front')) for (const q of d.parts.filter(x => x.label)) draft.add(label(q.label, new THREE.Vector3(-30, q.y, -12), '#fca5a5', 15));
+  const L = sideGeom('left', p), R = sideGeom('right', p);
+  const tag = [['Rund-Displays (fest, eingeklebt)', -30, (L.inner + L.outer(0)) / 2, p.faceH + 14, '#fcd34d', 'front'],
+    ['Panel „Motor“ in einer Reihe', -30, -(R.inner + R.outer(0)) / 2, p.faceH + 14, '#fca5a5', 'front'],
+    ['Nucleo-F446RE', 86, 165, -12, '#93c5fd', 'innen'], ['Display-Pico', 53, 80, -12, '#86efac', 'innen'],
+    ['7" + Pi 4 hinten dran', 40, 0, d.base + 150, '#d8b4fe', 'oben'],
+    ['Kabelrohr unter der Säule', 100, 0, -14, '#7dd3fc', 'kabel']];
+  for (const [t, u, y, z, c, grp] of tag) if (on.has(grp)) draft.add(label(t, new THREE.Vector3(u, y, z), c, 17));
+  renderDraftInfo(d);
+}
+
+function fitText(dims) {
+  return Object.entries(BEDS).map(([n, b]) => { const f = bedFit(dims, b); return `${n.replace(' (Hersteller, ungeprüft)', '*')}: ${f ? `${f.pose}${f.deg ? `, ${f.deg}° gedreht` : ''}` : '<span class="why">passt nicht</span>'}`; }).join('<br>');
+}
+function renderDraftInfo(d) {
+  const p = state.params, L = shellDims('left', p), R = shellDims('right', p);
+  const fl = [L[0], p.faceH, HYP.frontT], fr = [R[0], p.faceH, HYP.frontT];
+  const over = Math.max(0, p.faceH - M.slabH);
+  $('draftInfo').innerHTML = `
+  <b>Festgelegt:</b> zwei dichte PETG-Boxen + Brücke mit 7" und Pi 4 · Front (SLA) zum Fahrer: links 3 Rund-Displays, rechts Panel „Motor“ in einer Reihe · unten offen, Alu-Platte mit Dichtmasse · Nucleo + Pico links an der Decke · Kühlung erst messen.<br>
+  <b>PETG-Box links</b> ${L.join(' × ')} mm (Breite × Tiefe × Höhe)<br>${fitText(L)}<br>
+  <b>PETG-Box rechts</b> ${R.join(' × ')} mm<br>${fitText(R)}<br>
+  <b>SLA-Front links</b> ${fl.join(' × ')} · ${fitText(fl).split('<br>')[1]}<br>
+  <b>SLA-Front rechts</b> ${fr.join(' × ')} · ${fitText(fr).split('<br>')[1]}<br>
+  Frontfläche ${p.faceH} mm${over ? ` → <span class="warn">${over} mm über dem Freiraum (Sicht)</span>` : ' (= Freiraum)'} · Schalter-Mitte ${Math.round(d.holeZ)} mm über Unterkante, Kappen enden 2 mm unter der Oberkante.<br>
+  <span class="note"><b>Hypothese:</b> alles außer den Halle-Maßen – Wand ${HYP.wall} mm, Abstand ${HYP.sideGap} mm zu Rahmen/Säule, Rund-Display-Fenster Ø ${HYP.rdWindow}, Schalterkörper ${HYP.swBody[2]} mm tief, 7" ${HYP.disp.join(' × ')} mm, Gehäusetiefe ${HYP.dispHousing.l} mm, Neigung ${HYP.dispHousing.tilt}°, Pi 4 ${HYP.pi4.join(' × ')} mm, Lage Lenksäule. Druckbett-Prüfung nur über die Außenmaße (Slicer prüfen). Teil anklicken zeigt Name + Maße.</span>
+  <div id="partInfo" style="margin-top:4px;color:#ddd"></div>`;
+}
+function showPart(q) {
+  const el = $('partInfo'); if (!el) return;
+  const dims = q.kind === 'box' ? `${q.l} × ${q.w} × ${q.h} mm (u × y × z)` : q.kind === 'cyl' ? `Ø ${2 * q.r} mm` : '';
+  el.innerHTML = `<b>${q.name}</b> ${dims}${q.note ? `<br><span class="note">${q.note}</span>` : ''}`;
+}
+
 const statusColor = { green: 0x22c55e, yellow: 0xfacc15, red: 0xef4444 };
 let results = {};
 
@@ -245,14 +319,14 @@ function renderFields() {
 }
 $('name').oninput = () => { const b = state.boxes.find(x => x.id === sel); if (b) { b.name = $('name').value; save(); renderList(); } };
 
-const PARAMS = [['lineGap', 'Abstand Messlinien vorne → hinten'], ['colDia', 'Lenksäule Ø'], ['colAxis', 'Lenksäule Mitte über Unterkante Freiraum']];
+const PARAMS = [['lineGap', 'Abstand Messlinien vorne → hinten'], ['colDia', 'Lenksäule Ø'], ['colAxis', 'Lenksäule Mitte über Unterkante Freiraum'], ['faceH', 'Frontfläche Höhe (links = rechts)']];
 function renderParams() {
   const P = $('params'); P.innerHTML = '';
   for (const [k, t] of PARAMS) {
     const row = document.createElement('div'); row.className = 'row';
     row.innerHTML = `<span>${t}</span>`;
     const inp = document.createElement('input'); inp.type = 'number'; inp.step = 5; inp.value = state.params[k];
-    inp.oninput = () => { const v = parseFloat(inp.value); if (v > 0) { state.params[k] = v; save(); buildSpace(); buildBoxes(); } };
+    inp.oninput = () => { const v = parseFloat(inp.value); if (v > 0) { state.params[k] = v; save(); buildSpace(); buildBoxes(); buildDraft(); } };
     row.appendChild(inp); P.appendChild(row);
   }
   $('driverSide').value = state.driverSide;
@@ -285,6 +359,8 @@ $('import').onclick = () => {
 };
 $('reset').onclick = () => { if (!confirm('Alles auf den Ausgangsstand zurücksetzen?')) return; state = fresh(); sel = state.boxes[0].id; save(); renderParams(); buildSpace(); buildBoxes(); renderFields(); };
 $('sight').onchange = () => { if (sightGroup) sightGroup.visible = $('sight').checked; };
+$('showBoxes').onchange = () => { boxes.visible = $('showBoxes').checked; };
+document.querySelectorAll('.layer').forEach(c => c.onchange = buildDraft);
 $('togglePanel').onclick = () => $('panel').classList.toggle('hidden');
 
 function setView(v) {
@@ -305,13 +381,15 @@ renderer.domElement.addEventListener('pointerup', e => {
   if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5) return;
   mouse.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
   ray.setFromCamera(mouse, camera);
+  const dh = ray.intersectObjects(draft.children, true).find(h => h.object.userData.part);
+  if (dh && !boxes.visible) { showPart(dh.object.userData.part); return; }
   const hit = ray.intersectObjects(boxes.children, true).find(h => h.object.userData.id);
   if (hit) { sel = hit.object.userData.id; buildBoxes(); renderFields(); }
 });
 
 function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
 addEventListener('resize', resize); resize();
-renderParams(); buildSpace(); buildBoxes(); renderFields(); setView('iso');
+renderParams(); buildSpace(); buildBoxes(); buildDraft(); renderFields(); setView('iso');
 renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
 </script>
 </body>
