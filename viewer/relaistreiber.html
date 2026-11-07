@@ -34,9 +34,9 @@
 </head>
 <body>
 <h1>Relaistreiber ULN2003AN – Schaltplan</h1>
-<p class="hint">Stand 2026-11-06 (Controller STM32 statt Teensy). Quelle der Festlegungen: <code>Relaisbox.md</code> (Relais-Belegung, „Festgelegt 2026-11-01“) und <code>Bordnetz-Konzept.md</code>. <span class="hyp">Gelb = Vorschlag Claude / Hypothese, nicht festgelegt.</span> Controller-Pins sind bewusst nicht belegt (Firmware-Thema, <code>OUTnn</code> = logischer Signalname).</p>
+<p class="hint">Stand 2026-11-07 (Treiberplatine gebaut, Vorschlag Pinbelegung Nucleo-F446RE → <a href="#nucleo">Abschnitt 7</a>), davor 2026-11-06 (Controller STM32 statt Teensy). Quelle der Festlegungen: <code>Relaisbox.md</code> (Relais-Belegung, „Festgelegt 2026-11-01“) und <code>Bordnetz-Konzept.md</code>. <span class="hyp">Gelb = Vorschlag Claude / Hypothese, nicht festgelegt.</span> Controller-Pins sind bewusst nicht belegt (Firmware-Thema, <code>OUTnn</code> = logischer Signalname).</p>
 
-<div class="warn"><b>Offen vor dem Aufbau:</b> Spulenwiderstand der Hella-Relais ist noch nicht gemessen (To-Do Halle, 85 ↔ 86). Alle Stromangaben unten sind <b>Annahmen</b>, bis das gemessen ist.</div>
+<div class="warn"><b>Nachtrag 2026-11-04:</b> Spulenwiderstand Hella 4RD 003 520-08 gemessen <b>82 Ω</b> (≈ 146–176 mA bei 12–14,4 V); die 90-Ω-Annahme unten ist damit ersetzt. Chip-Namen U1–U3 in Abschnitt 2/4 entsprechen A–C der gebauten Platine nur, wenn die Kanalzuordnung so übernommen wird (Kabelbaum-Session).</div>
 
 <h2>1. Das Prinzip (pro Kanal)</h2>
 <ol>
@@ -82,7 +82,62 @@
   <li><b>Offen:</b> Freilaufdiode am Motor-Relais (Spule hängt am Speeduino Pin 31, nicht am ULN) · ZL180 (Spule ca. 0,4–0,48 A) nicht über einen ULN-Kanal · Strombilanz Teil A neu aufteilen.</li>
 </ul>
 
+<h2 id="nucleo">7. Gebaute Treiberplatine → Nucleo-F446RE</h2>
+<p><b>Gebaut (User, bestätigt 2026-11-07):</b> 3 Chips gesockelt nebeneinander (A, B, C), Platine ca. 3 × 6,5 × 1 cm, 20 Pull-downs 100 kΩ (ein Kanal ohne, welcher ist offen). Eingangsfarben je Chip gleich, von der Kerbe aus Pin 1 → 7:</p>
+<p id="colors"></p>
+<p>Masse (Pin 8 + alle Pull-downs) = <b>ein langes weißes Kabel</b> → zentraler Massepunkt. COM (Pin 9) = <b>je Chip ein weißes Kabel</b> → zusammen auf eine 12-V-Leitung. Ausgänge Pin 10–16 noch nicht verkabelt.</p>
+<div class="warn"><b>Weiß ist dreifach belegt</b> (Masse, 12 V COM, Eingang 4). Masse und 12 V vor dem Einbau eindeutig markieren, Chips mit A/B/C beschriften – Vertauschen von Masse und 12 V ist ein Kurzschluss.</div>
+
+<p class="hyp"><b>Pinbelegung = Vorschlag Claude (2026-11-07), nicht festgelegt.</b> Die inneren Arduino-Buchsen reichen nicht (22 Pins, D0/D1 belegt) → äußere <b>ST-Morpho-Stiftleisten CN7 (links) und CN10 (rechts)</b>, je 2 × 19, Raster 2,54 mm.</p>
+<p class="hint">Quellen: Morpho-Belegung UM1724 Rev 17 Tab. 29; 5-V-Toleranz DS10693 Rev 11 Tab. 9–10 (PA4/PA5 nicht 5-V-tolerant); Timer/ADC/CAN/UART aus STM32duino <code>PeripheralPins.c</code>. Tabelle: je Zeile ein Stiftpaar (ungerade | gerade), Zeile 1 = Pin 1/2. <span class="hyp">Welche Spalte am Board die ungerade ist und ob Pin 1 auf der USB-Seite liegt, ist nicht geprüft (Hypothese).</span> Prüfen vor dem Löten (2 Min): Durchgangsprüfer an GND, dann an CN7 in der <b>4. Stiftreihe von der USB-Seite</b> beide Stifte antippen – der, der piept, ist CN7-8 (GND); damit stehen Spalte und Richtung fest.</p>
+<div style="display:flex;flex-wrap:wrap;gap:16px">
+  <div><h3 style="margin:6px 0">CN7 (links)</h3><table id="cn7"></table></div>
+  <div><h3 style="margin:6px 0">CN10 (rechts)</h3><table id="cn10"></table></div>
+</div>
+<p class="hint">Grau hinterlegt = Versorgung/Masse/nicht verwenden. PA2/PA3 (USB-Seriell), PA13/PA14 (SWD), PC14/PC15 und PH0 (Board ab Rev. C-02) bleiben frei. Reserve: PC13 (Taster B1), PH1 (nur ab Rev. C-02). Budget: 41 von 42 nutzbaren GPIOs belegt.</p>
+
 <script>
+// Nucleo-F446RE morpho headers (UM1724 Rev 17, Table 29) with proposed use (Vorschlag Claude 2026-11-07)
+(function () {
+  const WIRES = [['Lila', '#b05fd8'], ['Grün', '#3cb44b'], ['Orange', '#f58231'], ['Weiß', '#eeeeee'], ['Gelb', '#ffe119'], ['Blau', '#4a7dff'], ['Grau', '#9a9a9a']];
+  document.getElementById('colors').innerHTML = WIRES.map(([n, c], i) =>
+    `<span style="display:inline-block;margin:2px 8px 2px 0"><span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:${c};vertical-align:-2px"></span> IN${i + 1} ${n}</span>`).join('');
+  const DRV = { A: ['PA9', 'PA8', 'PB10', 'PB4', 'PB5', 'PB3', 'PA10'], B: ['PB12', 'PB2', 'PB1', 'PB15', 'PB14', 'PB13', 'PC4'], C: ['PB8', 'PB9', 'PC5', 'PA6', 'PA7', 'PB6', 'PA5'] };
+  const USE = {
+    PA11: 'CAN1 RX → Transceiver', PA12: 'CAN1 TX → Transceiver',
+    PC11: 'UART4 RX ← Speeduino TX3 (D14 rot, 5 V über Reihenwiderstand/Pegelwandler)', PC10: 'UART4 TX → Pegelwandler → Speeduino RX3 (D15 weiß)',
+    PA15: 'Lüfter-PWM 25 Hz (TIM2_CH1) → 12-V-Stufe',
+    PC6: 'EPB links RPWM (TIM3_CH1)', PC7: 'EPB links LPWM (TIM3_CH2)', PC8: 'EPB rechts RPWM (TIM3_CH3)', PC9: 'EPB rechts LPWM (TIM3_CH4)',
+    PC12: 'EPB links Enable', PD2: 'EPB rechts Enable', PC2: 'EPB links Strom (ADC)', PC3: 'EPB rechts Strom (ADC)',
+    PC0: 'Batteriespannung (ADC, Teiler)', PC1: 'Tankgeber (ADC)',
+    PA0: 'Speeduino D47 Lüfter-Signal (Pull-up 3,3 V)', PA1: 'Warnblinkschalter Box', PB0: 'Zündschalter-Zustand', PA4: 'Kl.-15-Rückmeldung (nur Teiler, nicht 5-V-fest)',
+    PB7: 'ZL180-Spule Low-Side (MOSFET)', PC13: 'Reserve (Taster B1)', PH1: 'Reserve (ab Rev. C-02)'
+  };
+  const OFF = { PA13: 'SWD', PA14: 'SWD', PA2: 'USB-Seriell', PA3: 'USB-Seriell', PC14: 'Quarz (ab C-02)', PC15: 'Quarz (ab C-02)', PH0: 'ST-Link-Takt (ab C-02)', BOOT0: '' };
+  Object.entries(DRV).forEach(([chip, pins]) => pins.forEach((p, i) => { USE[p] = `ULN ${chip} IN${i + 1}|${i}`; }));
+  const CN7 = ['PC10', 'PC11', 'PC12', 'PD2', 'VDD', 'E5V', 'BOOT0', 'GND', '–', '–', '–', 'IOREF', 'PA13', 'RESET', 'PA14', '+3,3V', 'PA15', '+5V', 'GND', 'GND', 'PB7', 'GND', 'PC13', 'VIN', 'PC14', '–', 'PC15', 'PA0', 'PH0', 'PA1', 'PH1', 'PA4', 'VBAT', 'PB0', 'PC2', 'PC1', 'PC3', 'PC0'];
+  const CN10 = ['PC9', 'PC8', 'PB8', 'PC6', 'PB9', 'PC5', 'AVDD', 'U5V', 'GND', '–', 'PA5', 'PA12', 'PA6', 'PA11', 'PA7', 'PB12', 'PB6', '–', 'PC7', 'GND', 'PA9', 'PB2', 'PA8', 'PB1', 'PB10', 'PB15', 'PB4', 'PB14', 'PB5', 'PB13', 'PB3', 'AGND', 'PA10', 'PC4', 'PA2', '–', 'PA3', '–'];
+  const cell = (n, sig) => {
+    let use = USE[sig], bg = '', txt = '';
+    if (sig === 'E5V') txt = '5 V von der kleinen 5-V-Schiene';
+    else if (/GND/.test(sig)) txt = 'zentraler Massepunkt';
+    if (use && use.includes('|')) {
+      const [label, k] = use.split('|');
+      const [cn, col] = WIRES[+k];
+      txt = `<span style="display:inline-block;width:11px;height:11px;border-radius:2px;background:${col};vertical-align:-1px"></span> <b>${label}</b> (${cn})`;
+    } else if (use) txt = use;
+    else if (sig in OFF) { txt = OFF[sig] ? 'nicht verwenden: ' + OFF[sig] : ''; bg = '#1a1a1a'; }
+    else if (!/^P[A-H]\d+$/.test(sig) && !txt) bg = '#1a1a1a';
+    if (!/^P[A-H]\d+$/.test(sig) && !use) bg = '#1a1a1a';
+    return `<td style="background:${bg};color:#8cf">${n}</td><td style="background:${bg}"><b>${sig}</b></td><td style="background:${bg}">${txt}</td>`;
+  };
+  const table = (id, list) => {
+    let h = '<thead><tr><th>Pin</th><th>Signal</th><th>Verwendung</th><th>Pin</th><th>Signal</th><th>Verwendung</th></tr></thead><tbody>';
+    for (let i = 0; i < 38; i += 2) h += `<tr>${cell(i + 1, list[i])}${cell(i + 2, list[i + 1])}</tr>`;
+    document.getElementById(id).innerHTML = h + '</tbody>';
+  };
+  table('cn7', CN7); table('cn10', CN10);
+})();
 // Sockel / Verbraucher je Chip-Kanal (Relaisbox.md, Entwurf 2026-11-01); null = Kanal frei
 const CHIPS = [
   { name: 'U1', rows: [[1,'Blinker links'],[2,'Blinker rechts'],[3,'Stand-/Rücklicht'],[4,'Nachlaufpumpe V51'],[6,'Abblendlicht'],[7,'Fernlicht'],[8,'Nebelscheinwerfer vorn']] },
