@@ -97,7 +97,7 @@ export function design(p) {
     add('innen', `Rund-Display ${i + 1} (Platine)`, box({ u: H.frontT + 4, l: 8, y, w: H.rdBoard[0], z: zc - H.rdBoard[1] / 2, h: H.rdBoard[1] }), { color: '#f59e0b', check: true });
     add('front', `Rund-Display ${i + 1} Glas`, { kind: 'cyl', axis: 'u', u: -0.6, y, z: zc, r: H.rdWindow / 2, len: 1.2 }, { color: '#0b1220' });
   });
-  const yb = L.inner + H.wall + 2 + H.btnCap / 2 + 6;
+  const yb = (L.inner + yc - H.rdPitch - H.rdWindow / 2) / 2; // midway between front end and the nearest display glass
   LEFT_BUTTONS.forEach((b, i) => {
     const z = zc + (i === 0 ? 1 : -1) * H.btnGap / 2;
     add('front', `${b.label} Knopf`, { kind: 'cyl', axis: 'u', u: -3, y: yb, z, r: H.btnCap / 2, len: 6 }, { color: b.color, button: b.label, note: b.note + ' (Überlegung User 2026-11-07, Größe Hypothese)' });
