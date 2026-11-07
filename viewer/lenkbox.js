@@ -33,6 +33,7 @@ export const MOTOR_ROW = [
   { label: 'Motor', type: 'A', cap: true },
   { label: 'Start', type: 'T', cap: true },
   { label: 'Kompressor', type: 'B', cap: true },
+  { label: 'Winde (Überlegung)', type: 'A', cap: true }, // still on panel "Zubehör", user 2026-11-07
   { label: 'Lüfter A/M', type: 'A/C', cap: false },
   { label: 'Lüfter-Poti', type: 'Poti', cap: false, pot: true },
 ];
