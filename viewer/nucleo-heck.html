@@ -41,6 +41,7 @@
   .st.b { background: #1f3a1f; color: #9be09b; }
   .st.k { background: #4a1f1f; color: #ffb0b0; }
   .st.p { background: #3a3315; color: #e8c547; }
+  .st.o { background: #1f2f4a; color: #9cc3ff; }
   #plan .off { opacity: 0.07; }
   #plan.vbot #lparts { opacity: 0.25; }
   #plan.vbot #nucleo { opacity: 0.3; }
@@ -116,8 +117,8 @@
 
 <script>
 // ---------- part cards (Vorschlag Claude 2026-11-10) ----------
-const B = 'b', K = 'k', PR = 'p';
-const STXT = { b: 'Bestand', k: 'kaufen', p: 'prüfen' };
+const B = 'b', K = 'k', PR = 'p', O = 'o';
+const STXT = { b: 'Bestand', k: 'kaufen', p: 'prüfen', o: 'bestellt' };
 // chain items: ['P', pin, header] ['R', value] ['D', value, 'r'|'l'] ['N', [shunts]] ['M', title, [lines]] ['E', [label lines]]
 // shunt: { t: 'R'|'C'|'CP'|'D'|'Z', v, to: '3V3'|'GND'|other label }
 function chain(items) {
@@ -246,13 +247,13 @@ function zlStage() {
 }
 
 const CARDS = [
-  { id: 'ser', title: 'Serial3 zum/vom Speeduino · CN7-1 / CN7-2', svg: chain([['P', 'PC10', 'CN7-1 · TX'], ['M', 'Pegelwandler-Modul', ['A1 ← PC10 · B1 → D15', 'VA = 3,3 V · VB = 5 V', 'OE an VA · GND an GND']], ['E', ['D15 = RX3 Speeduino (weiß)']]]) + chain([['P', 'PC11', 'CN7-2 · RX'], ['R', '10 kΩ'], ['E', ['D14 = TX3 Speeduino (rot)', '5 V, PC11 ist 5-V-tolerant']]]),
-    parts: [['Pegelwandler-Modul 8 Kanäle (TXS0108E?)', 1, B], ['R 10 kΩ', 1, PR]],
-    note: '10 kΩ statt 1 kΩ: begrenzt den Strom in den stromlosen Nucleo auf unter 0,5 mA; bei 115200 Baud unkritisch (gerechnet). Pegelwandler: VA muss ≤ VB sein; ob OE auf dem Modul schon einen Pull-up hat, ist offen → an VA legen.' },
+  { id: 'ser', title: 'Serial3 zum/vom Speeduino · CN7-1 / CN7-2', svg: chain([['P', 'PC10', 'CN7-1 · TX'], ['M', 'Pegelwandler 4 Kanäle', ['LV1 ← PC10 · HV1 → D15', 'LV = 3,3 V · HV = 5 V', 'GND an GND']], ['E', ['D15 = RX3 Speeduino (weiß)']]]) + chain([['P', 'PC11', 'CN7-2 · RX'], ['R', '10 kΩ'], ['E', ['D14 = TX3 Speeduino (rot)', '5 V, PC11 ist 5-V-tolerant']]]),
+    parts: [['Pegelwandler-Modul 4 Kanäle (BSS138?)', 1, O], ['R 10 kΩ', 1, PR]],
+    note: '10 kΩ statt 1 kΩ: begrenzt den Strom in den stromlosen Nucleo auf unter 0,5 mA; bei 115200 Baud unkritisch (gerechnet). Pegelwandler: 4-Kanal-Modul statt 8-Kanal (User 2026-11-10), nur Kanal 1 belegt. Typ BSS138 mit Pull-ups und Pinfolge LV1 LV2 LV GND LV3 LV4 / HV1 HV2 HV GND HV3 HV4 = Hypothese Claude (übliches Modul, nicht am eigenen geprüft). Beide GND-Pins sind auf diesen Modulen nach Kenntnisstand verbunden (ungeprüft) → einer reicht.' },
   { id: 'e5v', title: '5-V-Einspeisung · CN7-6 (E5V)', svg: chain([['P', 'E5V', 'CN7-6'], ['N', [{ t: 'CP', v: '100 µF/25 V', to: 'GND' }, { t: 'C', v: '100 nF', to: 'GND' }]], ['E', ['+5 V kleine 5-V-Schiene', '(Klemme/Stecker)']]]),
     parts: [['Elko 100 µF/25 V', 1, B], ['C 100 nF', 1, K]],
     note: 'Jumper am Nucleo auf externe 5 V (E5V) stellen, Bezeichnung in UM1724 prüfen (vermutlich JP5, nicht geprüft). Elko: Minus (Streifen) an GND.' },
-  { id: 'v3', title: '3,3-V-Schiene · CN7-16', svg: chain([['P', '+3V3', 'CN7-16'], ['N', [{ t: 'CP', v: '10 µF/25 V', to: 'GND' }]], ['E', ['3,3-V-Schiene: Pull-ups, Klemmdioden,', 'Pegelwandler VA, CAN-Modul 3V3']]]),
+  { id: 'v3', title: '3,3-V-Schiene · CN7-16', svg: chain([['P', '+3V3', 'CN7-16'], ['N', [{ t: 'CP', v: '10 µF/25 V', to: 'GND' }]], ['E', ['3,3-V-Schiene: Pull-ups, Klemmdioden,', 'Pegelwandler LV, CAN-Modul 3V3']]]),
     parts: [['Elko 10 µF/25 V', 1, B]],
     note: 'Last auf der Schiene klein (CAN-Modul, Pull-ups, Pegelwandler); den Wert habe ich nicht gerechnet. Der 3,3-V-Regler des Nucleo ist nach Kenntnisstand Claude für ca. 500 mA ausgelegt (nicht geprüft).' },
   { id: 'gnd', title: 'GND-Schiene · CN7-20', svg: chain([['P', 'GND', 'CN7-20'], ['E', ['GND-Schiene → zentraler Massepunkt', '(eigene Ader, festgelegt 2026-11-06)']]]),
@@ -276,9 +277,9 @@ const CARDS = [
     note: 'Pull-up 1 kΩ an 3,3 V: U = 3,3 V · R / (R + 1 kΩ) → 0 Ω ≙ 0 V, 190 Ω ≙ 0,53 V, ca. 650 ADC-Stufen, Strom höchstens 3,3 mA (gerechnet). 1 kΩ in Reihe + Diode schützen den Pin, falls die Leitung zum Tank an 12 V kommt.' },
   { id: 'bat', title: 'Batteriespannung · CN7-38 (PC0, ADC)', svg: IN_DIV('PC0', 'CN7-38', ['+12 V am Eingang des kleinen', '5-V-Wandlers (Vorschlag)']), parts: P_IN_DIV,
     note: 'Gleicher Teiler wie Kl. 15 (14,4 V ≙ 2,4 V, Auflösung ca. 5 mV, gerechnet). Abgriff siehe „Offen“: dort liegt nur Spannung an, wenn der Nucleo läuft.' },
-  { id: 'can', title: 'CAN · CN10-12 (PA12 TX) / CN10-14 (PA11 RX)', svg: chain([['P', 'PA12', 'CN10-12 · TX'], ['M', 'SN65HVD230-Modul', ['PA12 → CTX · PA11 ← CRX', '3V3 → 3,3-V-Schiene · GND', '120 Ω auf dem Modul? (Hypothese)']], ['E', ['CAN-H / CAN-L', '→ Bus-Stecker']]]),
-    parts: [['CAN-Modul SN65HVD230', 1, K]],
-    note: 'Modul fehlt im Lager (User 2026-11-06), Bestellung geplant. Viele dieser Module haben den 120-Ω-Abschluss fest aufgelötet (Hypothese): auslöten, wenn die Relaisbox kein Busende ist.' },
+  { id: 'can', title: 'CAN · CN10-12 (PA12 TX) / CN10-14 (PA11 RX)', svg: chain([['P', 'PA12', 'CN10-12 · TX'], ['M', 'SN65HVD230-Modul', ['PA12 → CTX · PA11 ← CRX', '3V3 → 3,3-V-Schiene · GND', 'R2 = 120 Ω fest auf dem Modul']], ['E', ['CAN-H / CAN-L', '→ Bus-Stecker']]]),
+    parts: [['CAN-Modul SN65HVD230', 1, O]],
+    note: '10 Stück bestellt 2026-11-10 (WCMCU-230, 16,1 × 14,5 mm). Laut Händlerfoto ist R2 = 120 Ω („121“) fest zwischen CANH und CANL aufgelötet: auslöten, wenn die Relaisbox kein Busende ist. Original-Chip unsicher → Modul vor dem Einlöten am Bus testen.' },
   { id: 'uln', title: 'Bündel A, B, C → Treiberplatine · CN10', svg: '', parts: [],
     note: 'Keine Bauteile auf der Trägerplatine: Die Pull-downs sitzen schon auf der Treiberplatine (gebaut 2026-11-07). Die Adern werden direkt an die Buchsenleiste gelötet, Reihenfolge siehe Lötliste.' }
 ];
@@ -328,11 +329,11 @@ const fw = (from, to, c, what, card, h) => FW.push({ from, to, c, what, card, h 
 // rails
 br('GND-Schiene', 'g', [[G, 7], [G, 41], [40, 41]], 'gnd');
 br('3,3-V-Schiene', 'v', [[V, 0], [V, 40], [40, 40]], 'v3');
-// SER: module U1 pins in rows 1 (VA..OE) and 6 (VB..GND), cols 0..9
-PARTS.push({ id: 'U1', t: 'MODL', v: 'Pegelwandler 8 Kanäle', card: 'ser', pinsA: ['VA', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'OE'], pinsB: ['VB', 'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'GND'], i0: 0, ja: 1, jb: 6, note: 'VA…OE in Reihe 2, VB…GND in Reihe 7 (Annahme, am Modul prüfen)' });
-br('3,3 V an VA', 'v', [[0, 1], [0, 0], [V, 0]], 'ser'); br('OE an 3,3 V', 'v', [[9, 1], [9, 0]], 'ser');
-br('GND', 'g', [[9, 6], [9, 7], [G, 7]], 'ser');
-br('B1 → D15', 's', [[1, 6], [1, 7], [0, 7]], 'ser');
+// SER: module U1 pins in rows 1 (LV side) and 6 (HV side), cols 0..5
+PARTS.push({ id: 'U1', t: 'MODL', v: 'Pegelwandler 4 Kanäle', card: 'ser', pinsA: ['LV1', 'LV2', 'LV', 'GND', 'LV3', 'LV4'], pinsB: ['HV1', 'HV2', 'HV', 'GND', 'HV3', 'HV4'], i0: 0, ja: 1, jb: 6, note: 'LV-Seite in Reihe 2, HV-Seite in Reihe 7; Pinfolge und Reihenabstand = Hypothese, am Modul prüfen' });
+br('3,3 V an LV', 'v', [[2, 1], [2, 0], [V, 0]], 'ser');
+br('GND', 'g', [[3, 6], [3, 7], [G, 7]], 'ser');
+br('HV1 → D15', 's', [[0, 6], [0, 7]], 'ser');
 pad([0, 7], 'Speeduino RX3 = D15 (weiß)', 'L', 'ser');
 pad([0, 8], 'Speeduino TX3 = D14 (rot)', 'L', 'ser');
 br('D14', 's', [[0, 8], [1, 8]], 'ser');
@@ -413,17 +414,17 @@ two('D', '1N5819', [29, 40], [29, 36], 'tank', 'senkrecht, Ring unten (3,3-V-Sch
 two('C', '100 nF', [28, 39], [28, 41], 'tank', 'senkrecht, über die 3,3-V-Schiene in die GND-Schiene');
 pad([26, 41], 'Tankgeber 2. Ader (GND)', 'B', 'tank');
 // CAN
-PARTS.push({ id: 'U2', t: 'CANM', v: 'SN65HVD230-Modul', card: 'can', pins: ['3V3', 'GND', 'CTX', 'CRX', 'CANH', 'CANL'], i0: 31, j: 36, note: 'Stiftreihe in Reihe 37, Modul nach unten; Pinfolge am Modul prüfen' });
+PARTS.push({ id: 'U2', t: 'CANM', v: 'SN65HVD230-Modul', card: 'can', pins: ['3V3', 'GND', 'CTX', 'CRX', 'CANH', 'CANL'], i0: 31, j: 36, note: 'Stiftreihe in Reihe 37, Modul nach unten; Pinfolge 3V3 GND CTX CRX CANH CANL laut Händlerfoto, am eigenen Modul gegenprüfen' });
 br('3,3 V', 'v', [[31, 36], [31, 40]], 'can');
 pad([35, 36], 'CAN-H → Bus', 'B', 'can'); pad([36, 36], 'CAN-L → Bus', 'B', 'can');
 // 3V3 buffer, ground exit
 PARTS.push({ id: id('C'), t: 'E', v: '10 µF/25 V', p: [13, 40], m: [13, 41], r: 18, card: 'v3', note: 'Plus oben (3,3-V-Schiene), Minus unten (GND-Schiene)' });
 pad([G, 41], 'GND → zentraler Massepunkt', 'B', 'gnd');
 
-fw(hdr('CN7', 1), [1, 1], 'braun', 'PC10 → Pegelwandler A1', 'ser', 'CN7-1');
+fw(hdr('CN7', 1), [0, 1], 'braun', 'PC10 → Pegelwandler LV1', 'ser', 'CN7-1');
 fw(hdr('CN7', 2), [6, 8], 'tuerkis', 'PC11 ← 10 kΩ ← D14', 'ser', 'CN7-2');
 fw(hdr('CN7', 6), [3, 11], 'rot', 'E5V ← +5 V', 'e5v', 'CN7-6');
-fw([2, 11], [0, 6], 'rot', '+5 V → Pegelwandler VB', 'ser');
+fw([2, 11], [2, 6], 'rot', '+5 V → Pegelwandler HV', 'ser');
 fw(hdr('CN7', 16), [V, 19], 'rosa', '+3V3 → 3,3-V-Schiene', 'v3', 'CN7-16');
 fw(hdr('CN7', 17), [2, 20], 'gruen', 'PA15 → 1 kΩ → Basis', 'pwm', 'CN7-17');
 fw(hdr('CN7', 20), [G, 22], 'schwarz', 'GND → GND-Schiene', 'gnd', 'CN7-20');
@@ -524,9 +525,9 @@ PARTS.forEach(p => {
     p.pins.forEach(([i, j, l]) => { s += T(hx(i) + 6, hy(j) - 6, l, 'font-size:7.5px;fill:#fff;font-weight:700', 'middle'); });
     s += T(x - 24, y - 17.5, p.id, 'font-size:7.5px;fill:#111;font-weight:700', 'middle') + `</g>`;
   } else if (p.t === 'MODL') {
-    const x0 = hx(p.i0) - 10, x1 = hx(p.i0 + 9) + 10, y0 = hy(p.ja) - 10, y1 = hy(p.jb) + 10;
+    const x0 = hx(p.i0) - 10, x1 = hx(p.i0 + p.pinsA.length - 1) + 10, y0 = hy(p.ja) - 10, y1 = hy(p.jb) + 10;
     s += open + `<rect x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" rx="4" fill="#123a8a" stroke="#000" opacity="0.9"/>`;
-    s += T((x0 + x1) / 2, (y0 + y1) / 2 + 4, `${p.id} Pegelwandler`, 'font-size:11px;fill:#fff;font-weight:700', 'middle');
+    s += T((x0 + x1) / 2, (y0 + y1) / 2 + 4, `${p.id} Pegel`, 'font-size:11px;fill:#fff;font-weight:700', 'middle');
     p.pinsA.forEach((l, k) => { mark([p.i0 + k, p.ja], p.card); s += `<rect x="${hx(p.i0 + k) - 5}" y="${hy(p.ja) - 5}" width="10" height="10" fill="#d4af37"/>` + T(hx(p.i0 + k), hy(p.ja) + 15, l, 'font-size:7px;fill:#fff', 'middle'); });
     p.pinsB.forEach((l, k) => { mark([p.i0 + k, p.jb], p.card); s += `<rect x="${hx(p.i0 + k) - 5}" y="${hy(p.jb) - 5}" width="10" height="10" fill="#d4af37"/>` + T(hx(p.i0 + k), hy(p.jb) - 9, l, 'font-size:7px;fill:#fff', 'middle'); });
     s += `</g>`;
@@ -668,7 +669,7 @@ const STOCK = {
   'R 100 Ω': 'Lager: „kleinere Werte“, 100 Ω nicht genannt', 'Schottky 1N5819': 'Lager: ca. 10 (2 davon für Bremslicht-Dioden-ODER vorgeschlagen)',
   'MOSFET IRLZ44N': 'Lager: Menge offen, im Test am Lüfter-Prüfstand', 'Transistor BC547B': 'Lager: 4, Beinbelegung messen',
   'TVS 1.5KE24A': 'Lager: 4', 'Diode 1N4007': 'Lager: 9 (sitzt am ZL180, nicht auf der Platine)', 'Elko 100 µF/25 V': 'Lager: 2', 'Elko 10 µF/25 V': 'Lager: 1',
-  'Pegelwandler-Modul 8 Kanäle (TXS0108E?)': 'Lager: 4', 'CAN-Modul SN65HVD230': 'Lager: 0, Bestellung geplant'
+  'Pegelwandler-Modul 4 Kanäle (BSS138?)': '10 Stück, AliExpress 2026-11-10 (8-Kanal-Module im Lager bleiben frei)', 'CAN-Modul SN65HVD230': '10 Stück, AliExpress 2026-11-10 (WCMCU-230)'
 };
 const extra = [['Buchsenleiste 2 × 19, Raster 2,54 mm', 2, PR, 'nicht im Lagerbestand gelistet → fragen/kaufen', 'Nucleo-Sockel'],
   ['Lochraster Punktraster, mind. 105 × 110 mm', 1, PR, 'nicht im Lagerbestand gelistet → fragen/kaufen', 'Trägerplatine'],
@@ -682,7 +683,7 @@ document.querySelector('#bom tbody').innerHTML = Object.entries(bom).map(([n, o]
 const cardOf = id => CARDS.find(c => c.id === id);
 const cardName = id => { const c = cardOf(id); return c ? c.title.split(' · ')[0] : ''; };
 const holesTxt = p => {
-  if (p.t === 'MODL') return `Reihe ${p.ja + 1} und ${p.jb + 1}, Spalte ${p.i0 + 1}–${p.i0 + 10}`;
+  if (p.t === 'MODL') return `Reihe ${p.ja + 1} und ${p.jb + 1}, Spalte ${p.i0 + 1}–${p.i0 + p.pinsA.length}`;
   if (p.t === 'CANM') return `Reihe ${p.j + 1}, Spalte ${p.i0 + 1}–${p.i0 + 6}`;
   if (p.pins) return p.pins.map(([i, j, l]) => `${l} ${hole([i, j])}`).join(' · ');
   if (p.p) return `+ ${hole(p.p)} · − ${hole(p.m)}`;
