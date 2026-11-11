@@ -11,7 +11,7 @@ const BASE_NOTES = [
   'Oberfläche roh, Sichtflächen ohne Kratzer',
   '!Orange mit * = Prüfmaß: vor Fertigung vom Auftraggeber bestätigen',
 ];
-const sh = (k, info) => sheet(root, { sheet: `${k} / ${N}`, ...info, notes: [...(info.notes || []), ...BASE_NOTES] });
+const sh = (k, info) => sheet(root, { sheet: `${k} / ${N}`, date: '2026-11-11', rev: 'B', ...info, notes: [...(info.notes || []), ...BASE_NOTES] });
 
 // ---------- fabrication geometry (rounded where a slot or the general tolerance allows it)
 const r1 = (v) => Math.round(v * 10) / 10;
@@ -20,7 +20,7 @@ const L = PX(g.PLATE.x1), B = g.PLATE.z1 - g.PLATE.z0, T = g.FLOOR_T;
 const XW = PX(g.WALL_X), WT = g.WALL_T, WH = g.WALL_H, AXH = g.AX_H, AXZ = T + AXH;
 const QG = PY(g.G_Z), QR = PY(g.ROW_Z), QP = PY(g.POTI_Z);
 const GQ = g.GUSSET.z.map(PY), GT = g.GUSSET.t, GB = g.GUSSET.base, GH = g.GUSSET.h, GCH = 5;
-const RIV = { q: [40, 112], h: 66, d: 6 };
+const RIV = { q: [40, 112].map((q) => q + g.VALVE_EXTRA), h: WH - 7, d: 6 }; // q kept relative to the cylinders (box 20 wider since 2026-11-11)
 const BR = g.BRACKET, SB = g.SLED_BRACKET;
 const SLOT_C = BR.t + (BR.foot - BR.t) / 2, SLOT_Q = 17;
 const SB_HOLE = SB.t + (SB.foot - SB.t) / 2, SB_Q = 15;
@@ -30,7 +30,9 @@ const SLED_L = r1(g.SLED.x1 - g.SLED.x0), SLED_W = g.SLED_W, SLED_T = g.SLED_T, 
 const CAR_C = 23; // carriage centre from the sled ends
 const LID = { t: g.LID_T, gap: 0.5, lip: 18 };
 const LID_W = B + 2 * (LID.gap + LID.t), LID_L = XW + WT + 2 * (LID.gap + LID.t), LID_H = g.CB.h;
-const REAR = { t: 1.5, flange: 15, grommet: { q: 57, h: 35, d: 30 }, gland: { q: 20, h: 35, d: 16.5 }, flangeHole: 9, flangeQ: [30, 122] };
+const REAR = { t: 1.5, flange: 15, glands: g.REAR_GLANDS.y.map((y, i) => ({ q: r1(PY(g.REAR_GLANDS.z)), h: y - T, d: g.REAR_GLANDS.d, what: g.REAR_GLANDS.what[i] })), flangeHole: 9, flangeQ: [30, B - 30] };
+// valve stack (variant B, 2026-11-11): M4 tapped holes for the through bolts, from the scaled datasheet drawing (check on the valve)
+const STK = { x0: PX(g.VSTACK.x0), x1: PX(g.VSTACK.x1), q0: PY(g.VSTACK.zOut), q1: PY(g.VSTACK.zIn), h: g.STACK_H };
 const LASCHE = { l: 57, w: 16, t: 3, a: 8, pitch: r1(g.G_Z - g.POTI_Z) };
 
 const plateHoles = [
@@ -45,10 +47,12 @@ const plateHoles = [
   ['B4', L - 20, QR, 'M6', 'durchgehend', 'Befestigung Fahrzeug'],
   ['R1', REAR.flangeHole, REAR.flangeQ[0], 'M4', 'durchgehend', 'Rückwand (Pos 11)'],
   ['R2', REAR.flangeHole, REAR.flangeQ[1], 'M4', 'durchgehend', 'Rückwand (Pos 11)'],
+  ...g.VALVE.holes.map(([dx, dz], i) => [`V${i + 1}`, PX(g.VSTACK.cx + dx), r1(PY(g.VSTACK.zOut + g.VALVE.body - dz)), 'M4', 'durchgehend', 'Ventilstapel*']),
+  ['E1', PX(g.VSTACK.cx), r1(PY(g.CB.z0 + g.WALL_T + 10)), 'Ø6', 'durchgehend', 'Ablauf Wasser'],
 ];
 
 // guards: rounded fabrication values must stay close to the design geometry
-console.assert(L === 700 && XW === 658 && WH === 73, 'plate/wall', L, XW, WH);
+console.assert(L === 700 && XW === 658 && WH === 88 && B === 172, 'plate/wall', L, XW, WH, B);
 console.assert(Math.abs(PX(g.A_BRACKET_X) - SLOT_C - XA_SLOT) < 1, 'A slot');
 console.assert(GQ.every((q, i) => i === 0 || q - GQ[i - 1] > 40), 'gussets');
 
@@ -101,6 +105,8 @@ const SLED_Z = T + g.RAIL.h;
   rect(v, A_.aHead, AXZ - 8, A_.aRod, AXZ + 8);
   phantomCyl(v, A_.aRod, A_.sled0, AXZ, 11);
   for (const [k, n] of [['G', 70], ['R', 130]]) phantomCyl(v, XW - n, XW + 60, AXZ + (k === 'G' ? 0 : 0.01), 6);
+  rect(v, STK.x0, T + g.STACK.base, STK.x1, T + STK.h, 'p');
+  label(s, 45 + (STK.x0 + 40) * 0.5, 78 - (T + STK.h + 3) * 0.5, 'Ventilstapel (Kaufteile)', { size: 2.5 });
   line(v, -10, AXZ, L + 10, AXZ, 'c');
   dim(v, [0, 0], [L, 0], 'h', -10);
   dim(v, [L, T], [L, AXZ], 'v', 8, { text: `${AXH}` });
@@ -119,6 +125,8 @@ const SLED_Z = T + g.RAIL.h;
   phantomCyl(t, A_.aX0, A_.aHead, QR, 15); rect(t, A_.aHead, QR - 8, A_.aRod, QR + 8); phantomCyl(t, A_.aRod, A_.sled0, QR, 11);
   phantomCyl(t, A_.bRear, A_.bHead, QR, 13.5); phantomCyl(t, A_.bHead, A_.bRod, QR, 4); phantomCyl(t, A_.bRod, A_.bRod + 22, QR, 8);
   phantomCyl(t, A_.gRod - 120, A_.gRod + 65, QP, 6.5);
+  rect(t, STK.x0, STK.q0, STK.x1, STK.q1, 'p');
+  label(s, 45 + (STK.x0 + 50) * 0.5, 188 - ((STK.q0 + STK.q1) / 2) * 0.5, '3 Ventile M-04', { size: 2.5 });
   rect(t, A_.gRod - LASCHE.t, QP - LASCHE.a, A_.gRod, QG + LASCHE.a);
   for (const q of [QG, QR]) { line(t, -10, q, L + 10, q, 'c'); phantomCyl(t, XW - (q === QG ? 70 : 130), XW, q, q === QG ? 10.5 : 5.5); }
   dim(t, [0, B], [XW, B], 'h', 6);
@@ -237,7 +245,7 @@ const SLED_Z = T + g.RAIL.h;
   rect(sv, 0, 0, L, T);
   dim(sv, [L, 0], [L, T], 'v', 6);
   table(s, 22, 162, [['Loch', 12], ['X', 16], ['Y', 16], ['Gewinde', 18], ['Tiefe', 24], ['für', 52]],
-    plateHoles.map(([id, x, y, th, depth, use]) => [id, fmt(x) + (id.startsWith('S') ? '*' : ''), fmt(y), th, depth, use]), { rh: 5.1, size: 2.6 });
+    plateHoles.map(([id, x, y, th, depth, use]) => [id, fmt(x) + (/^[SV]/.test(id) ? '*' : ''), fmt(y), th, depth, use]), { rh: 5.1, size: 2.6 });
 }
 
 // ======================= 4: end wall, gusset, rear wall
@@ -246,7 +254,7 @@ const SLED_Z = T + g.RAIL.h;
     no: 'BGY-ZB-03', title: 'Stirnwand, Knotenblech, Rückwand', scale: '1:1', material: 'EN AW-5754 H111', stock: 'Pos 2: 1 · Pos 3: 3 · Pos 11: 1',
     notes: [
       'Pos 2: Bohrungen erst nach dem Schweißen, siehe ZB-01',
-      '!Pos 11: Ø30 nach Gummitülle (6 Schläuche Ø6) anpassen',
+      '!Pos 11: 3 × Ø16,5 für Kabelverschraubung M16 (Luft 8 mm, Sensorkabel, Spulenkabel); Klemmbereich für den 8-mm-Schlauch prüfen*',
       'Pos 11: Biegeradius innen 1,5–2 (nach Werkzeug)',
     ],
   });
@@ -273,19 +281,16 @@ const SLED_Z = T + g.RAIL.h;
   const r = view(s, 40, 232, 1);
   rect(r, 0, 0, B, WH);
   line(r, 0, REAR.t, B, REAR.t, 'h');
-  hole(r, REAR.grommet.q, REAR.grommet.h, REAR.grommet.d);
-  hole(r, REAR.gland.q, REAR.gland.h, REAR.gland.d);
+  for (const gl of REAR.glands) hole(r, gl.q, gl.h, gl.d);
   for (const q of RIV.q) hole(r, q, RIV.h, RIV.d);
-  dim(r, [0, WH], [REAR.gland.q, WH], 'h', 6);
+  dim(r, [0, WH], [REAR.glands[0].q, WH], 'h', 6);
   dim(r, [0, WH], [RIV.q[0], WH], 'h', 12);
-  dim(r, [0, WH], [REAR.grommet.q, WH], 'h', 18);
-  dim(r, [0, WH], [RIV.q[1], WH], 'h', 24);
-  dim(r, [0, WH], [B, WH], 'h', 30);
-  dim(r, [B, 0], [B, REAR.grommet.h], 'v', 8);
-  dim(r, [B, 0], [B, RIV.h], 'v', 16);
-  dim(r, [B, 0], [B, WH], 'v', 24);
-  leader(r, [REAR.grommet.q + 10.6, REAR.grommet.h - 10.6], 14, 14, `Ø${REAR.grommet.d}*`, { chk: true });
-  leader(r, [REAR.gland.q - 5.8, REAR.gland.h - 5.8], -6, 16, `Ø${fmt(REAR.gland.d)} (M16)`);
+  dim(r, [0, WH], [RIV.q[1], WH], 'h', 18);
+  dim(r, [0, WH], [B, WH], 'h', 24);
+  REAR.glands.forEach((gl, i) => dim(r, [0, 0], [0, gl.h], 'v', -6 - 7 * i));
+  dim(r, [B, 0], [B, RIV.h], 'v', 8);
+  dim(r, [B, 0], [B, WH], 'v', 16);
+  REAR.glands.forEach((gl) => leader(r, [gl.q + 5.8, gl.h + 5.8], 16, 0, `Ø${fmt(gl.d)} (M16) ${gl.what}`));
   leader(r, [RIV.q[1] - 2.1, RIV.h - 2.1], -14, 12, '2× Ø6 Blindnietmutter M4');
   label(s, 40, 237, '← Poti-Seite', { size: 2.6 });
   const rs = view(s, 203, 232, 1, [200, 155, 'Seitenansicht']);

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Buggy – Ventilbox 3D</title>
+<title>Buggy – Elektronik-Koffer 3D</title>
 <style>
   html, body { margin: 0; height: 100%; background: #111; color: #ddd; font-family: system-ui, sans-serif; overflow: hidden; }
   #bar { position: fixed; top: 0; left: 0; right: 0; padding: 8px 12px; background: #151517cc; display: flex; gap: 10px; align-items: center; font-size: 14px; z-index: 2; flex-wrap: wrap; }
@@ -20,9 +20,7 @@
 </head>
 <body>
 <div id="bar">
-  <b>Ventilbox 3D</b>
-  <button data-variant="flat" class="on">Ventile flach</button><button data-variant="manifold">Reihenleiste</button>
-  <span>|</span>
+  <b>Elektronik-Koffer 3D</b>
   <button data-v="iso">Schräg</button><button data-v="top">Oben</button><button data-v="side">Seite</button>
   <label><input id="labels" type="checkbox" checked> Beschriftung</label>
   <label><input id="case" type="checkbox" checked> Koffer</label>
@@ -31,12 +29,12 @@
 </div>
 <div id="panel">
   <div id="result"></div>
-  <div style="margin-top:4px"><span class="ok">Grün/Grau/Schwarz</span> = Datenblatt oder gemessen (Ventil M-04-53x, HW-039, SN65HVD230) · <span class="hyp">Orange durchsichtig</span> = Platzhalter/Hypothese (Module bestellt, Trägerplatine, Fittings, Kabelverschraubungen). Ventilform vereinfacht (Hüllmaß aus dem Datenblatt). Vorschlag Claude 2026-11-11.</div>
+  <div style="margin-top:4px"><span class="ok">Grün/Grau/Schwarz</span> = Datenblatt oder gemessen (HW-039, SN65HVD230) · <span class="hyp">Orange durchsichtig</span> = Platzhalter/Hypothese (Module bestellt, Trägerplatine, Kabelverschraubungen). Ventile seit 2026-11-11 in der Zylinderbox (<a href="zylinderbox-ventile.html" style="color:#8cf">3D</a>). Vorschlag Claude 2026-11-11.</div>
 </div>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
-import { layout, VALVE, GLAND } from './ventilbox-layout.js';
+import { layout, GLAND } from './ventilbox-layout.js';
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(devicePixelRatio);
@@ -51,11 +49,6 @@ const sun = new THREE.DirectionalLight(0xffffff, 2.2); sun.position.set(-200, 30
 const fill = new THREE.DirectionalLight(0xffffff, 1.0); fill.position.set(300, -300, 200); scene.add(fill);
 
 const mat = (c, o = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.6, ...o });
-const M_ALU = mat(0xb8bcc2, { metalness: 0.5, roughness: 0.4 });
-const M_COIL = mat(0x1e1e22);
-const M_SOCK = mat(0x55585e);
-const M_FIT = mat(0x3d7fd6);
-const M_SIL = mat(0xb08d57, { metalness: 0.6 });
 const M_HYP = new THREE.MeshStandardMaterial({ color: 0xf0b54a, transparent: true, opacity: 0.35, depthWrite: false });
 const M_HYP_EDGE = new THREE.LineBasicMaterial({ color: 0xf0b54a });
 
@@ -72,46 +65,10 @@ const box = (x, y, w, h, z0, zh, m, g = group) => {
   if (m === M_HYP) { const e = new THREE.LineSegments(new THREE.EdgesGeometry(b.geometry), M_HYP_EDGE); e.position.copy(b.position); g.add(e); }
   return b;
 };
-// Cylinder along the layout y axis (dir +1 = toward larger layout y)
-const cylY = (x, y, z, r, len, dir, m) => {
-  const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 24), m);
-  c.position.set(x, -(y + dir * len / 2), z); group.add(c); return c;
-};
 const cylZ = (x, y, z0, r, h, m) => {
   const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 24), m);
   c.rotation.x = Math.PI / 2; c.position.set(x, -y, z0 + h / 2); group.add(c); return c;
 };
-
-function valveFlat(x0, y0, name) {
-  // Coil side toward smaller y (2/4 between the coils), ports 1/3/5 on the face y0+64. Lying on its side: height = 22.
-  const Z = VALVE.W;
-  box(x0 + 10, y0 + 32, 160, 32, 0, Z, M_ALU);
-  box(x0 + 18, y0, 30, 32, 0, Z, M_COIL);
-  box(x0 + 132, y0, 30, 32, 0, Z, M_COIL);
-  box(x0, y0 + 4, 18, 22, 2, 18, M_SOCK);
-  box(x0 + 162, y0 + 4, 18, 22, 2, 18, M_SOCK);
-  const cx = x0 + 90, zc = Z / 2;
-  for (const dx of [-8, 8]) cylY(cx + dx, y0 + 32, zc, 5, 15, -1, M_FIT);
-  cylY(cx, y0 + 64, zc, 5, 15, 1, M_FIT);
-  for (const dx of [-16, 16]) cylY(cx + dx, y0 + 64, zc, 6, 25, 1, M_SIL);
-  label(`Ventil ${name}`, x0 + 90, -(y0 + 48), Z + 8);
-}
-
-function valvesManifold(x0, y0) {
-  const cx = x0 + 90;
-  box(cx - 8, y0, 16, 94, 24, 16, M_ALU);
-  for (const y of [y0, y0 + 84]) box(cx - 20, y, 40, 10, 0, 24, M_ALU);
-  for (let i = 0; i < 3; i++) {
-    const yc = y0 + 47 + (i - 1) * 22.2;
-    box(x0 + 10, yc - 11, 160, 22, 72, 32, M_ALU);
-    box(x0 + 18, yc - 11, 30, 22, 104, 32, M_COIL);
-    box(x0 + 132, yc - 11, 30, 22, 104, 32, M_COIL);
-    box(x0, yc - 9, 18, 18, 110, 18, M_SOCK);
-    box(x0 + 162, yc - 9, 18, 18, 110, 18, M_SOCK);
-    cylZ(cx, yc, 40, 4, 32, M_SOCK);
-  }
-  label('3 × Ventil auf R-281/3 (H ~136)', cx, -(y0 + 47), 150);
-}
 
 function hw039(b) {
   const cx = b.x + 26, cy = b.y + 26;
@@ -133,15 +90,12 @@ function nucleo(b) {
   label('Nucleo-F091RC auf Träger (H ~45)', b.x + 52, -(b.y + 55), 55, true);
 }
 
-function build(variant) {
+function build() {
   scene.remove(group); group = new THREE.Group(); scene.add(group);
   for (const l of labels) l.d.remove(); labels.length = 0;
-  const L = layout(variant);
+  const L = layout();
   box(0, 0, L.W, L.H, -3, 3, mat(0x3a3a40));
-  if (variant === 'flat') {
-    L.valves.items.filter(i => i.id === 'valve').forEach(v => valveFlat(v.x, v.y, v.name));
-  } else valvesManifold(L.valves.items[0].x, L.valves.items[0].y);
-  for (const b of L.electronics ?? L.all.filter(i => ['nucleo', 'can', 'hwl', 'hwr', 'pc817', 'lr', 'term'].includes(i.id))) {
+  for (const b of L.all) {
     if (b.id === 'nucleo') nucleo(b);
     else if (b.id === 'hwl' || b.id === 'hwr') hw039(b);
     else if (b.id === 'can') { box(b.x, b.y, b.w, b.h, 8, 1.6, mat(0x1d4fa8)); label('CAN', b.x + 8, -(b.y + 8), 16); }
@@ -156,14 +110,13 @@ function build(variant) {
     c.rotation.z = Math.PI / 2; c.position.set(x, -y, 30); c.name = 'case'; group.add(c);
     label(txt, x, -y, 30 + r + 6, true);
   };
-  gl(-g, 60, 14, 'Schläuche 6 × 6 mm');
-  gl(-g, 150, 7, 'Luft 8 mm');
+  gl(-g, 60, 8, 'Sensorkabel');
+  gl(-g, 110, 8, 'Spulenkabel');
+  gl(-g, 170, 7, 'Kupplung');
   const xr = L.W + g;
-  gl(xr, 40, 8, '12 V / Masse');
-  gl(xr, 80, 8, 'CAN-Bündel');
-  gl(xr, 150, 9, 'Motor L+R');
-  gl(xr, 240, 8, 'Sensorkabel');
-  gl(xr, 300, 7, 'Kupplung');
+  gl(xr, 30, 8, '12 V / Masse');
+  gl(xr, 110, 8, 'CAN-Bündel');
+  gl(xr, 200, 9, 'Motor L+R');
   setCase(document.getElementById('case').checked);
   document.getElementById('result').innerHTML =
     `Platte ≈ <b>${L.W} × ${L.H} mm</b> · Koffer innen mind. ≈ <b>${iw} × ${ih} × ${iz} mm</b> (rote Linie)`;
@@ -181,16 +134,13 @@ function setView(v) {
 function setCase(on) { group.children.filter(o => o.name === 'case').forEach(o => o.visible = on); }
 
 document.querySelectorAll('[data-v]').forEach(b => b.onclick = () => setView(b.dataset.v));
-document.querySelectorAll('[data-variant]').forEach(b => b.onclick = () => {
-  document.querySelectorAll('[data-variant]').forEach(x => x.classList.toggle('on', x === b));
-  build(b.dataset.variant);
-});
+
 document.getElementById('case').onchange = e => setCase(e.target.checked);
 const lblBox = document.getElementById('labels');
 
 function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
 addEventListener('resize', resize); resize();
-build('flat');
+build();
 const v = new THREE.Vector3();
 renderer.setAnimationLoop(() => {
   controls.update(); renderer.render(scene, camera);

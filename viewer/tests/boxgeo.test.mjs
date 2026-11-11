@@ -27,3 +27,14 @@ test('everything fits inside the box', () => {
   assert.ok(g.RAIL_X0 + g.RAIL.len < g.WALL_X - g.RIGID.R);
   assert.ok(g.AX_Y + g.HM25.D / 2 < g.CB.h);
 });
+
+test('valve stack (variant B, 2026-11-11) fits beside G and A and under the cover', () => {
+  const potiX0 = g.G_ROD_END0 + g.CLEVIS + 20 - 40 - 92.5;              // poti body as drawn in scene.js
+  assert.ok(g.VSTACK.x1 + 30 <= g.G_X0, 'room for the G rear port behind G');
+  assert.ok(g.VSTACK.x1 < potiX0, 'stack ends before the poti');
+  assert.ok(g.ROW_Z - g.HM25.D / 2 - g.VSTACK.zIn >= 15, 'gap coils -> A for the 2/4 hoses');
+  assert.ok(g.ROW_Z - g.BRACKET.w / 2 - g.VSTACK.zIn >= 5, 'A bracket clear of the coils');
+  assert.ok(g.VSTACK.zOut - g.STACK.fit >= g.CB.z0 + g.WALL_T, 'silencer zone inside the side wall');
+  assert.ok(g.FLOOR_T + g.STACK_H + 10 <= g.CB.h - g.LID_T, 'stack + bolt heads under the cover');
+  for (const y of g.REAR_GLANDS.y) assert.ok(y - 11 >= g.FLOOR_T && y + 11 <= g.FLOOR_T + g.WALL_H, 'gland nut on the rear wall');
+});

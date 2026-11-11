@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Buggy – Ventilbox Montageplatte</title>
+<title>Buggy – Elektronik-Koffer Montageplatte</title>
 <style>
   html, body { margin: 0; background: #111; color: #ddd; font-family: system-ui, sans-serif; }
   #bar { position: sticky; top: 0; padding: 8px 12px; background: #151517; display: flex; gap: 12px; align-items: center; font-size: 14px; flex-wrap: wrap; z-index: 2; }
@@ -24,10 +24,8 @@
 </head>
 <body>
 <div id="bar">
-  <b>Ventilbox – Montageplatte (Vorschlag Claude, 2026-11-11)</b>
-  <span>Ventile:</span>
-  <button data-v="flat" class="on">flach, ohne Reihenleiste</button>
-  <button data-v="manifold">stehend auf Reihenleiste R-281/3</button>
+  <b>Elektronik-Koffer – Montageplatte (Vorschlag Claude, 2026-11-11)</b>
+  <span>Ventile seit 2026-11-11 in der Zylinderbox (<a href="zylinderbox-ventile.html" style="color:#8cf">3D</a>)</span>
   <a href="ventilbox3d.html" style="color:#8cf">→ 3D</a>
 </div>
 <main>
@@ -36,14 +34,13 @@
   <div class="note">Draufsicht, Maße in mm. <span class="ok">Grün umrandet</span> = Maß aus Datenblatt oder gemessen · <span class="hyp">orange gestrichelt</span> = Platzhalter/Hypothese (Teil noch nicht da oder Zubehörmaß geschätzt). Gesamtmaße sind Mindest-<b>Innen</b>maße des Koffers, ohne Montageplatte und Schaumstoff.</div>
   <table id="parts"></table>
   <div class="note">
-    <b>Quellen:</b> Ventil Airtec M-04-53x-HN: 161 Körper / 180 mit Steckdosen, 64 hoch (Spule + Steckdose), 32 Körper, 22 breit, Befestigung Ø 4,5 (<a href="https://www.airtec.nl/img/bmepics/M-04.pdf" style="color:#8cf">Datenblatt M-04</a>, S. 4-05). Anschlüsse 2/4 auf der Spulenseite zwischen den Spulen, 1/3/5 gegenüber. Reihenleiste R-281/3: C = 94 (Breite mit Haltewinkeln), Teilung 22,2, Ventil steht 104 über Leistenmitte + 32 Haltewinkel (S. 4-06). HW-039 gemessen 2026-11-10 (<a href="hw039.html" style="color:#8cf">hw039.html</a>). Nucleo-Trägerplatine wie Relaisbox 105 × 110 (<a href="nucleo-heck.html" style="color:#8cf">nucleo-heck.html</a>).<br>
-    <b>Hinweis (Vorschlag Claude):</b> Die Abluft (3/5, Schalldämpfer) bläst in den Koffer. Schalldämpfer zur Wand hin, weg von der Elektronik; Druckausgleichselement in die Wand auf der Ventilseite. Druckluft laut Airtec gefiltert und getrocknet → Kondensat im Koffer ist trotzdem möglich (Hypothese).
+    <b>Quellen:</b> HW-039 gemessen 2026-11-10 (<a href="hw039.html" style="color:#8cf">hw039.html</a>), SN65HVD230 Händlerangabe. Nucleo-Trägerplatine wie Relaisbox 105 × 110 (<a href="nucleo-heck.html" style="color:#8cf">nucleo-heck.html</a>). Die Ventile sitzen seit 2026-11-11 als Stapel in der Zylinderbox (Festgelegt User) → Koffer trocken, ohne Abluft und Druckausgleich.
   </div>
 </main>
 <script type="module">
 import { layout, GLAND as glands } from './ventilbox-layout.js';
-function render(v) {
-  const { all, W, H, zMax, innerZ } = layout(v);
+function render() {
+  const { all, W, H, zMax, innerZ } = layout();
   const svg = document.getElementById('plate');
   svg.setAttribute('viewBox', `-30 -30 ${W + 60} ${H + 60}`);
   let s = `<rect x="0" y="0" width="${W}" height="${H}" fill="#202024" stroke="#666"/>`;
@@ -65,11 +62,7 @@ function render(v) {
   document.getElementById('parts').innerHTML = '<tr><th>Teil</th><th>Fläche</th><th>Höhe</th><th>Quelle</th></tr>' +
     all.filter(b => b.z).map(b => `<tr><td>${b.label}</td><td>${b.w} × ${b.h}</td><td>${b.z}</td><td class="${b.hyp ? 'hyp' : 'ok'}">${b.hyp ? 'Hypothese' : 'Datenblatt/gemessen'}</td></tr>`).join('');
 }
-document.querySelectorAll('#bar button').forEach(b => b.onclick = () => {
-  document.querySelectorAll('#bar button').forEach(x => x.classList.toggle('on', x === b));
-  render(b.dataset.v);
-});
-render('flat');
+render();
 </script>
 </body>
 </html>

@@ -100,7 +100,7 @@
   <li><b>Prüfen</b> (orangener Kasten oben). Airtec-Teile, Schiene und Wagen müssen dafür da sein.</li>
   <li><b>Material besorgen:</b> Bleche, Alu-Winkel und Normteile laut Liste (Metallhändler, Reststücke reichen).</li>
   <li><b>Kollege schweißt das Grundgerüst</b> (Teile 1–3): Stirnwand rechtwinklig auf die Platte, Knotenbleche außen. Danach die Clip-Bohrungen in die Stirnwand.</li>
-  <li><b>Grundplatte bohren:</b> Lochtabelle im Zeichnungssatz (BGY-ZB-02): M6 für Lagerböcke und Befestigung, M3 für die Schiene (vorher an der Schiene prüfen), M4 für die Rückwand-Lasche. Die Haube hält mit 4 Blindnietmuttern M4 in Stirnwand und Rückwand.</li>
+  <li><b>Grundplatte bohren:</b> Lochtabelle im Zeichnungssatz (BGY-ZB-02): M6 für Lagerböcke und Befestigung, M3 für die Schiene (vorher an der Schiene prüfen), M4 für die Rückwand-Lasche, 3 × M4 für den Ventilstapel (V1–V3, vorher am Ventil prüfen), Ø 6 Ablauf (E1). Die Haube hält mit 4 Blindnietmuttern M4 in Stirnwand und Rückwand.</li>
   <li><b>Böcke und Schlitten:</b> Winkel auf 50 mm ablängen. Ø 22,5 mit Stufenbohrer, Langlöcher fräsen oder als Doppelbohrung mit Feile, M10 × 1,25 in den Mitnehmer. Wagen mit Senkschrauben an den Schlitten, dann die Böcke an den Schlitten.</li>
   <li><b>Schlitten aufsetzen:</b> Muss über die <span class="a-stroke"></span> mm Weg ohne Klemmen laufen.</li>
   <li><b>Vormontieren:</b> Zylinder in die Böcke stecken, RM-25 vorn nur handfest. An A die Anschlaghülse aufschieben, FK-32 aufschrauben und in den Mitnehmer drehen, mit RL-25 kontern. RD-20 an G und B mit RL-20 kontern, die Poti-Lasche zwischen RL-20 und RD-20 an G klemmen.</li>
@@ -113,8 +113,9 @@
       <li><b>Obere Reihe:</b> B ausfahren. R, 1, 3 und 5 müssen einrasten, bevor B am Hubende ist (gemessen höchstens 28,1 von 40 mm).</li>
     </ol>
   </li>
+  <li><b>Ventilstapel</b> (Festgelegt 2026-11-11): 3 Ventile M-04-533 flach übereinander hinten in der Poti-Ecke, unten G, dann A, oben B. Distanzhülsen 3 mm unter und zwischen den Ventilen, M4-Gewindestangen oder lange Schrauben durch die Ø-4,5-Löcher in V1–V3. Spulen (Anschlüsse 2/4) zeigen zu den Zylindern, Schalldämpfer 3/5 zur Poti-Seitenwand. Druckluft über T-Stücke an die Anschlüsse 1.</li>
   <li><b>Probelauf mit 7 bar:</b> Sensoren ZS-6701 mit den Spannbändern NT-550 verschieben, bis die LED in der Endlage schaltet (B „aus“ bei ~21 mm). Drossel an G auf ~100 mm/s.</li>
-  <li><b>Schließen:</b> Rückwand mit Tülle und Kabelverschraubung, Schläuche mit Schlaufe zum Schlitten (B fährt <span class="a-stroke"></span> mm mit), Haube aufsetzen und an den Blindnietmuttern verschrauben. Ablaufbohrung Ø 6 an der tiefsten Stelle der Einbaulage.</li>
+  <li><b>Schließen:</b> Rückwand mit 3 Kabelverschraubungen M16 (Druckluft 8 mm, Sensorkabel, Spulenkabel), Schläuche mit Schlaufe zum Schlitten (B fährt <span class="a-stroke"></span> mm mit), Haube aufsetzen und an den Blindnietmuttern verschrauben. Ablaufbohrung Ø 6 (E1) unter den Schalldämpfern, bei anderer Einbaulage an die tiefste Stelle.</li>
 </ol>
 
 <h2>6 Offen</h2>
@@ -123,6 +124,7 @@
   <li>Starr oder auf Gummipuffern lagern? Die Befestigungslöcher passen für beides</li>
   <li>Lage der Ablaufbohrung (hängt vom Einbauort ab)</li>
   <li>Poti-Halter (nach Lieferung des Potis)</li>
+  <li>Ventilstapel: Lochbild V1–V3 am echten Ventil messen (aus der Datenblatt-Zeichnung abgegriffen), Zugang zu Steckdosen und Handbetätigung im eingebauten Zustand, Klemmbereich M16 für den 8-mm-Schlauch. Bock A steht ~11 mm vor den Anschlüssen 2/4 von G und A → dort Winkel-Steckverschraubungen (Hypothese)</li>
 </ul>
 </main>
 
@@ -201,6 +203,10 @@ function svg(id, w, h) {
     line(s, X(g.WALL_X + g.WALL_T), Z(z), X(g.PLATE.x1) + 20, Z(z), { 'stroke-width': 3, stroke: '#333' });
   }
   rect(s, X(g.G_ROD_END0) - 120, Z(g.POTI_Z) - 6, 185, 12, { 'stroke-dasharray': '4 2', stroke: '#aaa' });
+  { const zA = Z(g.VSTACK.zOut), zB = Z(g.VSTACK.zIn); // valve stack (Festgelegt 2026-11-11), coils toward the cylinders
+    rect(s, X(g.VSTACK.x0), Math.min(zA, zB), X(g.VSTACK.x1) - X(g.VSTACK.x0), Math.abs(zB - zA), { fill: '#3a4048', stroke: '#9aa3ad' });
+    rect(s, X(g.VSTACK.x0) + 60, Math.min(zA, Z(g.VSTACK.zOut - g.STACK.fit)), 60, Math.abs(Z(g.VSTACK.zOut - g.STACK.fit) - zA), { 'stroke-dasharray': '3 2', stroke: '#c9a227' });
+    text(s, X(g.VSTACK.cx) - 55, (zA + zB) / 2 + 3, '3 Ventile M-04 (Stapel, unten G)', { 'font-size': 6.5 }); }
   text(s, X(g.G_ROD_END0) - 27, Z(g.POTI_Z) + 3, 'Poti KPZ 125 (Lage nach Lieferung)', { 'font-size': 6.5 });
   // labels
   const lab = (x, z, t, dy = 3) => text(s, X(x), Z(z) + dy, t, { 'font-size': 7 });
@@ -386,8 +392,8 @@ const plateHoles = [];
     ['7', 'Poti-Lasche', 'Alu 3 mm', `~55 × 16`, 1, `Ø 8,5 (Stange G) und Bohrung für Poti-Auge, Abstand ${r1(g.G_Z - g.POTI_Z)}`, 'selbst'],
     ['8', 'Poti-Halter', 'Alu-Winkel', 'nach Lieferung', 1, 'Langloch längs', 'selbst'],
     ['9', 'Anschlaghülse A', 'Alu/Stahl Rundmaterial Ø 16', '40 lang, innen Ø 10,5', 1, 'Passscheiben M10 dazu', 'selbst (To-Do)'],
-    ['10', 'Haube', 'Alu 1,5 mm, gekantet', 'außen 664 × 156 × 83, Laschen vorn/hinten 18', 1, '4 × Ø 4,5 in den Laschen (BGY-ZB-06)', 'Metallbauer'],
-    ['11', 'Rückwand', 'Alu 1,5 mm', `${Wd} × ${Hh} + Lasche 15`, 1, 'Tülle Schläuche (Bohrung nach Tülle), Ø 16,5 für M16, 2 × Blindnietmutter M4 (BGY-ZB-03)', 'Metallbauer'],
+    ['10', 'Haube', 'Alu 1,5 mm, gekantet', `außen ${g.CB.x1 - g.CB.x0 + 4} × ${Wd + 4} × ${g.CB.h}, Laschen vorn/hinten 18`, 1, '4 × Ø 4,5 in den Laschen (BGY-ZB-06)', 'Metallbauer'],
+    ['11', 'Rückwand', 'Alu 1,5 mm', `${Wd} × ${Hh} + Lasche 15`, 1, '3 × Ø 16,5 für M16, 2 × Blindnietmutter M4 (BGY-ZB-03)', 'Metallbauer'],
   ];
   const t = document.getElementById('parts');
   for (const p of parts) t.insertRow().innerHTML = p.map((c, i) => `<td${i === 4 ? ' class="n"' : ''}>${c}</td>`).join('');
@@ -401,7 +407,9 @@ const plateHoles = [];
     ['Zylinderschraube M3 × 8', 8, 'Schiene auf die Platte (Senkbohrung der Schiene)'],
     ['Linsenschraube M4 × 8', 6, 'Haube (4), Rückwand-Lasche (2)'],
     ['Blindnietmutter M4', 4, 'in Stirnwand und Rückwand (setzt der Metallbauer)'],
-    ['Gummitülle (6 Schläuche Ø 6) + Kabelverschraubung M16', '1 + 1', 'Rückwand'],
+    ['Kabelverschraubung M16 (Klemmbereich bis ≥ 8 mm)', 3, 'Rückwand: Druckluft 8 mm, Sensorkabel, Spulenkabel'],
+    ['Gewindestange M4 oder Schraube M4 × ~90 + Mutter/Scheibe', 3, 'Ventilstapel (Länge nach Stapelhöhe 75 + Platte)'],
+    ['Distanzhülse Ø 8 / 4,3 × 3', 9, 'Ventilstapel: unter und zwischen den Ventilen'],
     ['Gummipuffer M6 (vorhanden) oder Schrauben M6', 4, 'Befestigung im Rahmen; Bolzen höchstens 8 mm einschrauben'],
   ];
   const t2 = document.getElementById('std');
