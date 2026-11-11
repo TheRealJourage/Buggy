@@ -15,7 +15,7 @@ test('one blank keeps the box at or below the fixed 115 mm for every material an
 test('outer length, width, flange and web stay within 1 mm of nominal', () => {
   for (const c of cases) {
     assert.ok(Math.abs(c.L - g.OUTER.L) < 1 && Math.abs(c.W - g.OUTER.W) < 1, `${c.key} r${c.r}`);
-    assert.ok(Math.abs(c.flange - g.OUTER.FLANGE) < 1 && Math.abs(c.uWeb - g.WEB_W) < 1);
+    assert.ok(Math.abs(c.flange - g.OUTER.FLANGE) < 1 && Math.abs(c.stegWeb - g.WEB_W) < 1);
   }
 });
 
@@ -28,10 +28,10 @@ test('wall corners and flange mitres leave a gap instead of colliding', () => {
   }
 });
 
-test('U web fits between the walls and into the flange notch; legs stay off the floor', () => {
+test('centre web fits between the walls and into the flange notch; its wall stays off the floor', () => {
   for (const c of cases) {
-    assert.ok(g.U.L < c.innerL, `${c.key} r${c.r}`);
-    assert.ok(c.uWeb <= g.NOTCH.w, 'web into notch');
+    assert.ok(g.STEG.L < c.innerL, `${c.key} r${c.r}`);
+    assert.ok(c.stegWeb <= g.NOTCH.w, 'web into notch');
     assert.ok(c.floorGap > 5);
   }
 });
@@ -65,8 +65,8 @@ test('cutting plan holds both blanks without overlap', () => {
   assert.ok(A.x + A.w + g.KERF <= B.x + 1e-6);
 });
 
-test('sheet weight matches the relay box note (3.0 kg alu, 6.6 kg stainless)', () => {
-  const area = (g.polyArea(g.tubOutline()) + g.polyArea(g.uOutline())) * 1e-6;
+test('sheet weight: single-wall web saves about one wall against the note (3.0 kg alu, 6.6 kg stainless)', () => {
+  const area = (g.polyArea(g.tubOutline()) + g.polyArea(g.stegOutline())) * 1e-6;
   const kg = (m) => area * m.t * m.rho;
-  assert.ok(Math.abs(kg(g.MATERIALS.alu) - 3.0) < 0.1 && Math.abs(kg(g.MATERIALS.va) - 6.6) < 0.1);
+  assert.ok(kg(g.MATERIALS.alu) < 3.0 && kg(g.MATERIALS.alu) > 2.6 && kg(g.MATERIALS.va) < 6.6 && kg(g.MATERIALS.va) > 5.8);
 });

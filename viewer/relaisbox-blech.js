@@ -70,35 +70,31 @@ export const tubBendLines = () => {
 };
 export const reliefHoles = () => [[1, 1], [1, -1], [-1, 1], [-1, -1]].map(([sx, sy]) => [sx * TUB.a, sy * TUB.b]);
 
-// ---------- Pos 2: centre web as an inverted U (web 50 = sealing face, two legs hang down)
-export const U = { L: 495, web: WEB_W, leg: 100, notch: { w: 80, h: 40, r: 5, x: [-150, 0, 150] } };
-U.webFlat = r1(U.web - BD);
-U.legFlat = r1(U.leg - BD / 2);
-U.flatW = r1(U.webFlat + 2 * U.legFlat);
+// ---------- Pos 2: centre web as a single-wall angle (user 2026-11-11: not double-walled).
+// Web 50 = sealing face of both lids; one wall hangs down under the web edge on the control side
+// (Vorschlag Claude), free above the floor, cable notches at its lower edge.
+export const STEG = { L: 495, web: WEB_W, leg: 100, side: -1, notch: { w: 80, h: 40, r: 5, x: [-150, 0, 150] } };
+STEG.webFlat = r1(STEG.web - BD / 2);
+STEG.legFlat = r1(STEG.leg - BD / 2);
+STEG.flatW = r1(STEG.webFlat + STEG.legFlat);
 
 const arc = (cx, cy, r, a0, a1, n = 6) => Array.from({ length: n + 1 }, (_, k) => {
   const t = a0 + ((a1 - a0) * k) / n;
   return [cx + r * Math.cos(t), cy + r * Math.sin(t)];
 });
 
-// U outline: u along the length (centred), w across the flat (0 .. flatW); cable notches with
-// rounded corners in both leg edges (legs hang down, notches end up at the floor side)
-export function uOutline() {
-  const { L, flatW, notch: { w: nw, h: nh, r, x: nx } } = U, h = L / 2, P = Math.PI;
+// flat outline: u along the length (centred), w across: 0 = lower wall edge (notches), legFlat = bend, flatW = web edge
+export function stegOutline() {
+  const { L, flatW, notch: { w: nw, h: nh, r, x: nx } } = STEG, h = L / 2, P = Math.PI;
   const pts = [[-h, 0]];
   for (const x of nx) {
     const x0 = x - nw / 2, x1 = x + nw / 2;
     pts.push([x0, 0], ...arc(x0 + r, nh - r, r, P, P / 2), ...arc(x1 - r, nh - r, r, P / 2, 0), [x1, 0]);
   }
-  pts.push([h, 0], [h, flatW]);
-  for (const x of nx.slice().reverse()) {
-    const x0 = x - nw / 2, x1 = x + nw / 2;
-    pts.push([x1, flatW], ...arc(x1 - r, flatW - nh + r, r, 0, -P / 2), ...arc(x0 + r, flatW - nh + r, r, -P / 2, -P), [x0, flatW]);
-  }
-  pts.push([-h, flatW]);
+  pts.push([h, 0], [h, flatW], [-h, flatW]);
   return pts;
 }
-export const uBendLines = () => [U.legFlat, U.legFlat + U.webFlat].map((w) => [[-U.L / 2, w], [U.L / 2, w]]);
+export const stegBendLines = () => [[[-STEG.L / 2, STEG.legFlat], [STEG.L / 2, STEG.legFlat]]];
 
 // ---------- assembled result per material and bend radius
 export function result(key, r) {
@@ -107,17 +103,17 @@ export function result(key, r) {
     key, r, bd,
     L: 2 * TUB.a + bd, W: 2 * TUB.b + bd,
     H: TUB.wall + bd, flange: TUB.flange + bd / 2,
-    uWeb: U.webFlat + bd, uLeg: U.legFlat + bd / 2,
+    stegWeb: STEG.webFlat + bd / 2, stegLeg: STEG.legFlat + bd / 2,
     innerL: 2 * TUB.a + bd - 2 * m.t,
-    floorGap: TUB.wall + bd - m.t - (U.legFlat + bd / 2),
+    floorGap: TUB.wall + bd - m.t - (STEG.legFlat + bd / 2),
   };
 }
 
-// ---------- cutting plan: tub blank + U on one sheet, 10 mm edge, 10 mm between parts
+// ---------- cutting plan: tub blank + centre web on one sheet, 10 mm edge, 10 mm between parts
 export const KERF = 10;
 export function cutPlan() {
   const tub = { w: TUB.flatW, h: TUB.flatL }; // tub rotated: width across the sheet
-  const u = { w: U.flatW, h: U.L };
+  const u = { w: STEG.flatW, h: STEG.L };
   const W = r1(KERF + tub.w + KERF + u.w + KERF), H = r1(KERF + tub.h + KERF);
   return {
     sheet: { w: Math.ceil(W / 10) * 10, h: Math.ceil(H / 10) * 10 },

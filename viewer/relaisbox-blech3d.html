@@ -33,7 +33,7 @@
   <button data-stage="2">2 Seitenwände</button>
   <button data-stage="3">3 Stirnwände</button>
   <button id="play">▶ abspielen</button>
-  <label><input type="checkbox" id="assembled"> U-Steg einsetzen</label>
+  <label><input type="checkbox" id="assembled"> Winkelsteg einsetzen</label>
   <span>Material:</span>
   <button data-mat="va" class="active">Edelstahl 1,5</button>
   <button data-mat="alu">Alu 2</button>
@@ -49,7 +49,7 @@ import * as g from './relaisbox-blech.js';
 
 // x = driving direction (front +x), y = left (+), z = up; mm. Bends drawn sharp (radius not modelled),
 // hinges sit on the flat bend lines, sheet thickness lies on the outside of each bend.
-const { TUB, U, GAP, NOTCH } = g;
+const { TUB, STEG, GAP, NOTCH } = g;
 const COLORS = { va: 0xa7b0b5, alu: 0xc4cad2 };
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(devicePixelRatio);
@@ -95,9 +95,9 @@ function build() {
   root.add(tub);
   plate(`Pos 1 Boden ${2 * a} × ${2 * b} (zwischen den Biegelinien)`, [[-a, -b], [a, -b], [a, b], [-a, b]], t, color, tub);
   const sides = [
-    { nm: 'Stirnwand vorn (Kabelverschraubungen)', fl: 'Flansch vorn, Ausschnitt für den U-Steg', rot: 0, pos: [a, 0], h: b - GAP, notch: true, kind: 'end' },
+    { nm: 'Stirnwand vorn (Kabelverschraubungen)', fl: 'Flansch vorn, Ausschnitt für den Winkelsteg', rot: 0, pos: [a, 0], h: b - GAP, notch: true, kind: 'end' },
     { nm: 'Seitenwand links (Lastseite)', fl: 'Flansch links', rot: Math.PI / 2, pos: [0, b], h: a - GAP, notch: false, kind: 'long' },
-    { nm: 'Stirnwand hinten', fl: 'Flansch hinten, Ausschnitt für den U-Steg', rot: Math.PI, pos: [-a, 0], h: b - GAP, notch: true, kind: 'end' },
+    { nm: 'Stirnwand hinten', fl: 'Flansch hinten, Ausschnitt für den Winkelsteg', rot: Math.PI, pos: [-a, 0], h: b - GAP, notch: true, kind: 'end' },
     { nm: 'Seitenwand rechts (Steuerseite)', fl: 'Flansch rechts', rot: -Math.PI / 2, pos: [0, -b], h: a - GAP, notch: false, kind: 'long' },
   ];
   for (const sd of sides) {
@@ -118,24 +118,17 @@ function build() {
     } else plate(fname, [[0, -h], [f, -(h - f)], [f, h - f], [0, h]], t, color, flH);
   }
 
-  // Pos 2: U web, lies beside the tub while flat; legs fold up, then the U is turned over into the tub
+  // Pos 2: single-wall angle; lies beside the tub while flat, the wall folds up, then it is
+  // turned over into the tub: web flush with the flange, wall under the edge towards the control side
   uGroup = new THREE.Group(); root.add(uGroup);
-  const L2 = U.L / 2, wf = U.webFlat / 2, lf = U.legFlat, nt = U.notch;
-  plate(`Pos 2 U-Steg: Steg ${U.web} = Dichtfläche beider Deckel`, [[-L2, -wf], [L2, -wf], [L2, wf], [-L2, wf]], t, color, uGroup);
-  for (const s of [1, -1]) {
-    const hg = new THREE.Group(); hg.position.y = s * wf; hg.rotation.z = s > 0 ? Math.PI / 2 : -Math.PI / 2;
-    uGroup.add(hg);
-    const fold = new THREE.Group(); hg.add(fold); hinges.uLegs.push(fold);
-    // local X = outward from the hinge (0..lf), Y along the length; notches at the free edge
-    const pts = [[0, -L2], [lf, -L2]];
-    const xs = s > 0 ? nt.x.map((x) => -x) : nt.x; // keep the notch order consistent after the 90 deg turn
-    for (const x of xs.slice().sort((p, q) => p - q)) {
-      const y0 = x - nt.w / 2, y1 = x + nt.w / 2;
-      pts.push([lf, y0], [lf - nt.h, y0], [lf - nt.h, y1], [lf, y1]);
-    }
-    pts.push([lf, L2], [0, L2]);
-    plate(`Pos 2 Schenkel ${U.leg}, 3 Ausschnitte ${nt.w} × ${nt.h} für Kabel`, pts, t, color, fold);
-  }
+  const S = STEG, L2 = S.L / 2, lf = S.legFlat, nt = S.notch;
+  plate(`Pos 2 Winkelsteg: Steg ${S.web} = Dichtfläche beider Deckel`, [[-L2, -S.webFlat], [L2, -S.webFlat], [L2, 0], [-L2, 0]], t, color, uGroup);
+  const hg = new THREE.Group(); hg.rotation.z = Math.PI / 2; uGroup.add(hg);
+  const fold = new THREE.Group(); hg.add(fold); hinges.uLegs.push(fold);
+  const pts = [[0, -L2], [lf, -L2]];
+  for (const x of nt.x) pts.push([lf, x - nt.w / 2], [lf - nt.h, x - nt.w / 2], [lf - nt.h, x + nt.w / 2], [lf, x + nt.w / 2]);
+  pts.push([lf, L2], [0, L2]);
+  plate(`Pos 2 Wand ${S.leg} (einwandig), 3 Ausschnitte ${nt.w} × ${nt.h} für Kabel`, pts, t, color, fold);
   apply();
 }
 
@@ -150,10 +143,10 @@ function apply() {
   const t = g.MATERIALS[mat].t;
   if (document.getElementById('assembled').checked) {
     uGroup.rotation.set(Math.PI, 0, 0);
-    uGroup.position.set(0, 0, TUB.wall);
+    uGroup.position.set(0, -STEG.webFlat / 2, TUB.wall);
   } else {
     uGroup.rotation.set(0, 0, 0);
-    uGroup.position.set(0, -(TUB.flatW / 2 + 90 + U.flatW / 2), 0);
+    uGroup.position.set(0, -(TUB.flatW / 2 + 90), 0);
   }
   void t;
   document.querySelectorAll('[data-stage]').forEach((b) => b.classList.toggle('active', Math.abs(+b.dataset.stage - stage) < 0.005));
@@ -185,7 +178,7 @@ function info() {
     .filter((c) => c.key === mat)
     .map((c) => `<tr><td>ri ${c.r}</td><td>${c.L.toFixed(1)} × ${c.W.toFixed(1)} × <b>${c.H.toFixed(1)}</b></td><td>Flansch ${c.flange.toFixed(1)}</td></tr>`).join('');
   document.getElementById('info').innerHTML = `<h3>Biegemuster · Vorschlag Claude 2026-11-11</h3>
-    Pos 1 Wanne aus einem Stück, Abwicklung <b>${TUB.flatL} × ${TUB.flatW}</b> · Pos 2 U-Steg <b>${U.L} × ${U.flatW}</b><br>
+    Pos 1 Wanne aus einem Stück, Abwicklung <b>${TUB.flatL} × ${TUB.flatW}</b> · Pos 2 Winkelsteg (einwandig) <b>${STEG.L} × ${STEG.flatW}</b><br>
     Biegefolge: 1 Flansche nach innen · 2 lange Seitenwände · 3 Stirnwände (Oberwange zwischen den Seitenwänden).<br>
     Ergebnis außen, gerechnet (DIN 6935), ${g.MATERIALS[mat].name}:
     <table>${rows}</table>

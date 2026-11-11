@@ -14,7 +14,7 @@ function sh(k, info) {
   for (const t of s.querySelectorAll('text')) if (t.textContent.startsWith('Buggy – pneumatische')) t.textContent = PROJECT;
   return s;
 }
-const { TUB, U, BD, GAP, RELIEF_D, NOTCH } = g;
+const { TUB, STEG, BD, GAP, RELIEF_D, NOTCH } = g;
 const cases = Object.entries(g.MATERIALS).flatMap(([k, m]) => m.r.map((r) => ({ m, ...g.result(k, r) })));
 
 // ---------- sheet 1: tub flat pattern
@@ -53,7 +53,7 @@ const cases = Object.entries(g.MATERIALS).flatMap(([k, m]) => m.r.map((r) => ({ 
   const left = -TUB.flatL / 2, ys = [-(b + w + f), -(b + w), -b, b, b + w, b + w + f];
   for (let i = 0; i < ys.length - 1; i++) dim(v, [left, ys[i]], [left, ys[i + 1]], 'v', -7, { size: 2.6 });
   dim(v, [left, ys[0]], [left, ys[5]], 'v', -15);
-  leader(v, [a + w + f, NOTCH.w / 2], 6, 14, [`Ausschnitt ${fmt(NOTCH.w)} × ${fmt(f + NOTCH.extra)}`, 'für den Steg Pos 2'], { size: 2.5 });
+  leader(v, [a + w + f, NOTCH.w / 2], 6, 14, [`Ausschnitt ${fmt(NOTCH.w)} × ${fmt(f + NOTCH.extra)}`, 'für den Winkelsteg Pos 2'], { size: 2.5 });
   leader(v, [-a - w - f, -NOTCH.w / 2], -6, 16, [`Ausschnitt ${fmt(NOTCH.w)} × ${fmt(f + NOTCH.extra)}`], { size: 2.5 });
   leader(v, [a - RELIEF_D / 2 * 0.7, b - RELIEF_D / 2 * 0.7], 10, -24, [`Freistich Ø${RELIEF_D}, Mitte auf`, 'Kreuzung der Biegelinien', `Wandkanten ${fmt(GAP)} zurück`], { size: 2.5 });
   leader(v, [a + w + f / 2, b - GAP - f / 2], 8, -8, ['Gehrung 45°'], { size: 2.5 });
@@ -71,73 +71,75 @@ const cases = Object.entries(g.MATERIALS).flatMap(([k, m]) => m.r.map((r) => ({ 
   window.drawingsReady = false;
 }
 
-// ---------- sheet 2: U web + assembly section
+// ---------- sheet 2: centre web (single-wall angle) + assembly section
 {
+  const S = STEG;
   const s = sh(2, {
-    title: 'Pos 2 U-Steg + Zusammenbau', scale: '1:3 / 1:2 / 1:4', no: 'RB-02', stock: `Blech ${fmt(U.L)} × ${fmt(U.flatW)} · 1 Stk`,
+    title: 'Pos 2 Winkelsteg + Zusammenbau', scale: '1:3 / 1:2 / 1:4', no: 'RB-02', stock: `Blech ${fmt(S.L)} × ${fmt(S.flatW)} · 1 Stk`,
     notes: [
-      'Pos 2 ersetzt Mittelsteg + Mittelwand aus Entwurf v3 (Vorschlag Claude, 2026-11-11):',
-      `umgedrehtes U, Oberseite ${U.web} = Dichtfläche beider Deckel, Schenkel ${U.leg} hängen frei,`,
+      'Pos 2 ersetzt Mittelsteg + Mittelwand aus Entwurf v3; Mitte einwandig (User 2026-11-11).',
+      `Winkel: Steg ${S.web} oben = Dichtfläche beider Deckel, eine Wand ${S.leg} hängt unter der`,
+      'Stegkante zur Steuerseite (Seite = Vorschlag Claude), frei über dem Boden.',
       'Kabel laufen unten durch die 3 Ausschnitte 80 × 40 (Kante mit Kantenschutzprofil).',
-      `Länge ${U.L}: ca. 0,7–1,1 Luft zu den Stirnwänden, Spalt beim Schweißen schließen.`,
-      'Zusammenbau: Wanne kopfüber auf eine ebene Platte legen, Pos 2 einlegen →',
-      'Flansch und Steg-Oberseite liegen bündig. Heften, dann Steg ↔ Flansch-Ausschnitt dicht',
-      'schweißen und oben plan schleifen (Dichtung liegt darauf). Schenkel an die Stirnwände.',
+      `Länge ${S.L}: ca. 0,7–1,1 Luft zu den Stirnwänden, Spalt beim Schweißen schließen.`,
+      'Zusammenbau: Wanne kopfüber auf eine ebene Platte legen, Pos 2 einlegen → Flansch und',
+      'Steg liegen bündig. Heften, Steg ↔ Flansch-Ausschnitt dicht schweißen, oben plan schleifen;',
+      'Wand an beiden Stirnwänden anschweißen.',
       '!Steg-Löcher M5 (9 neben der Mitte) nach dem Einschweißen mit dem Flansch bohren.',
     ],
   });
-  // flat U
-  const v = view(s, 125, 122, 1 / 3, [25, 18, 'Abwicklung Pos 2 (1:3)']);
-  poly(v, g.uOutline(), 'k');
-  for (const [p1, p2] of g.uBendLines()) line(v, ...p1, ...p2, 'p');
-  const h = U.L / 2;
+  const v = view(s, 125, 100, 1 / 3, [25, 18, 'Abwicklung Pos 2 (1:3)']);
+  poly(v, g.stegOutline(), 'k');
+  for (const [p1, p2] of g.stegBendLines()) line(v, ...p1, ...p2, 'p');
+  const h = S.L / 2, nx = S.notch.x;
   dim(v, [-h, 0], [h, 0], 'h', -12);
-  dim(v, [h, 0], [h, U.legFlat], 'v', 8, { size: 2.6 });
-  dim(v, [h, U.legFlat], [h, U.legFlat + U.webFlat], 'v', 8, { size: 2.6 });
-  dim(v, [h, U.legFlat + U.webFlat], [h, U.flatW], 'v', 8, { size: 2.6 });
-  dim(v, [h, 0], [h, U.flatW], 'v', 17);
-  const nx = U.notch.x;
-  dim(v, [-h, U.flatW], [nx[0] - U.notch.w / 2, U.flatW], 'h', 7, { size: 2.6 });
-  dim(v, [nx[0] - U.notch.w / 2, U.flatW], [nx[0] + U.notch.w / 2, U.flatW], 'h', 7, { size: 2.6 });
-  dim(v, [nx[0], U.flatW], [nx[1], U.flatW], 'h', 13, { size: 2.6 });
-  dim(v, [nx[1], U.flatW], [nx[2], U.flatW], 'h', 13, { size: 2.6 });
-  dim(v, [nx[2] + U.notch.w / 2, U.flatW], [nx[2] + U.notch.w / 2, U.flatW - U.notch.h], 'v', 6, { size: 2.6 });
-  leader(v, [nx[1] + U.notch.w / 2 - 2, U.notch.h - 1], 10, 8, [`3 × Ausschnitt ${U.notch.w} × ${U.notch.h}, R${U.notch.r}`, 'je Schenkel'], { size: 2.5 });
+  dim(v, [h, 0], [h, S.legFlat], 'v', 8, { size: 2.6 });
+  dim(v, [h, S.legFlat], [h, S.flatW], 'v', 8, { size: 2.6 });
+  dim(v, [h, 0], [h, S.flatW], 'v', 17);
+  dim(v, [-h, 0], [nx[0] - S.notch.w / 2, 0], 'h', -6, { size: 2.6 });
+  dim(v, [nx[0] - S.notch.w / 2, S.flatW], [nx[0] + S.notch.w / 2, S.flatW], 'h', 7, { size: 2.6 });
+  dim(v, [nx[0], S.flatW], [nx[1], S.flatW], 'h', 13, { size: 2.6 });
+  dim(v, [nx[1], S.flatW], [nx[2], S.flatW], 'h', 13, { size: 2.6 });
+  dim(v, [nx[2] + S.notch.w / 2, 0], [nx[2] + S.notch.w / 2, S.notch.h], 'v', 6, { size: 2.6 });
+  leader(v, [nx[1] + S.notch.w / 2 - 2, S.notch.h - 1], 10, -8, [`3 × Ausschnitt ${S.notch.w} × ${S.notch.h}, R${S.notch.r}`], { size: 2.5 });
   const bt = (u, wv, t) => el(v.g, 'text', { x: v.X(u), y: v.Y(wv) - 0.8, 'font-size': 2.4, 'text-anchor': 'middle' }, t);
-  bt(-200, U.legFlat, 'S1 90°'); bt(-200, U.legFlat + U.webFlat, 'S2 90° (gleiche Richtung)');
-  bt(-60, U.legFlat + U.webFlat / 2 - 1.5, 'Steg = Dichtfläche');
+  bt(-200, S.legFlat, 'S1 90°');
+  bt(-60, S.legFlat + S.webFlat / 2 - 1.5, 'Steg = Dichtfläche');
+  bt(-60, S.legFlat / 2 + 8, 'Wand (einwandig)');
 
-  // section of U at 1:1 (stainless 1.5 shown)
+  // section at 1:2 (stainless 1.5 shown): web on top, wall under the edge towards the control side
   const t = g.MATERIALS.va.t, vs = view(s, 300, 40, 0.5, [262, 22, 'Schnitt Pos 2 (1:2, Edelstahl 1,5)']);
-  const W2 = U.web / 2;
-  poly(vs, [[-W2, 0], [-W2, -U.leg], [-W2 + t, -U.leg], [-W2 + t, -t], [W2 - t, -t], [W2 - t, -U.leg], [W2, -U.leg], [W2, 0]], 'k');
+  const W2 = S.web / 2;
+  poly(vs, [[-W2, 0], [W2, 0], [W2, -S.leg], [W2 - t, -S.leg], [W2 - t, -t], [-W2, -t]], 'k');
   dim(vs, [-W2, 0], [W2, 0], 'h', 6);
-  dim(vs, [W2, 0], [W2, -U.leg], 'v', 8);
-  label(s, 262, 100, `Abwicklung gerechnet mit v = −${fmt(BD)}: Steg ${fmt(U.webFlat)} + 2 × ${fmt(U.legFlat)}`, { size: 2.5 });
+  dim(vs, [W2, 0], [W2, -S.leg], 'v', 8);
+  label(s, 262, 100, `Abwicklung gerechnet mit v = −${fmt(BD)}: Steg ${fmt(S.webFlat)} + Wand ${fmt(S.legFlat)}`, { size: 2.5 });
+  label(s, vs.X(-W2) - 2, vs.Y(-40), 'Lastseite', { size: 2.4, anchor: 'end' });
+  label(s, vs.X(W2) + 12, vs.Y(-40), 'Steuerseite', { size: 2.4 });
 
-  // assembly cross-section at 1:4 (y-z), stainless
+  // assembly cross-section at 1:4, seen from the rear (left = load side), stainless
   const va = cases.find((c) => c.key === 'va' && c.r === 2), alu = cases.find((c) => c.key === 'alu' && c.r === 3);
-  const k = 0.25, va4 = view(s, 130, 230, k, [25, 150, 'Zusammenbau, Querschnitt (1:4, Edelstahl 1,5, ri 2)']);
+  const k = 0.25, va4 = view(s, 130, 230, k, [25, 150, 'Zusammenbau, Querschnitt von hinten (1:4, Edelstahl 1,5, ri 2)']);
   const Wo = va.W / 2, Ho = va.H, F = va.flange;
   poly(va4, [[-Wo + F, Ho], [-Wo, Ho], [-Wo, 0], [Wo, 0], [Wo, Ho], [Wo - F, Ho], [Wo - F, Ho - t], [Wo - t, Ho - t], [Wo - t, t], [-Wo + t, t], [-Wo + t, Ho - t], [-Wo + F, Ho - t]], 'k');
-  poly(va4, [[-W2, Ho], [-W2, Ho - va.uLeg], [-W2 + t, Ho - va.uLeg], [-W2 + t, Ho - t], [W2 - t, Ho - t], [W2 - t, Ho - va.uLeg], [W2, Ho - va.uLeg], [W2, Ho]], 'k');
+  poly(va4, [[-W2, Ho], [W2, Ho], [W2, Ho - va.stegLeg], [W2 - t, Ho - va.stegLeg], [W2 - t, Ho - t], [-W2, Ho - t]], 'k');
   rect(va4, -Wo, Ho + 3, -1, Ho + 8, 'h'); rect(va4, 1, Ho + 3, Wo, Ho + 8, 'h');
   label(s, va4.X(-Wo / 2), va4.Y(Ho + 10), 'Deckel Lastseite (PC 5)', { size: 2.4, anchor: 'middle' });
   label(s, va4.X(Wo / 2), va4.Y(Ho + 10), 'Deckel Steuerseite (PC 5)', { size: 2.4, anchor: 'middle' });
-  dim(va4, [Wo, 0], [Wo, Ho], 'v', 8, { text: `${fmt(Math.round(va.H * 10) / 10)} (Alu ${fmt(Math.round(alu.H * 10) / 10)}) ≤ 115` , size: 2.5 });
+  dim(va4, [Wo, 0], [Wo, Ho], 'v', 8, { text: `${fmt(Math.round(va.H * 10) / 10)} (Alu ${fmt(Math.round(alu.H * 10) / 10)}) ≤ 115`, size: 2.5 });
   dim(va4, [-Wo, 0], [Wo, 0], 'h', -8, { text: `${fmt(Math.round(va.W * 10) / 10)} (Soll 430)`, size: 2.6 });
   dim(va4, [-Wo, Ho], [-Wo + F, Ho], 'h', 14, { size: 2.4, text: `${fmt(Math.round(F * 10) / 10)}` });
   dim(va4, [-W2, Ho], [W2, Ho], 'h', 14, { size: 2.4 });
-  dim(va4, [-W2, t], [-W2, Ho - va.uLeg], 'v', -5, { size: 2.4, text: `${fmt(Math.round(va.floorGap * 10) / 10)}` });
+  dim(va4, [W2, t], [W2, Ho - va.stegLeg], 'v', 5, { size: 2.4, text: `${fmt(Math.round(va.floorGap * 10) / 10)}` });
   leader(va4, [-Wo / 2, t], -6, 10, 'Lastseite (links in Fahrtrichtung)', { size: 2.4, dot: true });
   leader(va4, [Wo / 2, t], 6, 10, 'Steuerseite', { size: 2.4, dot: true });
-  leader(va4, [W2, Ho - 3], 34, -16, ['Schweißnaht Steg ↔ Flansch-Ausschnitt', 'oben dicht, plan geschliffen'], { size: 2.4 });
+  leader(va4, [0, Ho], 34, -16, ['Schweißnaht Steg ↔ Flansch-Ausschnitt', 'oben dicht, plan geschliffen'], { size: 2.4 });
 }
 
 // ---------- sheet 3: cutting plan
 {
   const plan = g.cutPlan(), { sheet: SH } = plan;
-  const area = (g.polyArea(g.tubOutline()) + g.polyArea(g.uOutline())) * 1e-6;
+  const area = (g.polyArea(g.tubOutline()) + g.polyArea(g.stegOutline())) * 1e-6;
   const s = sh(3, {
     title: 'Schnittplan', scale: '1:5 / 1:20', no: 'RB-03', stock: `Zuschnitt ${SH.w} × ${SH.h} · 1 Tafel`,
     notes: [
@@ -154,11 +156,11 @@ const cases = Object.entries(g.MATERIALS).flatMap(([k, m]) => m.r.map((r) => ({ 
   const [P1, P2] = plan.parts;
   poly(v, g.tubOutline(16).map(([x, y]) => [P1.x + P1.w / 2 + y, P1.y + P1.h / 2 + x]), 'k');
   for (const bl of g.tubBendLines()) line(v, P1.x + P1.w / 2 + bl.p[0][1], P1.y + P1.h / 2 + bl.p[0][0], P1.x + P1.w / 2 + bl.p[1][1], P1.y + P1.h / 2 + bl.p[1][0], 'p');
-  poly(v, g.uOutline().map(([u, w]) => [P2.x + w, P2.y + u + U.L / 2]), 'k');
-  for (const [p1, p2] of g.uBendLines()) line(v, P2.x + p1[1], P2.y + p1[0] + U.L / 2, P2.x + p2[1], P2.y + p2[0] + U.L / 2, 'p');
+  poly(v, g.stegOutline().map(([u, w]) => [P2.x + w, P2.y + u + STEG.L / 2]), 'k');
+  for (const [p1, p2] of g.stegBendLines()) line(v, P2.x + p1[1], P2.y + p1[0] + STEG.L / 2, P2.x + p2[1], P2.y + p2[0] + STEG.L / 2, 'p');
   label(s, v.X(P1.x + P1.w / 2), v.Y(P1.y + P1.h / 2), 'Pos 1 Wanne', { size: 3.5, anchor: 'middle', bold: true });
   label(s, v.X(P2.x + P2.w / 2), v.Y(P2.y + P2.h / 2), 'Pos 2', { size: 3.5, anchor: 'middle', bold: true });
-  label(s, v.X(P2.x + P2.w / 2), v.Y(P2.y + P2.h / 2) + 4.5, 'U-Steg', { size: 3, anchor: 'middle' });
+  label(s, v.X(P2.x + P2.w / 2), v.Y(P2.y + P2.h / 2) + 4.5, 'Winkelsteg', { size: 3, anchor: 'middle' });
   label(s, v.X(P2.x + P2.w / 2), v.Y(P2.h + 2 * g.KERF + 100), 'Rest', { size: 3, anchor: 'middle' });
   dim(v, [0, SH.h], [SH.w, SH.h], 'h', 8);
   dim(v, [SH.w, 0], [SH.w, SH.h], 'v', 8);

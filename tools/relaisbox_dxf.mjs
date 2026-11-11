@@ -24,5 +24,5 @@ function dxf(contour, bends, shift = [0, 0]) {
 
 const tubShift = [g.TUB.flatL / 2, g.TUB.flatW / 2];
 writeFileSync(out + 'pos1_wanne_abwicklung.dxf', dxf(g.tubOutline(32), g.tubBendLines().map((b) => b.p), tubShift));
-writeFileSync(out + 'pos2_u-steg_abwicklung.dxf', dxf(g.uOutline(), g.uBendLines(), [g.U.L / 2, 0]));
+writeFileSync(out + 'pos2_winkelsteg_abwicklung.dxf', dxf(g.stegOutline(), g.stegBendLines(), [g.STEG.L / 2, 0]));
 console.log('written', out);
