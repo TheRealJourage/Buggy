@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Ventilbox Montageplatte</title>
+<style>
+  html, body { margin: 0; background: #111; color: #ddd; font-family: system-ui, sans-serif; }
+  #bar { position: sticky; top: 0; padding: 8px 12px; background: #151517; display: flex; gap: 12px; align-items: center; font-size: 14px; flex-wrap: wrap; z-index: 2; }
+  #bar button { background: #222; color: #ddd; border: 1px solid #444; border-radius: 4px; padding: 4px 10px; }
+  #bar button.on { background: #2d5a8a; border-color: #4a8ad0; }
+  main { padding: 0 12px 24px; max-width: 1100px; }
+  svg { width: 100%; height: auto; background: #18181b; border-radius: 6px; margin-top: 10px; }
+  .box text { font-size: 9px; fill: #fff; }
+  .dim { font-size: 9px; fill: #8cf; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; margin-top: 10px; }
+  td, th { padding: 3px 6px; border-bottom: 1px solid #2a2a2e; text-align: left; vertical-align: top; }
+  th { color: #aaa; font-weight: normal; }
+  .hyp { color: #f0b54a; }
+  .ok { color: #7fd17f; }
+  .note { font-size: 13px; color: #bbb; margin-top: 8px; line-height: 1.45; }
+  #result { font-size: 15px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div id="bar">
+  <b>Ventilbox – Montageplatte (Vorschlag Claude, 2026-11-11)</b>
+  <span>Ventile:</span>
+  <button data-v="flat" class="on">flach, ohne Reihenleiste</button>
+  <button data-v="manifold">stehend auf Reihenleiste R-281/3</button>
+</div>
+<main>
+  <div id="result"></div>
+  <svg id="plate" viewBox="0 0 420 420"></svg>
+  <div class="note">Draufsicht, Maße in mm. <span class="ok">Grün umrandet</span> = Maß aus Datenblatt oder gemessen · <span class="hyp">orange gestrichelt</span> = Platzhalter/Hypothese (Teil noch nicht da oder Zubehörmaß geschätzt). Gesamtmaße sind Mindest-<b>Innen</b>maße des Koffers, ohne Montageplatte und Schaumstoff.</div>
+  <table id="parts"></table>
+  <div class="note">
+    <b>Quellen:</b> Ventil Airtec M-04-53x-HN: 161 Körper / 180 mit Steckdosen, 64 hoch (Spule + Steckdose), 32 Körper, 22 breit, Befestigung Ø 4,5 (<a href="https://www.airtec.nl/img/bmepics/M-04.pdf" style="color:#8cf">Datenblatt M-04</a>, S. 4-05). Anschlüsse 2/4 auf der Spulenseite zwischen den Spulen, 1/3/5 gegenüber. Reihenleiste R-281/3: C = 94 (Breite mit Haltewinkeln), Teilung 22,2, Ventil steht 104 über Leistenmitte + 32 Haltewinkel (S. 4-06). HW-039 gemessen 2026-11-10 (<a href="hw039.html" style="color:#8cf">hw039.html</a>). Nucleo-Trägerplatine wie Relaisbox 105 × 110 (<a href="nucleo-heck.html" style="color:#8cf">nucleo-heck.html</a>).<br>
+    <b>Hinweis (Vorschlag Claude):</b> Die Abluft (3/5, Schalldämpfer) bläst in den Koffer. Schalldämpfer zur Wand hin, weg von der Elektronik; Druckausgleichselement in die Wand auf der Ventilseite. Druckluft laut Airtec gefiltert und getrocknet → Kondensat im Koffer ist trotzdem möglich (Hypothese).
+  </div>
+</main>
+<script>
+const M = 10, GAP = 20;
+const ELX = M + 180 + GAP;
+const electronics = [
+  { id: 'nucleo', x: ELX, y: M, w: 105, h: 110, z: 45, label: 'Nucleo-F091RC auf Träger', sub: 'H ~45 (Hypothese)', hyp: true },
+  { id: 'can', x: ELX + 107, y: M + 5, w: 16, h: 15, z: 10, label: 'CAN', sub: 'SN65HVD230 16,1×14,5', hyp: false, small: true },
+  { id: 'hwl', x: ELX, y: M + 125, w: 52, h: 52, z: 40, label: 'HW-039 L', sub: '50×51,5, H 40 (gemessen)', hyp: false },
+  { id: 'hwr', x: ELX + 61, y: M + 125, w: 52, h: 52, z: 40, label: 'HW-039 R', sub: '', hyp: false },
+  { id: 'pc817', x: ELX, y: M + 190, w: 113, h: 45, z: 20, label: 'PC817 8 Kanäle', sub: 'Maß offen (bestellt)', hyp: true },
+  { id: 'lr', x: ELX, y: M + 245, w: 113, h: 60, z: 20, label: '6 × LR7843 + 1N4007', sub: 'Maß offen (bestellt)', hyp: true },
+  { id: 'term', x: ELX, y: M + 315, w: 113, h: 25, z: 25, label: 'Klemmen 12 V / Masse-Stern', sub: 'WAGO, Platz geschätzt', hyp: true },
+];
+function valvesFlat() {
+  const out = [], pitch = 115;
+  ['G', 'A', 'B'].forEach((n, i) => {
+    const y = M + i * pitch;
+    out.push({ x: M, y, w: 180, h: 64, z: 22, label: `Ventil ${n} (5/3)`, sub: '180×64, flach, H 22', hyp: false });
+    out.push({ x: M + 10, y: y + 64, w: 160, h: 35, z: 22, label: `1/3/5: Schalldämpfer + Versorgung`, sub: '~35 geschätzt', hyp: true });
+  });
+  return { items: out, z: 22 };
+}
+function valvesManifold() {
+  return { items: [
+    { x: M, y: M, w: 180, h: 94, z: 136, label: '3 × Ventil stehend auf R-281/3', sub: '180×94, H ~136 (104 + 32)', hyp: false },
+    { x: M + 10, y: M + 94, w: 160, h: 30, z: 0, label: 'Schläuche 2/4 oben, Abluft 3/5 unten', sub: 'Platz geschätzt', hyp: true },
+  ], z: 136 };
+}
+function render(v) {
+  const valves = v === 'flat' ? valvesFlat() : valvesManifold();
+  const all = [...valves.items, ...electronics];
+  const W = Math.max(...all.map(b => b.x + b.w)) + M;
+  const H = Math.max(...all.map(b => b.y + b.h)) + M;
+  const glands = 25;
+  const zMax = Math.max(valves.z, ...electronics.map(e => e.z));
+  const innerZ = Math.max(zMax + 25, 70);
+  const svg = document.getElementById('plate');
+  svg.setAttribute('viewBox', `-30 -30 ${W + 60} ${H + 60}`);
+  let s = `<rect x="0" y="0" width="${W}" height="${H}" fill="#202024" stroke="#666"/>`;
+  for (const b of all) {
+    const col = b.hyp ? '#f0b54a' : '#7fd17f';
+    s += `<g class="box"><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" fill="${b.hyp ? '#3a2e15' : '#1d3320'}" stroke="${col}" ${b.hyp ? 'stroke-dasharray="4 3"' : ''}/>`;
+    if (!b.small) {
+      s += `<text x="${b.x + 4}" y="${b.y + 12}">${b.label}</text>`;
+      if (b.sub) s += `<text x="${b.x + 4}" y="${b.y + 23}" fill="#aaa" style="fill:#aaa">${b.sub}</text>`;
+    } else s += `<text x="${b.x + 2}" y="${b.y + 10}" style="font-size:6px">${b.label}</text>`;
+    s += `</g>`;
+  }
+  s += `<text class="dim" x="${W / 2}" y="-8" text-anchor="middle">${W} mm</text>`;
+  s += `<text class="dim" x="-8" y="${H / 2}" text-anchor="middle" transform="rotate(-90 -8 ${H / 2})">${H} mm</text>`;
+  svg.innerHTML = s;
+  document.getElementById('result').innerHTML =
+    `Platte ≈ <b>${W} × ${H} mm</b> · Koffer innen mindestens ≈ <b>${W + glands} × ${H + glands} × ${innerZ} mm</b> ` +
+    `<span class="hyp">(+${glands} mm für Kabelverschraubungen innen, Höhe = höchstes Teil ${zMax} + 25 Kabel/Stecker; Hypothese)</span>`;
+  document.getElementById('parts').innerHTML = '<tr><th>Teil</th><th>Fläche</th><th>Höhe</th><th>Quelle</th></tr>' +
+    all.filter(b => b.z).map(b => `<tr><td>${b.label}</td><td>${b.w} × ${b.h}</td><td>${b.z}</td><td class="${b.hyp ? 'hyp' : 'ok'}">${b.hyp ? 'Hypothese' : 'Datenblatt/gemessen'}</td></tr>`).join('');
+}
+document.querySelectorAll('#bar button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#bar button').forEach(x => x.classList.toggle('on', x === b));
+  render(b.dataset.v);
+});
+render('flat');
+</script>
+</body>
+</html>
