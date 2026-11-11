@@ -36,5 +36,22 @@ test('valve stack (variant B, 2026-11-11) fits beside G and A and under the cove
   assert.ok(g.ROW_Z - g.BRACKET.w / 2 - g.VSTACK.zIn >= 5, 'A bracket clear of the coils');
   assert.ok(g.VSTACK.zOut - g.STACK.fit >= g.CB.z0 + g.WALL_T, 'silencer zone inside the side wall');
   assert.ok(g.FLOOR_T + g.STACK_H + 10 <= g.CB.h - g.LID_T, 'stack + bolt heads under the cover');
-  for (const y of g.REAR_GLANDS.y) assert.ok(y - 11 >= g.FLOOR_T && y + 11 <= g.FLOOR_T + g.WALL_H, 'gland nut on the rear wall');
+  for (const y of g.REAR_GLANDS.y) assert.ok(y - 11 >= g.FLOOR_T && y + 11 <= g.UNDER_FLANGE - 2, 'gland nut on the rear wall, under the flange');
+});
+
+test('stainless tub with PC lid (2026-11-11): flange, screws and clearances', () => {
+  assert.equal(g.CB.h, g.TUB_H + g.GASKET + g.LID_T);
+  assert.ok(g.FLOOR_T + g.STACK_H + 8 <= g.UNDER_FLANGE, 'valve stack + bolt heads under the rear flange');
+  assert.ok(g.AX_Y + g.HM25.D / 2 + 20 <= g.UNDER_FLANGE, 'cylinders + sensors under the flange');
+  const open = [g.CB.z0 + g.FLANGE.w, g.CB.z1 - g.FLANGE.w];
+  for (const z of [g.G_Z, g.ROW_Z]) assert.ok(z > open[0] && z < open[1], 'cylinder axes (sensor clamps) reachable through the opening');
+  assert.ok(g.VSTACK.zIn < open[1] && g.VSTACK.zOut > open[0], 'valve stack top reachable through the opening');
+  assert.ok(g.FLANGE.seal + 5 <= g.FLANGE.w && g.FLANGE.screw + 5 <= g.FLANGE.seal, 'screw and 10 mm tape side by side on the flange');
+  const xs = [...new Set(g.LID_SCREWS.map(([x]) => x))].sort((a, b) => a - b);
+  const zs = [...new Set(g.LID_SCREWS.map(([, z]) => z))].sort((a, b) => a - b);
+  for (const v of [xs, zs]) for (let i = 1; i < v.length; i++) assert.ok(v[i] - v[i - 1] <= g.FLANGE.pitch + 1e-9, 'screw pitch');
+  for (const [x, z] of g.LID_SCREWS) for (const y of g.REAR_GLANDS.y) {
+    const clear = Math.hypot(x - (g.CB.x0 + g.SHELL_T), z - g.REAR_GLANDS.z);
+    assert.ok(y + 11 < g.UNDER_FLANGE - 10 || clear > 11 + 6, 'rivet nut body clear of the gland nuts');
+  }
 });

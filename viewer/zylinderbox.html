@@ -39,10 +39,11 @@
 <body>
 <main>
 <h1>Zylinderbox – Bauplan (Entwurf v1)</h1>
-<div class="sub">Stand 2026-11-01 · Doku: Vault <code>Buggy/Zylinderbox.md</code> · 3D: <a href="./">Viewer</a> (Ansicht „Box“) · Rechnung: <a href="auslegung.html">auslegung.html</a> · <b>Für die Fertigung gilt der <a href="zeichnungen.html">Zeichnungssatz</a> (<a href="downloads/Zylinderbox-Zeichnungen.pdf">PDF</a>)</b> · Maße kommen aus <code>boxgeo.js</code>, dieselben wie im 3D-Viewer</div>
+<div class="sub">Stand 2026-11-11 (Edelstahl-Wanne mit PC-Deckel, Zeichnungssatz Index C), davor 2026-11-01 · Doku: Vault <code>Buggy/Zylinderbox.md</code> · 3D: <a href="./">Viewer</a> (Ansicht „Box“) · Rechnung: <a href="auslegung.html">auslegung.html</a> · <b>Für die Fertigung gilt der <a href="zeichnungen.html">Zeichnungssatz</a> (<a href="downloads/Zylinderbox-Zeichnungen.pdf">PDF</a>)</b> · Maße kommen aus <code>boxgeo.js</code>, dieselben wie im 3D-Viewer</div>
 
 <div class="box">
 <b>Festgelegt (User, 2026-11-01):</b> Die Zylinder sitzen in Eigenbau-Lagerböcken: Ø-22,5-Bohrung, Kopfgewinde M22 × 1,5, Mutter RM-25. Das Grundgerüst (Grundplatte, Stirnwand, Knotenbleche) wird geschweißt, alles andere geschraubt.<br>
+<b>Festgelegt (User, 2026-11-11):</b> Alle Metallteile aus <b>Edelstahl</b>, gleicher Grundaufbau wie die Relaisbox: geschweißte Wanne mit Flansch, Dichtband, <b>PC-Deckel 5 mm</b>. Blechstärken, Flansch 25, Werkstoff 1.4301 und Grundplatte 6 mm sind <b>Vorschlag Claude</b>.<br>
 <b>Bemaßung:</b> <b>d</b> = Abstand ab der <b>Innenseite der Stirnwand</b> nach hinten · <b>q</b> = Abstand quer ab der <b>Außenkante auf der Poti-Seite</b> · <b>h</b> = Höhe über der <b>Oberseite der Grundplatte</b>. Alle Zylinderachsen liegen auf h = <span id="axh"></span> mm.
 </div>
 
@@ -75,8 +76,8 @@
     </table>
     <p>Die Wand ist <b>2 mm</b> dick, weil die Original-Seilenden in 2-mm-Wände einrasten. Erst schweißen, dann bohren (Verzug), h ab Plattenoberseite messen.</p>
     <p><b>Knotenbleche</b> (<span id="gt"></span> mm, Dreieck <span id="gb"></span> × <span id="gh"></span> mm) bei q = <span id="gq"></span>, jeweils an Wand und Platte durchgeschweißt.</p>
-    <p class="sub"><b>Abschätzung Claude, warum die Knotenbleche Pflicht sind:</b> Ein Zylinder drückt bei 7 bar mit bis zu ~200 N (<a href="auslegung.html">Rechnung</a>). Bei 40 mm Hebel sind das 8 N·m am Wandfuß. Ein 2-mm-Blech, 152 mm breit, kommt damit auf ~80 MPa Biegespannung. Das liegt etwa bei der Dehngrenze von weichem AlMg3 (Kenntnisstand, Wert nicht geprüft), und neben der Schweißnaht ist das Blech weich. Mit den drei Knotenblechen trägt die Wand nur noch die Felder dazwischen. <span class="hyp">Hypothese:</span> Das reicht. Prüfen: beim Probelauf eine Messuhr an die Wand halten.</p>
-    <p class="sub">Ob sich 2 mm Blech sauber an die 8-mm-Platte schweißen lassen, beurteilt der Kollege.</p>
+    <p class="sub"><b>Abschätzung Claude, warum die Knotenbleche Pflicht sind:</b> Ein Zylinder drückt bei 7 bar mit bis zu ~200 N (<a href="auslegung.html">Rechnung</a>). Bei 40 mm Hebel sind das 8 N·m am Wandfuß. Ein 2-mm-Blech, 172 mm breit, kommt damit auf ~70 MPa Biegespannung. Edelstahl 1.4301 hat eine Dehngrenze von mindestens ~230 MPa (Kenntnisstand, Wert nicht geprüft), also gut dreifache Reserve; bei Alu (AlMg3, bis 2026-11-10 geplant) lag das an der Grenze. Die Knotenbleche bleiben trotzdem: Sie nehmen die Wand gegen Durchbiegen in die Zange, und die Clip-Bohrungen schwächen den Querschnitt. <span class="hyp">Hypothese:</span> Das reicht. Prüfen: beim Probelauf eine Messuhr an die Wand halten.</p>
+    <p class="sub">Ob sich 2 mm bzw. 1,5 mm Blech sauber an die 6-mm-Platte schweißen lassen, beurteilt der Kollege.</p>
   </div>
 </div>
 
@@ -98,9 +99,9 @@
 <h2>5 Bauschritte</h2>
 <ol>
   <li><b>Prüfen</b> (orangener Kasten oben). Airtec-Teile, Schiene und Wagen müssen dafür da sein.</li>
-  <li><b>Material besorgen:</b> Bleche, Alu-Winkel und Normteile laut Liste (Metallhändler, Reststücke reichen).</li>
-  <li><b>Kollege schweißt das Grundgerüst</b> (Teile 1–3): Stirnwand rechtwinklig auf die Platte, Knotenbleche außen. Danach die Clip-Bohrungen in die Stirnwand.</li>
-  <li><b>Grundplatte bohren:</b> Lochtabelle im Zeichnungssatz (BGY-ZB-02): M6 für Lagerböcke und Befestigung, M3 für die Schiene (vorher an der Schiene prüfen), M4 für die Rückwand-Lasche, 3 × M4 für den Ventilstapel (V1–V3, vorher am Ventil prüfen), Ø 6 Ablauf (E1). Die Haube hält mit 4 Blindnietmuttern M4 in Stirnwand und Rückwand.</li>
+  <li><b>Material:</b> Der Metallbauer fertigt alle Metallteile aus Edelstahl (Festgelegt 2026-11-01 / 2026-11-11). Selbst besorgen: PC-Deckel (erst nach dem Schweißen messen), Dichtband, Normteile in A2.</li>
+  <li><b>Kollege schweißt die Wanne</b> (Grundplatte, Stirnwand, Knotenbleche, Rückwand, 2 Seitenwände): Stirnwand rechtwinklig auf die Platte, Knotenbleche außen, alle Stöße dicht, Flanschoberseite eben. Danach die Clip-Bohrungen in die Stirnwand und 18 Einnietmuttern M5 in den Flansch. Die 3 Löcher für die Kabelverschraubungen in der Rückwand vor dem Schweißen.</li>
+  <li><b>Grundplatte bohren:</b> Lochtabelle im Zeichnungssatz (BGY-ZB-02): M6 für Lagerböcke und Befestigung, M3 für die Schiene (vorher an der Schiene prüfen), 3 × M4 für den Ventilstapel (V1–V3, vorher am Ventil prüfen), Ø 6 Ablauf (E1). Gewinde in Edelstahl mit Schneidöl.</li>
   <li><b>Böcke und Schlitten:</b> Winkel auf 50 mm ablängen. Ø 22,5 mit Stufenbohrer, Langlöcher fräsen oder als Doppelbohrung mit Feile, M10 × 1,25 in den Mitnehmer. Wagen mit Senkschrauben an den Schlitten, dann die Böcke an den Schlitten.</li>
   <li><b>Schlitten aufsetzen:</b> Muss über die <span class="a-stroke"></span> mm Weg ohne Klemmen laufen.</li>
   <li><b>Vormontieren:</b> Zylinder in die Böcke stecken, RM-25 vorn nur handfest. An A die Anschlaghülse aufschieben, FK-32 aufschrauben und in den Mitnehmer drehen, mit RL-25 kontern. RD-20 an G und B mit RL-20 kontern, die Poti-Lasche zwischen RL-20 und RD-20 an G klemmen.</li>
@@ -115,7 +116,7 @@
   </li>
   <li><b>Ventilstapel</b> (Festgelegt 2026-11-11): 3 Ventile M-04-533 flach übereinander hinten in der Poti-Ecke, unten G, dann A, oben B. Distanzhülsen 3 mm unter und zwischen den Ventilen, M4-Gewindestangen oder lange Schrauben durch die Ø-4,5-Löcher in V1–V3. Spulen (Anschlüsse 2/4) zeigen zu den Zylindern, Schalldämpfer 3/5 zur Poti-Seitenwand. Druckluft über T-Stücke an die Anschlüsse 1.</li>
   <li><b>Probelauf mit 7 bar:</b> Sensoren ZS-6701 mit den Spannbändern NT-550 verschieben, bis die LED in der Endlage schaltet (B „aus“ bei ~21 mm). Drossel an G auf ~100 mm/s.</li>
-  <li><b>Schließen:</b> Rückwand mit 3 Kabelverschraubungen M16 (Druckluft 8 mm, Sensorkabel, Spulenkabel), Schläuche mit Schlaufe zum Schlitten (B fährt <span class="a-stroke"></span> mm mit), Haube aufsetzen und an den Blindnietmuttern verschrauben. Ablaufbohrung Ø 6 (E1) unter den Schalldämpfern, bei anderer Einbaulage an die tiefste Stelle.</li>
+  <li><b>Schließen:</b> Rückwand mit 3 Kabelverschraubungen M16 (Druckluft 8 mm, Sensorkabel, Spulenkabel), Schläuche mit Schlaufe zum Schlitten (B fährt <span class="a-stroke"></span> mm mit), Dichtband auf den Flansch kleben (innen neben den Schrauben), PC-Deckel mit 18 × M5 A2 + Scheibe verschrauben, nicht zu fest. Ablaufbohrung Ø 6 (E1) unter den Schalldämpfern, bei anderer Einbaulage an die tiefste Stelle.</li>
 </ol>
 
 <h2>6 Offen</h2>
@@ -124,6 +125,8 @@
   <li>Starr oder auf Gummipuffern lagern? Die Befestigungslöcher passen für beides</li>
   <li>Lage der Ablaufbohrung (hängt vom Einbauort ab)</li>
   <li>Poti-Halter (nach Lieferung des Potis)</li>
+  <li>Edelstahl-Winkel 60 × 60 × 6 und 40 × 40 × 5 (1.4301) beim Händler verfügbar? Sonst Bock aus Blech kanten (Rücksprache Kollege)</li>
+  <li>Gewicht: Wanne + Teile aus Edelstahl ca. 9 kg statt ca. 4 kg in Alu (gerechnet aus Blechmaßen, Hypothese) → Befestigung/Gummipuffer danach wählen</li>
   <li>Ventilstapel: Lochbild V1–V3 am echten Ventil messen (aus der Datenblatt-Zeichnung abgegriffen), Zugang zu Steckdosen und Handbetätigung im eingebauten Zustand, Klemmbereich M16 für den 8-mm-Schlauch. Bock A steht ~11 mm vor den Anschlüssen 2/4 von G und A → dort Winkel-Steckverschraubungen (Hypothese)</li>
 </ul>
 </main>
@@ -321,7 +324,7 @@ const SLED_AX = g.AX_Y - g.SLED_TOP;
   text(s, fx + B.foot / 2, fy - 5, 'Fuß von oben', { 'font-size': 7 });
   dimH(s, fx, fx + SLOT_X, fy + B.w + 12, `${SLOT_X}`);
   text(s, fx + B.foot / 2, fy + B.w + 26, `Langloch 6,6 × ${B.slot}, Abstand ${2 * SLOT_Q}`, { 'font-size': 6.5 });
-  text(s, 100, 140, `Alu-Winkel ${B.h} × ${B.foot} × ${B.t}, Länge ${B.w}. Vorderkante = Seite der Mutter`, { 'font-size': 6.5 });
+  text(s, 100, 140, `Edelstahl-Winkel ${B.h} × ${B.foot} × ${B.t}, Länge ${B.w}. Vorderkante = Seite der Mutter`, { 'font-size': 6.5 });
 }
 {
   const s = svg('br40', 205, 150);
@@ -339,7 +342,7 @@ const SLED_AX = g.AX_Y - g.SLED_TOP;
   rect(s, fx, fy, SB.t, SB.w, { fill: C.dark });
   for (const dq of [-SB_HOLE_Q, SB_HOLE_Q]) circ(s, fx + SB_HOLE_X, fy + SB.w / 2 + dq, 2.75);
   text(s, fx + 15, fy - 6, 'Fuß', { 'font-size': 7 });
-  text(s, 100, 112, `Alu-Winkel ${SB.h} × ${SB.foot} × ${SB.t}, Länge ${SB.w}. Fuß: 2 × Ø 5,5 mit Senkung 90°,`, { 'font-size': 6.5 });
+  text(s, 100, 112, `Edelstahl-Winkel ${SB.h} × ${SB.foot} × ${SB.t}, Länge ${SB.w}. Fuß: 2 × Ø 5,5 mit Senkung 90°,`, { 'font-size': 6.5 });
   text(s, 100, 122, `${r1(SB_HOLE_X)} mm ab Außenseite Steg, Abstand ${2 * SB_HOLE_Q}. Fuß zeigt unter B.`, { 'font-size': 6.5 });
   text(s, 100, 136, 'Mitnehmer: FK-32 eindrehen, hinten mit RL-25 kontern.', { 'font-size': 6.5 });
 }
@@ -357,7 +360,7 @@ const SLED_AX = g.AX_Y - g.SLED_TOP;
   for (const x of [SB_HOLE_X, L - SB_HOLE_X]) for (const dq of [-SB_HOLE_Q, SB_HOLE_Q]) circ(s, ox + x, oy + Wd / 2 + dq, 2.5, { stroke: C.dim });
   dimH(s, ox, ox + L, oy + Wd + 14, `${r1(L)}`);
   dimV(s, ox - 4, oy, oy + Wd, `${Wd}`);
-  text(s, ox + L / 2, oy - 6, `Alu ${g.SLED_T} mm · links Mitnehmer (hinten), rechts Bock B (vorn)`, { 'font-size': 6.5 });
+  text(s, ox + L / 2, oy - 6, `Edelstahl ${g.SLED_T} mm · links Mitnehmer (hinten), rechts Bock B (vorn)`, { 'font-size': 6.5 });
   text(s, ox + L / 2, oy + Wd + 30, 'Wagen: 4 × Ø 3,4, Senkung 90° für M3 (20 × 20)', { 'font-size': 6 });
   text(s, ox + L / 2, oy + Wd + 40, `Böcke (gelb): 4 × M5, ${r1(SB_HOLE_X)} ab Ende, Abstand ${2 * SB_HOLE_Q}`, { 'font-size': 6 });
 }
@@ -374,7 +377,7 @@ const plateHoles = [];
   for (const [x, z] of [[g.CB.x1 + 20, g.G_Z], [g.CB.x1 + 20, g.ROW_Z], [g.CB.x0 + 20, g.CB.z0 + 20], [g.CB.x0 + 20, g.CB.z1 - 20]]) add(x, z, 'M6 Befestigung (Puffer)', C.dim);
   for (let i = 0; i < g.RAIL.len / g.RAIL.pitch; i++) circ(s, X(g.RAIL_X0 + g.RAIL.pitch / 2 + i * g.RAIL.pitch), Z(g.ROW_Z), 1.2, { stroke: '#aaa' });
   text(s, X(g.PLATE.x0) + W * k / 2, Z(g.PLATE.z1) + 14, 'blau M6 Böcke · gelb M6 Befestigung · grau M3 Schiene (mit Schiene abnehmen)', { 'font-size': 8 });
-  text(s, X(g.PLATE.x0) + W * k / 2, Z(g.PLATE.z1) + 26, 'hinten 2 × M4 Rückwand-Lasche · genaue Koordinaten: Zeichnungssatz BGY-ZB-02', { 'font-size': 8 });
+  text(s, X(g.PLATE.x0) + W * k / 2, Z(g.PLATE.z1) + 26, 'genaue Koordinaten: Zeichnungssatz BGY-ZB-02', { 'font-size': 8 });
   const t = document.getElementById('holes');
   for (const [w, dd, qq] of plateHoles) t.insertRow().innerHTML = `<td>${w}</td><td class="n">${r1(dd)}</td><td class="n">${r1(qq)}</td>`;
 }
@@ -382,18 +385,20 @@ const plateHoles = [];
 // ---------- parts + standard parts
 {
   const L = r1(g.PLATE.x1 - g.PLATE.x0), Wd = g.CB.z1 - g.CB.z0, Hh = g.WALL_H, BL = r1(g.CB.x1 - g.CB.x0);
+  const E = 'Edelstahl 1.4301', MB = 'Metallbauer';
   const parts = [
-    ['1', 'Grundplatte', `Alu ${g.FLOOR_T} mm, EN AW-5083`, `${L} × ${Wd}`, 1, 'Lochtabelle BGY-ZB-02, Gewinde M6/M4/M3', 'Kollege (Schweißen) / selbst (Bohren)'],
-    ['2', 'Stirnwand', 'Alu 2 mm, AlMg3', `${Wd} × ${Hh}`, 1, `Ø ${g.HOLE_D.G} / Ø ${g.HOLE_D.R} nach dem Schweißen`, 'Kollege'],
-    ['3', 'Knotenblech', `Alu ${g.GUSSET.t} mm`, `Dreieck ${g.GUSSET.base} × ${g.GUSSET.h}`, 3, 'an Wand + Platte schweißen', 'Kollege'],
-    ['4', 'Lagerbock G, A', 'Alu-Winkel 60 × 60 × 6', `Länge ${B.w}`, 2, `Ø ${B.hole}, 2 Langlöcher`, 'selbst'],
-    ['5', 'Lagerbock B, Mitnehmer', 'Alu-Winkel 40 × 40 × 5', `Länge ${SB.w}`, 2, `Ø ${B.hole} bzw. M10 × 1,25; Fuß 2 × Senkung`, 'selbst'],
-    ['6', 'Schlitten B', `Alu ${g.SLED_T} mm`, `${r1(g.SLED.x1 - g.SLED.x0)} × ${g.SLED_W}`, 1, '8 × Senkung M3, 4 × M5', 'selbst'],
-    ['7', 'Poti-Lasche', 'Alu 3 mm', `~55 × 16`, 1, `Ø 8,5 (Stange G) und Bohrung für Poti-Auge, Abstand ${r1(g.G_Z - g.POTI_Z)}`, 'selbst'],
-    ['8', 'Poti-Halter', 'Alu-Winkel', 'nach Lieferung', 1, 'Langloch längs', 'selbst'],
-    ['9', 'Anschlaghülse A', 'Alu/Stahl Rundmaterial Ø 16', '40 lang, innen Ø 10,5', 1, 'Passscheiben M10 dazu', 'selbst (To-Do)'],
-    ['10', 'Haube', 'Alu 1,5 mm, gekantet', `außen ${g.CB.x1 - g.CB.x0 + 4} × ${Wd + 4} × ${g.CB.h}, Laschen vorn/hinten 18`, 1, '4 × Ø 4,5 in den Laschen (BGY-ZB-06)', 'Metallbauer'],
-    ['11', 'Rückwand', 'Alu 1,5 mm', `${Wd} × ${Hh} + Lasche 15`, 1, '3 × Ø 16,5 für M16, 2 × Blindnietmutter M4 (BGY-ZB-03)', 'Metallbauer'],
+    ['1', 'Grundplatte', `${E}, ${g.FLOOR_T} mm`, `${L} × ${Wd}`, 1, 'Lochtabelle BGY-ZB-02, Gewinde M6/M4/M3', 'Kollege (Schweißen)'],
+    ['2', 'Stirnwand', `${E}, 2 mm, Flansch ${g.FLANGE.w}`, `${Wd} × ${Hh}`, 1, `Ø ${g.HOLE_D.G} / Ø ${g.HOLE_D.R} nach dem Schweißen`, 'Kollege'],
+    ['3', 'Knotenblech', `${E}, ${g.GUSSET.t} mm`, `Dreieck ${g.GUSSET.base} × ${g.GUSSET.h}`, 3, 'an Wand + Platte schweißen', 'Kollege'],
+    ['4', 'Lagerbock G, A', `${E}, Winkel 60 × 60 × 6`, `Länge ${B.w}`, 2, `Ø ${B.hole}, 2 Langlöcher`, MB],
+    ['5', 'Lagerbock B, Mitnehmer', `${E}, Winkel 40 × 40 × 5`, `Länge ${SB.w}`, 2, `Ø ${B.hole} bzw. M10 × 1,25; Fuß 2 × Senkung`, MB],
+    ['6', 'Schlitten B', `${E}, ${g.SLED_T} mm`, `${r1(g.SLED.x1 - g.SLED.x0)} × ${g.SLED_W}`, 1, '8 × Senkung M3, 4 × M5', MB],
+    ['7', 'Poti-Lasche', `${E}, 3 mm`, `~55 × 16`, 1, `Ø 8,5 (Stange G) und Bohrung für Poti-Auge, Abstand ${r1(g.G_Z - g.POTI_Z)}`, MB],
+    ['8', 'Poti-Halter', 'Edelstahl-Winkel', 'nach Lieferung', 1, 'Langloch längs', 'offen'],
+    ['9', 'Anschlaghülse A', 'Edelstahl 1.4305, Rund Ø 16', '40 lang, innen Ø 10,5', 1, 'Passscheiben M10 dazu', MB],
+    ['10', 'Deckel', 'Polycarbonat 5 mm, glasklar, UV', `${g.CB.x1 - g.CB.x0} × ${Wd} (an der Wanne messen)`, 1, '18 × Ø 7 selbst bohren (BGY-ZB-06)', 'selbst bestellen'],
+    ['11', 'Rückwand', `${E}, 1,5 mm, Flansch ${g.FLANGE.w}`, `${Wd} × ${Hh}`, 1, '3 × Ø 16,5 für M16 vor dem Schweißen (BGY-ZB-03)', 'Kollege'],
+    ['13', 'Seitenwand', `${E}, 1,5 mm, Flansch ${g.FLANGE.w}`, `${r1(g.WALL_X - g.CB.x0 - g.SHELL_T)} × ${Hh}`, 2, 'Flansch an den Enden ausgeklinkt (BGY-ZB-06)', 'Kollege'],
   ];
   const t = document.getElementById('parts');
   for (const p of parts) t.insertRow().innerHTML = p.map((c, i) => `<td${i === 4 ? ' class="n"' : ''}>${c}</td>`).join('');
@@ -405,12 +410,13 @@ const plateHoles = [];
     ['Senkschraube M5 × 10 (ISO 10642), nicht länger', 4, 'Bock B und Mitnehmer auf den Schlitten'],
     ['Senkschraube M3 (ISO 10642), Länge nach Gewindetiefe Wagen', 8, 'Wagen an den Schlitten'],
     ['Zylinderschraube M3 × 8', 8, 'Schiene auf die Platte (Senkbohrung der Schiene)'],
-    ['Linsenschraube M4 × 8', 6, 'Haube (4), Rückwand-Lasche (2)'],
-    ['Blindnietmutter M4', 4, 'in Stirnwand und Rückwand (setzt der Metallbauer)'],
+    ['Einnietmutter M5 A2, Flachkopf (Klemmbereich 1,5–2 prüfen)', 18, 'im Flansch, setzt der Metallbauer nach dem Schweißen'],
+    ['Linsenschraube M5 × 12 A2 + Karosseriescheibe', 18, 'PC-Deckel'],
+    ['Dichtband EPDM-Zellkautschuk 10 × 5, selbstklebend', '~1,6 m', 'Flansch, innen neben den Schrauben (wie Relaisbox)'],
     ['Kabelverschraubung M16 (Klemmbereich bis ≥ 8 mm)', 3, 'Rückwand: Druckluft 8 mm, Sensorkabel, Spulenkabel'],
-    ['Gewindestange M4 oder Schraube M4 × ~90 + Mutter/Scheibe', 3, 'Ventilstapel (Länge nach Stapelhöhe 75 + Platte)'],
-    ['Distanzhülse Ø 8 / 4,3 × 3', 9, 'Ventilstapel: unter und zwischen den Ventilen'],
-    ['Gummipuffer M6 (vorhanden) oder Schrauben M6', 4, 'Befestigung im Rahmen; Bolzen höchstens 8 mm einschrauben'],
+    ['Gewindestange M4 A2 oder Schraube M4 × ~90 A2 + Mutter/Scheibe', 3, 'Ventilstapel (Länge nach Stapelhöhe 75 + Platte)'],
+    ['Distanzhülse Kunststoff (PA) Ø 8 / 4,3 × 3', 9, 'Ventilstapel: unter und zwischen den Ventilen; trennt Ventilkörper und Edelstahlplatte (falls Ventil aus Alu: Kontaktkorrosion, Kenntnisstand; Werkstoff im Datenblatt prüfen)'],
+    ['Gummipuffer M6 (vorhanden) oder Schrauben M6', 4, `Befestigung im Rahmen; Bolzen höchstens ${g.FLOOR_T} mm einschrauben`],
   ];
   const t2 = document.getElementById('std');
   for (const p of std) t2.insertRow().innerHTML = p.map((c, i) => `<td${i === 1 ? ' class="n"' : ''}>${c}</td>`).join('');

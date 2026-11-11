@@ -6,7 +6,7 @@ import {
   HM20, HM25, G_BODY, A_BODY, B_BODY, WALL_X, WALL_T, FLOOR_T, FLOOR_EXT, RIGID, HOLE_D, CLEVIS, FK32, AX_Y,
   BRACKET, SLED_BRACKET, RAIL, CARRIAGE, SLED_T, SLED_W, ROW_Z, G_Z, POTI_Z, G_ROD_END0, G_X0, B_ROD_END0, B_OFFSET,
   A_ROD_END0, A_X0, CB, PLATE, GUSSET, WALL_H, G_BRACKET_X, A_BRACKET_X, SLED_TOP, SLED, RAIL_X0, MITN_BACK0,
-  VALVE, VSTACK, valveY, REAR_GLANDS,
+  VALVE, VSTACK, valveY, REAR_GLANDS, FLANGE, TUB_H, SHELL_T, LID_T, LID_SCREWS,
 } from './boxgeo.js';
 
 const CYL_R = HM20.D / 2;
@@ -140,9 +140,14 @@ function enclosure(b, title, part, note, floorMat, floorT) {
   world.add(lid);
   lids.push(lid);
 }
-enclosure(CB, 'Zylinderbox (Minimalmaß) – Grundplatte', `Alu ${FLOOR_T} mm, außen ~${CB.x1 - CB.x0} × ${CB.z1 - CB.z0} × ${CB.h} mm`, 'Minimalbox: Stirnwand (2 mm) = Seil-Widerlager, Zylinder von der Wand aus rückwärts angeordnet. Kraftfluss Zylinderfüße → Grundplatte → Stirnwand, deshalb Stirnwand fest mit der Grundplatte verbinden und abstützen.', mat.frame, FLOOR_T);
+enclosure(CB, 'Zylinderbox – Grundplatte', `Edelstahl ${FLOOR_T} mm, Wanne mit PC-Deckel, außen ~${CB.x1 - CB.x0} × ${CB.z1 - CB.z0} × ${CB.h} mm`, 'Edelstahl-Wanne wie die Relaisbox (Festgelegt 2026-11-11): Flansch 25 innen, Dichtband, PC-Deckel 5 mm. Minimalbox: Stirnwand (2 mm) = Seil-Widerlager, Zylinder von der Wand aus rückwärts angeordnet. Kraftfluss Zylinderfüße → Grundplatte → Stirnwand, deshalb Stirnwand fest mit der Grundplatte verbinden und abstützen.', mat.frame, FLOOR_T);
 enclosure(EB, 'Elektronik-Koffer – Boden', `Hartschalenkoffer, Modell offen (Platzhalter ${EB.x1 - EB.x0} × ${EB.z1 - EB.z0} × ${EB.h} mm)`, 'Nucleo-F091RC, 2 × HW-039 (Feststellbremse), PC817, LR7843-Treiber, CAN. Seit 2026-11-11 ohne Ventile (die sitzen in der Zylinderbox) → trocken, kein Druckausgleich. Ort offen.', mat.frame, 4);
 world.add(label('Zylinderbox', (CB.x0 + CB.x1) / 2, CB.h + 30, CB.z0, 16));
+{ // flange 25 inward on all walls (stainless tub, 2026-11-11); lid (glass) sits on top at CB.h
+  const L = CB.x1 - CB.x0, W = CB.z1 - CB.z0, f = FLANGE.w, y = TUB_H - SHELL_T / 2;
+  for (const [w, d, x, z] of [[L, f, (CB.x0 + CB.x1) / 2, CB.z0 + f / 2], [L, f, (CB.x0 + CB.x1) / 2, CB.z1 - f / 2], [f, W - 2 * f, CB.x0 + f / 2, (CB.z0 + CB.z1) / 2], [f, W - 2 * f, CB.x1 - f / 2, (CB.z0 + CB.z1) / 2]])
+    world.add(info(box(w, SHELL_T, d, mat.alu, x, y, z), 'Flansch der Wanne', `Edelstahl, ${f} mm nach innen`, `${LID_SCREWS.length} Einnietmuttern M5 A2, Dichtband EPDM 10 × 5, darauf PC-Deckel ${LID_T} mm (Haken „Deckel“). Wie Relaisbox.`));
+}
 world.add(label('Elektronik-Koffer', (EB.x0 + EB.x1) / 2, EB.h + 30, EB.z1, 16));
 // rear-wall glands of the cylinder box (Vorschlag Claude 2026-11-11): air, sensor cable, coil cable
 REAR_GLANDS.y.forEach((y, i) => world.add(info(cyl(8, CB.x0 - 12, CB.x0 + 2, i === 0 ? mat.blue : mat.dark, 'x', y, REAR_GLANDS.z),
@@ -159,7 +164,7 @@ function bracket(parent, x, z, b, base, title, part) {
 
 // G cylinder (gate / Wählseil)
 world.add(info(cyl(CYL_R, G_X0, G_X0 + G_BODY, mat.alu, 'x', AX_Y, G_Z), 'Zylinder G (Gasse → Wählseil)', `Airtec HM-20-0${GATE_TRAVEL} (Standardhub, nicht begrenzt)`, `Wählt die Gasse R · 1/2 · 3/4 · 5. Gemessener Gassenweg R → 5 = 27 mm, Hub ${GATE_TRAVEL} mm lässt je 6,5 mm Reserve: R und 5 enden am Gassenanschlag im Getriebe, nicht am Zylinder. 1/2 und 3/4 werden „fliegend“ eingelegt. Kraft gemessen 9 kg ≈ 88 N, HM-20 bei 7 bar ≈ 198 N aus / 166 N ein (Katalog).`));
-bracket(world, G_BRACKET_X, G_Z, BRACKET, FLOOR_T, 'Lagerbock G', 'Alu-Winkel 60 × 60 × 6, Langlöcher M6');
+bracket(world, G_BRACKET_X, G_Z, BRACKET, FLOOR_T, 'Lagerbock G', 'Edelstahl-Winkel 60 × 60 × 6, Langlöcher M6');
 const gRod = cyl(ROD_R, 0, 80, mat.steel, 'x', AX_Y, G_Z);
 world.add(gRod);
 const gPortCap = V(G_X0 + 14, AX_Y + CYL_R, G_Z);
@@ -171,7 +176,7 @@ world.add(label('G – Gasse', G_X0 + G_BODY / 2, AX_Y + 40, G_Z - 10));
 
 // A cylinder (fixed) + B cylinder (on linear guide, pushed by A) → Schaltseil
 world.add(info(cyl(A_CYL_R, A_X0, A_X0 + A_BODY, mat.alu, 'x', AX_Y, ROW_Z), 'Zylinder A (Reihe, Kaskade hinten)', `Airtec HM-25-0${A_CYL_STROKE}, mit Anschlaghülse auf ${A_STROKE} mm begrenzt`, `Unten → Neutral, ${A_STROKE} mm = gemessener Weg 2/4 (9,0) → Neutral (Mittel 36,8). Die Hülse auf der Kolbenstange nimmt ${A_STOP} mm vom Einfahren weg; mit Passscheiben lässt sich Neutral genau einstellen. Ø 25, weil A beim Einlegen oben die volle Kraft von B abstützen muss (265 > 170 N bei 6 bar).`));
-bracket(world, A_BRACKET_X, ROW_Z, BRACKET, FLOOR_T, 'Lagerbock A', 'Alu-Winkel 60 × 60 × 6, Langlöcher M6');
+bracket(world, A_BRACKET_X, ROW_Z, BRACKET, FLOOR_T, 'Lagerbock A', 'Edelstahl-Winkel 60 × 60 × 6, Langlöcher M6');
 const aRod = cyl(A_ROD_R, 0, 80, mat.steel, 'x', AX_Y, ROW_Z);
 world.add(aRod);
 world.add(label('A', A_X0 + A_BODY / 2, AX_Y + 26, ROW_Z + 32));
@@ -183,13 +188,13 @@ bGroup.add(info(cyl(8, A_ROD_END0 - A_WF - A_STOP, A_ROD_END0, mat.red, 'x', AX_
 bGroup.add(info(cyl(9, A_ROD_END0, A_ROD_END0 + FK32, mat.dark, 'x', AX_Y, ROW_Z), 'Ausgleichskupplung A → B', 'Airtec FK-32 (M10 × 1,25, 71,5 mm)', 'Verbindet Kolbenstange A mit dem Schlitten von B. Gleicht Winkel- und Parallelversatz aus, damit nichts klemmt.'));
 bGroup.add(info(cyl(CYL_R, A_ROD_END0 + B_OFFSET, A_ROD_END0 + B_OFFSET + B_BODY, mat.alu, 'x', AX_Y, ROW_Z), 'Zylinder B (Reihe, Kaskade vorn)', `Airtec HM-20-0${B_STROKE} (Standardhub, nicht begrenzt)`, `Neutral → oben. Gemessen bis zum Gang: R 22,5 · 1 21,8 · 3 28,1 · 5 25,2 mm → Gang endet am Anschlag im Getriebe, B erreicht sein Hubende nie. Sensor „aus“ bei ~21 mm. Kraft gemessen 6–8 kg ≈ 78 N, HM-20 bei 7 bar ≈ 198 / 166 N.`));
 for (const cx of [SLED.x0 + CARRIAGE.len / 2, SLED.x1 - CARRIAGE.len / 2]) bGroup.add(box(CARRIAGE.len, 10, CARRIAGE.w, mat.steel, cx, SLED_TOP - SLED_T - 5, ROW_Z));
-bGroup.add(info(box(SLED.x1 - SLED.x0, SLED_T, SLED_W, mat.frame, (SLED.x0 + SLED.x1) / 2, SLED_TOP - SLED_T / 2, ROW_Z), 'Schlitten B', `Alu ${SLED_T} mm auf 2 × MGN12H`, 'Trägt Lagerbock B vorn und den Mitnehmer hinten. Alle Schrauben oben versenkt (B liegt knapp darüber).'));
-bracket(bGroup, SLED.x1, ROW_Z, SLED_BRACKET, SLED_TOP, 'Lagerbock B (auf dem Schlitten)', 'Alu-Winkel 40 × 40 × 5');
+bGroup.add(info(box(SLED.x1 - SLED.x0, SLED_T, SLED_W, mat.frame, (SLED.x0 + SLED.x1) / 2, SLED_TOP - SLED_T / 2, ROW_Z), 'Schlitten B', `Edelstahl ${SLED_T} mm auf 2 × MGN12H`, 'Trägt Lagerbock B vorn und den Mitnehmer hinten. Alle Schrauben oben versenkt (B liegt knapp darüber).'));
+bracket(bGroup, SLED.x1, ROW_Z, SLED_BRACKET, SLED_TOP, 'Lagerbock B (auf dem Schlitten)', 'Edelstahl-Winkel 40 × 40 × 5');
 {
   const m = new THREE.Group();
   m.add(box(SLED_BRACKET.t, SLED_BRACKET.h, SLED_BRACKET.w, mat.red, MITN_BACK0 + SLED_BRACKET.t / 2, SLED_TOP + SLED_BRACKET.h / 2, ROW_Z));
   m.add(box(SLED_BRACKET.foot - SLED_BRACKET.t, SLED_BRACKET.t, SLED_BRACKET.w, mat.red, MITN_BACK0 + SLED_BRACKET.t + (SLED_BRACKET.foot - SLED_BRACKET.t) / 2, SLED_TOP + SLED_BRACKET.t / 2, ROW_Z));
-  bGroup.add(info(m, 'Mitnehmer', 'Alu-Winkel 40 × 40 × 5, Gewinde M10 × 1,25', 'FK-32 ist eingeschraubt und mit RL-25 gekontert. A schiebt hier den Schlitten mit B.'));
+  bGroup.add(info(m, 'Mitnehmer', 'Edelstahl-Winkel 40 × 40 × 5, Gewinde M10 × 1,25', 'FK-32 ist eingeschraubt und mit RL-25 gekontert. A schiebt hier den Schlitten mit B.'));
 }
 const bRod = cyl(ROD_R, 0, 80, mat.steel, 'x', AX_Y, ROW_Z);
 bGroup.add(bRod);
