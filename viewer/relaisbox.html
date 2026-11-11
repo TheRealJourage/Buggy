@@ -24,8 +24,8 @@
 <div id="bar">
   <b>Relaisbox – Entwurf v3.1</b>
   <span>Material:</span>
-  <button data-mat="alu" class="active">Alu 2 mm</button>
-  <button data-mat="va">Edelstahl 1,5 mm</button>
+  <button data-mat="va" class="active">Edelstahl 1,5 mm</button>
+  <button data-mat="alu">Alu 2 mm (Vergleich)</button>
   <span>Deckel:</span>
   <button data-lid="closed" class="active">zu</button>
   <button data-lid="0">Lastseite auf</button>
@@ -37,8 +37,8 @@
   <span class="hint">Maus: drehen · Rad: zoomen · rechts: verschieben · über Teile fahren = Name</span>
 </div>
 <div id="info">
-  <h3>Stand 2026-10-30 · Vault Buggy/Relaisbox.md (Maßblatt)</h3>
-  Geschweißte Wanne, außen <b>500 × 430 × 115</b> (Platzhalter bis zur Messung). Material nach Probe des Kollegen am 2026-11-06: Alu, sonst Edelstahl.
+  <h3>Stand 2026-11-11 · Vault Buggy/Relaisbox.md (Maßblatt)</h3>
+  Geschweißte Wanne, außen <b>500 × 430 × 115</b> (Platzhalter bis zur Messung). Material: <b>Edelstahl</b> (festgelegt 2026-11-11), Alu nur zum Vergleich.
   <table>
     <tr><td>Flansch oben</td><td>25 mm nach innen, umlaufend, dicht verschweißt; Schrauben 9 mm, Dichtung 19 mm von der Außenkante</td></tr>
     <tr><td>Mittelsteg</td><td>50 mm breit, längs, auf der Mittelwand (Schrauben/Dichtung wie Flansch)</td></tr>
@@ -231,7 +231,7 @@ document.querySelectorAll('[data-mat]').forEach(b => b.onclick = () => {
 document.getElementById('walls').onchange = e => { shell.children.filter(m => m.material?.transparent).forEach(m => m.visible = e.target.checked); };
 document.getElementById('inside').onchange = e => { inside.visible = e.target.checked; };
 document.getElementById('beams').onchange = e => { beams.visible = e.target.checked; };
-buildShell('alu');
+buildShell('va');
 
 // dimensions + labels
 const dimMat = new THREE.LineBasicMaterial({ color: 0x88ccff });
