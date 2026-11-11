@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Relaisbox Biegemuster 3D</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #111; color: #ddd; font-family: system-ui, sans-serif; overflow: hidden; }
+  #bar { position: fixed; top: 0; left: 0; right: 0; padding: 8px 12px; background: #151517cc; display: flex; gap: 10px; align-items: center; font-size: 14px; z-index: 2; flex-wrap: wrap; }
+  #bar button { background: #333; color: #ddd; border: 1px solid #555; padding: 4px 9px; cursor: pointer; border-radius: 3px; }
+  #bar button.active { background: #4f6b8a; color: #fff; }
+  #bar a { color: #9cf; }
+  #bar input[type=range] { width: 220px; }
+  #bar .hint { color: #888; }
+  #info { position: fixed; bottom: 10px; left: 10px; max-width: 480px; padding: 10px 12px; background: #000b; border-radius: 6px; font-size: 13px; line-height: 1.4; }
+  #info h3 { margin: 0 0 4px; font-size: 12px; color: #8ab; text-transform: uppercase; letter-spacing: .05em; }
+  #info .warn { color: #fc6; }
+  #info table { border-collapse: collapse; margin: 4px 0; }
+  #info td { padding: 0 8px 0 0; }
+  #hover { position: fixed; pointer-events: none; padding: 4px 7px; background: #000d; border: 1px solid #555; border-radius: 4px; font-size: 12px; display: none; z-index: 3; max-width: 420px; }
+  canvas { display: block; }
+  @media (max-width: 600px) { #info { max-width: calc(100% - 44px); font-size: 12px; } #bar input[type=range] { width: 140px; } }
+</style>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.js" } }</script>
+</head>
+<body>
+<div id="bar">
+  <b>Relaisbox – Biegemuster 3D</b>
+  <span>Biegen:</span>
+  <input type="range" id="fold" min="0" max="3" step="0.01" value="0">
+  <button data-stage="0" class="active">flach</button>
+  <button data-stage="1">1 Flansche</button>
+  <button data-stage="2">2 Seitenwände</button>
+  <button data-stage="3">3 Stirnwände</button>
+  <button id="play">▶ abspielen</button>
+  <label><input type="checkbox" id="assembled"> U-Steg einsetzen</label>
+  <span>Material:</span>
+  <button data-mat="va" class="active">Edelstahl 1,5</button>
+  <button data-mat="alu">Alu 2</button>
+  <a href="relaisbox-blech.html">Zeichnungen</a> · <a href="relaisbox.html">Gesamtentwurf</a>
+  <span class="hint">Maus: drehen · Rad: zoomen · rechts: verschieben · über Teile fahren = Name</span>
+</div>
+<div id="info"></div>
+<div id="hover"></div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from './vendor/OrbitControls.js';
+import * as g from './relaisbox-blech.js';
+
+// x = driving direction (front +x), y = left (+), z = up; mm. Bends drawn sharp (radius not modelled),
+// hinges sit on the flat bend lines, sheet thickness lies on the outside of each bend.
+const { TUB, U, GAP, NOTCH } = g;
+const COLORS = { va: 0xa7b0b5, alu: 0xc4cad2 };
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(devicePixelRatio);
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a1c);
+const camera = new THREE.PerspectiveCamera(35, 1, 1, 8000);
+camera.position.set(-900, -1300, 1000);
+camera.up.set(0, 0, 1);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, -180, 40);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x333344, 1.2));
+const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+sun.position.set(-400, -600, 900);
+scene.add(sun);
+const grid = new THREE.GridHelper(2400, 24, 0x333333, 0x262626);
+grid.rotation.x = Math.PI / 2; grid.position.z = -3;
+scene.add(grid);
+
+let mat = 'va', pickables = [];
+const root = new THREE.Group();
+scene.add(root);
+
+function plate(name, pts, t, color, parent) {
+  const shape = new THREE.Shape(pts.map(([x, y]) => new THREE.Vector2(x, y)));
+  const geo = new THREE.ExtrudeGeometry(shape, { depth: t, bevelEnabled: false });
+  geo.translate(0, 0, -t);
+  const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color, metalness: .55, roughness: .45, side: THREE.DoubleSide }));
+  m.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 20), new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: .45 })));
+  m.userData.name = name;
+  pickables.push(m);
+  parent.add(m);
+  return m;
+}
+
+let hinges = { flange: [], long: [], end: [], uLegs: [] }, uGroup;
+
+function build() {
+  root.clear(); pickables = []; hinges = { flange: [], long: [], end: [], uLegs: [] };
+  const t = g.MATERIALS[mat].t, color = COLORS[mat];
+  const { a, b, wall: w, flange: f } = TUB, n = NOTCH.w / 2, e = NOTCH.extra;
+  const tub = new THREE.Group();
+  root.add(tub);
+  plate(`Pos 1 Boden ${2 * a} × ${2 * b} (zwischen den Biegelinien)`, [[-a, -b], [a, -b], [a, b], [-a, b]], t, color, tub);
+  const sides = [
+    { nm: 'Stirnwand vorn (Kabelverschraubungen)', fl: 'Flansch vorn, Ausschnitt für den U-Steg', rot: 0, pos: [a, 0], h: b - GAP, notch: true, kind: 'end' },
+    { nm: 'Seitenwand links (Lastseite)', fl: 'Flansch links', rot: Math.PI / 2, pos: [0, b], h: a - GAP, notch: false, kind: 'long' },
+    { nm: 'Stirnwand hinten', fl: 'Flansch hinten, Ausschnitt für den U-Steg', rot: Math.PI, pos: [-a, 0], h: b - GAP, notch: true, kind: 'end' },
+    { nm: 'Seitenwand rechts (Steuerseite)', fl: 'Flansch rechts', rot: -Math.PI / 2, pos: [0, -b], h: a - GAP, notch: false, kind: 'long' },
+  ];
+  for (const sd of sides) {
+    const base = new THREE.Group();
+    base.position.set(sd.pos[0], sd.pos[1], 0); base.rotation.z = sd.rot;
+    tub.add(base);
+    const wallH = new THREE.Group(); base.add(wallH);
+    hinges[sd.kind].push(wallH);
+    const h = sd.h;
+    const wallPts = sd.notch ? [[0, -h], [w, -h], [w, -n], [w - e, -n], [w - e, n], [w, n], [w, h], [0, h]] : [[0, -h], [w, -h], [w, h], [0, h]];
+    plate(`Pos 1 ${sd.nm}, flach ${w} hoch`, wallPts, t, color, wallH);
+    const flH = new THREE.Group(); flH.position.x = w; wallH.add(flH);
+    hinges.flange.push(flH);
+    const fname = `Pos 1 ${sd.fl}, flach ${f}, Gehrung 45°`;
+    if (sd.notch) {
+      plate(fname, [[0, -h], [f, -(h - f)], [f, -n], [0, -n]], t, color, flH);
+      plate(fname, [[0, n], [f, n], [f, h - f], [0, h]], t, color, flH);
+    } else plate(fname, [[0, -h], [f, -(h - f)], [f, h - f], [0, h]], t, color, flH);
+  }
+
+  // Pos 2: U web, lies beside the tub while flat; legs fold up, then the U is turned over into the tub
+  uGroup = new THREE.Group(); root.add(uGroup);
+  const L2 = U.L / 2, wf = U.webFlat / 2, lf = U.legFlat, nt = U.notch;
+  plate(`Pos 2 U-Steg: Steg ${U.web} = Dichtfläche beider Deckel`, [[-L2, -wf], [L2, -wf], [L2, wf], [-L2, wf]], t, color, uGroup);
+  for (const s of [1, -1]) {
+    const hg = new THREE.Group(); hg.position.y = s * wf; hg.rotation.z = s > 0 ? Math.PI / 2 : -Math.PI / 2;
+    uGroup.add(hg);
+    const fold = new THREE.Group(); hg.add(fold); hinges.uLegs.push(fold);
+    // local X = outward from the hinge (0..lf), Y along the length; notches at the free edge
+    const pts = [[0, -L2], [lf, -L2]];
+    const xs = s > 0 ? nt.x.map((x) => -x) : nt.x; // keep the notch order consistent after the 90 deg turn
+    for (const x of xs.slice().sort((p, q) => p - q)) {
+      const y0 = x - nt.w / 2, y1 = x + nt.w / 2;
+      pts.push([lf, y0], [lf - nt.h, y0], [lf - nt.h, y1], [lf, y1]);
+    }
+    pts.push([lf, L2], [0, L2]);
+    plate(`Pos 2 Schenkel ${U.leg}, 3 Ausschnitte ${nt.w} × ${nt.h} für Kabel`, pts, t, color, fold);
+  }
+  apply();
+}
+
+let stage = 0;
+const clamp = (v) => Math.min(1, Math.max(0, v));
+function apply() {
+  const deg = (p) => -clamp(p) * Math.PI / 2;
+  hinges.flange.forEach((h) => (h.rotation.y = deg(stage)));
+  hinges.long.forEach((h) => (h.rotation.y = deg(stage - 1)));
+  hinges.end.forEach((h) => (h.rotation.y = deg(stage - 2)));
+  hinges.uLegs.forEach((h) => (h.rotation.y = deg(stage / 3)));
+  const t = g.MATERIALS[mat].t;
+  if (document.getElementById('assembled').checked) {
+    uGroup.rotation.set(Math.PI, 0, 0);
+    uGroup.position.set(0, 0, TUB.wall);
+  } else {
+    uGroup.rotation.set(0, 0, 0);
+    uGroup.position.set(0, -(TUB.flatW / 2 + 90 + U.flatW / 2), 0);
+  }
+  void t;
+  document.querySelectorAll('[data-stage]').forEach((b) => b.classList.toggle('active', Math.abs(+b.dataset.stage - stage) < 0.005));
+}
+
+const fold = document.getElementById('fold');
+fold.oninput = () => { stage = +fold.value; apply(); };
+document.querySelectorAll('[data-stage]').forEach((b) => (b.onclick = () => { stage = +b.dataset.stage; fold.value = stage; apply(); }));
+document.getElementById('assembled').onchange = apply;
+document.querySelectorAll('[data-mat]').forEach((b) => (b.onclick = () => {
+  mat = b.dataset.mat;
+  document.querySelectorAll('[data-mat]').forEach((c) => c.classList.toggle('active', c === b));
+  build(); info();
+}));
+let playing = null;
+document.getElementById('play').onclick = () => {
+  if (playing) { cancelAnimationFrame(playing); playing = null; return; }
+  let last = performance.now(); if (stage >= 3) stage = 0;
+  const step = (now) => {
+    stage = Math.min(3, stage + (now - last) / 1500); last = now;
+    fold.value = stage; apply();
+    playing = stage < 3 ? requestAnimationFrame(step) : null;
+  };
+  playing = requestAnimationFrame(step);
+};
+
+function info() {
+  const rows = Object.entries(g.MATERIALS).flatMap(([k, m]) => m.r.map((r) => g.result(k, r)))
+    .filter((c) => c.key === mat)
+    .map((c) => `<tr><td>ri ${c.r}</td><td>${c.L.toFixed(1)} × ${c.W.toFixed(1)} × <b>${c.H.toFixed(1)}</b></td><td>Flansch ${c.flange.toFixed(1)}</td></tr>`).join('');
+  document.getElementById('info').innerHTML = `<h3>Biegemuster · Vorschlag Claude 2026-11-11</h3>
+    Pos 1 Wanne aus einem Stück, Abwicklung <b>${TUB.flatL} × ${TUB.flatW}</b> · Pos 2 U-Steg <b>${U.L} × ${U.flatW}</b><br>
+    Biegefolge: 1 Flansche nach innen · 2 lange Seitenwände · 3 Stirnwände (Oberwange zwischen den Seitenwänden).<br>
+    Ergebnis außen, gerechnet (DIN 6935), ${g.MATERIALS[mat].name}:
+    <table>${rows}</table>
+    <span class="warn">Modell: Biegungen scharf, Radius nicht modelliert → im 3D ca. 1–2 mm kleiner als gerechnet.
+    Offen: zählt die festgelegte Bauhöhe 115 nur die Wanne oder Wanne + Dichtung + Deckel (120 bis zum Handbremsseil)?</span>`;
+}
+
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(), hover = document.getElementById('hover');
+renderer.domElement.addEventListener('pointermove', (ev) => {
+  mouse.set(ev.clientX / innerWidth * 2 - 1, -ev.clientY / innerHeight * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+  const hit = ray.intersectObjects(pickables, false)[0];
+  if (hit) { hover.style.display = 'block'; hover.style.left = ev.clientX + 14 + 'px'; hover.style.top = ev.clientY + 10 + 'px'; hover.textContent = hit.object.userData.name; }
+  else hover.style.display = 'none';
+});
+
+function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+build(); info();
+window.viewerReady = true;
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+</script>
+</body>
+</html>
