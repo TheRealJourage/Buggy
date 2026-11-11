@@ -35,7 +35,7 @@ export const minimalParts = [
   { id: 'term', x: M, y: M + 120, w: 105, h: 25, z: 25, label: 'Klemmen 12 V / Masse-Stern', sub: 'WAGO, Platz geschätzt', hyp: true },
   { id: 'hwl', x: B, y: M, w: 52, h: 52, z: 40, label: 'HW-039 L', sub: '50×51,5, H 40 (gemessen)', hyp: false },
   { id: 'hwr', x: B + 61, y: M, w: 52, h: 52, z: 40, label: 'HW-039 R', sub: '', hyp: false },
-  { id: 'pc817', x: B, y: M + 62, w: 113, h: 45, z: 20, label: 'PC817 8 Kanäle', sub: 'Maß offen (bestellt)', hyp: true },
+  { id: 'pc817', x: B, y: M + 62, w: 113, h: 45, z: 20, label: 'PC817 8 Kanäle (4 belegt)', sub: 'Maß offen (bestellt)', hyp: true },
   { id: 'lr', x: B, y: M + 117, w: 113, h: 60, z: 20, label: '6 × LR7843 + 1N4007', sub: 'Maß offen (bestellt)', hyp: true },
 ];
 // wall: top = y 0 side, bottom = y H side, left = x 0 side; pos along the wall; to = part id the cable runs to
@@ -45,9 +45,9 @@ export const minimalGlands = [
   { wall: 'top', pos: B + 87, size: 16, label: 'Motor R', to: 'hwr' },
   { wall: 'left', pos: M + 35, size: 16, label: 'CAN-Bündel', to: 'can' },
   { wall: 'left', pos: M + 132, size: 16, label: '12 V Steuerung', to: 'term' },
-  { wall: 'bottom', pos: B + 20, size: 16, label: 'Sensorkabel', to: 'pc817' },
-  { wall: 'bottom', pos: B + 52, size: 16, label: 'Kupplung', to: 'pc817' },
-  { wall: 'bottom', pos: B + 88, size: 16, label: 'Spulenkabel', to: 'lr' },
+  // clutch S1/S2 go to the front controller and arrive via CAN (decided 2026-11-11) → no clutch gland
+  { wall: 'bottom', pos: B + 30, size: 16, label: 'Sensorkabel', to: 'pc817' },
+  { wall: 'bottom', pos: B + 83, size: 16, label: 'Spulenkabel', to: 'lr' },
 ];
 
 export function minimalLayout() {
