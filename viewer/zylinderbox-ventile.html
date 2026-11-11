@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Ventile in der Zylinderbox</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #111; color: #ddd; font-family: system-ui, sans-serif; overflow: hidden; }
+  #bar { position: fixed; top: 0; left: 0; right: 0; padding: 8px 12px; background: #151517cc; display: flex; gap: 10px; align-items: center; font-size: 14px; z-index: 2; flex-wrap: wrap; }
+  #bar button { background: #222; color: #ddd; border: 1px solid #444; border-radius: 4px; padding: 3px 8px; }
+  #bar button.on { background: #2d5a8a; border-color: #4a8ad0; }
+  #bar .hint { color: #888; }
+  #panel { position: fixed; left: 8px; bottom: 8px; max-width: min(440px, calc(100vw - 32px)); background: #151517e6; padding: 8px 10px; border-radius: 6px; font-size: 13px; z-index: 2; max-height: 42vh; overflow: auto; line-height: 1.4; }
+  .hyp { color: #f0b54a; }
+  .lbl { position: absolute; font-size: 11px; color: #fff; background: #000a; padding: 1px 4px; border-radius: 3px; pointer-events: none; white-space: nowrap; transform: translate(-50%, -50%); }
+  canvas { display: block; }
+</style>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.js" } }</script>
+</head>
+<body>
+<div id="bar">
+  <b>Ventile in der Zylinderbox</b>
+  <button data-variant="now">heute (ohne Ventile)</button>
+  <button data-variant="A" class="on">A: eigene Ventilspur</button>
+  <button data-variant="B">B: Ventilstapel hinten</button>
+  <span>|</span>
+  <button data-v="iso">Schräg</button><button data-v="top">Oben</button><button data-v="rear">Rückwand</button>
+  <label><input id="labels" type="checkbox" checked> Beschriftung</label>
+  <label><input id="hoses" type="checkbox" checked> Schläuche</label>
+  <span class="hint">Ziehen: drehen · Rad/Pinch: zoomen · rechts: verschieben</span>
+</div>
+<div id="panel"><div id="result"></div>
+  <div style="margin-top:4px">Geometrie der Zylinder, Wände und Spuren aus <code>boxgeo.js</code> (Bauplan 2026-11-01). Ventil Airtec M-04-53x 180 × 64 × 22 (Datenblatt). <span class="hyp">Orange = Hypothese:</span> Platz für Schalldämpfer/Versorgung an 1/3/5 (~35), Distanzen im Stapel (3 mm), Schlauchwege (nur Linien, zeigen die ungefähre Länge). Deckel ausgeblendet, Seitenwände durchsichtig. Vorschlag Claude 2026-11-11, nicht entschieden. Weitere Ansichten: <a href="zylinderbox.html" style="color:#8cf">Bauplan</a> · <a href="ventilbox3d.html" style="color:#8cf">Ventilbox-Koffer</a></div>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from './vendor/OrbitControls.js';
+import { CB, PLATE, FLOOR_T, WALL_T, WALL_X, AX_Y, HM20, HM25, G_Z, ROW_Z, POTI_Z, G_X0, G_HEAD, G_ROD_END0,
+  A_X0, A_HEAD, A_ROD_END0, B_REAR0, B_HEAD0, B_ROD_END0, CLEVIS, LID_T } from './boxgeo.js';
+import { GATE_TRAVEL } from './sim.js';
+
+const VALVE = { L: 180, H: 64, W: 22 };
+const FIT = 35;              // silencers + supply on the 1/3/5 face (estimate)
+const STACK_GAP = 3;
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(devicePixelRatio);
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a1c);
+const camera = new THREE.PerspectiveCamera(35, 1, 1, 6000);
+const controls = new OrbitControls(camera, renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x333344, 1.3));
+const sun = new THREE.DirectionalLight(0xffffff, 2.2); sun.position.set(-300, 600, 400); scene.add(sun);
+const fill = new THREE.DirectionalLight(0xffffff, 1.0); fill.position.set(400, 200, -400); scene.add(fill);
+
+const mat = (c, o = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.6, ...o });
+const M = {
+  plate: mat(0x8d9299, { metalness: 0.5 }), wall: mat(0xa9aeb5, { metalness: 0.5 }),
+  glass: new THREE.MeshStandardMaterial({ color: 0x9fb4c8, transparent: true, opacity: 0.12, depthWrite: false }),
+  cyl: mat(0xd5d8dc, { metalness: 0.7, roughness: 0.3 }), rod: mat(0xeeeeee, { metalness: 0.9, roughness: 0.2 }),
+  poti: mat(0x333338), alu: mat(0xb8bcc2, { metalness: 0.5, roughness: 0.4 }), coil: mat(0x1e1e22), sock: mat(0x55585e),
+  fit: mat(0x3d7fd6), sil: mat(0xb08d57, { metalness: 0.6 }),
+  hyp: new THREE.MeshStandardMaterial({ color: 0xf0b54a, transparent: true, opacity: 0.3, depthWrite: false }),
+};
+
+let group, hoseGroup;
+const labels = [];
+const label = (txt, x, y, z, hyp) => {
+  const d = document.createElement('div'); d.className = 'lbl'; d.textContent = txt; if (hyp) d.style.color = '#f0b54a';
+  document.body.appendChild(d); labels.push({ d, p: new THREE.Vector3(x, y, z) });
+};
+// box by ranges (x0..x1, y0..y1, z0..z1); coordinates as in boxgeo.js: x along cylinders, y up, z across
+const box = (x0, x1, y0, y1, z0, z1, m, g = group) => {
+  const b = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0), m);
+  b.position.set((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2); g.add(b); return b;
+};
+const cylX = (x0, x1, y, z, r, m) => {
+  const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, x1 - x0, 32), m);
+  c.rotation.z = Math.PI / 2; c.position.set((x0 + x1) / 2, y, z); group.add(c); return c;
+};
+const cylZ = (x, y, z0, z1, r, m) => {
+  const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, Math.abs(z1 - z0), 24), m);
+  c.rotation.x = Math.PI / 2; c.position.set(x, y, (z0 + z1) / 2); group.add(c); return c;
+};
+
+// Valve lying flat: length along x, 64 across z, 22 high. Coil side (2/4) toward +z (cylinders), 1/3/5 toward -z (outer wall).
+function valve(x0, y0, zOut, name) {
+  const zIn = zOut + VALVE.H;
+  box(x0 + 10, x0 + 170, y0, y0 + VALVE.W, zOut, zOut + 32, M.alu);
+  box(x0 + 18, x0 + 48, y0, y0 + VALVE.W, zOut + 32, zIn, M.coil);
+  box(x0 + 132, x0 + 162, y0, y0 + VALVE.W, zOut + 32, zIn, M.coil);
+  box(x0, x0 + 18, y0 + 2, y0 + 20, zIn - 26, zIn - 4, M.sock);
+  box(x0 + 162, x0 + 180, y0 + 2, y0 + 20, zIn - 26, zIn - 4, M.sock);
+  const cx = x0 + 90, yc = y0 + VALVE.W / 2;
+  const ports = {};
+  for (const [k, dx] of [['4', -8], ['2', 8]]) { cylZ(cx + dx, yc, zOut + 32, zOut + 47, 5, M.fit); ports[k] = new THREE.Vector3(cx + dx, yc, zOut + 47); }
+  cylZ(cx, yc, zOut, zOut - 15, 5, M.fit);
+  for (const dx of [-16, 16]) cylZ(cx + dx, yc, zOut, zOut - 25, 6, M.sil);
+  label(`Ventil ${name}`, cx, y0 + VALVE.W + 6, zOut + 20);
+  return ports;
+}
+
+function hose(from, to) {
+  const mid = new THREE.Vector3((from.x + to.x) / 2, Math.max(from.y, to.y) + 12, (from.z + to.z) / 2);
+  const curve = new THREE.CatmullRomCurve3([from, mid, to]);
+  const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 24, 3, 8), mat(0x2f6fd0));
+  hoseGroup.add(tube);
+  return curve.getLength();
+}
+
+function build(variant) {
+  if (group) scene.remove(group);
+  group = new THREE.Group(); scene.add(group);
+  hoseGroup = new THREE.Group(); group.add(hoseGroup);
+  for (const l of labels) l.d.remove(); labels.length = 0;
+
+  const widen = variant === 'A' ? 103 : variant === 'B' ? 20 : 0;
+  const H = variant === 'B' ? 98 : CB.h;
+  const z0 = CB.z0 - widen, z1 = CB.z1;
+  const wallH = H - FLOOR_T - LID_T - 0.5;
+  // Base plate, end wall (cable side), rear wall, transparent side walls
+  box(PLATE.x0, PLATE.x1, 0, FLOOR_T, z0, z1, M.plate);
+  box(WALL_X, WALL_X + WALL_T, FLOOR_T, FLOOR_T + wallH, z0, z1, M.wall);
+  box(CB.x0, CB.x0 + WALL_T, FLOOR_T, FLOOR_T + wallH, z0, z1, M.wall);
+  box(CB.x0, CB.x1, FLOOR_T, FLOOR_T + wallH, z0, z0 + 1.5, M.glass);
+  box(CB.x0, CB.x1, FLOOR_T, FLOOR_T + wallH, z1 - 1.5, z1, M.glass);
+  // Cylinders (retracted positions)
+  cylX(G_X0, G_HEAD, AX_Y, G_Z, HM20.D / 2, M.cyl); cylX(G_HEAD, G_ROD_END0, AX_Y, G_Z, HM20.rod / 2, M.rod);
+  cylX(A_X0, A_HEAD, AX_Y, ROW_Z, HM25.D / 2, M.cyl); cylX(A_HEAD, A_ROD_END0, AX_Y, ROW_Z, HM25.rod / 2, M.rod);
+  cylX(B_REAR0, B_HEAD0, AX_Y, ROW_Z, HM20.D / 2, M.cyl); cylX(B_HEAD0, B_ROD_END0, AX_Y, ROW_Z, HM20.rod / 2, M.rod);
+  const potiX = G_ROD_END0 + CLEVIS + GATE_TRAVEL / 2 - 40;
+  box(potiX - 92.5, potiX + 92.5, AX_Y - 8, AX_Y + 8, POTI_Z - 8, POTI_Z + 8, M.poti);
+  label('G', (G_X0 + G_HEAD) / 2, AX_Y + 22, G_Z);
+  label('A', (A_X0 + A_HEAD) / 2, AX_Y + 24, ROW_Z);
+  label('B', (B_REAR0 + B_HEAD0) / 2, AX_Y + 22, ROW_Z);
+  label('Poti', potiX, AX_Y + 16, POTI_Z);
+  label('Seilseite (Stirnwand)', WALL_X + 10, FLOOR_T + wallH + 12, (z0 + z1) / 2);
+
+  // Cylinder ports: rear port near the rear end, front port near the head (top of tube)
+  const cp = (xRear, xHead, z, r) => ({ rear: new THREE.Vector3(xRear + 12, AX_Y + r, z), front: new THREE.Vector3(xHead - 12, AX_Y + r, z) });
+  const cyls = { G: cp(G_X0, G_HEAD, G_Z, HM20.D / 2), A: cp(A_X0, A_HEAD, ROW_Z, HM25.D / 2), B: cp(B_REAR0, B_HEAD0, ROW_Z, HM20.D / 2) };
+
+  let text = '', lengths = [];
+  const xIn0 = CB.x0 + WALL_T;
+  if (variant === 'A') {
+    const zOut = z0 + 1.5 + FIT;
+    const gap = 15, xStart = xIn0 + 20;
+    ['G', 'A', 'B'].forEach((n, i) => {
+      const p = valve(xStart + i * (VALVE.L + gap), FLOOR_T, zOut, n);
+      lengths.push(hose(p['4'], cyls[n].rear), hose(p['2'], cyls[n].front));
+    });
+    box(xStart + 60, xStart + 3 * VALVE.L + 2 * gap - 60, FLOOR_T, FLOOR_T + 2, z0 + 1.5, zOut, M.hyp);
+    label('Abluft/Schalldämpfer-Zone ~35', xStart + 300, FLOOR_T + 30, z0 + 18, true);
+  } else if (variant === 'B') {
+    const zOut = z0 + 1.5 + FIT, xStart = xIn0 + 20;
+    ['G', 'A', 'B'].forEach((n, i) => {
+      const p = valve(xStart, FLOOR_T + i * (VALVE.W + STACK_GAP), zOut, n);
+      lengths.push(hose(p['4'], cyls[n].rear), hose(p['2'], cyls[n].front));
+    });
+    box(xStart, xStart + VALVE.L, FLOOR_T, FLOOR_T + 3 * VALVE.W + 2 * STACK_GAP, z0 + 1.5, zOut, M.hyp);
+    label('Stapel 3 × 22 + 2 × 3 = 72 hoch', xStart + 90, FLOOR_T + 84, zOut + 32, true);
+  }
+  const outW = Math.round(z1 - z0), outL = Math.round(PLATE.x1 - PLATE.x0);
+  if (variant === 'now') text = `Heute: Box außen 660 × 152 × 83 (Platte ${outL} lang). Ventile im Koffer, 6 Schläuche nach außen.`;
+  else {
+    const maxL = Math.max(...lengths), sumL = lengths.reduce((a, b) => a + b, 0);
+    text = `Variante ${variant}: Box außen ≈ <b>660 × ${outW} × ${H} mm</b> (heute 660 × 152 × 83). ` +
+      `Schläuche in der Box: längster ≈ <b>${Math.round(maxL)} mm</b>, zusammen ≈ ${Math.round(sumL / 10) / 100} m <span class="hyp">(Luftlinie mit Bogen, Hypothese)</span>.`;
+  }
+  document.getElementById('result').innerHTML = text;
+  hoseGroup.visible = document.getElementById('hoses').checked;
+  setView(currentView);
+}
+
+let currentView = 'iso';
+function setView(v) {
+  currentView = v;
+  const cx = (CB.x0 + CB.x1) / 2, cz = (CB.z0 + CB.z1) / 2 - 40;
+  const pos = { iso: [cx - 450, 520, cz - 650], top: [cx, 1100, cz - 0.01], rear: [CB.x0 - 650, 220, cz - 150] }[v];
+  camera.position.set(...pos); controls.target.set(cx, 40, cz); controls.update();
+}
+
+document.querySelectorAll('[data-v]').forEach(b => b.onclick = () => setView(b.dataset.v));
+document.querySelectorAll('[data-variant]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('[data-variant]').forEach(x => x.classList.toggle('on', x === b));
+  build(b.dataset.variant);
+});
+document.getElementById('hoses').onchange = e => { hoseGroup.visible = e.target.checked; };
+const lblBox = document.getElementById('labels');
+function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+build('A');
+const v = new THREE.Vector3();
+renderer.setAnimationLoop(() => {
+  controls.update(); renderer.render(scene, camera);
+  for (const l of labels) {
+    v.copy(l.p).project(camera);
+    l.d.style.display = lblBox.checked && v.z < 1 ? '' : 'none';
+    l.d.style.left = (v.x + 1) / 2 * innerWidth + 'px'; l.d.style.top = (1 - v.y) / 2 * innerHeight + 'px';
+  }
+});
+</script>
+</body>
+</html>
