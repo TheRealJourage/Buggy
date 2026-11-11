@@ -31,6 +31,7 @@ CONNECTORS = {
     "Diagnosebuchse vorn": (C, -600),
     "Spiegelschalter E43": (C, 60),
     "Bremslichtschalter F": (C, 480),
+    "Kupplungsschalter S1/S2 (Pedal)": (C, 900),
     "Spiegel R T5a": (C, 1500),
     # D: front fuse block on X2
     "Front-Sicherungen (X2)": (D, -600),
