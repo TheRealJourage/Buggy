@@ -24,7 +24,7 @@ const cases = Object.entries(g.MATERIALS).flatMap(([k, m]) => m.r.map((r) => ({ 
     notes: [
       `Abwicklung nach DIN 6935, gemeinsamer Ausgleichswert v = −${fmt(BD)} je 90°-Biegung`,
       `(Mittel aus Edelstahl 1,5 r1,5–2 und Alu 2 r2–3). Wandmaß ${fmt(TUB.wall)} mit dem größten v gerechnet,`,
-      `damit die Bauhöhe 115 (festgelegt) bei keinem Werkstoff überschritten wird.`,
+      `damit Wanne + Dichtung (gequetscht ${g.STACK.gasket}) + Deckel ${g.STACK.lid} ≤ 115 (festgelegt) bleiben.`,
       'B1–B4: 90° hoch · F1–F4: 90° nach innen (Flansch zeigt zur Boxmitte).',
       `Ecken: Wandkanten ${fmt(GAP)} vor der Biegelinie, Freistich Ø${RELIEF_D}, Flansch-Gehrung 45°;`,
       'Ecken und Gehrungen WIG dicht durchschweißen (Edelstahl: Wurzel mit Formiergas, Kenntnisstand).',
@@ -61,7 +61,7 @@ const cases = Object.entries(g.MATERIALS).flatMap(([k, m]) => m.r.map((r) => ({ 
   label(s, 240, 22, 'Ergebnis nach dem Biegen (gerechnet, außen)', { bold: true, size: 3.2 });
   table(s, 240, 25, [['Werkstoff', 52], ['ri', 12], ['v', 12], ['L × B', 34], ['H', 16], ['Flansch', 18]],
     cases.map((c) => [c.m.name, fmt(c.r), fmt(Math.round(c.bd * 100) / 100), `${fmt(Math.round(c.L * 10) / 10)} × ${fmt(Math.round(c.W * 10) / 10)}`, fmt(Math.round(c.H * 10) / 10), fmt(Math.round(c.flange * 10) / 10)]), { size: 2.6 });
-  label(s, 240, 61, 'Soll: 500 × 430, H max. 115 (festgelegt 2026-11-01), Flansch 25', { size: 2.6 });
+  label(s, 240, 61, `Soll: 500 × 430, Wanne H max. ${g.H_MAX} (115 gesamt mit Dichtung + Deckel), Flansch 25`, { size: 2.6 });
   label(s, 240, 65, 'ri = Innenradius an der Kantbank (Werkzeug des Kollegen, offen).', { size: 2.6 });
 
   label(s, 240, 75, 'Biegefolge (Vorschlag)', { bold: true, size: 3.2 });
@@ -126,7 +126,8 @@ const cases = Object.entries(g.MATERIALS).flatMap(([k, m]) => m.r.map((r) => ({ 
   rect(va4, -Wo, Ho + 3, -1, Ho + 8, 'h'); rect(va4, 1, Ho + 3, Wo, Ho + 8, 'h');
   label(s, va4.X(-Wo / 2), va4.Y(Ho + 10), 'Deckel Lastseite (PC 5)', { size: 2.4, anchor: 'middle' });
   label(s, va4.X(Wo / 2), va4.Y(Ho + 10), 'Deckel Steuerseite (PC 5)', { size: 2.4, anchor: 'middle' });
-  dim(va4, [Wo, 0], [Wo, Ho], 'v', 8, { text: `${fmt(Math.round(va.H * 10) / 10)} (Alu ${fmt(Math.round(alu.H * 10) / 10)}) ≤ 115`, size: 2.5 });
+  dim(va4, [Wo, 0], [Wo, Ho], 'v', 8, { text: `${fmt(Math.round(va.H * 10) / 10)} (Alu ${fmt(Math.round(alu.H * 10) / 10)})`, size: 2.5 });
+  dim(va4, [Wo, 0], [Wo, Ho + g.STACK.gasket + g.STACK.lid], 'v', 16, { text: `${fmt(Math.round((va.H + g.STACK.gasket + g.STACK.lid) * 10) / 10)} mit Dichtung + Deckel ≤ 115`, size: 2.5 });
   dim(va4, [-Wo, 0], [Wo, 0], 'h', -8, { text: `${fmt(Math.round(va.W * 10) / 10)} (Soll 430)`, size: 2.6 });
   dim(va4, [-Wo, Ho], [-Wo + F, Ho], 'h', 14, { size: 2.4, text: `${fmt(Math.round(F * 10) / 10)}` });
   dim(va4, [-W2, Ho], [W2, Ho], 'h', 14, { size: 2.4 });

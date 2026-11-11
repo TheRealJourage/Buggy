@@ -183,7 +183,7 @@ function info() {
     Ergebnis außen, gerechnet (DIN 6935), ${g.MATERIALS[mat].name}:
     <table>${rows}</table>
     <span class="warn">Modell: Biegungen scharf, Radius nicht modelliert → im 3D ca. 1–2 mm kleiner als gerechnet.
-    Offen: zählt die festgelegte Bauhöhe 115 nur die Wanne oder Wanne + Dichtung + Deckel (120 bis zum Handbremsseil)?</span>`;
+    Bauhöhe 115 gilt mit Dichtung (gequetscht ${g.STACK.gasket}) + Deckel ${g.STACK.lid} (User 2026-11-11) → Wanne max. ${g.H_MAX}.</span>`;
 }
 
 const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(), hover = document.getElementById('hover');

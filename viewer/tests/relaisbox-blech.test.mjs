@@ -8,8 +8,8 @@ test('DIN 6935 bend deduction matches hand calculation (s = r = 2: k 0.65, BD 3.
   assert.ok(Math.abs(g.bendDeduction(2, 2) - 3.837) < 0.01);
 });
 
-test('one blank keeps the box at or below the fixed 115 mm for every material and radius', () => {
-  for (const c of cases) assert.ok(c.H <= g.H_MAX, `${c.key} r${c.r}: H ${c.H}`);
+test('tub + gasket + lid stay at or below the fixed 115 mm for every material and radius', () => {
+  for (const c of cases) assert.ok(c.H + g.STACK.gasket + g.STACK.lid <= g.STACK.total, `${c.key} r${c.r}: H ${c.H}`);
 });
 
 test('outer length, width, flange and web stay within 1 mm of nominal', () => {

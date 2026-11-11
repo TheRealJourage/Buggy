@@ -39,7 +39,7 @@
 </div>
 <div id="info">
   <h3>Stand 2026-11-11 · Vault Buggy/Relaisbox.md (Maßblatt)</h3>
-  Geschweißte Wanne, außen <b>500 × 430 × 115</b> (Platzhalter bis zur Messung). Material: <b>Edelstahl</b> (festgelegt 2026-11-11), Alu nur zum Vergleich.
+  Geschweißte Wanne, außen <b>500 × 430 × 107</b> (115 mit Dichtung + Deckel, festgelegt 2026-11-11). Material: <b>Edelstahl</b> (festgelegt 2026-11-11), Alu nur zum Vergleich.
   <table>
     <tr><td>Flansch oben</td><td>25 mm nach innen, umlaufend, dicht verschweißt; Schrauben 9 mm, Dichtung 19 mm von der Außenkante</td></tr>
     <tr><td>Mittelsteg</td><td>50 mm breit, längs, auf der Mittelwand (Schrauben/Dichtung wie Flansch)</td></tr>
@@ -59,7 +59,7 @@ import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
 
 // x = driving direction (+x front, -x rear), y = left(+)/right(-), z = up; mm
-const L = 500, W = 430, H = 115;
+const L = 500, W = 430, H = 107; // tub; + gasket 3 + lid 5 = 115 (user 2026-11-11)
 const FLANGE = 25, WEB = 50, LID = 5, GASKET = 3, SCREW_IN = 9, GASKET_IN = 19;
 const REAR = -L / 2;
 // seat cross beams, measured user 2026-10-30: 10–11 cm behind rear beam, 30 mm wide, 255 mm gap
@@ -248,7 +248,7 @@ function label(text, x, y, z, w = 110) {
 }
 label('500 (L)', 0, -W / 2 - 60, 0);
 label('430 (B)', -L / 2 - 70, 0, 0);
-label('115 (H)', -L / 2 - 30, -W / 2 - 60, H / 2);
+label('107 (H Wanne)', -L / 2 - 30, -W / 2 - 60, H / 2);
 label('Lastseite', 0, yLoad, H + 90, 90);
 label('Steuerseite', 0, yCtrl, H + 90, 90);
 label('→ Fahrtrichtung', L / 2 + 110, 0, 0, 90);

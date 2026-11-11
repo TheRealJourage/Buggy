@@ -1,10 +1,12 @@
 // Relay box sheet-metal parts: flat patterns valid for both materials, cutting plan.
 // Outer-dimension method: flat = sum(outer legs) - n * BD. One common BD is used for the cut;
-// the wall leg is sized with the largest BD so the box never exceeds the fixed 115 mm height.
+// the wall leg is sized with the largest BD so tub + gasket + lid never exceed the fixed 115 mm.
 // Bend deduction after DIN 6935 (90 deg): k = 0.65 + 0.5 lg(r/s), BA = pi/2 (r + s/2 k), BD = 2 (r + s) - BA.
 
-export const OUTER = { L: 500, W: 430, H: 115, FLANGE: 25 };
-export const H_MAX = 115; // fixed by user 2026-11-01 (120 mm to the handbrake cable)
+// 115 mm = whole stack incl. gasket and lid (user 2026-11-01 / 2026-11-11; 120 mm to the handbrake cable)
+export const STACK = { total: 115, lid: 5, gasket: 3 }; // PC lid 5; gasket compressed (10 x 5 band to ~3, Vorschlag)
+export const H_MAX = STACK.total - STACK.lid - STACK.gasket; // tub alone
+export const OUTER = { L: 500, W: 430, H: H_MAX, FLANGE: 25 };
 
 export const MATERIALS = {
   va: { name: 'Edelstahl 1.4301, 1,5 mm', t: 1.5, rho: 7.9, r: [1.5, 2] },
@@ -73,7 +75,7 @@ export const reliefHoles = () => [[1, 1], [1, -1], [-1, 1], [-1, -1]].map(([sx, 
 // ---------- Pos 2: centre web as a single-wall angle (user 2026-11-11: not double-walled).
 // Web 50 = sealing face of both lids; one wall hangs down under the web edge on the control side
 // (Vorschlag Claude), free above the floor, cable notches at its lower edge.
-export const STEG = { L: 495, web: WEB_W, leg: 100, side: -1, notch: { w: 80, h: 40, r: 5, x: [-150, 0, 150] } };
+export const STEG = { L: 495, web: WEB_W, leg: 92, side: -1, notch: { w: 80, h: 40, r: 5, x: [-150, 0, 150] } };
 STEG.webFlat = r1(STEG.web - BD / 2);
 STEG.legFlat = r1(STEG.leg - BD / 2);
 STEG.flatW = r1(STEG.webFlat + STEG.legFlat);
