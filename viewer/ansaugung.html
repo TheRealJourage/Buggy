@@ -24,7 +24,7 @@
 <body>
 <div id="bar">
   <b>Ansaug-Übergang v2 (Entwurf)</b>
-  <label>Variante <select id="variant"><option value="fdm">FDM (Wand 6,8, 2 Hälften)</option><option value="sls">SLS (Wand 4, 2 Hälften)</option><option value="guss">Alu-Guss (Wand 6, 6 Rohre, +1,3 %)</option></select></label>
+  <label>Variante <select id="variant"><option value="sls">SLS (Wand 4, Querleiste, am Stück bestellen)</option><option value="fdm">FDM (Wand 6,8, 2 Hälften)</option><option value="guss">Alu-Guss (Wand 6, 6 Rohre, +1,3 %)</option></select></label>
   <span><button data-v="iso">Schräg</button> <button data-v="side">Seite</button> <button data-v="front">Vorn</button> <button data-v="top">Oben</button></span>
   <label><input id="einbau" type="checkbox"> Einbaulage (Tüllen nach oben)</label>
   <label><input id="showA" type="checkbox" checked> Hälfte A / Rohr 1–3</label>
@@ -216,7 +216,9 @@ async function loadVariant(name) {
 document.getElementById('variant').onchange = (e) => loadVariant(e.target.value);
 OLD = await load(base + 'Ansaugung_v1_original.stl', mat(0xffffff, { transparent: true, opacity: 0.25, depthWrite: false }));
 OLD.visible = false;
-await loadVariant('fdm');
+const startVariant = new URLSearchParams(location.search).get('v') in VARIANTS ? new URLSearchParams(location.search).get('v') : 'sls';
+document.getElementById('variant').value = startVariant;
+await loadVariant(startVariant);
 
 const lblBox = document.getElementById('labels');
 const v = new THREE.Vector3();
