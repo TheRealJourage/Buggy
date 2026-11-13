@@ -29,6 +29,7 @@
   <label><input id="einbau" type="checkbox"> Einbaulage (Tüllen nach oben)</label>
   <label><input id="showA" type="checkbox" checked> Hälfte A / Rohr 1–3</label>
   <label><input id="showB" type="checkbox" checked> Hälfte B / Rohr 4–6</label>
+  <label><input id="showC" type="checkbox" checked> Adapter (grün)</label>
   <label>Teilung auseinander <input id="gap" type="range" min="0" max="80" value="0" style="width:90px"></label>
   <label><input id="alt" type="checkbox"> Original v1</label>
   <label><input id="k100" type="checkbox" checked> Schläuche + K100</label>
@@ -181,6 +182,7 @@ document.querySelectorAll('[data-v]').forEach((b) => b.onclick = () => setView(b
 document.getElementById('einbau').onchange = (e) => { model.rotation.x = e.target.checked ? Math.PI / 2 : 0; updateBed(); setView('iso'); };
 document.getElementById('showA').onchange = (e) => { A.visible = e.target.checked; };
 document.getElementById('showB').onchange = (e) => { B.visible = e.target.checked; };
+document.getElementById('showC').onchange = (e) => { C.visible = e.target.checked; };
 document.getElementById('alt').onchange = (e) => { if (OLD) OLD.visible = e.target.checked; };
 document.getElementById('k100').onchange = (e) => { k100.visible = e.target.checked; kLbl.visible = e.target.checked; };
 document.getElementById('gap').oninput = applyGap;
@@ -222,6 +224,7 @@ async function loadVariant(name) {
   geosA.forEach((g, i) => { const m = new THREE.Mesh(g, mat(metal ? (i % 2 ? 0xb8bcc4 : 0x9aa0ac) : 0xd08a4a, metal ? { metalness: 0.5 } : {})); m.userData.k = i; A.add(m); });
   geosB.forEach((g, i) => { const m = new THREE.Mesh(g, mat(metal ? (i % 2 ? 0x9aa0ac : 0xb8bcc4) : 0x5a8fd0, metal ? { metalness: 0.5 } : {})); m.userData.k = 3 + i; B.add(m); });
   k100.position.set(0, (V.tip ? V.tip[0] : TIP_Y) - TIP_Y, (V.tip ? V.tip[1] : AX_Z) - AX_Z);
+  C.visible = document.getElementById('showC').checked;
   A.visible = document.getElementById('showA').checked; B.visible = document.getElementById('showB').checked;
   document.getElementById('dl').innerHTML = 'Download: ' + [...V.A, ...V.B, ...(V.C || []), ...V.extra]
     .map((f) => `<a href="${base}${f}" download>${f.replace('Ansaugung_v2_', '').replace(/_port_x.*(?=\.stl$)/, '')}</a>`).join(' · ');
