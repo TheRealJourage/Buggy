@@ -24,16 +24,17 @@
 <body>
 <div id="bar">
   <b>Ansaug-Übergang v2 (Entwurf)</b>
+  <label>Variante <select id="variant"><option value="fdm">FDM (Wand 6,8, 2 Hälften)</option><option value="sls">SLS (Wand 4, 2 Hälften)</option><option value="guss">Alu-Guss (Wand 6, 6 Rohre, +1,3 %)</option></select></label>
   <span><button data-v="iso">Schräg</button> <button data-v="side">Seite</button> <button data-v="front">Vorn</button> <button data-v="top">Oben</button></span>
   <label><input id="einbau" type="checkbox"> Einbaulage (Tüllen nach oben)</label>
-  <label><input id="showA" type="checkbox" checked> Hälfte A</label>
-  <label><input id="showB" type="checkbox" checked> Hälfte B</label>
+  <label><input id="showA" type="checkbox" checked> Hälfte A / Rohr 1–3</label>
+  <label><input id="showB" type="checkbox" checked> Hälfte B / Rohr 4–6</label>
   <label>Teilung auseinander <input id="gap" type="range" min="0" max="80" value="0" style="width:90px"></label>
   <label><input id="alt" type="checkbox"> Original v1</label>
   <label><input id="k100" type="checkbox" checked> Schläuche + K100</label>
   <label>Druckbett <select id="bed"><option value="0">aus</option><option>220</option><option selected>256</option><option>300</option><option>350</option></select> für <select id="bedHalf"><option value="A">A</option><option value="B">B</option></select></label>
   <label><input id="labels" type="checkbox" checked> Beschriftung</label>
-  <span>Download: <a href="downloads/ansaugung/Ansaugung_v2_Zyl-Haelfte_A_x-plus.stl" download>STL A</a> · <a href="downloads/ansaugung/Ansaugung_v2_Zyl-Haelfte_B_x-minus.stl" download>STL B</a> · <a href="downloads/ansaugung/Ansaugung_v2_Zyl-Haelfte_A_x-plus.step" download>STEP A</a> · <a href="downloads/ansaugung/Ansaugung_v2_Zyl-Haelfte_B_x-minus.step" download>STEP B</a> · <a href="downloads/ansaugung/Ansaugung_v2_komplett.step" download>STEP komplett</a></span>
+  <span id="dl"></span>
   <span class="hint">Maus/Finger: drehen · Rad/Pinch: zoomen · rechts/2 Finger: verschieben</span>
 </div>
 <div id="load">Lade Modelle (≈ 21 MB) …</div>
@@ -51,6 +52,8 @@
     <tr><td>Steht weiter vom Kopf ab als v1</td><td>+29 (137 statt 108)</td></tr>
     <tr><td>Hälfte A / B (je 3 Zylinder), x × y × z</td><td>≈ 214 × 190 × 132</td></tr>
     <tr><td>Teilung zwischen Zyl.-Port 3 und 4, durch die mittlere Flanschschraube (klemmt beide)</td><td>x = −97,8</td></tr>
+    <tr><td><b>SLS</b>: Kanäle ab Flanschoberkante neu, Wand 4 (Tülle 3), Volumen ≈ 790 cm³ (FDM 1240, v1 647)</td><td>2 Hälften</td></tr>
+    <tr><td><b>Guss</b>: Wand 6, je Rohr eigenes Flanschstück, Trennung an den Kopfschrauben (Scheibe klemmt beide), Modell +1,3 % Schwindmaß, Dichtfläche +1 mm, Schraublöcher Ø 11,2 gegossen → aufbohren, Tülle Ø 41,6 → schleifen</td><td>6 × ≈ 185–200 cm³</td></tr>
     <tr class="hyp"><td>Annahmen: Austritt parallel zur Flanschfläche = eingebaut senkrecht; K100-Leiste mittig über den Ports; Schlauch/Klappe nur angedeutet</td><td>Hypothese</td></tr>
   </table></details>
 </div>
@@ -130,14 +133,15 @@ const kLbl = label('Schlauch 100 frei + K100 (angedeutet)', THROTTLE_X[3], yK0 +
 
 // print bed outline (flange on bed, z = 5)
 let bedLine = null;
-let A = null, B = null, OLD = null;
+const A = new THREE.Group(), B = new THREE.Group(); model.add(A, B);
+let OLD = null;
 function updateBed() {
   if (bedLine) { model.remove(bedLine); bedLine = null; }
   const s = +document.getElementById('bed').value;
   const half = document.getElementById('bedHalf').value === 'A' ? A : B;
-  if (!s || !half || document.getElementById('einbau').checked) return;
-  const bb = half.geometry.boundingBox;
-  const cx = (bb.min.x + bb.max.x) / 2 + half.position.x, cy = (bb.min.y + bb.max.y) / 2;
+  if (!s || !half.children.length || document.getElementById('einbau').checked) return;
+  const bb = new THREE.Box3().setFromObject(half);
+  const cx = (bb.min.x + bb.max.x) / 2, cy = (bb.min.y + bb.max.y) / 2;
   const g = new THREE.EdgesGeometry(new THREE.BoxGeometry(s, s, s));
   bedLine = new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0xff7b6b }));
   bedLine.position.set(cx, cy, 5 + s / 2); model.add(bedLine);
@@ -145,8 +149,9 @@ function updateBed() {
 
 function applyGap() {
   const g = +document.getElementById('gap').value;
-  if (A) A.position.x = g / 2;
-  if (B) B.position.x = -g / 2;
+  const parts = [...A.children, ...B.children];
+  if (variant === 'guss') parts.forEach((m) => { m.position.x = (2.5 - m.userData.k) * g / 2; });
+  else { A.children.forEach((m) => { m.position.x = g / 2; }); B.children.forEach((m) => { m.position.x = -g / 2; }); }
   updateBed();
 }
 
@@ -158,8 +163,8 @@ const setView = (v) => {
 };
 document.querySelectorAll('[data-v]').forEach((b) => b.onclick = () => setView(b.dataset.v));
 document.getElementById('einbau').onchange = (e) => { model.rotation.x = e.target.checked ? Math.PI / 2 : 0; updateBed(); setView('iso'); };
-document.getElementById('showA').onchange = (e) => { if (A) A.visible = e.target.checked; };
-document.getElementById('showB').onchange = (e) => { if (B) B.visible = e.target.checked; };
+document.getElementById('showA').onchange = (e) => { A.visible = e.target.checked; };
+document.getElementById('showB').onchange = (e) => { B.visible = e.target.checked; };
 document.getElementById('alt').onchange = (e) => { if (OLD) OLD.visible = e.target.checked; };
 document.getElementById('k100').onchange = (e) => { k100.visible = e.target.checked; kLbl.visible = e.target.checked; };
 document.getElementById('gap').oninput = applyGap;
@@ -171,14 +176,36 @@ if (innerWidth < 900) document.getElementById('info').open = false;
 setView('iso');
 
 const base = 'downloads/ansaugung/';
-[A, B, OLD] = await Promise.all([
-  load(base + 'Ansaugung_v2_Zyl-Haelfte_A_x-plus.stl', mat(0xd08a4a)),
-  load(base + 'Ansaugung_v2_Zyl-Haelfte_B_x-minus.stl', mat(0x5a8fd0)),
-  load(base + 'Ansaugung_v1_original.stl', mat(0xffffff, { transparent: true, opacity: 0.25, depthWrite: false })),
-]);
+const GUSS = ['Rohr1_port_x+65.2', 'Rohr2_port_x+0.0', 'Rohr3_port_x-65.2', 'Rohr4_port_x-130.4', 'Rohr5_port_x-195.6', 'Rohr6_port_x-260.8']
+  .map((n) => `Ansaugung_v2_Guss_${n}.stl`);
+const VARIANTS = {
+  fdm: { A: ['Ansaugung_v2_Zyl-Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_Zyl-Haelfte_B_x-minus.stl'],
+    extra: ['Ansaugung_v2_Zyl-Haelfte_A_x-plus.step', 'Ansaugung_v2_Zyl-Haelfte_B_x-minus.step', 'Ansaugung_v2_komplett.step'] },
+  sls: { A: ['Ansaugung_v2_SLS_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_SLS_Haelfte_B_x-minus.stl'], extra: ['Ansaugung_v2_SLS_komplett.stl'] },
+  guss: { A: GUSS.slice(0, 3), B: GUSS.slice(3), extra: [] },
+};
+const cache = {};
+const getGeo = async (f) => cache[f] ??= parseStl(await (await fetch(base + f)).arrayBuffer());
+let variant = 'fdm';
+async function loadVariant(name) {
+  variant = name;
+  const lb = document.createElement('div'); lb.id = 'load'; lb.textContent = 'Lade Modelle …'; document.body.appendChild(lb);
+  const V = VARIANTS[name];
+  const geosA = await Promise.all(V.A.map(getGeo)), geosB = await Promise.all(V.B.map(getGeo));
+  A.clear(); B.clear();
+  const metal = name === 'guss';
+  geosA.forEach((g, i) => { const m = new THREE.Mesh(g, mat(metal ? (i % 2 ? 0xb8bcc4 : 0x9aa0ac) : 0xd08a4a, metal ? { metalness: 0.5 } : {})); m.userData.k = i; A.add(m); });
+  geosB.forEach((g, i) => { const m = new THREE.Mesh(g, mat(metal ? (i % 2 ? 0x9aa0ac : 0xb8bcc4) : 0x5a8fd0, metal ? { metalness: 0.5 } : {})); m.userData.k = 3 + i; B.add(m); });
+  A.visible = document.getElementById('showA').checked; B.visible = document.getElementById('showB').checked;
+  document.getElementById('dl').innerHTML = 'Download: ' + [...V.A, ...V.B, ...V.extra]
+    .map((f) => `<a href="${base}${f}" download>${f.replace('Ansaugung_v2_', '').replace(/_port_x.*(?=\.stl$)/, '')}</a>`).join(' · ');
+  document.querySelectorAll('#load').forEach((e) => e.remove());
+  applyGap();
+}
+document.getElementById('variant').onchange = (e) => loadVariant(e.target.value);
+OLD = await load(base + 'Ansaugung_v1_original.stl', mat(0xffffff, { transparent: true, opacity: 0.25, depthWrite: false }));
 OLD.visible = false;
-document.getElementById('load').remove();
-applyGap();
+await loadVariant('fdm');
 
 const lblBox = document.getElementById('labels');
 const v = new THREE.Vector3();
