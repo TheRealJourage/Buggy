@@ -42,9 +42,9 @@
   Geschweißte Wanne, außen <b>500 × 430 × 107</b> (115 mit Dichtung + Deckel, festgelegt 2026-11-11). Material: <b>Edelstahl</b> (festgelegt 2026-11-11), Alu nur zum Vergleich.
   <table>
     <tr><td>Flansch oben</td><td>25 mm nach innen, umlaufend, dicht verschweißt; Schrauben 9 mm, Dichtung 19 mm von der Außenkante</td></tr>
-    <tr><td>Mittelsteg</td><td>50 mm breit, längs, auf der Mittelwand (Schrauben/Dichtung wie Flansch)</td></tr>
+    <tr><td>Winkelsteg (Pos 2)</td><td>Steg 50 mm oben (Schrauben/Dichtung wie Flansch), darunter Wand 92 mm zur Steuerseite, frei über dem Boden</td></tr>
     <tr><td>Öffnung je Seite</td><td id="open"></td></tr>
-    <tr><td>Mittelwand</td><td>längs, oben 3 Aussparungen 80 × 40 für Kabel (Kantenschutz)</td></tr>
+    <tr><td>Kabel links ↔ rechts</td><td>3 Ausschnitte 80 × 40 R5 <b>unten</b> an der Wand (Kantenschutz)</td></tr>
     <tr><td>Deckel</td><td>2 × Polycarbonat 5 mm, klar, je 500 × 215</td></tr>
     <tr><td>Verschraubung</td><td><span id="nScrews"></span> × M5 Edelstahl in Einnietmuttern, Löcher im Deckel Ø 7</td></tr>
     <tr><td>Dichtung</td><td>EPDM-Moosgummi ca. 10 × 3, innen neben den Schrauben</td></tr>
@@ -57,6 +57,7 @@
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
+import { STEG } from './relaisbox-blech.js';
 
 // x = driving direction (+x front, -x rear), y = left(+)/right(-), z = up; mm
 const L = 500, W = 430, H = 107; // tub; + gasket 3 + lid 5 = 115 (user 2026-11-11)
@@ -130,18 +131,20 @@ function buildShell(key) {
   P(`Flansch oben, ${FLANGE} mm nach innen, umlaufend dicht verschweißt`, L, FLANGE, t, 0, -W / 2 + FLANGE / 2, zf, color);
   P(`Flansch oben, ${FLANGE} mm nach innen, umlaufend dicht verschweißt`, FLANGE, W - 2 * FLANGE, t, L / 2 - FLANGE / 2, 0, zf, color);
   P(`Flansch oben, ${FLANGE} mm nach innen, umlaufend dicht verschweißt`, FLANGE, W - 2 * FLANGE, t, -L / 2 + FLANGE / 2, 0, zf, color);
-  P(`Mittelsteg ${WEB} mm, längs, an Flansch vorn/hinten verschweißt (dicht)`, L - 2 * FLANGE, WEB, t, 0, 0, zf, color);
-  // centre wall with three top notches for cables
-  const wallH = H - 2 * t, notchW = 80, notchD = 40, notches = [-150, 0, 150];
+  // Pos 2 angle (relaisbox-blech.js): web on top, one wall hanging under the web edge on the
+  // control side, free above the floor, cable notches open at its lower edge
+  const { L: sL, leg, side, notch: { w: notchW, h: notchH, x: notches } } = STEG;
+  P(`Pos 2 Winkelsteg: Steg ${WEB} mm oben = Dichtfläche beider Deckel, an Flansch vorn/hinten verschweißt (dicht)`, sL, WEB, t, 0, 0, zf, color);
+  const wy = side * (WEB / 2 - t / 2), wz0 = H - leg, wallH = leg - t;
   const segs = [];
-  let x0 = -L / 2 + t;
+  let x0 = -sL / 2;
   for (const nx of notches) { segs.push([x0, nx - notchW / 2]); x0 = nx + notchW / 2; }
-  segs.push([x0, L / 2 - t]);
-  for (const [a, b] of segs) S('Mittelwand (Versteifung, stützt den Mittelsteg)', b - a, t, wallH, (a + b) / 2, 0, t, color);
+  segs.push([x0, sL / 2]);
+  const wallName = `Pos 2 Winkelsteg: Wand ${leg} mm unter der Stegkante (Seite Vorschlag Claude), an beide Stirnwände geschweißt, frei ca. ${(wz0 - t).toFixed(0)} mm über dem Boden`;
+  for (const [a, b] of segs) S(wallName, b - a, t, wallH, (a + b) / 2, wy, wz0, color);
   for (const nx of notches) {
-    S('Mittelwand unter der Aussparung', notchW, t, wallH - notchD, nx, 0, t, color);
-    const e = P('Aussparung 80 × 40 für Kabel links ↔ rechts, Kante mit Kantenschutzprofil', notchW, 6, 4, nx, 0, t + wallH - notchD - 4, 0x222222);
-    e.userData.shell = true;
+    S(wallName, notchW, t, wallH - notchH, nx, wy, wz0 + notchH, color);
+    P(`Ausschnitt ${notchW} × ${notchH} R${STEG.notch.r} unten für Kabel links ↔ rechts, Kante mit Kantenschutzprofil`, notchW, 6, 3, nx, wy, wz0 + notchH, 0x222222);
   }
   // rivet nuts on flange and web
   const nutColor = 0xd0b040;
@@ -180,8 +183,8 @@ function buildShell(key) {
   });
   document.getElementById('open').innerHTML = `<b>${L - 2 * FLANGE} × ${OPEN} mm</b> – Relaisträger ca. 120 × 450 mm passt durch (User 2026-10-30)`;
   document.getElementById('nScrews').textContent = 2 * (xScrews.length * 2 + 4);
-  // tub weight: floor + walls + flange + web + centre wall, sheet only
-  const area = L * W + 2 * (L + W) * H + 2 * (L + W) * FLANGE + L * WEB + L * H;
+  // tub weight: floor + walls + flange + Pos 2 angle, sheet only
+  const area = L * W + 2 * (L + W) * H + 2 * (L + W) * FLANGE + sL * (WEB + leg);
   document.getElementById('weight').textContent = `ca. ${(area * 1e-6 * t * 1e-3 * rho * 1000).toFixed(1)} kg (${MAT[key].name}, nur Blech, gerechnet)`;
   applyLids();
 }
