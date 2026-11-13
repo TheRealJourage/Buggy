@@ -1,7 +1,7 @@
 """Intake adapter v2 variants with mesh booleans (manifold3d).
 sls : wall 4 mm, two halves (split between cyl 3/4)
 cast: wall 6 mm, six single runners each with its own flange segment, shrink + machining allowance
-usage: intake_v2_variants.py <fdm|sls|cast> <outdir>
+usage: intake_v2_variants.py <fdm|fdm_kurz|sls|cast> <outdir>
 """
 import sys, os, json, tempfile
 import numpy as np
@@ -16,6 +16,7 @@ os.makedirs(OUT, exist_ok=True)
 CFG = {
     "sls": dict(wall=4.0, spigot_od=41.0, cone=4.0, tag="SLS", eyes=True),
     "fdm": dict(wall=6.8, spigot_od=41.0, cone=9.0, tag="FDM"),
+    "fdm_kurz": dict(wall=6.8, spigot_od=41.0, cone=9.0, tag="FDM_kurz", compact=dict(r=89.7, straight=25.0)),
     "cast": dict(wall=6.0, spigot_od=41.6, shrink=1.013, face_allow=1.0, hole_cast_d=11.2),
 }[MODE]
 G.SRC = "/srv/data/obsidian/vault/Buggy/Ansaugung/Ansaugung.step"
@@ -53,6 +54,38 @@ flange = to_mf(src.split(Plane.XY.offset(G.FLANGE_TOP), keep=Keep.BOTTOM))
 (bx0, by0, bz0), (bx1, by1, bz1) = G.NIPPLE_BOX
 nipple = to_mf(src & Pos((bx0 + bx1) / 2, (by0 + by1) / 2, (bz0 + bz1) / 2) * Box(bx1 - bx0, by1 - by0, bz1 - bz0))
 
+import math
+from build123d import Vector
+
+
+def centreline_compact(port, x_end, n=90):
+    """tighter 90 deg bend from the flange top, then a straight run; lateral fan-out only once the runner
+    has cleared the bolt access columns (ends 1/6: y >= 34, others: y >= 45.3)"""
+    c = CFG["compact"]
+    r, L = c["r"], c["straight"]
+    phi0 = math.radians(G.PHI0)
+    y0a = G.CY - G.R * math.cos(phi0)
+    cy, cz = y0a + r * math.cos(phi0), G.FLANGE_TOP - r * math.sin(phi0)
+    pts = []
+    for i in range(n + 1):
+        ph = phi0 + (math.pi / 2 - phi0) * i / n
+        blend = 1 - G.smoothstep((math.degrees(ph) - G.PHI0) / 15)
+        pts.append([port[0], cy - r * math.cos(ph) + (port[1] - y0a) * blend, cz + r * math.sin(ph)])
+    for i in range(1, 26):
+        pts.append([port[0], cy + L * i / 25, cz + r])
+    s = [0.0]
+    for a, b in zip(pts, pts[1:]):
+        s.append(s[-1] + math.dist(a, b))
+    y_thr = 34.0 if port[0] in (65.2, -260.8) else 45.3
+    s0 = next(si for si, p in zip(s, pts) if p[1] >= y_thr)
+    for si, p in zip(s, pts):
+        p[0] = port[0] + (x_end - port[0]) * G.smoothstep((si - s0) / (s[-1] - s0))
+    return [Vector(*p) for p in pts]
+
+
+if CFG.get("compact"):
+    G.centreline = centreline_compact
+    G.STRAIGHT = 2.0
 runners = []
 for port, xe in zip(G.PORTS, G.THROTTLE_X):
     outer, end = G.runner(port, xe, G.WALL)
@@ -77,7 +110,7 @@ info = {"mode": MODE, "cfg": CFG}
 # bolt from outside along +z into a captured M8 nut that sits in a hex pocket on the head side (open into the runner gap)
 EYE = dict(w=40.0, y0=96.0, y1=120.0, z0=114.0, z1=138.0, hole_d=8.4, nut_af=13.0, nut_h=7.0)
 EYE_X = [(G.THROTTLE_X[k] + G.THROTTLE_X[k + 1]) / 2 for k in (0, 2, 4)]
-if MODE in ("sls", "fdm"):
+if MODE in ("sls", "fdm", "fdm_kurz"):
     part = flange + nipple
     if CFG.get("eyes"):
         for ex in EYE_X:
