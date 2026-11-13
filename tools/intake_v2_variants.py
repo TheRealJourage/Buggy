@@ -24,7 +24,7 @@ CFG = {
                       eyes=dict(w=40.0, y0=68.0, y1=92.0, z0=84.0, z1=108.0, hole_d=8.4, nut_af=13.0, nut_h=7.0)),
     # modular: base with a small bolt flange per runner, screw-on spigot adapters (K100 41 mm now, 48 mm later)
     "fdm_modular": dict(wall=6.8, r_in=19.0, spigot_od=41.0, spigot_id=35.0, cone=9.0, tag="FDM_Modular", opt=dict(r=77.0, straight=15.0), modular=True,
-                        plate=True, teardrop=dict(H=22.5, y_fade0=72.0, y_fade1=80.0)),
+                        plate=True, teardrop=dict(H=21.0, H_end=20.0, y_h0=76.0, y_h1=84.0, y_fade0=200.0, y_fade1=201.0)),
     "cast": dict(wall=6.0, spigot_od=41.6, shrink=1.013, face_allow=1.0, hole_cast_d=11.2),
 }[MODE]
 G.SRC = "/srv/data/obsidian/vault/Buggy/Ansaugung/Ansaugung.step"
@@ -60,6 +60,10 @@ def save(man, path, keep_all=False):
     me = man.to_mesh()
     tm = trimesh.Trimesh(vertices=np.asarray(me.vert_properties)[:, :3], faces=np.asarray(me.tri_verts), process=False)
     tm.export(path)
+    chk = trimesh.load(path)
+    nb = len(chk.split(only_watertight=False))
+    if not chk.is_watertight or (not keep_all and nb != 1):
+        raise RuntimeError(f"export check failed for {path}: watertight={chk.is_watertight}, bodies={nb}")
     b = tm.bounds
     return {"vol_cm3": round(tm.volume / 1000, 1), "watertight": bool(tm.is_watertight),
             "bodies": len(tm.split(only_watertight=False)), "size": [round(float(v), 1) for v in b[1] - b[0]]}
@@ -126,7 +130,8 @@ def _dists(pts, xs, port):
 
 def _clear(pts, xs, port, base):
     d = _dists(pts, xs, port)
-    need = np.array([11.8, 11.8, 11.8, 11.8, 10.0, 10.0] * (len(d) // 6))
+    per = 16 * len(BORE_COLS) + 16 * len(EAR_BOLTS)
+    need = np.array(([12.6] * (16 * len(BORE_COLS)) + [10.0] * (16 * len(EAR_BOLTS))) * (len(d) // per))
     return bool(np.all(d >= np.minimum(need, base - 0.05)))
 
 
@@ -135,7 +140,7 @@ def centreline_opt(port, x_end, n=90):
     lateral fan-out starts as early as the bolt access allows"""
     c = CFG["opt"]
     r, L = c["r"], c["straight"]
-    pts = []
+    pts = [[port[0], port[1], FACE_Z - 1.5]]
     for i in range(n + 1):
         ph = (math.pi / 2) * i / n
         blend = 1 - G.smoothstep(math.degrees(ph) / 15)
@@ -163,27 +168,27 @@ if CFG.get("opt"):
     G.centreline = centreline_opt
     G.STRAIGHT = 2.0
     # fill the old vertical port bores, the new curved bore is cut from the face upwards
+    flange0 = flange
     for port in G.PORTS:
-        flange += to_mf(Pos(port[0], port[1], FACE_Z) * extrude(RectangleRounded(port[2] + 0.4, port[3] + 0.4, port[4] + 0.2), amount=23.0 - FACE_Z))
+        # fill the old vertical bore only above the face-side pocket (z 10.5); the original port collars below stay untouched
+        flange += to_mf(Pos(port[0], port[1], 10.6) * extrude(RectangleRounded(port[2] + 0.4, port[3] + 0.4, port[4] + 0.2), amount=23.0 - 10.6))
     G.FLANGE_TOP = FACE_Z
-    # keep the original face-side pocket (z 5..10.5 around the port collars) exactly as it was
-    _orig = to_mf(src)
-    _rings = _orig.slice(12.0).to_polygons()
-    _outer = max(_rings, key=lambda r: abs(sum(x0 * y1 - x1 * y0 for (x0, y0), (x1, y1) in zip(r, np.roll(r, -1, axis=0)))))
-    _slab = mf.Manifold.extrude(mf.CrossSection([_outer]), 10.5 - FACE_Z).translate((0, 0, FACE_Z))
-    FACE_POCKET = _slab - _orig
-    for port in G.PORTS:
-        FACE_POCKET -= to_mf(Pos(port[0], port[1], FACE_Z - 1) * extrude(RectangleRounded(port[2] + 0.4, port[3] + 0.4, port[4] + 0.2), amount=7.0))
+    FACE_POCKET = None
 runners = []
 ENDS = []
 for port, xe in zip(G.PORTS, G.THROTTLE_X):
     outer, end = G.runner(port, xe, G.WALL)
-    inner, _ = G.runner(port, xe, 0.0, extra_below=3.0)
+    inner, _ = G.runner(port, xe, 0.0, extra_below=0.0 if CFG.get("opt") else 3.0)
+    if CFG.get("opt"):
+        inner = [inner, mf.Manifold()]
     w, h, r = port[2] + 2 * G.WALL, port[3] + 2 * G.WALL, port[4] + G.WALL
-    add = to_mf(outer) + (mf.Manifold() if CFG.get("modular") else to_mf(G.spigot(end, True)))
+    add = to_mf(outer)
+    if CFG.get("opt"):
+        add = add.trim_by_plane((0, 0, 1), 22.5)  # below the flange top the (filled) flange plate is the wall; avoids grazing the bolt bosses
+    add += (mf.Manifold() if CFG.get("modular") else to_mf(G.spigot(end, True)))
     if not CFG.get("opt"):
         add += to_mf(Pos(port[0], port[1], G.FLANGE_TOP - 1.5) * extrude(RectangleRounded(w, h, r), amount=1.5))
-    sub = to_mf(inner[0]) + to_mf(inner[1]) + (mf.Manifold() if CFG.get("modular") else to_mf(G.spigot(end, False)))
+    sub = to_mf(inner[0]) + (inner[1] if isinstance(inner[1], mf.Manifold) else to_mf(inner[1])) + (mf.Manifold() if CFG.get("modular") else to_mf(G.spigot(end, False)))
     runners.append((add, sub))
     ENDS.append((end.X, end.Y, end.Z))
     print("runner", port[0], "ok", flush=True)
@@ -204,8 +209,10 @@ if isinstance(CFG.get("eyes"), dict):
     EYE = CFG["eyes"]
 EYE_X = [(G.THROTTLE_X[k] + G.THROTTLE_X[k + 1]) / 2 for k in (0, 2, 4)]
 # ---- modular joint: base flange + screw-on spigot adapter (axis +y at each runner end)
-J = dict(fw=62.0, fd=52.0, ft=8.0, bore_r=19.0, ring_r=20.5, ring_h=2.0, cb_r=20.7, cb_h=2.3,
-         groove=(21.0, 23.7, 1.5), bolt=(24.0, 20.0), hole_base=5.3, hole_adp=5.6, nut_af=8.0, nut_h=4.2, neck_l=8.0, spigot_l=22.0)
+# review 2026-11-13 (Codex + Fable): no centring ring (unprintable lying, no FDM margin) -> located by the 4 bolts;
+# M5 heat-set inserts (hole 6.4) instead of downward-open nut pockets; plate 10 mm; teardrop bore through the joint.
+J = dict(fw=62.0, fd=52.0, ft=10.0, adp_ft=8.0, bore_r=19.0, td_h=20.0,
+         groove=(21.0, 23.7, 1.5), bolt=(24.0, 18.0), hole_base=6.4, hole_adp=5.6, neck_l=14.0, spigot_l=22.0, strut_hole=6.6)
 
 
 def ycyl(r0, y0, y1, x, z, r1=None, seg=96):
@@ -217,33 +224,50 @@ def ybox(x, y0, y1, z, w, d):
     return mf.Manifold.cube((w, y1 - y0, d)).translate((x - w / 2, y0, z - d / 2))
 
 
+def yteardrop(r, h, y0, y1, x, z, n=96):
+    """prism along +y with a 45 deg teardrop section, apex towards +z (print 'up'), truncated at h from the axis"""
+    pts = []
+    for k in range(n):
+        th = 2 * math.pi * k / n          # th measured from +z (up)
+        a = abs((th + math.pi) % (2 * math.pi) - math.pi)
+        rr = min(r / math.cos(math.pi / 4 - a), h / math.cos(a)) if a < math.pi / 4 else r
+        # cross-section coords (cx, cy) map to world (x + cx, ., z - cy) after the -90 deg x-rotation
+        pts.append((rr * math.sin(th), -rr * math.cos(th)))
+    c = mf.Manifold.extrude(mf.CrossSection([pts]), y1 - y0)
+    return c.rotate((-90, 0, 0)).translate((x, y0, z))
+
+
 def bolt_xy(x, z):
     bx, bz = J["bolt"]
     return [(x + sx * bx, z + sz * bz) for sx in (-1, 1) for sz in (-1, 1)]
 
 
 def base_flange(x, y, z):
-    add = ybox(x, y - J["ft"], y, z, J["fw"], J["fd"]) + ycyl(J["ring_r"], y - 0.1, y + J["ring_h"], x, z)
-    sub = ycyl(J["bore_r"], y - J["ft"] - 1, y + J["ring_h"] + 1, x, z)
+    add = ybox(x, y - J["ft"], y, z, J["fw"], J["fd"])
+    sub = yteardrop(J["bore_r"] + 0.05, J["td_h"], y - J["ft"] - 1, y + 1, x, z)
     g0, g1, gd = J["groove"]
     sub += ycyl(g1, y - gd, y + 1, x, z) - ycyl(g0, y - gd - 1, y + 2, x, z)
     for bx, bz in bolt_xy(x, z):
         sub += ycyl(J["hole_base"] / 2, y - J["ft"] - 1, y + 1, bx, bz, seg=32)
-        nut = mf.Manifold.extrude(mf.CrossSection.circle(J["nut_af"] / 2 / 0.8660254 + 0.15, 6), J["nut_h"] + 1)
-        sub += nut.rotate((-90, 0, 0)).translate((bx, y - J["ft"] - 1, bz))
     return add, sub
 
 
 def adapter(x, y, z, od, idd, bead_od, flare):
-    """screw-on spigot: flange on the base face, centring ring into the base counterbore, neck, spigot with bead"""
-    ft, nl, sl = J["ft"], J["neck_l"], J["spigot_l"]
-    neck_r = max(22.0, od / 2)
+    """screw-on spigot: flat flange (prints face-down), 45 deg shoulder, neck, 45 deg step to the spigot, bead;
+    bore starts with the same teardrop as the base outlet and tapers to the spigot bore along the neck"""
+    ft, nl, sl = J["adp_ft"], J["neck_l"], J["spigot_l"]
+    neck_r = max(23.0, od / 2 + 1.5)
     a = ybox(x, y, y + ft, z, J["fw"], J["fd"])
-    a += ycyl(neck_r, y + ft - 0.1, y + ft + nl, x, z) + ycyl(od / 2, y + ft + nl - 0.1, y + ft + nl + sl, x, z)
+    a += ycyl(neck_r + 4.0, y + ft - 0.1, y + ft + 4.0, x, z, neck_r)          # 45 deg shoulder flange -> neck
+    a += ycyl(neck_r, y + ft + 3.9, y + ft + nl, x, z)
+    step = neck_r - od / 2
+    a += ycyl(neck_r, y + ft + nl - 0.1, y + ft + nl + step, x, z, od / 2)       # 45 deg neck -> spigot
+    a += ycyl(od / 2, y + ft + nl + step - 0.1, y + ft + nl + sl, x, z)
     tip = y + ft + nl + sl
     b0 = tip - 4.0 - 1.5
-    a += ycyl(od / 2, b0 - 1.2, b0, x, z, bead_od / 2) + ycyl(bead_od / 2, b0, b0 + 3.0, x, z) + ycyl(bead_od / 2, b0 + 3.0, b0 + 4.2, x, z, od / 2)
-    v = ycyl(J["bore_r"], y - 1, y + ft, x, z) + ycyl(J["cb_r"], y - 1, y + J["cb_h"], x, z) + ycyl(J["bore_r"], y + ft - 0.01, y + ft + nl, x, z, idd / 2)
+    a += ycyl(od / 2, b0 - 1.5, b0, x, z, bead_od / 2) + ycyl(bead_od / 2, b0, b0 + 3.0, x, z) + ycyl(bead_od / 2, b0 + 3.0, b0 + 4.5, x, z, od / 2)
+    v = yteardrop(J["bore_r"] + 0.05, J["td_h"], y - 1, y + ft, x, z)
+    v += ycyl(J["bore_r"], y + ft - 0.01, y + ft + nl, x, z, idd / 2)
     v += ycyl(idd / 2, y + ft + nl - 0.01, tip + 1, x, z)
     if flare:
         v += ycyl(idd / 2, tip - 1.5 * flare, tip + 0.01, x, z, idd / 2 + flare)
@@ -280,11 +304,9 @@ if MODE in ("sls", "fdm", "fdm_kurz", "fdm_opt", "fdm_power", "sls_power", "fdm_
             # M6 holes for the support strut in the gaps between the runners (bolt from the top, nut below)
             SUPPORT_X = [(ENDS[k][0] + ENDS[k + 1][0]) / 2 for k in (0, 1, 3, 4)]
             for sx in SUPPORT_X:
-                part -= ycyl(3.2, ENDS[0][1] - J["ft"] - 1, ENDS[0][1] + 1, sx, ENDS[0][2], seg=32)
+                part -= ycyl(J["strut_hole"] / 2, ENDS[0][1] - J["ft"] - 1, ENDS[0][1] + 1, sx, ENDS[0][2], seg=32)
             info["support_holes_x"] = [round(x, 2) for x in SUPPORT_X]
     part -= bores
-    if CFG.get("opt"):
-        part -= FACE_POCKET
     if CFG.get("eyes"):
         yc = (EYE["y0"] + EYE["y1"]) / 2
         for ex in EYE_X:
@@ -295,7 +317,7 @@ if MODE in ("sls", "fdm", "fdm_kurz", "fdm_opt", "fdm_power", "sls_power", "fdm_
     part -= nipple_bore
     info["komplett"] = save(part, f"{OUT}/Ansaugung_v2_{CFG['tag']}_komplett.stl")
     if CFG.get("modular"):
-        for name, od, idd, bead, flare in (("K100_Tuelle41", 41.0, 35.0, 42.4, 1.5), ("48er_Tuelle48", 48.3, 40.0, 49.6, 2.0)):
+        for name, od, idd, bead, flare in (("K100_Tuelle41", 41.0, 35.0, 43.0, 1.0), ("48er_Tuelle48", 48.3, 40.0, 50.3, 1.5)):
             allsix = mf.Manifold()
             for (ex, ey, ez) in ENDS:
                 allsix += adapter(ex, ey, ez, od, idd, bead, flare)
