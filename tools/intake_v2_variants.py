@@ -215,7 +215,29 @@ J = dict(fw=62.0, fd=52.0, ft=10.0, adp_ft=8.0, bore_r=19.0, td_h=20.0,
          groove=(21.0, 23.7, 1.5), bolt=(24.0, 18.0), hole_base=6.4, hole_adp=5.6, neck_l=14.0, spigot_l=22.0, strut_hole=6.6)
 
 
-TAB = dict(w=24.0, zc=120.0, hole=6.6)  # tab centre/hole at z 120 (12 mm beyond the plate edge at 108), round end r 12
+TAB = dict(w=24.0, zc=120.0, hole=6.6, fillet=10.0)  # hole at z 120 (12 mm beyond the plate edge), round end r 12, root fillets r 10
+
+
+def ytab(x, y0, y1, z_edge, n=24):
+    """support tab in the plate plane: concave root fillets blend into the plate edge, straight flanks, round end"""
+    hw, R, zc = TAB["w"] / 2, TAB["fillet"], TAB["zc"]
+    pts = [(-(hw + R) - 2.0, z_edge - 1.0), (-(hw + R), z_edge)]
+    for k in range(1, n + 1):                      # left fillet: centre (-(hw+R), z_edge+R), from bottom to tangent point
+        t = (math.pi / 2) * k / n
+        pts.append((-(hw + R) + R * math.sin(t), z_edge + R - R * math.cos(t)))
+    pts.append((-hw, zc))
+    for k in range(1, 2 * n):                      # round end, centre (0, zc)
+        t = math.pi - math.pi * k / (2 * n)
+        pts.append((hw * math.cos(t), zc + hw * math.sin(t)))
+    pts.append((hw, zc))
+    for k in range(n, -1, -1):                     # right fillet mirrored
+        t = (math.pi / 2) * k / n
+        pts.append(((hw + R) - R * math.sin(t), z_edge + R - R * math.cos(t)))
+    pts.append(((hw + R) + 2.0, z_edge - 1.0))
+    cs = mf.CrossSection([[(px, -(pz - z_edge)) for px, pz in pts]])
+    if cs.area() < 0:
+        cs = mf.CrossSection([[(px, -(pz - z_edge)) for px, pz in reversed(pts)]])
+    return mf.Manifold.extrude(cs, y1 - y0).rotate((-90, 0, 0)).translate((x, y0, z_edge))
 
 
 def ycyl(r0, y0, y1, x, z, r1=None, seg=96):
@@ -304,8 +326,7 @@ if MODE in ("sls", "fdm", "fdm_kurz", "fdm_opt", "fdm_power", "sls_power", "fdm_
             TAB_X = [(ENDS[k][0] + ENDS[k + 1][0]) / 2 for k in (0, 1, 3, 4)]
             ey, ez = ENDS[0][1], ENDS[0][2]
             for tx in TAB_X:
-                part += ybox(tx, ey - J["ft"], ey, (ez + J["fd"] / 2 - 0.5 + TAB["zc"]) / 2, TAB["w"], TAB["zc"] - (ez + J["fd"] / 2 - 0.5))
-                part += ycyl(TAB["w"] / 2, ey - J["ft"], ey, tx, TAB["zc"])
+                part += ytab(tx, ey - J["ft"], ey, ez + J["fd"] / 2)
     for _, s in runners:
         part -= s
     if CFG.get("modular"):
