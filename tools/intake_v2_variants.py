@@ -24,7 +24,7 @@ CFG = {
                       eyes=dict(w=40.0, y0=68.0, y1=92.0, z0=84.0, z1=108.0, hole_d=8.4, nut_af=13.0, nut_h=7.0)),
     # modular: base with a small bolt flange per runner, screw-on spigot adapters (K100 41 mm now, 48 mm later)
     "fdm_modular": dict(wall=6.8, r_in=19.0, spigot_od=41.0, spigot_id=35.0, cone=9.0, tag="FDM_Modular", opt=dict(r=77.0, straight=15.0), modular=True,
-                        eyes=dict(w=40.0, y0=48.0, y1=70.0, z0=84.0, z1=108.0, hole_d=8.4, nut_af=13.0, nut_h=7.0)),
+                        plate=True, teardrop=dict(H=22.5, y_fade0=72.0, y_fade1=80.0)),
     "cast": dict(wall=6.0, spigot_od=41.6, shrink=1.013, face_allow=1.0, hole_cast_d=11.2),
 }[MODE]
 G.SRC = "/srv/data/obsidian/vault/Buggy/Ansaugung/Ansaugung.step"
@@ -33,10 +33,13 @@ G.R_IN = CFG.get("r_in", G.R_IN)
 G.SPIGOT_ID = CFG.get("spigot_id", G.SPIGOT_ID)
 G.BEAD_OD = CFG.get("bead_od", G.BEAD_OD)
 G.TIP_FLARE = CFG.get("tip_flare", 0.0)
+G.TEARDROP = CFG.get("teardrop")
+if G.TEARDROP:
+    G.N_PTS = 48
 G.R_OUT = G.R_IN + G.WALL
 G.SPIGOT_OD = CFG["spigot_od"]
 G.CONE = CFG.get("cone", G.CONE)
-G.N_PTS = 32
+G.N_PTS = 48 if CFG.get("teardrop") else 32
 TMP = tempfile.mkdtemp()
 
 
@@ -202,7 +205,7 @@ if isinstance(CFG.get("eyes"), dict):
 EYE_X = [(G.THROTTLE_X[k] + G.THROTTLE_X[k + 1]) / 2 for k in (0, 2, 4)]
 # ---- modular joint: base flange + screw-on spigot adapter (axis +y at each runner end)
 J = dict(fw=62.0, fd=52.0, ft=8.0, bore_r=19.0, ring_r=20.5, ring_h=2.0, cb_r=20.7, cb_h=2.3,
-         groove=(22.0, 25.4, 1.9), bolt=(24.0, 20.0), hole_base=5.3, hole_adp=5.6, nut_af=8.0, nut_h=4.2, neck_l=8.0, spigot_l=22.0)
+         groove=(21.0, 23.7, 1.5), bolt=(24.0, 20.0), hole_base=5.3, hole_adp=5.6, nut_af=8.0, nut_h=4.2, neck_l=8.0, spigot_l=22.0)
 
 
 def ycyl(r0, y0, y1, x, z, r1=None, seg=96):
@@ -260,12 +263,25 @@ if MODE in ("sls", "fdm", "fdm_kurz", "fdm_opt", "fdm_power", "sls_power", "fdm_
         for (ex, ey, ez) in ENDS:
             fa, _ = base_flange(ex, ey, ez)
             part += fa
+        if CFG.get("plate"):
+            # one continuous flange plate per half (runners 1-3 / 4-6), never across the split
+            for grp in (ENDS[:3], ENDS[3:]):
+                xs = [e[0] for e in grp]
+                x0, x1 = min(xs) - J["fw"] / 2, max(xs) + J["fw"] / 2
+                ey, ez = grp[0][1], grp[0][2]
+                part += ybox((x0 + x1) / 2, ey - J["ft"], ey, ez, x1 - x0, J["fd"])
     for _, s in runners:
         part -= s
     if CFG.get("modular"):
         for (ex, ey, ez) in ENDS:
             _, fs = base_flange(ex, ey, ez)
             part -= fs
+        if CFG.get("plate"):
+            # M6 holes for the support strut in the gaps between the runners (bolt from the top, nut below)
+            SUPPORT_X = [(ENDS[k][0] + ENDS[k + 1][0]) / 2 for k in (0, 1, 3, 4)]
+            for sx in SUPPORT_X:
+                part -= ycyl(3.2, ENDS[0][1] - J["ft"] - 1, ENDS[0][1] + 1, sx, ENDS[0][2], seg=32)
+            info["support_holes_x"] = [round(x, 2) for x in SUPPORT_X]
     part -= bores
     if CFG.get("opt"):
         part -= FACE_POCKET

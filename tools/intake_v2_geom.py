@@ -26,6 +26,7 @@ CONE = 4.0
 SPIGOT_L, SPIGOT_OD, SPIGOT_ID = 22.0, 41.0, 35.0
 BEAD_OD, BEAD_POS, BEAD_W = 42.4, 4.0, 3.0
 TIP_FLARE = 0.0
+TEARDROP = None
 SPLIT_X = PORT_MID
 BOLT_BORES = [(-226.6, 16.5), (-164.6, 16.5), (-34.0, 16.5), (34.0, 16.5)]
 NIPPLE_BOX = ((-143.0, -29.0, 38.0), (-117.0, 4.0, 86.0))
@@ -72,10 +73,20 @@ def section(centre, tangent, port, blend, grow):
     u = Vector(1, 0, 0) - n * n.X
     u = u.normalized()
     v = n.cross(u)
+    # FDM: self-supporting roof (truncated 45 deg teardrop) on the inner bore where the runner lies flatter than 45 deg
+    td_w = 0.0
+    if TEARDROP and grow == 0:
+        tilt = math.degrees(math.acos(max(-1.0, min(1.0, n.Z))))
+        td_w = smoothstep((tilt - 35.0) / 15.0) * smoothstep((TEARDROP["y_fade1"] - centre.Y) / (TEARDROP["y_fade1"] - TEARDROP["y_fade0"]))
     pts = []
     for k in range(N_PTS):
         th = 2 * math.pi * k / N_PTS
         rr = (1 - blend) * rrect_radius(th, w, h, r) + blend * rc
+        if td_w > 0:
+            a = abs((th + math.pi / 2 + math.pi) % (2 * math.pi) - math.pi)  # angle from 'up' (= -v)
+            if a < math.pi / 4:
+                td = min(rc / math.cos(math.pi / 4 - a), TEARDROP["H"] / math.cos(a))
+                rr += td_w * blend * (td - rc)
         pts.append(centre + u * (rr * math.cos(th)) + v * (rr * math.sin(th)))
     return Wire([Spline(*pts, periodic=True)])
 
