@@ -215,24 +215,27 @@ J = dict(fw=62.0, fd=52.0, ft=10.0, adp_ft=8.0, bore_r=19.0, td_h=20.0,
          groove=(21.0, 23.7, 1.5), bolt=(24.0, 18.0), hole_base=6.4, hole_adp=5.6, neck_l=14.0, spigot_l=22.0, strut_hole=6.6)
 
 
-TAB = dict(w=24.0, zc=120.0, hole=6.6, fillet=10.0)  # hole at z 120 (12 mm beyond the plate edge), round end r 12, root fillets r 10
+TAB = dict(w=24.0, zc=120.0, hole=6.6, fillet=20.0)  # hole at z 120 (12 mm beyond the plate edge), round end r 12, root fillets r 20
 
 
 def ytab(x, y0, y1, z_edge, n=24):
     """support tab in the plate plane: concave root fillets blend into the plate edge, straight flanks, round end"""
     hw, R, zc = TAB["w"] / 2, TAB["fillet"], TAB["zc"]
+    Rz = min(R, zc - z_edge)                       # elliptical fillet: R wide, never taller than the tab flank
     pts = [(-(hw + R) - 2.0, z_edge - 1.0), (-(hw + R), z_edge)]
-    for k in range(1, n + 1):                      # left fillet: centre (-(hw+R), z_edge+R), from bottom to tangent point
+    for k in range(1, n + 1):                      # left fillet (quarter ellipse), tangent to plate edge and tab flank
         t = (math.pi / 2) * k / n
-        pts.append((-(hw + R) + R * math.sin(t), z_edge + R - R * math.cos(t)))
-    pts.append((-hw, zc))
+        pts.append((-(hw + R) + R * math.sin(t), z_edge + Rz - Rz * math.cos(t)))
+    if z_edge + Rz < zc:
+        pts.append((-hw, zc))
     for k in range(1, 2 * n):                      # round end, centre (0, zc)
         t = math.pi - math.pi * k / (2 * n)
         pts.append((hw * math.cos(t), zc + hw * math.sin(t)))
-    pts.append((hw, zc))
+    if z_edge + Rz < zc:
+        pts.append((hw, zc))
     for k in range(n, -1, -1):                     # right fillet mirrored
         t = (math.pi / 2) * k / n
-        pts.append(((hw + R) - R * math.sin(t), z_edge + R - R * math.cos(t)))
+        pts.append(((hw + R) - R * math.sin(t), z_edge + Rz - Rz * math.cos(t)))
     pts.append(((hw + R) + 2.0, z_edge - 1.0))
     cs = mf.CrossSection([[(px, -(pz - z_edge)) for px, pz in pts]])
     if cs.area() < 0:
