@@ -25,6 +25,7 @@ STRAIGHT = 6.0
 CONE = 4.0
 SPIGOT_L, SPIGOT_OD, SPIGOT_ID = 22.0, 41.0, 35.0
 BEAD_OD, BEAD_POS, BEAD_W = 42.4, 4.0, 3.0
+TIP_FLARE = 0.0
 SPLIT_X = PORT_MID
 BOLT_BORES = [(-226.6, 16.5), (-164.6, 16.5), (-34.0, 16.5), (34.0, 16.5)]
 NIPPLE_BOX = ((-143.0, -29.0, 38.0), (-117.0, 4.0, 86.0))
@@ -114,6 +115,10 @@ def spigot(ax0, solid):
     inner = Cylinder(R_IN, STRAIGHT + 1, align=(Align.CENTER, Align.CENTER, Align.MIN)).rotate(Axis.X, -90).translate(ax0 - Vector(0, 1, 0))
     cone = Cone(R_IN, SPIGOT_ID / 2, CONE, align=(Align.CENTER, Align.CENTER, Align.MIN)).rotate(Axis.X, -90).translate(ax0 + Vector(0, STRAIGHT, 0))
     tube = Cylinder(SPIGOT_ID / 2, SPIGOT_L + 1, align=(Align.CENTER, Align.CENTER, Align.MIN)).rotate(Axis.X, -90).translate(ax0 + Vector(0, STRAIGHT + CONE, 0))
+    if TIP_FLARE:
+        # entry flare at the spigot mouth: softens the step from a larger hose bore into the spigot
+        tip = Cone(SPIGOT_ID / 2, SPIGOT_ID / 2 + TIP_FLARE, TIP_FLARE * 1.5 + 0.01, align=(Align.CENTER, Align.CENTER, Align.MIN)).rotate(Axis.X, -90)
+        tube = tube + tip.translate(ax0 + Vector(0, STRAIGHT + CONE + SPIGOT_L - TIP_FLARE * 1.5, 0))
     return inner + cone + tube
 
 

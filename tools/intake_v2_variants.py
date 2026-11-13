@@ -1,7 +1,7 @@
 """Intake adapter v2 variants with mesh booleans (manifold3d).
 sls : wall 4 mm, two halves (split between cyl 3/4)
 cast: wall 6 mm, six single runners each with its own flange segment, shrink + machining allowance
-usage: intake_v2_variants.py <fdm|fdm_kurz|fdm_opt|sls|cast> <outdir>
+usage: intake_v2_variants.py <fdm|fdm_kurz|fdm_opt|fdm_power|sls|sls_power|cast> <outdir>
 """
 import sys, os, json, tempfile
 import numpy as np
@@ -18,10 +18,18 @@ CFG = {
     "fdm": dict(wall=6.8, spigot_od=41.0, cone=9.0, tag="FDM"),
     "fdm_opt": dict(wall=6.8, spigot_od=41.0, cone=9.0, tag="FDM_opt", opt=dict(r=78.4, straight=15.0)),
     "fdm_kurz": dict(wall=6.8, spigot_od=41.0, cone=9.0, tag="FDM_kurz", compact=dict(r=89.7, straight=25.0)),
+    # power layout: bore 38 (~ head port area), spigot 48.3/40 for a 48 mm hose; K100 now via 48->40 reducer hose, 45 mm throttles later
+    "fdm_power": dict(wall=6.8, r_in=19.0, spigot_od=48.3, spigot_id=40.0, bead_od=49.6, tip_flare=2.0, cone=9.0, tag="FDM_Leistung", opt=dict(r=77.0, straight=15.0)),
+    "sls_power": dict(wall=4.0, r_in=19.0, spigot_od=48.3, spigot_id=40.0, bead_od=49.6, tip_flare=2.0, cone=6.0, tag="SLS_Leistung", opt=dict(r=77.0, straight=15.0),
+                      eyes=dict(w=40.0, y0=68.0, y1=92.0, z0=84.0, z1=108.0, hole_d=8.4, nut_af=13.0, nut_h=7.0)),
     "cast": dict(wall=6.0, spigot_od=41.6, shrink=1.013, face_allow=1.0, hole_cast_d=11.2),
 }[MODE]
 G.SRC = "/srv/data/obsidian/vault/Buggy/Ansaugung/Ansaugung.step"
 G.WALL = CFG["wall"]
+G.R_IN = CFG.get("r_in", G.R_IN)
+G.SPIGOT_ID = CFG.get("spigot_id", G.SPIGOT_ID)
+G.BEAD_OD = CFG.get("bead_od", G.BEAD_OD)
+G.TIP_FLARE = CFG.get("tip_flare", 0.0)
 G.R_OUT = G.R_IN + G.WALL
 G.SPIGOT_OD = CFG["spigot_od"]
 G.CONE = CFG.get("cone", G.CONE)
@@ -111,7 +119,7 @@ def _dists(pts, xs, port):
 
 def _clear(pts, xs, port, base):
     d = _dists(pts, xs, port)
-    need = np.array([11.0, 11.0, 11.0, 11.0, 10.0, 10.0] * (len(d) // 6))
+    need = np.array([11.8, 11.8, 11.8, 11.8, 10.0, 10.0] * (len(d) // 6))
     return bool(np.all(d >= np.minimum(need, base - 0.05)))
 
 
@@ -183,8 +191,10 @@ info = {"mode": MODE, "cfg": CFG}
 # support eyes on the outer side of the bends (face away from the head, +z), bridging runner pairs 1-2, 3-4, 5-6.
 # bolt from outside along +z into a captured M8 nut that sits in a hex pocket on the head side (open into the runner gap)
 EYE = dict(w=40.0, y0=96.0, y1=120.0, z0=114.0, z1=138.0, hole_d=8.4, nut_af=13.0, nut_h=7.0)
+if isinstance(CFG.get("eyes"), dict):
+    EYE = CFG["eyes"]
 EYE_X = [(G.THROTTLE_X[k] + G.THROTTLE_X[k + 1]) / 2 for k in (0, 2, 4)]
-if MODE in ("sls", "fdm", "fdm_kurz", "fdm_opt"):
+if MODE in ("sls", "fdm", "fdm_kurz", "fdm_opt", "fdm_power", "sls_power"):
     part = flange + nipple
     if CFG.get("eyes"):
         for ex in EYE_X:
