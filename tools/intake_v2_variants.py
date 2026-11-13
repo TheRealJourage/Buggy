@@ -24,7 +24,7 @@ CFG = {
                       eyes=dict(w=40.0, y0=68.0, y1=92.0, z0=84.0, z1=108.0, hole_d=8.4, nut_af=13.0, nut_h=7.0)),
     # modular: base with a small bolt flange per runner, screw-on spigot adapters (K100 41 mm now, 48 mm later)
     "fdm_modular": dict(wall=6.8, r_in=19.0, spigot_od=41.0, spigot_id=35.0, cone=9.0, tag="FDM_Modular", opt=dict(r=77.0, straight=15.0), modular=True,
-                        plate=True, teardrop=dict(H=21.0, H_end=20.0, y_h0=76.0, y_h1=84.0, y_fade0=200.0, y_fade1=201.0)),
+                        plate=True, teardrop=dict(H=21.0, H_end=20.0, y_h0=76.0, y_h1=84.0, y_fade0=88.0, y_fade1=89.5)),
     "cast": dict(wall=6.0, spigot_od=41.6, shrink=1.013, face_allow=1.0, hole_cast_d=11.2),
 }[MODE]
 G.SRC = "/srv/data/obsidian/vault/Buggy/Ansaugung/Ansaugung.step"
@@ -272,7 +272,7 @@ def bolt_xy(x, z):
 
 def base_flange(x, y, z):
     add = ybox(x, y - J["ft"], y, z, J["fw"], J["fd"])
-    sub = yteardrop(J["bore_r"] + 0.05, J["td_h"], y - J["ft"] - 1, y + 1, x, z)
+    sub = yteardrop(J["bore_r"] + 0.05, J["td_h"], y - J["ft"] - 1, y - 2.0, x, z) + ycyl(J["bore_r"] + 0.15, y - 2.5, y + 1, x, z)
     g0, g1, gd = J["groove"]
     sub += ycyl(g1, y - gd, y + 1, x, z) - ycyl(g0, y - gd - 1, y + 2, x, z)
     for bx, bz in bolt_xy(x, z):
@@ -296,7 +296,7 @@ def adapter(x, y, z, od, idd, bead_od, flare):
     tip = y + ft + nl + sl
     b0 = tip - 4.0 - 1.5
     a += ycyl(od / 2, b0 - 1.5, b0, x, z, bead_od / 2) + ycyl(bead_od / 2, b0, b0 + 3.0, x, z) + ycyl(bead_od / 2, b0 + 3.0, b0 + 4.5, x, z, od / 2)
-    v = yteardrop(J["bore_r"] + 0.05, J["td_h"], y - 1, y + ft, x, z)
+    v = ycyl(J["bore_r"] + 0.05, y - 1, y + ft, x, z)
     v += ycyl(J["bore_r"], y + ft - 0.01, y + ft + nl, x, z, idd / 2)
     v += ycyl(idd / 2, y + ft + nl - 0.01, tip + 1, x, z)
     if flare:
