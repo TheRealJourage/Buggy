@@ -258,8 +258,10 @@ def adapter(x, y, z, od, idd, bead_od, flare):
     ft, nl, sl = J["adp_ft"], J["neck_l"], J["spigot_l"]
     neck_r = max(23.0, od / 2 + 1.5)
     a = ybox(x, y, y + ft, z, J["fw"], J["fd"])
-    a += ycyl(neck_r + 4.0, y + ft - 0.1, y + ft + 4.0, x, z, neck_r)          # 45 deg shoulder flange -> neck
-    a += ycyl(neck_r, y + ft + 3.9, y + ft + nl, x, z)
+    sh_r = min(neck_r + 4.0, J["fd"] / 2 - 0.5)                                  # shoulder never wider than the flange
+    if sh_r > neck_r + 0.05:
+        a += ycyl(sh_r, y + ft - 0.1, y + ft + (sh_r - neck_r), x, z, neck_r)     # 45 deg shoulder flange -> neck
+    a += ycyl(neck_r, y + ft - 0.1, y + ft + nl, x, z)
     step = neck_r - od / 2
     a += ycyl(neck_r, y + ft + nl - 0.1, y + ft + nl + step, x, z, od / 2)       # 45 deg neck -> spigot
     a += ycyl(od / 2, y + ft + nl + step - 0.1, y + ft + nl + sl, x, z)
