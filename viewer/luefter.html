@@ -205,7 +205,7 @@
   <li>TVS + 100 Ω schützen gegen Spitzen vom Modul. Schaltung nach golf2lin-Prinzip, <span class="hyp">nicht aufgebaut/gemessen</span>.</li>
   <li>Für den Buggy später: Kl. 30 über Last-Relais/Sicherung laut Bordnetz-Konzept (Vault), Kl. 15 von der Freigabe-Kette.</li>
 </ul>
-<p class="hint">Abschnitt 4 ist der erste Entwurf (Nucleo + BC337). Aufgebaut wird <b>4b</b> mit dem Uno und dem IRLZ44N.</p>
+<p class="hint">Abschnitt 4 ist der erste Entwurf (Nucleo + BC337). Aufgebaut wird <b>4c</b> (Uno + IRLZ44N am Labornetzgerät, 2026-11-13). <b>4b</b> mit Autobatterie folgt später für Volllast, Notlauf und Strom.</p>
 
 <h2>4b. Prüfstand mit Arduino Uno + IRLZ44N (parallel zum LIN-Aufbau)</h2>
 <p class="hint">Stand 2026-10-29. Der LIN-Aufbau aus dem Vault-Steckplan (SteeringControl/Steckplan) bleibt komplett stecken: D0, D1, D2, D3, D12 und D13 sind belegt. Die Lüfterstufe hängt an <b>D9</b> (Timer1/OC1A). Den Timer1 nutzt die LIN-Firmware nicht, dadurch kann er die 25 Hz in Hardware erzeugen. <span class="hyp">Schaltung ist nicht aufgebaut und nicht gemessen.</span></p>
@@ -399,21 +399,195 @@
   <li class="hyp"><b>Uno aus, Reset oder Upload:</b> Der FET sperrt, die Leitung liegt dauerhaft auf 12 V. Das Modul wertet das vermutlich als 100 % oder als ungültig (Notlauf). In beiden Fällen läuft der Lüfter auf <b>Vollgas</b>. Vor jedem Upload Kl. 15 ausschalten.</li>
 </ul>
 
-<h2>5. Einkaufs-/Material-Liste</h2>
+<h2>4c. Prüfstand am Labornetzgerät 12 V / 5 A (aufbauen, 2026-11-13)</h2>
+<p class="hint">Gleiche Signalstufe wie 4b (P3–P8 unverändert), aber <b>eine</b> Quelle: das Labornetzgerät statt Autobatterie. Ziel ist nur: <b>Lässt sich der Lüfter über PWM steuern?</b> Pin-Zuordnung, Polarität, untere Grenze. <b>Nicht</b> prüfbar: Volllast, Notlauf, Signalverlust und Lüfterstrom für die Strombilanz → später 4b mit Batterie. <span class="hyp">Schaltung nicht aufgebaut und nicht gemessen.</span></p>
+<div class="legend">
+  <span><i class="sw" style="background:#ff5a5a"></i>Kl. 30 (Laborleitung)</span>
+  <span><i class="sw" style="background:#888"></i>Masse</span>
+  <span><i class="sw" style="background:#ff9a3c"></i>Kl. 15 (eigene Schiene)</span>
+  <span><i class="sw" style="background:#7fe07f"></i>PWM 12 V</span>
+  <span><i class="sw" style="background:#5ab4ff"></i>5-V-Logik</span>
+</div>
+<div class="svgwrap">
+<svg viewBox="0 0 1060 680" width="1060" height="680" xmlns="http://www.w3.org/2000/svg">
+  <!-- Lab supply -->
+  <rect x="20" y="30" width="150" height="110" rx="8" fill="#222" stroke="#666"/>
+  <text x="95" y="56" text-anchor="middle" class="title">Labornetzgerät</text>
+  <text x="95" y="76" text-anchor="middle" class="small">12,0 V · max. 5 A</text>
+  <text x="95" y="94" text-anchor="middle" class="small y">Strombegrenzung 5 A</text>
+  <text x="155" y="68" style="fill:#ff5a5a;font-weight:700">+</text>
+  <text x="155" y="130" style="fill:#aaa;font-weight:700">−</text>
+
+  <!-- Kl30: supply + -> module, no fuse (supply limits) -->
+  <polyline points="170,62 900,62 900,170" fill="none" stroke="#ff5a5a" stroke-width="4" stroke-linejoin="round"/>
+  <text x="600" y="52" text-anchor="middle">Kl. 30 · Laborleitung · <tspan class="y">P12 zuletzt</tspan></text>
+
+  <!-- Kl15: tap at supply + -> 5 A -> switch -> rail -->
+  <circle cx="330" cy="62" r="5" fill="#fff"/>
+  <line x1="330" y1="62" x2="330" y2="95" stroke="#ff9a3c" stroke-width="3"/>
+  <rect x="318" y="95" width="24" height="40" rx="3" fill="#2a1f10" stroke="#ff9a3c"/>
+  <text x="350" y="120" class="small">5 A</text>
+  <line x1="330" y1="135" x2="330" y2="159" stroke="#ff9a3c" stroke-width="3"/>
+  <circle cx="330" cy="163" r="4" fill="#ff9a3c"/>
+  <line x1="330" y1="167" x2="350" y2="194" stroke="#ff9a3c" stroke-width="3"/>
+  <circle cx="330" cy="200" r="4" fill="#ff9a3c"/>
+  <text x="358" y="185" class="small">Schalter „Kl. 15“ (P9)</text>
+  <polyline points="330,204 330,230 840,230" fill="none" stroke="#ff9a3c" stroke-width="3"/>
+  <text x="345" y="250" class="small">Kl.-15-Schiene (eigene Schiene, nicht die +12-V-Schiene des LIN-Teils)</text>
+  <text x="780" y="222" text-anchor="middle" class="small">P10</text>
+
+  <!-- R3 pull-up -->
+  <circle cx="600" cy="230" r="5" fill="#fff"/>
+  <line x1="600" y1="230" x2="600" y2="255" stroke="#ff9a3c" stroke-width="3"/>
+  <rect x="588" y="255" width="24" height="50" fill="#222" stroke="#ff9a3c"/>
+  <text x="620" y="276" class="small">R3 1 kΩ Pull-up (P6)</text>
+  <text x="620" y="292" class="small">≥ 0,25 W, wird warm</text>
+  <line x1="600" y1="305" x2="600" y2="400" stroke="#7fe07f" stroke-width="3"/>
+  <circle cx="600" cy="330" r="5" fill="#fff"/>
+
+  <!-- R4 + PWM line -->
+  <line x1="600" y1="330" x2="660" y2="330" stroke="#7fe07f" stroke-width="3"/>
+  <rect x="660" y="320" width="40" height="20" fill="#222" stroke="#7fe07f"/>
+  <text x="680" y="314" text-anchor="middle" class="small">R4 100 Ω (P7)</text>
+  <line x1="700" y1="330" x2="840" y2="330" stroke="#7fe07f" stroke-width="3"/>
+  <text x="810" y="322" text-anchor="middle" class="small">P11</text>
+
+  <!-- TVS -->
+  <circle cx="770" cy="330" r="5" fill="#fff"/>
+  <line x1="770" y1="330" x2="770" y2="380" stroke="#7fe07f" stroke-width="2"/>
+  <line x1="756" y1="380" x2="784" y2="380" stroke="#e8c547" stroke-width="3"/>
+  <polygon points="758,402 782,402 770,380" fill="none" stroke="#e8c547" stroke-width="2"/>
+  <line x1="770" y1="402" x2="770" y2="600" stroke="#888" stroke-width="2"/>
+  <text x="665" y="430" class="small y">TVS (P8)</text>
+  <text x="665" y="446" class="small">1.5KE24A</text>
+  <text x="665" y="462" class="small">Ring oben</text>
+
+  <!-- MOSFET -->
+  <rect x="550" y="400" width="100" height="80" rx="6" fill="#1a2a1a" stroke="#7fe07f"/>
+  <text x="600" y="430" text-anchor="middle" class="title">IRLZ44N</text>
+  <text x="600" y="448" text-anchor="middle" class="small">N-MOSFET</text>
+  <text x="607" y="414" class="small">D (2)</text>
+  <text x="607" y="475" class="small">S (3)</text>
+  <text x="556" y="465" class="small">G (1)</text>
+  <line x1="600" y1="480" x2="600" y2="600" stroke="#888" stroke-width="3"/>
+  <text x="608" y="540" class="small">P5</text>
+
+  <!-- Gate: D9 -> R1 -> G, R2 G-S -->
+  <line x1="395" y1="440" x2="425" y2="440" stroke="#5ab4ff" stroke-width="3"/>
+  <rect x="425" y="430" width="40" height="20" fill="#222" stroke="#5ab4ff"/>
+  <text x="445" y="422" text-anchor="middle" class="small">R1 1 kΩ (P3)</text>
+  <line x1="465" y1="440" x2="550" y2="440" stroke="#5ab4ff" stroke-width="3"/>
+  <circle cx="510" cy="440" r="5" fill="#fff"/>
+  <line x1="510" y1="440" x2="510" y2="470" stroke="#5ab4ff" stroke-width="2"/>
+  <rect x="500" y="470" width="20" height="40" fill="#222" stroke="#5ab4ff"/>
+  <text x="494" y="494" text-anchor="end" class="small">R2 10 kΩ (P4)</text>
+  <line x1="510" y1="510" x2="510" y2="600" stroke="#888" stroke-width="2"/>
+
+  <!-- Uno -->
+  <rect x="245" y="380" width="150" height="140" rx="8" fill="#1a2030" stroke="#5ab4ff"/>
+  <text x="320" y="402" text-anchor="middle" class="title">Arduino Uno</text>
+  <text x="320" y="418" text-anchor="middle" class="small">USB am PC</text>
+  <text x="387" y="445" text-anchor="end">D9</text>
+  <text x="387" y="505" text-anchor="end">GND</text>
+  <text x="255" y="465" class="small">Test-Sketch (Abschn. 7)</text>
+  <text x="255" y="480" class="small">LIN-Teil darf stecken</text>
+  <polyline points="395,500 410,500 410,600" fill="none" stroke="#888" stroke-width="2"/>
+
+  <!-- Module -->
+  <rect x="840" y="170" width="200" height="230" rx="10" fill="#222" stroke="#aaa" stroke-width="2"/>
+  <text x="940" y="270" text-anchor="middle" class="title">Lüfter RIDEX</text>
+  <text x="940" y="288" text-anchor="middle" class="title">508R0028</text>
+  <text x="940" y="306" text-anchor="middle" class="small">mit J293</text>
+  <text x="908" y="190" class="small" style="fill:#ff5a5a">Kl.30</text>
+  <text x="848" y="226" class="small" style="fill:#ff9a3c">Kl.15</text>
+  <text x="848" y="326" class="small" style="fill:#7fe07f">PWM</text>
+  <text x="948" y="392" class="small">Kl.31</text>
+  <text x="940" y="346" text-anchor="middle" class="small y">Pin-Nr. vorher</text>
+  <text x="940" y="362" text-anchor="middle" class="small y">am Teil klären</text>
+
+  <!-- Ground: lab lead to module, thin lead to breadboard rail, both from supply minus -->
+  <polyline points="170,125 185,125 185,640 940,640 940,400" fill="none" stroke="#888" stroke-width="4" stroke-linejoin="round"/>
+  <text x="560" y="662" text-anchor="middle">Kl. 31 · Laborleitung (P1)</text>
+  <circle cx="185" cy="125" r="6" fill="#fff"/>
+  <polyline points="185,125 215,125 215,600 770,600" fill="none" stroke="#888" stroke-width="2" stroke-linejoin="round"/>
+  <text x="490" y="620" text-anchor="middle" class="small">GND-Schiene Steckbrett, eigene dünne Leitung vom Minus des Netzgeräts (P2)</text>
+  <circle cx="410" cy="600" r="4" fill="#fff"/>
+  <circle cx="510" cy="600" r="4" fill="#fff"/>
+  <circle cx="600" cy="600" r="4" fill="#fff"/>
+
+  <!-- Notes -->
+  <text x="20" y="190" class="small">Sternpunkt = Minus-Buchse</text>
+  <text x="20" y="240" class="small">Reihenfolge:</text>
+  <text x="20" y="258" class="small">1. Masse (P1, P2)</text>
+  <text x="20" y="276" class="small">2. Signalstufe (P3–P8)</text>
+  <text x="20" y="294" class="small">3. Sketch hochladen</text>
+  <text x="20" y="312" class="small">4. Kl. 15 (P9–P11),</text>
+  <text x="20" y="328" class="small">   Schalter aus</text>
+  <text x="20" y="346" class="small">5. Kl. 30 zuletzt (P12)</text>
+  <text x="20" y="364" class="small">6. Kl. 15 ein</text>
+  <text x="20" y="400" class="small y">Vor Upload/Reset:</text>
+  <text x="20" y="416" class="small y">Kl. 15 aus</text>
+</svg>
+</div>
+
+<h3>Steckliste 4c</h3>
 <table>
-<tr><th>✓</th><th>Teil</th><th>Notiz</th></tr>
-<tr><td><input type="checkbox"></td><td>Autobatterie ≥ 60 Ah + Ladegerät</td><td>Labornetzteil nur, wenn &gt; 60 A</td></tr>
-<tr><td><input type="checkbox"></td><td>MIDI- oder Streifensicherung 60 A + Halter</td><td>direkt an Batterie-Plus</td></tr>
-<tr><td><input type="checkbox"></td><td>Leitung 6 mm² rot + schwarz, Ringösen M6/M8</td><td>so kurz wie möglich</td></tr>
-<tr><td><input type="checkbox"></td><td>Flachsicherung 5 A + Halter, Kippschalter</td><td>Kl. 15</td></tr>
-<tr><td><input type="checkbox"></td><td>Gegenstecker 4-polig (Golf 5 Lüfter) oder Flachstecker auf die Pins</td><td>Teilenummer am Stecker ablesen</td></tr>
-<tr><td><input type="checkbox"></td><td>NPN BC337 oder BC547, 1 kΩ 0,5 W (Pull-up), 1 kΩ (Basis), 100 Ω, 10 kΩ, TVS SMBJ15A (oder P6KE18A), Lochraster</td><td>alles noch kaufen, Centbeträge</td></tr>
-<tr><td><input type="checkbox"></td><td>Nucleo-F091RC (frei), USB-Kabel</td><td>Zuordnung erst nach OK</td></tr>
-<tr><td><input type="checkbox"></td><td>Multimeter, DC-Strommesszange; ideal Oszilloskop</td><td>Pin-Zuordnung + PWM prüfen</td></tr>
-<tr><td><input type="checkbox"></td><td>Schraubzwingen/Halter, Schutzbrille</td><td>Lüfter fest einspannen</td></tr>
+  <tr><th>✓</th><th>Nr.</th><th>Von → Nach</th><th>Hinweis</th></tr>
+  <tr><td><input type="checkbox"></td><td>P1</td><td>Netzgerät − → Lüfter Kl. 31</td><td>Laborleitung, Netzgerät aus</td></tr>
+  <tr><td><input type="checkbox"></td><td>P2</td><td>Netzgerät − → GND-Schiene des Steckbretts</td><td>eigene dünne Leitung, nicht vom Lüfterkabel abzweigen. Uno-GND hängt dort</td></tr>
+  <tr><td><input type="checkbox"></td><td>P3</td><td>Uno <b>D9</b> → R1 1 kΩ → IRLZ44N <b>Pin 1 (G)</b></td><td></td></tr>
+  <tr><td><input type="checkbox"></td><td>P4</td><td>R2 10 kΩ zwischen <b>Pin 1 (G)</b> und <b>Pin 3 (S)</b></td><td>direkt am FET. Hält ihn bei Reset/Upload sicher aus</td></tr>
+  <tr><td><input type="checkbox"></td><td>P5</td><td>IRLZ44N <b>Pin 3 (S)</b> → GND-Schiene</td><td></td></tr>
+  <tr><td><input type="checkbox"></td><td>P6</td><td>Kl.-15-Schiene → R3 1 kΩ → IRLZ44N <b>Pin 2 (D)</b></td><td>Pull-up, R3 ≥ 0,25 W</td></tr>
+  <tr><td><input type="checkbox"></td><td>P7</td><td>IRLZ44N <b>Pin 2 (D)</b> → R4 100 Ω → Leitung „PWM“</td><td></td></tr>
+  <tr><td><input type="checkbox"></td><td>P8</td><td>TVS 1.5KE24A: <b>Ring</b> an PWM-Leitung hinter R4, anderes Ende → GND-Schiene</td><td>Draht vermutlich zu dick fürs Steckbrett (<span class="hyp">Hypothese</span>) → dünne Litze anlöten</td></tr>
+  <tr><td><input type="checkbox"></td><td>P9</td><td>Netzgerät + → Flachsicherung 5 A → Schalter → Kl.-15-Schiene</td><td>Schalter <b>aus</b>. Neue, eigene Schiene, nicht die +12-V-Schiene des LIN-Teils (sonst ist der Schalter überbrückt)</td></tr>
+  <tr><td><input type="checkbox"></td><td>P10</td><td>Kl.-15-Schiene → Lüfter Kl. 15</td><td>0,5 mm²</td></tr>
+  <tr><td><input type="checkbox"></td><td>P11</td><td>PWM-Leitung → Lüfter PWM</td><td>0,5 mm². Für Test 4 (Signalstufe allein) noch nicht stecken</td></tr>
+  <tr><td><input type="checkbox"></td><td>P12</td><td>Netzgerät + → Lüfter Kl. 30</td><td>Laborleitung, <b>zuletzt</b>, Netzgerät aus</td></tr>
 </table>
 
-<h2>6. Testablauf (ca. 1 h)</h2>
+<h3>Was sich gegenüber 4b ändert</h3>
+<ul>
+  <li><b>Eine Quelle:</b> Das Netzgerät versorgt Lüfter, Kl. 15 und (falls gesteckt) den LIN-Teil. Die Strombegrenzung des Netzgeräts ersetzt die 60-A-Sicherung; 6-mm²-Leitungen und Strommesszange entfallen, Strom und Spannung am Display ablesen.</li>
+  <li><b>Strombegrenzung:</b> vor dem Anschließen ohne Last auf 12,0 V und 5 A stellen (falls einstellbar). <span class="hyp">Ob die Laborleitungen für 5 A ausgelegt sind: Aufdruck prüfen (Hypothese: übliche 4-mm-Laborleitungen ja).</span></li>
+  <li class="hyp"><b>An der Stromgrenze</b> bricht die Spannung ein. Wie das J293 auf Unterspannung reagiert (abschalten, Fehler, Notlauf), ist unbekannt. Deshalb Sollwert nur so weit erhöhen, bis der Strom nahe 5 A liegt.</li>
+  <li><b>Uno aus, Reset oder Upload:</b> Der FET sperrt, die Leitung liegt auf 12 V → der Lüfter will Vollgas und läuft an die Stromgrenze. Vor jedem Upload und Reset Kl. 15 aus.</li>
+  <li><b>LIN-Teil:</b> Der Test-Sketch ersetzt die LIN-Firmware auf dem Uno. Die LIN-Verkabelung darf stecken bleiben; nach dem Test die LIN-Firmware wieder aufspielen.</li>
+</ul>
+
+<h3>Testablauf 4c (ca. 45 min)</h3>
+<ol>
+  <li><b>Netzgerät einstellen</b> (ohne Last): 12,0 V, Strombegrenzung 5 A.</li>
+  <li><b>Pins klären</b> (stromlos): dicke/dünne Adern, Durchgang zu Elko-Minus, Ergebnis in Tabelle 2 eintragen.</li>
+  <li><b>Sketch hochladen</b> (Abschnitt 7), Kl. 15 aus. Serieller Monitor 115200 Baud, Zeilenende „Neue Zeile“. Erwartet: <code>Soll 20 %</code>.</li>
+  <li><b>Signalstufe allein</b> (P11 nicht gesteckt): Kl. 15 an, Multimeter PWM-Leitung gegen GND. <code>0</code> → ca. 0 V, <code>100</code> → ca. 12 V, <code>50</code> → ca. 6 V (Mittelwert). Danach <code>20</code> eingeben, Kl. 15 aus.</li>
+  <li><b>Lüfter</b>: P11 und P12 stecken, Kl. 15 an. Strom am Display. Dann 25, 30, 40, 50 … eingeben, je 20 s. <b>Abbruch</b>, wenn der Strom 5 A erreicht oder die Spannung sichtbar fällt: <code>20</code> eingeben oder Kl. 15 aus.</li>
+  <li><b>Polarität</b>: Läuft er bei 20 % schon fast voll oder wird er mit höherem Soll langsamer → <code>i</code> eingeben (Polarität tauschen, ohne Upload), Schritt 5 wiederholen.</li>
+  <li><b>Untere Grenze</b>: 0, 10, 15 → ab wann dreht er?</li>
+</ol>
+<table>
+<tr><th>Soll %</th><th>Strom A</th><th>Spannung V</th><th>Drehzahl / Eindruck</th></tr>
+<tr><td>0</td><td></td><td></td><td></td></tr><tr><td>10</td><td></td><td></td><td></td></tr><tr><td>15</td><td></td><td></td><td></td></tr>
+<tr><td>20</td><td></td><td></td><td></td></tr><tr><td>25</td><td></td><td></td><td></td></tr><tr><td>30</td><td></td><td></td><td></td></tr>
+<tr><td>40</td><td></td><td></td><td></td></tr><tr><td>50</td><td></td><td></td><td></td></tr><tr><td>60</td><td></td><td></td><td></td></tr>
+<tr><td>Polarität getauscht?</td><td colspan="3"></td></tr>
+</table>
+
+<h2>5. Material-Liste (4c jetzt, 4b später)</h2>
+<table>
+<tr><th>✓</th><th>Teil</th><th>Notiz</th></tr>
+<tr><td><input type="checkbox"></td><td>Labornetzgerät 12 V, 5 A + Laborleitungen rot/schwarz</td><td>vorhanden (User 2026-11-13); Strombegrenzung einstellbar? prüfen</td></tr>
+<tr><td><input type="checkbox"></td><td>Flachsicherung 5 A + Halter, Kippschalter</td><td>Kl. 15</td></tr>
+<tr><td><input type="checkbox"></td><td>Gegenstecker 4-polig (Golf 5 Lüfter) oder Flachstecker auf die Pins</td><td>Teilenummer am Stecker ablesen</td></tr>
+<tr><td><input type="checkbox"></td><td>IRLZ44N, R 1 kΩ (Gate), R 10 kΩ, R 1 kΩ ≥ 0,25 W (Pull-up), R 100 Ω, TVS 1.5KE24A</td><td>Lagerbestand: IRLZ44N (Menge offen), TVS, 1 k, 10 k vorhanden; 100 Ω und Belastbarkeit des Pull-up prüfen</td></tr>
+<tr><td><input type="checkbox"></td><td>Arduino Uno + USB-Kabel, Steckbrett</td><td>vorhanden (LIN-Prüfstand)</td></tr>
+<tr><td><input type="checkbox"></td><td>Multimeter; ideal Oszilloskop</td><td>Pin-Zuordnung + PWM prüfen</td></tr>
+<tr><td><input type="checkbox"></td><td>Schraubzwingen/Halter, Schutzbrille</td><td>Lüfter fest einspannen</td></tr>
+<tr><td><input type="checkbox"></td><td><i>Später für 4b:</i> Autobatterie ≥ 60 Ah + Ladegerät, MIDI-/Streifensicherung 60 A + Halter, Leitung 6 mm² + Ringösen, DC-Strommesszange</td><td>für Volllast, Notlauf, Strom</td></tr>
+</table>
+
+<h2>6. Testablauf mit Batterie (4b, später, ca. 1 h)</h2>
 <ol>
   <li><b>Pins klären</b> (stromlos): dicke/dünne Adern, Durchgang zu Elko-Minus, Ergebnis in Tabelle 2 eintragen.</li>
   <li><b>Signalstufe allein</b>: Modul nicht angeschlossen, Kl. 15 an, Nucleo 25 Hz / 50 % → am PWM-Ausgang 0 / ~12 V messen (Multimeter zeigt ~6 V Mittelwert).</li>
@@ -432,32 +606,50 @@
 <tr><td>70</td><td></td><td></td></tr><tr><td>90</td><td></td><td></td></tr><tr><td>95</td><td></td><td></td></tr><tr><td>100</td><td></td><td></td></tr>
 </table>
 
-<h2>7. Test-Sketch (Nucleo-F091RC, PlatformIO/Arduino)</h2>
-<p class="hint">Entwurf, nicht kompiliert. Sollwert per Serial-Monitor (115200) als Zahl 0–100 eingeben.</p>
+<h2>7. Test-Sketch (Arduino Uno, für 4b und 4c)</h2>
+<p class="hint">2026-11-13 fehlerfrei kompiliert (PlatformIO, Board uno), auf Hardware nicht getestet. Timer1 erzeugt 25 Hz an D9 (OC1A) in Hardware. Serieller Monitor 115200, Zeilenende „Neue Zeile“: Zahl 0–100 = Soll (High-Zeit der Lüfterleitung in %), <code>i</code> = Polarität tauschen. Ersetzt die LIN-Firmware, solange er drauf ist. (Der frühere Nucleo-F091RC-Sketch entfällt: der F091RC ist seit 2026-11-10 der Gangschaltung zugeordnet.)</p>
 <pre>#include &lt;Arduino.h&gt;
 
-const uint32_t PWM_PIN = D9;   // PC7, TIM3_CH2
-const bool INVERT = true;      // transistor stage inverts: pin high = line 0 V
-int duty = 20;
+// Fan PWM test bench (luefter.html 4b/4c). D9 = OC1A drives the IRLZ44N gate.
+// The stage inverts: D9 high -&gt; FET on -&gt; fan line 0 V.
+const uint16_t TOP = 9999;   // 16 MHz / 64 / (TOP + 1) = 25 Hz
+int duty = 20;               // high time of the fan line in percent
+bool swapped = false;        // toggled with 'i' if the module reads the signal the other way round
 
 void apply() {
-  int pin = INVERT ? 100 - duty : duty;
-  analogWrite(PWM_PIN, pin * 4095 / 100);
-  Serial.printf("Soll %d %% (Pin %d %%)\n", duty, pin);
+  int line = swapped ? 100 - duty : duty;
+  int pin = 100 - line;      // high time of D9
+  if (pin == 0 || pin == 100) {
+    TCCR1A &amp;= ~_BV(COM1A1);  // constant level: disconnect OC1A, drive D9 directly
+    digitalWrite(9, pin == 100 ? HIGH : LOW);
+  } else {
+    OCR1A = (uint32_t)(TOP + 1) * pin / 100 - 1;
+    TCCR1A |= _BV(COM1A1);
+  }
+  Serial.print(F("Soll "));
+  Serial.print(duty);
+  Serial.print(F(" %"));
+  Serial.println(swapped ? F(" (Polaritaet getauscht)") : F(""));
 }
 
 void setup() {
+  digitalWrite(9, LOW);
+  pinMode(9, OUTPUT);
+  TCCR1A = _BV(WGM11);                                        // fast PWM, TOP = ICR1 (mode 14)
+  TCCR1B = _BV(WGM13) | _BV(WGM12) | _BV(CS11) | _BV(CS10);   // prescaler 64
+  ICR1 = TOP;
   Serial.begin(115200);
-  analogWriteResolution(12);
-  analogWriteFrequency(25);
   apply();
 }
 
 void loop() {
-  if (Serial.available()) {
-    int v = Serial.parseInt();
-    if (v &gt;= 0 &amp;&amp; v &lt;= 100) { duty = v; apply(); }
-  }
+  if (!Serial.available()) return;
+  String s = Serial.readStringUntil('\n');
+  s.trim();
+  if (s == "i") { swapped = !swapped; apply(); return; }
+  if (s.length() == 0 || !isDigit(s[0])) return;
+  int v = s.toInt();
+  if (v &gt;= 0 &amp;&amp; v &lt;= 100) { duty = v; apply(); }
 }</pre>
 
 <h2>8. Offen</h2>
