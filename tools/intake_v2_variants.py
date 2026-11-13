@@ -215,6 +215,9 @@ J = dict(fw=62.0, fd=52.0, ft=10.0, adp_ft=8.0, bore_r=19.0, td_h=20.0,
          groove=(21.0, 23.7, 1.5), bolt=(24.0, 18.0), hole_base=6.4, hole_adp=5.6, neck_l=14.0, spigot_l=22.0, strut_hole=6.6)
 
 
+TAB = dict(w=24.0, zc=120.0, hole=6.6)  # tab centre/hole at z 120 (12 mm beyond the plate edge at 108), round end r 12
+
+
 def ycyl(r0, y0, y1, x, z, r1=None, seg=96):
     c = mf.Manifold.cylinder(y1 - y0, r0, r0 if r1 is None else r1, seg)
     return c.rotate((-90, 0, 0)).translate((x, y0, z))
@@ -296,6 +299,13 @@ if MODE in ("sls", "fdm", "fdm_kurz", "fdm_opt", "fdm_power", "sls_power", "fdm_
                 x0, x1 = min(xs) - J["fw"] / 2, max(xs) + J["fw"] / 2
                 ey, ez = grp[0][1], grp[0][2]
                 part += ybox((x0 + x1) / 2, ey - J["ft"], ey, ez, x1 - x0, J["fd"])
+            # support tabs (user 2026-11-13): plate extended away from the head (+z) between the runners,
+            # hole outside the runner/adapter envelope so a bar can be bolted on from outside
+            TAB_X = [(ENDS[k][0] + ENDS[k + 1][0]) / 2 for k in (0, 1, 3, 4)]
+            ey, ez = ENDS[0][1], ENDS[0][2]
+            for tx in TAB_X:
+                part += ybox(tx, ey - J["ft"], ey, (ez + J["fd"] / 2 - 0.5 + TAB["zc"]) / 2, TAB["w"], TAB["zc"] - (ez + J["fd"] / 2 - 0.5))
+                part += ycyl(TAB["w"] / 2, ey - J["ft"], ey, tx, TAB["zc"])
     for _, s in runners:
         part -= s
     if CFG.get("modular"):
@@ -303,11 +313,9 @@ if MODE in ("sls", "fdm", "fdm_kurz", "fdm_opt", "fdm_power", "sls_power", "fdm_
             _, fs = base_flange(ex, ey, ez)
             part -= fs
         if CFG.get("plate"):
-            # M6 holes for the support strut in the gaps between the runners (bolt from the top, nut below)
-            SUPPORT_X = [(ENDS[k][0] + ENDS[k + 1][0]) / 2 for k in (0, 1, 3, 4)]
-            for sx in SUPPORT_X:
-                part -= ycyl(J["strut_hole"] / 2, ENDS[0][1] - J["ft"] - 1, ENDS[0][1] + 1, sx, ENDS[0][2], seg=32)
-            info["support_holes_x"] = [round(x, 2) for x in SUPPORT_X]
+            for tx in TAB_X:
+                part -= ycyl(TAB["hole"] / 2, ENDS[0][1] - J["ft"] - 1, ENDS[0][1] + 1, tx, TAB["zc"], seg=32)
+            info["support_tabs"] = dict(TAB, x=[round(x, 2) for x in TAB_X])
     part -= bores
     if CFG.get("eyes"):
         yc = (EYE["y0"] + EYE["y1"]) / 2
