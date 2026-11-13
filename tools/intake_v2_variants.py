@@ -1,7 +1,7 @@
 """Intake adapter v2 variants with mesh booleans (manifold3d).
 sls : wall 4 mm, two halves (split between cyl 3/4)
 cast: wall 6 mm, six single runners each with its own flange segment, shrink + machining allowance
-usage: variants.py <sls|cast> <outdir>
+usage: intake_v2_variants.py <fdm|sls|cast> <outdir>
 """
 import sys, os, json, tempfile
 import numpy as np
@@ -14,13 +14,15 @@ from build123d import import_step, export_stl, Plane, Keep, Pos, Box, extrude, R
 MODE, OUT = sys.argv[1], sys.argv[2]
 os.makedirs(OUT, exist_ok=True)
 CFG = {
-    "sls": dict(wall=4.0, spigot_od=41.0),
+    "sls": dict(wall=4.0, spigot_od=41.0, cone=4.0, tag="SLS"),
+    "fdm": dict(wall=6.8, spigot_od=41.0, cone=9.0, tag="FDM"),
     "cast": dict(wall=6.0, spigot_od=41.6, shrink=1.013, face_allow=1.0, hole_cast_d=11.2),
 }[MODE]
 G.SRC = "/srv/data/obsidian/vault/Buggy/Ansaugung/Ansaugung.step"
 G.WALL = CFG["wall"]
 G.R_OUT = G.R_IN + G.WALL
 G.SPIGOT_OD = CFG["spigot_od"]
+G.CONE = CFG.get("cone", G.CONE)
 G.N_PTS = 32
 TMP = tempfile.mkdtemp()
 
@@ -71,7 +73,7 @@ _t0, _t1 = 40.0, 74.0
 nipple_bore = (mf.Manifold.cylinder(_t1 - _t0, 3.0, 3.0, 32).translate((0, 0, _t0))
                .rotate((55.5, 0, 0)).translate((-130.4, 48.3, 31.3)))
 info = {"mode": MODE, "cfg": CFG}
-if MODE == "sls":
+if MODE in ("sls", "fdm"):
     part = flange + nipple
     for a, _ in runners:
         part += a
@@ -79,11 +81,11 @@ if MODE == "sls":
         part -= s
     part -= bores
     part -= nipple_bore
-    info["komplett"] = save(part, f"{OUT}/Ansaugung_v2_SLS_komplett.stl")
+    info["komplett"] = save(part, f"{OUT}/Ansaugung_v2_{CFG['tag']}_komplett.stl")
     a = part.trim_by_plane((1, 0, 0), G.SPLIT_X)
     b = part.trim_by_plane((-1, 0, 0), -G.SPLIT_X)
-    info["A"] = save(a, f"{OUT}/Ansaugung_v2_SLS_Haelfte_A_x-plus.stl")
-    info["B"] = save(b, f"{OUT}/Ansaugung_v2_SLS_Haelfte_B_x-minus.stl")
+    info["A"] = save(a, f"{OUT}/Ansaugung_v2_{CFG['tag']}_Haelfte_A_x-plus.stl")
+    info["B"] = save(b, f"{OUT}/Ansaugung_v2_{CFG['tag']}_Haelfte_B_x-minus.stl")
 else:
     # flange segment borders = head bolts between the ports
     borders = [400, 34.0, -34.0, -96.2, -164.6, -226.6, -400]
