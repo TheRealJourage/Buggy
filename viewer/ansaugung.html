@@ -24,7 +24,7 @@
 <body>
 <div id="bar">
   <b>Ansaug-Übergang v2 (Entwurf)</b>
-  <label>Variante <select id="variant"><option value="sls">SLS (Wand 4, 3 Stützaugen, am Stück bestellen)</option><option value="fdm">FDM (Wand 6,8, 2 Hälften)</option><option value="kurz">FDM kurz (Bogen R 90, 2 Hälften)</option><option value="guss">Alu-Guss (Wand 6, 6 Rohre, +1,3 %)</option></select></label>
+  <label>Variante <select id="variant"><option value="sls">SLS (Wand 4, 3 Stützaugen, am Stück bestellen)</option><option value="fdm">FDM (Wand 6,8, 2 Hälften)</option><option value="opt">FDM optimiert (Bogen ab Dichtfläche, R 78, 2 Hälften)</option><option value="kurz">FDM kurz (Bogen R 90, 2 Hälften)</option><option value="guss">Alu-Guss (Wand 6, 6 Rohre, +1,3 %)</option></select></label>
   <span><button data-v="iso">Schräg</button> <button data-v="side">Seite</button> <button data-v="front">Vorn</button> <button data-v="top">Oben</button></span>
   <label><input id="einbau" type="checkbox"> Einbaulage (Tüllen nach oben)</label>
   <label><input id="showA" type="checkbox" checked> Hälfte A / Rohr 1–3</label>
@@ -53,6 +53,7 @@
     <tr><td>Hälfte A / B (je 3 Zylinder), x × y × z</td><td>≈ 214 × 190 × 132</td></tr>
     <tr><td>Teilung zwischen Zyl.-Port 3 und 4, durch die mittlere Flanschschraube (klemmt beide)</td><td>x = −97,8</td></tr>
     <tr><td><b>SLS</b>: Kanäle ab Flanschoberkante neu, Wand 4 (Tülle 3); 3 Stützaugen außen am Bogen (kopfabgewandt) zwischen Rohr 1/2, 3/4, 5/6: Fläche 40 × 24, Loch Ø 8,4 vom Kopf weg, M8-Mutter innen eingelegt (Sechskanttasche SW 13); Volumen ≈ 850 cm³; am Stück bestellen</td><td>komplett 423 × 186 × 133</td></tr>
+    <tr><td><b>FDM optimiert</b>: Bogen beginnt schon in der Flanschbohrung (tangential, kein 19°-Knick an der Flanschoberkante), R 78, 15 mm gerade; Dichtfläche mit Tasche unverändert; z ≤ 108; Tüllenende 126,4 vor; Mittellinie ≈ 171; geschätzter Verlust ζ ≈ 0,49 (kurz 0,57, FDM 0,54)</td><td>≈ 960 cm³</td></tr>
     <tr><td><b>FDM kurz</b>: Bogen R ≈ 90 ab Flanschoberkante bis 90°, danach 25 mm gerade; steht nicht weiter ab als v1 (z ≤ 108); Tüllenende 142,5 vor, Achse 83,3 über Nullpunkt; Mittellinie ≈ 185 (v1 ≈ 105)</td><td>≈ 1060 cm³, Hälften ≈ 214 × 170 × 103</td></tr>
     <tr><td><b>Guss</b>: Wand 6, je Rohr eigenes Flanschstück, Trennung an den Kopfschrauben (Scheibe klemmt beide), Modell +1,3 % Schwindmaß, Dichtfläche +1 mm, Schraublöcher Ø 11,2 gegossen → aufbohren, Tülle Ø 41,6 → schleifen</td><td>6 × ≈ 185–200 cm³</td></tr>
     <tr class="hyp"><td>Annahmen: Austritt parallel zur Flanschfläche = eingebaut senkrecht; K100-Leiste mittig über den Ports; Schlauch/Klappe nur angedeutet</td><td>Hypothese</td></tr>
@@ -193,6 +194,7 @@ const GUSS = ['Rohr1_port_x+65.2', 'Rohr2_port_x+0.0', 'Rohr3_port_x-65.2', 'Roh
   .map((n) => `Ansaugung_v2_Guss_${n}.stl`);
 const VARIANTS = {
   fdm: { A: ['Ansaugung_v2_FDM_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_FDM_Haelfte_B_x-minus.stl'], extra: ['Ansaugung_v2_FDM_komplett.stl'] },
+  opt: { A: ['Ansaugung_v2_FDM_opt_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_FDM_opt_Haelfte_B_x-minus.stl'], extra: ['Ansaugung_v2_FDM_opt_komplett.stl'], tip: [126.4, 83.4] },
   kurz: { A: ['Ansaugung_v2_FDM_kurz_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_FDM_kurz_Haelfte_B_x-minus.stl'], extra: ['Ansaugung_v2_FDM_kurz_komplett.stl'], tip: [142.46, 83.29] },
   sls: { A: ['Ansaugung_v2_SLS_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_SLS_Haelfte_B_x-minus.stl'], extra: ['Ansaugung_v2_SLS_komplett.stl'] },
   guss: { A: GUSS.slice(0, 3), B: GUSS.slice(3), extra: [] },

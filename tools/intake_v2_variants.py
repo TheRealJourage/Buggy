@@ -1,7 +1,7 @@
 """Intake adapter v2 variants with mesh booleans (manifold3d).
 sls : wall 4 mm, two halves (split between cyl 3/4)
 cast: wall 6 mm, six single runners each with its own flange segment, shrink + machining allowance
-usage: intake_v2_variants.py <fdm|fdm_kurz|sls|cast> <outdir>
+usage: intake_v2_variants.py <fdm|fdm_kurz|fdm_opt|sls|cast> <outdir>
 """
 import sys, os, json, tempfile
 import numpy as np
@@ -16,6 +16,7 @@ os.makedirs(OUT, exist_ok=True)
 CFG = {
     "sls": dict(wall=4.0, spigot_od=41.0, cone=4.0, tag="SLS", eyes=True),
     "fdm": dict(wall=6.8, spigot_od=41.0, cone=9.0, tag="FDM"),
+    "fdm_opt": dict(wall=6.8, spigot_od=41.0, cone=9.0, tag="FDM_opt", opt=dict(r=78.4, straight=15.0)),
     "fdm_kurz": dict(wall=6.8, spigot_od=41.0, cone=9.0, tag="FDM_kurz", compact=dict(r=89.7, straight=25.0)),
     "cast": dict(wall=6.0, spigot_od=41.6, shrink=1.013, face_allow=1.0, hole_cast_d=11.2),
 }[MODE]
@@ -83,23 +84,96 @@ def centreline_compact(port, x_end, n=90):
     return [Vector(*p) for p in pts]
 
 
+FACE_Z = 5.0
+BORE_COLS = [(-226.6, 16.5), (-164.6, 16.5), (-34.0, 16.5), (34.0, 16.5)]
+EAR_BOLTS = [(98.5, 1.3), (-297.1, 1.3)]
+
+
+def _dists(pts, xs, port):
+    """horizontal distances from bolt columns to sampled channel walls above the flange (inner->socket bores, outer->end bolt heads)"""
+    out = []
+    for i, (p, x) in enumerate(zip(pts, xs)):
+        if p[2] < 23.0:
+            continue
+        a, b = pts[max(i - 1, 0)], pts[min(i + 1, len(pts) - 1)]
+        t = np.array([b[0] - a[0], b[1] - a[1], b[2] - a[2]]); t /= np.linalg.norm(t)
+        u = np.cross(t, [1.0, 0, 0]); u /= np.linalg.norm(u); v = np.cross(t, u)
+        bl = G.smoothstep((p[2] - FACE_Z) / G.TRANSITION)
+        r_in = (1 - bl) * max(port[2], port[3]) / 2 + bl * G.R_IN
+        for rr, cols in ((r_in, BORE_COLS), (r_in + G.WALL, EAR_BOLTS)):
+            for k in range(16):
+                th = 2 * math.pi * k / 16
+                q = np.array([x, p[1], p[2]]) + rr * (math.cos(th) * u + math.sin(th) * v)
+                for bx, by in cols:
+                    out.append(math.hypot(q[0] - bx, q[1] - by) if q[2] >= 23.0 else 1e9)
+    return np.array(out)
+
+
+def _clear(pts, xs, port, base):
+    d = _dists(pts, xs, port)
+    need = np.array([11.0, 11.0, 11.0, 11.0, 10.0, 10.0] * (len(d) // 6))
+    return bool(np.all(d >= np.minimum(need, base - 0.05)))
+
+
+def centreline_opt(port, x_end, n=90):
+    """tangent-continuous bend starting at the flange face (vertical), radius r to 90 deg, short straight;
+    lateral fan-out starts as early as the bolt access allows"""
+    c = CFG["opt"]
+    r, L = c["r"], c["straight"]
+    pts = []
+    for i in range(n + 1):
+        ph = (math.pi / 2) * i / n
+        blend = 1 - G.smoothstep(math.degrees(ph) / 15)
+        pts.append([port[0], r * (1 - math.cos(ph)) + port[1] * blend, FACE_Z + r * math.sin(ph)])
+    for i in range(1, 16):
+        pts.append([port[0], r + L * i / 15, FACE_Z + r])
+    s = [0.0]
+    for a, b in zip(pts, pts[1:]):
+        s.append(s[-1] + math.dist(a, b))
+    base = _dists(pts, [port[0]] * len(pts), port)
+    for s_a in np.arange(0, s[-1] - 30, 2.0):
+        xs = [port[0] + (x_end - port[0]) * G.smoothstep((si - s_a) / (s[-1] - s_a)) for si in s]
+        if _clear(pts, xs, port, base):
+            break
+    else:
+        raise RuntimeError("no clear shift profile for port %s" % port[0])
+    print("  shift start s=%.0f of %.0f mm" % (s_a, s[-1]), flush=True)
+    return [Vector(x, p[1], p[2]) for x, p in zip(xs, pts)]
+
+
 if CFG.get("compact"):
     G.centreline = centreline_compact
     G.STRAIGHT = 2.0
+if CFG.get("opt"):
+    G.centreline = centreline_opt
+    G.STRAIGHT = 2.0
+    # fill the old vertical port bores, the new curved bore is cut from the face upwards
+    for port in G.PORTS:
+        flange += to_mf(Pos(port[0], port[1], FACE_Z) * extrude(RectangleRounded(port[2] + 0.4, port[3] + 0.4, port[4] + 0.2), amount=23.0 - FACE_Z))
+    G.FLANGE_TOP = FACE_Z
+    # keep the original face-side pocket (z 5..10.5 around the port collars) exactly as it was
+    _orig = to_mf(src)
+    _rings = _orig.slice(12.0).to_polygons()
+    _outer = max(_rings, key=lambda r: abs(sum(x0 * y1 - x1 * y0 for (x0, y0), (x1, y1) in zip(r, np.roll(r, -1, axis=0)))))
+    _slab = mf.Manifold.extrude(mf.CrossSection([_outer]), 10.5 - FACE_Z).translate((0, 0, FACE_Z))
+    FACE_POCKET = _slab - _orig
+    for port in G.PORTS:
+        FACE_POCKET -= to_mf(Pos(port[0], port[1], FACE_Z - 1) * extrude(RectangleRounded(port[2] + 0.4, port[3] + 0.4, port[4] + 0.2), amount=7.0))
 runners = []
 for port, xe in zip(G.PORTS, G.THROTTLE_X):
     outer, end = G.runner(port, xe, G.WALL)
     inner, _ = G.runner(port, xe, 0.0, extra_below=3.0)
     w, h, r = port[2] + 2 * G.WALL, port[3] + 2 * G.WALL, port[4] + G.WALL
-    foot = to_mf(Pos(port[0], port[1], G.FLANGE_TOP - 1.5) * extrude(RectangleRounded(w, h, r), amount=1.5))
-    add = to_mf(outer) + foot + to_mf(G.spigot(end, True))
+    add = to_mf(outer) + to_mf(G.spigot(end, True))
+    if not CFG.get("opt"):
+        add += to_mf(Pos(port[0], port[1], G.FLANGE_TOP - 1.5) * extrude(RectangleRounded(w, h, r), amount=1.5))
     sub = to_mf(inner[0]) + to_mf(inner[1]) + to_mf(G.spigot(end, False))
     runners.append((add, sub))
     print("runner", port[0], "ok", flush=True)
 
 bores = mf.Manifold()
 for bx, by in G.BOLT_BORES:
-    bores += mf.Manifold.cylinder(300, 8.0, 8.0, 64).translate((bx, by, G.FLANGE_TOP))
+    bores += mf.Manifold.cylinder(300, 8.0, 8.0, 64).translate((bx, by, 23.0))
 
 # vacuum nipple on runner 4: re-drill through the new (thinner) wall along the original nipple axis
 _t0, _t1 = 40.0, 74.0
@@ -110,7 +184,7 @@ info = {"mode": MODE, "cfg": CFG}
 # bolt from outside along +z into a captured M8 nut that sits in a hex pocket on the head side (open into the runner gap)
 EYE = dict(w=40.0, y0=96.0, y1=120.0, z0=114.0, z1=138.0, hole_d=8.4, nut_af=13.0, nut_h=7.0)
 EYE_X = [(G.THROTTLE_X[k] + G.THROTTLE_X[k + 1]) / 2 for k in (0, 2, 4)]
-if MODE in ("sls", "fdm", "fdm_kurz"):
+if MODE in ("sls", "fdm", "fdm_kurz", "fdm_opt"):
     part = flange + nipple
     if CFG.get("eyes"):
         for ex in EYE_X:
@@ -120,6 +194,8 @@ if MODE in ("sls", "fdm", "fdm_kurz"):
     for _, s in runners:
         part -= s
     part -= bores
+    if CFG.get("opt"):
+        part -= FACE_POCKET
     if CFG.get("eyes"):
         yc = (EYE["y0"] + EYE["y1"]) / 2
         for ex in EYE_X:
