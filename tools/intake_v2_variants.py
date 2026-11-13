@@ -14,7 +14,7 @@ from build123d import import_step, export_stl, Plane, Keep, Pos, Box, extrude, R
 MODE, OUT = sys.argv[1], sys.argv[2]
 os.makedirs(OUT, exist_ok=True)
 CFG = {
-    "sls": dict(wall=4.0, spigot_od=41.0, cone=4.0, tag="SLS", tie_plate=True),
+    "sls": dict(wall=4.0, spigot_od=41.0, cone=4.0, tag="SLS", eyes=True),
     "fdm": dict(wall=6.8, spigot_od=41.0, cone=9.0, tag="FDM"),
     "cast": dict(wall=6.0, spigot_od=41.6, shrink=1.013, face_allow=1.0, hole_cast_d=11.2),
 }[MODE]
@@ -73,22 +73,27 @@ _t0, _t1 = 40.0, 74.0
 nipple_bore = (mf.Manifold.cylinder(_t1 - _t0, 3.0, 3.0, 32).translate((0, 0, _t0))
                .rotate((55.5, 0, 0)).translate((-130.4, 48.3, 31.3)))
 info = {"mode": MODE, "cfg": CFG}
-# tie plate across all runners just below the spigots: support strut mount + runner bracing
-TIE = dict(y0=118.0, t=10.0, w=44.0, hole_d=6.4, x0=-330.0, x1=134.0)
-tie_holes_x = [G.THROTTLE_X[0] + 21.8 + 9.5] + [(a + b) / 2 for a, b in zip(G.THROTTLE_X, G.THROTTLE_X[1:])] + [G.THROTTLE_X[-1] - 21.8 - 9.5]
+# support eyes on the outer side of the bends (face away from the head, +z), bridging runner pairs 1-2, 3-4, 5-6.
+# bolt from outside along +z into a captured M8 nut that sits in a hex pocket on the head side (open into the runner gap)
+EYE = dict(w=40.0, y0=96.0, y1=120.0, z0=114.0, z1=138.0, hole_d=8.4, nut_af=13.0, nut_h=7.0)
+EYE_X = [(G.THROTTLE_X[k] + G.THROTTLE_X[k + 1]) / 2 for k in (0, 2, 4)]
 if MODE in ("sls", "fdm"):
     part = flange + nipple
-    if CFG.get("tie_plate"):
-        part += mf.Manifold.cube((TIE["x1"] - TIE["x0"], TIE["t"], TIE["w"])).translate((TIE["x0"], TIE["y0"], 112.52 - TIE["w"] / 2))
+    if CFG.get("eyes"):
+        for ex in EYE_X:
+            part += mf.Manifold.cube((EYE["w"], EYE["y1"] - EYE["y0"], EYE["z1"] - EYE["z0"])).translate((ex - EYE["w"] / 2, EYE["y0"], EYE["z0"]))
     for a, _ in runners:
         part += a
     for _, s in runners:
         part -= s
     part -= bores
-    if CFG.get("tie_plate"):
-        for hx in tie_holes_x:
-            part -= mf.Manifold.cylinder(40, TIE["hole_d"] / 2, TIE["hole_d"] / 2, 32).rotate((-90, 0, 0)).translate((hx, TIE["y0"] - 15, 112.52))
-        info["tie_holes_x"] = [round(x, 1) for x in tie_holes_x]
+    if CFG.get("eyes"):
+        yc = (EYE["y0"] + EYE["y1"]) / 2
+        for ex in EYE_X:
+            part -= mf.Manifold.cylinder(60, EYE["hole_d"] / 2, EYE["hole_d"] / 2, 32).translate((ex, yc, EYE["z0"] - 20))
+            nut = mf.Manifold.extrude(mf.CrossSection.circle(EYE["nut_af"] / 2 / 0.8660254 + 0.2, 6), EYE["nut_h"] + 20)
+            part -= nut.rotate((0, 0, 30)).translate((ex, yc, EYE["z0"] - 20))
+        info["eyes"] = dict(EYE, x=[round(x, 1) for x in EYE_X])
     part -= nipple_bore
     info["komplett"] = save(part, f"{OUT}/Ansaugung_v2_{CFG['tag']}_komplett.stl")
     a = part.trim_by_plane((1, 0, 0), G.SPLIT_X)
