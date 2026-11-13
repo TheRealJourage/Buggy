@@ -1,7 +1,7 @@
 """Intake adapter v2 variants with mesh booleans (manifold3d).
 sls : wall 4 mm, two halves (split between cyl 3/4)
 cast: wall 6 mm, six single runners each with its own flange segment, shrink + machining allowance
-usage: intake_v2_variants.py <fdm|fdm_kurz|fdm_opt|fdm_power|sls|sls_power|cast> <outdir>
+usage: intake_v2_variants.py <fdm|fdm_kurz|fdm_opt|fdm_power|fdm_modular|sls|sls_power|cast> <outdir>
 """
 import sys, os, json, tempfile
 import numpy as np
@@ -22,6 +22,9 @@ CFG = {
     "fdm_power": dict(wall=6.8, r_in=19.0, spigot_od=48.3, spigot_id=40.0, bead_od=49.6, tip_flare=2.0, cone=9.0, tag="FDM_Leistung", opt=dict(r=77.0, straight=15.0)),
     "sls_power": dict(wall=4.0, r_in=19.0, spigot_od=48.3, spigot_id=40.0, bead_od=49.6, tip_flare=2.0, cone=6.0, tag="SLS_Leistung", opt=dict(r=77.0, straight=15.0),
                       eyes=dict(w=40.0, y0=68.0, y1=92.0, z0=84.0, z1=108.0, hole_d=8.4, nut_af=13.0, nut_h=7.0)),
+    # modular: base with a small bolt flange per runner, screw-on spigot adapters (K100 41 mm now, 48 mm later)
+    "fdm_modular": dict(wall=6.8, r_in=19.0, spigot_od=41.0, spigot_id=35.0, cone=9.0, tag="FDM_Modular", opt=dict(r=77.0, straight=15.0), modular=True,
+                        eyes=dict(w=40.0, y0=48.0, y1=70.0, z0=84.0, z1=108.0, hole_d=8.4, nut_af=13.0, nut_h=7.0)),
     "cast": dict(wall=6.0, spigot_od=41.6, shrink=1.013, face_allow=1.0, hole_cast_d=11.2),
 }[MODE]
 G.SRC = "/srv/data/obsidian/vault/Buggy/Ansaugung/Ansaugung.step"
@@ -47,9 +50,10 @@ def to_mf(shape):
     return mf.Manifold(mf.Mesh(vert_properties=np.asarray(m.vertices, np.float32), tri_verts=np.asarray(m.faces, np.uint32)))
 
 
-def save(man, path):
+def save(man, path, keep_all=False):
     parts = man.decompose()
-    man = max(parts, key=lambda x: x.volume())
+    if not keep_all:
+        man = max(parts, key=lambda x: x.volume())
     me = man.to_mesh()
     tm = trimesh.Trimesh(vertices=np.asarray(me.vert_properties)[:, :3], faces=np.asarray(me.tri_verts), process=False)
     tm.export(path)
@@ -168,15 +172,17 @@ if CFG.get("opt"):
     for port in G.PORTS:
         FACE_POCKET -= to_mf(Pos(port[0], port[1], FACE_Z - 1) * extrude(RectangleRounded(port[2] + 0.4, port[3] + 0.4, port[4] + 0.2), amount=7.0))
 runners = []
+ENDS = []
 for port, xe in zip(G.PORTS, G.THROTTLE_X):
     outer, end = G.runner(port, xe, G.WALL)
     inner, _ = G.runner(port, xe, 0.0, extra_below=3.0)
     w, h, r = port[2] + 2 * G.WALL, port[3] + 2 * G.WALL, port[4] + G.WALL
-    add = to_mf(outer) + to_mf(G.spigot(end, True))
+    add = to_mf(outer) + (mf.Manifold() if CFG.get("modular") else to_mf(G.spigot(end, True)))
     if not CFG.get("opt"):
         add += to_mf(Pos(port[0], port[1], G.FLANGE_TOP - 1.5) * extrude(RectangleRounded(w, h, r), amount=1.5))
-    sub = to_mf(inner[0]) + to_mf(inner[1]) + to_mf(G.spigot(end, False))
+    sub = to_mf(inner[0]) + to_mf(inner[1]) + (mf.Manifold() if CFG.get("modular") else to_mf(G.spigot(end, False)))
     runners.append((add, sub))
+    ENDS.append((end.X, end.Y, end.Z))
     print("runner", port[0], "ok", flush=True)
 
 bores = mf.Manifold()
@@ -194,15 +200,72 @@ EYE = dict(w=40.0, y0=96.0, y1=120.0, z0=114.0, z1=138.0, hole_d=8.4, nut_af=13.
 if isinstance(CFG.get("eyes"), dict):
     EYE = CFG["eyes"]
 EYE_X = [(G.THROTTLE_X[k] + G.THROTTLE_X[k + 1]) / 2 for k in (0, 2, 4)]
-if MODE in ("sls", "fdm", "fdm_kurz", "fdm_opt", "fdm_power", "sls_power"):
+# ---- modular joint: base flange + screw-on spigot adapter (axis +y at each runner end)
+J = dict(fw=62.0, fd=52.0, ft=8.0, bore_r=19.0, ring_r=20.5, ring_h=2.0, cb_r=20.7, cb_h=2.3,
+         groove=(22.0, 25.4, 1.9), bolt=(24.0, 20.0), hole_base=5.3, hole_adp=5.6, nut_af=8.0, nut_h=4.2, neck_l=8.0, spigot_l=22.0)
+
+
+def ycyl(r0, y0, y1, x, z, r1=None, seg=96):
+    c = mf.Manifold.cylinder(y1 - y0, r0, r0 if r1 is None else r1, seg)
+    return c.rotate((-90, 0, 0)).translate((x, y0, z))
+
+
+def ybox(x, y0, y1, z, w, d):
+    return mf.Manifold.cube((w, y1 - y0, d)).translate((x - w / 2, y0, z - d / 2))
+
+
+def bolt_xy(x, z):
+    bx, bz = J["bolt"]
+    return [(x + sx * bx, z + sz * bz) for sx in (-1, 1) for sz in (-1, 1)]
+
+
+def base_flange(x, y, z):
+    add = ybox(x, y - J["ft"], y, z, J["fw"], J["fd"]) + ycyl(J["ring_r"], y - 0.1, y + J["ring_h"], x, z)
+    sub = ycyl(J["bore_r"], y - J["ft"] - 1, y + J["ring_h"] + 1, x, z)
+    g0, g1, gd = J["groove"]
+    sub += ycyl(g1, y - gd, y + 1, x, z) - ycyl(g0, y - gd - 1, y + 2, x, z)
+    for bx, bz in bolt_xy(x, z):
+        sub += ycyl(J["hole_base"] / 2, y - J["ft"] - 1, y + 1, bx, bz, seg=32)
+        nut = mf.Manifold.extrude(mf.CrossSection.circle(J["nut_af"] / 2 / 0.8660254 + 0.15, 6), J["nut_h"] + 1)
+        sub += nut.rotate((-90, 0, 0)).translate((bx, y - J["ft"] - 1, bz))
+    return add, sub
+
+
+def adapter(x, y, z, od, idd, bead_od, flare):
+    """screw-on spigot: flange on the base face, centring ring into the base counterbore, neck, spigot with bead"""
+    ft, nl, sl = J["ft"], J["neck_l"], J["spigot_l"]
+    neck_r = max(22.0, od / 2)
+    a = ybox(x, y, y + ft, z, J["fw"], J["fd"])
+    a += ycyl(neck_r, y + ft - 0.1, y + ft + nl, x, z) + ycyl(od / 2, y + ft + nl - 0.1, y + ft + nl + sl, x, z)
+    tip = y + ft + nl + sl
+    b0 = tip - 4.0 - 1.5
+    a += ycyl(od / 2, b0 - 1.2, b0, x, z, bead_od / 2) + ycyl(bead_od / 2, b0, b0 + 3.0, x, z) + ycyl(bead_od / 2, b0 + 3.0, b0 + 4.2, x, z, od / 2)
+    v = ycyl(J["bore_r"], y - 1, y + ft, x, z) + ycyl(J["cb_r"], y - 1, y + J["cb_h"], x, z) + ycyl(J["bore_r"], y + ft - 0.01, y + ft + nl, x, z, idd / 2)
+    v += ycyl(idd / 2, y + ft + nl - 0.01, tip + 1, x, z)
+    if flare:
+        v += ycyl(idd / 2, tip - 1.5 * flare, tip + 0.01, x, z, idd / 2 + flare)
+    for bx, bz in bolt_xy(x, z):
+        v += ycyl(J["hole_adp"] / 2, y - 1, y + ft + 1, bx, bz, seg=32)
+    return a - v
+
+
+if MODE in ("sls", "fdm", "fdm_kurz", "fdm_opt", "fdm_power", "sls_power", "fdm_modular"):
     part = flange + nipple
     if CFG.get("eyes"):
         for ex in EYE_X:
             part += mf.Manifold.cube((EYE["w"], EYE["y1"] - EYE["y0"], EYE["z1"] - EYE["z0"])).translate((ex - EYE["w"] / 2, EYE["y0"], EYE["z0"]))
     for a, _ in runners:
         part += a
+    if CFG.get("modular"):
+        for (ex, ey, ez) in ENDS:
+            fa, _ = base_flange(ex, ey, ez)
+            part += fa
     for _, s in runners:
         part -= s
+    if CFG.get("modular"):
+        for (ex, ey, ez) in ENDS:
+            _, fs = base_flange(ex, ey, ez)
+            part -= fs
     part -= bores
     if CFG.get("opt"):
         part -= FACE_POCKET
@@ -215,6 +278,15 @@ if MODE in ("sls", "fdm", "fdm_kurz", "fdm_opt", "fdm_power", "sls_power"):
         info["eyes"] = dict(EYE, x=[round(x, 1) for x in EYE_X])
     part -= nipple_bore
     info["komplett"] = save(part, f"{OUT}/Ansaugung_v2_{CFG['tag']}_komplett.stl")
+    if CFG.get("modular"):
+        for name, od, idd, bead, flare in (("K100_Tuelle41", 41.0, 35.0, 42.4, 1.5), ("48er_Tuelle48", 48.3, 40.0, 49.6, 2.0)):
+            allsix = mf.Manifold()
+            for (ex, ey, ez) in ENDS:
+                allsix += adapter(ex, ey, ez, od, idd, bead, flare)
+            info["adapter_" + name + "_alle6"] = save(allsix, f"{OUT}/Ansaugung_v2_Adapter_{name}_alle6_Einbaulage.stl", keep_all=True)
+            one = adapter(0.0, 0.0, 0.0, od, idd, bead, flare).rotate((90, 0, 0))
+            info["adapter_" + name] = save(one, f"{OUT}/Ansaugung_v2_Adapter_{name}_1Stueck_Druck.stl")
+        info["ends"] = [[round(v, 2) for v in e] for e in ENDS]
     a = part.trim_by_plane((1, 0, 0), G.SPLIT_X)
     b = part.trim_by_plane((-1, 0, 0), -G.SPLIT_X)
     info["A"] = save(a, f"{OUT}/Ansaugung_v2_{CFG['tag']}_Haelfte_A_x-plus.stl")

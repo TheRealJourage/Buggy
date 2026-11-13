@@ -24,7 +24,7 @@
 <body>
 <div id="bar">
   <b>Ansaug-Übergang v2 (Entwurf)</b>
-  <label>Variante <select id="variant"><option value="power_sls">Leistung SLS (Kanal 38, Tülle 48, Stützaugen)</option><option value="power">Leistung FDM (Kanal 38, Tülle 48, 2 Hälften)</option><option value="sls">SLS (Wand 4, 3 Stützaugen, am Stück bestellen)</option><option value="fdm">FDM (Wand 6,8, 2 Hälften)</option><option value="opt">FDM optimiert (Bogen ab Dichtfläche, R 78, 2 Hälften)</option><option value="kurz">FDM kurz (Bogen R 90, 2 Hälften)</option><option value="guss">Alu-Guss (Wand 6, 6 Rohre, +1,3 %)</option></select></label>
+  <label>Variante <select id="variant"><option value="modular">Modular FDM (Grundteil + Schraub-Adapter K100)</option><option value="modular48">Modular FDM (Grundteil + Schraub-Adapter 48)</option><option value="power_sls">Leistung SLS (Kanal 38, Tülle 48, Stützaugen)</option><option value="power">Leistung FDM (Kanal 38, Tülle 48, 2 Hälften)</option><option value="sls">SLS (Wand 4, 3 Stützaugen, am Stück bestellen)</option><option value="fdm">FDM (Wand 6,8, 2 Hälften)</option><option value="opt">FDM optimiert (Bogen ab Dichtfläche, R 78, 2 Hälften)</option><option value="kurz">FDM kurz (Bogen R 90, 2 Hälften)</option><option value="guss">Alu-Guss (Wand 6, 6 Rohre, +1,3 %)</option></select></label>
   <span><button data-v="iso">Schräg</button> <button data-v="side">Seite</button> <button data-v="front">Vorn</button> <button data-v="top">Oben</button></span>
   <label><input id="einbau" type="checkbox"> Einbaulage (Tüllen nach oben)</label>
   <label><input id="showA" type="checkbox" checked> Hälfte A / Rohr 1–3</label>
@@ -53,6 +53,7 @@
     <tr><td>Hälfte A / B (je 3 Zylinder), x × y × z</td><td>≈ 214 × 190 × 132</td></tr>
     <tr><td>Teilung zwischen Zyl.-Port 3 und 4, durch die mittlere Flanschschraube (klemmt beide)</td><td>x = −97,8</td></tr>
     <tr><td><b>SLS</b>: Kanäle ab Flanschoberkante neu, Wand 4 (Tülle 3); 3 Stützaugen außen am Bogen (kopfabgewandt) zwischen Rohr 1/2, 3/4, 5/6: Fläche 40 × 24, Loch Ø 8,4 vom Kopf weg, M8-Mutter innen eingelegt (Sechskanttasche SW 13); Volumen ≈ 850 cm³; am Stück bestellen</td><td>komplett 423 × 186 × 133</td></tr>
+    <tr><td><b>Modular</b> (FDM): Grundteil wie „Leistung“ (Kanal Ø 38), am Rohrende Flansch 62 × 52 × 8 mit Zentrierring Ø 41 × 2, O-Ring-Nut Ø 44–50,8 × 1,9 (z. B. O-Ring 44 × 2,5, oder Dichtmasse), 4 × M5 mit Mutter von unten. Grün: Schraub-Adapter 38 mm hoch – K100: Tülle 41/35, später 48er: Tülle 48,3/40. Stützaugen tiefer gesetzt (Muttern erreichbar).</td><td>Grundteil ≈ 980 cm³, Adapter 27 / 33 cm³</td></tr>
     <tr><td><b>Leistung</b> (FDM / SLS): Führung wie „optimiert“, Bogen R 77; Kanal Ø 38 (≈ Kopfport), Tülle außen 48,3 / innen 40 mit Einlauffase auf Ø 43,6, Wulst 49,6 → K100 heute über Reduzierschlauch 48 → 40, später 45-mm-Klappen mit geradem 48er-Schlauch; SLS mit 3 Stützaugen außen (Fläche bündig mit dem Bogenscheitel, M8, Mutter innen)</td><td>FDM ≈ 1020 cm³, SLS ≈ 750 cm³</td></tr>
     <tr><td><b>FDM optimiert</b>: Bogen beginnt schon in der Flanschbohrung (tangential, kein 19°-Knick an der Flanschoberkante), R 78, 15 mm gerade; Dichtfläche mit Tasche unverändert; z ≤ 108; Tüllenende 126,4 vor; Mittellinie ≈ 171; geschätzter Verlust ζ ≈ 0,49 (kurz 0,57, FDM 0,54)</td><td>≈ 960 cm³</td></tr>
     <tr><td><b>FDM kurz</b>: Bogen R ≈ 90 ab Flanschoberkante bis 90°, danach 25 mm gerade; steht nicht weiter ab als v1 (z ≤ 108); Tüllenende 142,5 vor, Achse 83,3 über Nullpunkt; Mittellinie ≈ 185 (v1 ≈ 105)</td><td>≈ 1060 cm³, Hälften ≈ 214 × 170 × 103</td></tr>
@@ -148,7 +149,7 @@ const kLbl = label('Schlauch 100 frei + K100 (angedeutet)', THROTTLE_X[3], yK0 +
 
 // print bed outline (flange on bed, z = 5)
 let bedLine = null;
-const A = new THREE.Group(), B = new THREE.Group(); model.add(A, B);
+const A = new THREE.Group(), B = new THREE.Group(), C = new THREE.Group(); model.add(A, B, C);
 let OLD = null;
 function updateBed() {
   if (bedLine) { model.remove(bedLine); bedLine = null; }
@@ -195,6 +196,10 @@ const GUSS = ['Rohr1_port_x+65.2', 'Rohr2_port_x+0.0', 'Rohr3_port_x-65.2', 'Roh
   .map((n) => `Ansaugung_v2_Guss_${n}.stl`);
 const VARIANTS = {
   fdm: { A: ['Ansaugung_v2_FDM_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_FDM_Haelfte_B_x-minus.stl'], extra: ['Ansaugung_v2_FDM_komplett.stl'] },
+  modular: { A: ['Ansaugung_v2_FDM_Modular_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_FDM_Modular_Haelfte_B_x-minus.stl'], C: ['Ansaugung_v2_Adapter_K100_Tuelle41_alle6_Einbaulage.stl'],
+    extra: ['Ansaugung_v2_FDM_Modular_komplett.stl', 'Ansaugung_v2_Adapter_K100_Tuelle41_1Stueck_Druck.stl', 'Ansaugung_v2_Adapter_48er_Tuelle48_1Stueck_Druck.stl'], tip: [130.0, 82.0] },
+  modular48: { A: ['Ansaugung_v2_FDM_Modular_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_FDM_Modular_Haelfte_B_x-minus.stl'], C: ['Ansaugung_v2_Adapter_48er_Tuelle48_alle6_Einbaulage.stl'],
+    extra: ['Ansaugung_v2_FDM_Modular_komplett.stl', 'Ansaugung_v2_Adapter_48er_Tuelle48_1Stueck_Druck.stl'], tip: [130.0, 82.0] },
   power: { A: ['Ansaugung_v2_FDM_Leistung_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_FDM_Leistung_Haelfte_B_x-minus.stl'], extra: ['Ansaugung_v2_FDM_Leistung_komplett.stl'], tip: [125.0, 82.0] },
   power_sls: { A: ['Ansaugung_v2_SLS_Leistung_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_SLS_Leistung_Haelfte_B_x-minus.stl'], extra: ['Ansaugung_v2_SLS_Leistung_komplett.stl'], tip: [122.0, 82.0] },
   opt: { A: ['Ansaugung_v2_FDM_opt_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_FDM_opt_Haelfte_B_x-minus.stl'], extra: ['Ansaugung_v2_FDM_opt_komplett.stl'], tip: [126.4, 83.4] },
@@ -210,13 +215,15 @@ async function loadVariant(name) {
   const lb = document.createElement('div'); lb.id = 'load'; lb.textContent = 'Lade Modelle …'; document.body.appendChild(lb);
   const V = VARIANTS[name];
   const geosA = await Promise.all(V.A.map(getGeo)), geosB = await Promise.all(V.B.map(getGeo));
-  A.clear(); B.clear();
+  const geosC = await Promise.all((V.C || []).map(getGeo));
+  A.clear(); B.clear(); C.clear();
+  geosC.forEach((g) => C.add(new THREE.Mesh(g, mat(0x6fbf73))));
   const metal = name === 'guss';
   geosA.forEach((g, i) => { const m = new THREE.Mesh(g, mat(metal ? (i % 2 ? 0xb8bcc4 : 0x9aa0ac) : 0xd08a4a, metal ? { metalness: 0.5 } : {})); m.userData.k = i; A.add(m); });
   geosB.forEach((g, i) => { const m = new THREE.Mesh(g, mat(metal ? (i % 2 ? 0x9aa0ac : 0xb8bcc4) : 0x5a8fd0, metal ? { metalness: 0.5 } : {})); m.userData.k = 3 + i; B.add(m); });
   k100.position.set(0, (V.tip ? V.tip[0] : TIP_Y) - TIP_Y, (V.tip ? V.tip[1] : AX_Z) - AX_Z);
   A.visible = document.getElementById('showA').checked; B.visible = document.getElementById('showB').checked;
-  document.getElementById('dl').innerHTML = 'Download: ' + [...V.A, ...V.B, ...V.extra]
+  document.getElementById('dl').innerHTML = 'Download: ' + [...V.A, ...V.B, ...(V.C || []), ...V.extra]
     .map((f) => `<a href="${base}${f}" download>${f.replace('Ansaugung_v2_', '').replace(/_port_x.*(?=\.stl$)/, '')}</a>`).join(' · ');
   document.querySelectorAll('#load').forEach((e) => e.remove());
   applyGap();
@@ -224,7 +231,7 @@ async function loadVariant(name) {
 document.getElementById('variant').onchange = (e) => loadVariant(e.target.value);
 OLD = await load(base + 'Ansaugung_v1_original.stl', mat(0xffffff, { transparent: true, opacity: 0.25, depthWrite: false }));
 OLD.visible = false;
-const startVariant = new URLSearchParams(location.search).get('v') in VARIANTS ? new URLSearchParams(location.search).get('v') : 'power_sls';
+const startVariant = new URLSearchParams(location.search).get('v') in VARIANTS ? new URLSearchParams(location.search).get('v') : 'modular';
 document.getElementById('variant').value = startVariant;
 await loadVariant(startVariant);
 
