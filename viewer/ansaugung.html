@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Ansaug-Übergang v2</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #111; color: #ddd; font-family: system-ui, sans-serif; overflow: hidden; }
+  #bar { position: fixed; top: 0; left: 0; right: 0; padding: 8px 12px; background: #151517cc; display: flex; gap: 10px 14px; align-items: center; font-size: 14px; z-index: 2; flex-wrap: wrap; }
+  #bar .hint { color: #888; }
+  #bar a { color: #8cf; }
+  #panel { position: fixed; left: 8px; bottom: 8px; max-width: min(460px, calc(100vw - 32px)); background: #151517e6; padding: 10px 12px; border-radius: 6px; font-size: 13px; z-index: 2; max-height: 50vh; overflow: auto; }
+  #panel table { border-collapse: collapse; width: 100%; }
+  #panel td { padding: 2px 6px; border-bottom: 1px solid #2a2a2e; vertical-align: top; }
+  #panel td:last-child { text-align: right; }
+  #panel summary { cursor: pointer; font-weight: bold; }
+  .hyp { color: #f0b54a; }
+  #load { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 16px; color: #aaa; z-index: 3; }
+  .lbl { position: absolute; font-size: 12px; color: #fff; background: #000a; padding: 1px 4px; border-radius: 3px; pointer-events: none; white-space: nowrap; transform: translate(-50%, -50%); }
+  canvas { display: block; }
+</style>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.js" } }</script>
+</head>
+<body>
+<div id="bar">
+  <b>Ansaug-Übergang v2 (Entwurf)</b>
+  <label>Variante <select id="variant"><option value="modular">Modular FDM (Grundteil + Schraub-Adapter K100)</option><option value="modular48">Modular FDM (Grundteil + Schraub-Adapter 48)</option><option value="power_sls">Leistung SLS (Kanal 38, Tülle 48, Stützaugen)</option><option value="power">Leistung FDM (Kanal 38, Tülle 48, 2 Hälften)</option><option value="sls">SLS (Wand 4, 3 Stützaugen, am Stück bestellen)</option><option value="fdm">FDM (Wand 6,8, 2 Hälften)</option><option value="opt">FDM optimiert (Bogen ab Dichtfläche, R 78, 2 Hälften)</option><option value="kurz">FDM kurz (Bogen R 90, 2 Hälften)</option><option value="guss">Alu-Guss (Wand 6, 6 Rohre, +1,3 %)</option></select></label>
+  <span><button data-v="iso">Schräg</button> <button data-v="side">Seite</button> <button data-v="front">Vorn</button> <button data-v="top">Oben</button></span>
+  <label><input id="einbau" type="checkbox"> Einbaulage (Tüllen nach oben)</label>
+  <label><input id="showA" type="checkbox" checked> Hälfte A / Rohr 1–3</label>
+  <label><input id="showB" type="checkbox" checked> Hälfte B / Rohr 4–6</label>
+  <label><input id="showC" type="checkbox" checked> Adapter (grün)</label>
+  <label>Teilung auseinander <input id="gap" type="range" min="0" max="80" value="0" style="width:90px"></label>
+  <label><input id="alt" type="checkbox"> Original v1</label>
+  <label><input id="k100" type="checkbox" checked> Schläuche + K100</label>
+  <label>Druckbett <select id="bed"><option value="0">aus</option><option>220</option><option selected>256</option><option>300</option><option>350</option></select> für <select id="bedHalf"><option value="A">A</option><option value="B">B</option></select></label>
+  <label><input id="labels" type="checkbox" checked> Beschriftung</label>
+  <span id="dl"></span>
+  <span class="hint">Maus/Finger: drehen · Rad/Pinch: zoomen · rechts/2 Finger: verschieben</span>
+</div>
+<div id="load">Lade Modelle (≈ 21 MB) …</div>
+<div id="panel">
+  <details id="info" open><summary>Was ist neu (Claude, 2026-11-12, Entwurf)</summary>
+  <table>
+    <tr><td>Flanschplatte (bis Oberkante), Schraublöcher, Unterdruck-Nippel, Werkzeugbohrungen aus der Onshape-STEP; Kanäle ab Flanschoberkante in einem Stück neu (kein Übergang mehr)</td><td>seit 2026-11-13</td></tr>
+    <tr><td>Bogen: gleicher Radius wie v1 (R ≈ 133), weitergeführt</td><td>bis 90°</td></tr>
+    <tr><td>Tüllen-Abstand (K100-Leiste 379,3 / 5)</td><td>75,86</td></tr>
+    <tr><td>Seitlicher Versatz innen / Mitte / außen</td><td>5,3 / 16,0 / 26,7</td></tr>
+    <tr><td>Tülle außen / Wulst / innen (v1: 41 / 42 / 36)</td><td>41 / 42,4 / 35</td></tr>
+    <tr><td>Wand Tülle (v1: 2,5) · Bogen</td><td>3,0 · 6,8</td></tr>
+    <tr><td>Übergang Körper Ø 49,3 → Tülle</td><td>Kegel 9 mm statt Stufe</td></tr>
+    <tr><td>Tüllenende ab Nullpunkt: vor / Achse über Flansch</td><td>162,6 / 112,5</td></tr>
+    <tr><td>Steht weiter vom Kopf ab als v1</td><td>+29 (137 statt 108)</td></tr>
+    <tr><td>Hälfte A / B (je 3 Zylinder), x × y × z</td><td>≈ 214 × 190 × 132</td></tr>
+    <tr><td>Teilung zwischen Zyl.-Port 3 und 4, durch die mittlere Flanschschraube (klemmt beide)</td><td>x = −97,8</td></tr>
+    <tr><td><b>SLS</b>: Kanäle ab Flanschoberkante neu, Wand 4 (Tülle 3); 3 Stützaugen außen am Bogen (kopfabgewandt) zwischen Rohr 1/2, 3/4, 5/6: Fläche 40 × 24, Loch Ø 8,4 vom Kopf weg, M8-Mutter innen eingelegt (Sechskanttasche SW 13); Volumen ≈ 850 cm³; am Stück bestellen</td><td>komplett 423 × 186 × 133</td></tr>
+    <tr><td><b>Modular</b> (FDM, Stand nach Prüfung Codex + Fable 2026-11-13): Grundteil Kanal Ø 38, je Hälfte durchgehende Flanschplatte 10 mm mit O-Ring-Nut (O-Ring 42 × 2, Nut Ø 42–47,4 × 1,5); <b>kein Zentrierring</b>, Ausrichtung über die Schrauben; <b>4 × Ø 6,4 je Rohr für M5-Gewindeeinsätze</b> (oder M5 + Mutter mit Scheibe); 4 <b>Stützlaschen</b> zwischen den Rohren, 24 mm breit mit elliptischen Wurzelrundungen 20 × 12 (Wurzel 64 mm), 24 mm über die Platte hinaus vom Kopf weg, Loch Ø 6,6 (M6) außerhalb von Rohren und Adaptern, von oben und unten frei zugänglich; Kanaldecke durchgehend Tropfenform (Spitze 21 → 20 mm), Wand ≥ 3,9 mm. Grün: Adapter mit 45°-Übergängen, Hals 14 mm, K100 Tülle 41/35 Wulst 43, 48er Tülle 48,3/40 Wulst 50,3.</td><td>Grundteil ≈ 940 cm³, Adapter ≈ 30 / 36 cm³</td></tr>
+    <tr><td><b>Leistung</b> (FDM / SLS): Führung wie „optimiert“, Bogen R 77; Kanal Ø 38 (≈ Kopfport), Tülle außen 48,3 / innen 40 mit Einlauffase auf Ø 43,6, Wulst 49,6 → K100 heute über Reduzierschlauch 48 → 40, später 45-mm-Klappen mit geradem 48er-Schlauch; SLS mit 3 Stützaugen außen (Fläche bündig mit dem Bogenscheitel, M8, Mutter innen)</td><td>FDM ≈ 1020 cm³, SLS ≈ 750 cm³</td></tr>
+    <tr><td><b>FDM optimiert</b>: Bogen beginnt schon in der Flanschbohrung (tangential, kein 19°-Knick an der Flanschoberkante), R 78, 15 mm gerade; Dichtfläche mit Tasche unverändert; z ≤ 108; Tüllenende 126,4 vor; Mittellinie ≈ 171; geschätzter Verlust ζ ≈ 0,49 (kurz 0,57, FDM 0,54)</td><td>≈ 960 cm³</td></tr>
+    <tr><td><b>FDM kurz</b>: Bogen R ≈ 90 ab Flanschoberkante bis 90°, danach 25 mm gerade; steht nicht weiter ab als v1 (z ≤ 108); Tüllenende 142,5 vor, Achse 83,3 über Nullpunkt; Mittellinie ≈ 185 (v1 ≈ 105)</td><td>≈ 1060 cm³, Hälften ≈ 214 × 170 × 103</td></tr>
+    <tr><td><b>Guss</b>: Wand 6, je Rohr eigenes Flanschstück, Trennung an den Kopfschrauben (Scheibe klemmt beide), Modell +1,3 % Schwindmaß, Dichtfläche +1 mm, Schraublöcher Ø 11,2 gegossen → aufbohren, Tülle Ø 41,6 → schleifen</td><td>6 × ≈ 185–200 cm³</td></tr>
+    <tr class="hyp"><td>Annahmen: Austritt parallel zur Flanschfläche = eingebaut senkrecht; K100-Leiste mittig über den Ports; Schlauch/Klappe nur angedeutet</td><td>Hypothese</td></tr>
+  </table></details>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from './vendor/OrbitControls.js';
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(devicePixelRatio);
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a1c);
+const camera = new THREE.PerspectiveCamera(35, 1, 1, 5000);
+camera.up.set(0, 0, 1);
+const controls = new OrbitControls(camera, renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x333344, 1.3));
+const sun = new THREE.DirectionalLight(0xffffff, 2.2); sun.position.set(-300, -400, 600); scene.add(sun);
+const fill = new THREE.DirectionalLight(0xffffff, 1.0); fill.position.set(300, 400, -500); scene.add(fill);
+
+// Model frame (STEP coords): z = flange normal (print bed), +y = bend direction, x along the head.
+const model = new THREE.Group(); scene.add(model);
+const mat = (c, o = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.55, ...o });
+
+function parseStl(buf) {
+  const dv = new DataView(buf); const n = dv.getUint32(80, true);
+  const pos = new Float32Array(n * 9); const nor = new Float32Array(n * 9);
+  for (let i = 0; i < n; i++) {
+    const o = 84 + i * 50;
+    const nx = dv.getFloat32(o, true), ny = dv.getFloat32(o + 4, true), nz = dv.getFloat32(o + 8, true);
+    for (let k = 0; k < 3; k++) {
+      for (let j = 0; j < 3; j++) pos[i * 9 + k * 3 + j] = dv.getFloat32(o + 12 + k * 12 + j * 4, true);
+      nor[i * 9 + k * 3] = nx; nor[i * 9 + k * 3 + 1] = ny; nor[i * 9 + k * 3 + 2] = nz;
+    }
+  }
+  // smooth shading with a crease angle: average face normals at shared positions if < 30 deg apart
+  const groups = new Map(), key = (i) => `${Math.round(pos[i] * 200)},${Math.round(pos[i + 1] * 200)},${Math.round(pos[i + 2] * 200)}`;
+  for (let c = 0; c < n * 3; c++) { const k = key(c * 3); let gl = groups.get(k); if (!gl) groups.set(k, gl = []); gl.push(c); }
+  const sm = new Float32Array(n * 9), cosLim = Math.cos(Math.PI / 6);
+  for (const gl of groups.values()) for (const c of gl) {
+    let sx = 0, sy = 0, sz = 0;
+    for (const d of gl) {
+      const dot = nor[c * 3] * nor[d * 3] + nor[c * 3 + 1] * nor[d * 3 + 1] + nor[c * 3 + 2] * nor[d * 3 + 2];
+      if (dot > cosLim) { sx += nor[d * 3]; sy += nor[d * 3 + 1]; sz += nor[d * 3 + 2]; }
+    }
+    const l = Math.hypot(sx, sy, sz) || 1; sm[c * 3] = sx / l; sm[c * 3 + 1] = sy / l; sm[c * 3 + 2] = sz / l;
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('normal', new THREE.BufferAttribute(sm, 3));
+  g.computeBoundingBox();
+  return g;
+}
+const load = async (url, material) => {
+  const g = parseStl(await (await fetch(url)).arrayBuffer());
+  const m = new THREE.Mesh(g, material); model.add(m); return m;
+};
+
+const SPLIT_X = -97.8;
+const THROTTLE_X = [0, 1, 2, 3, 4, 5].map((k) => SPLIT_X + (2.5 - k) * 379.3 / 5);
+const TIP_Y = 162.55, AX_Z = 112.52;
+
+// hose + K100 stubs, indicative only (free hose length assumed)
+const k100 = new THREE.Group(); model.add(k100);
+const HOSE_FREE = 100, OVERLAP = 18, SEAT = 13.8, K_LEN = 64.3, K_MID = 64.3 - 2 * 13.8;
+const cylY = (r, y0, y1, x, m) => {
+  const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, y1 - y0, 40), m);
+  c.position.set(x, (y0 + y1) / 2, AX_Z); k100.add(c); return c;
+};
+const hoseMat = mat(0x3d6fd9, { transparent: true, opacity: 0.35, depthWrite: false });
+const kMat = mat(0x9aa0a6, { metalness: 0.6 });
+const yK0 = TIP_Y + HOSE_FREE - SEAT;
+for (const x of THROTTLE_X) {
+  cylY(24, TIP_Y - OVERLAP, TIP_Y + HOSE_FREE, x, hoseMat);
+  cylY(20.05, yK0, yK0 + SEAT, x, kMat);
+  cylY(26, yK0 + SEAT, yK0 + SEAT + K_MID, x, kMat);
+  cylY(20.05, yK0 + SEAT + K_MID, yK0 + K_LEN, x, kMat);
+}
+const shaft = new THREE.Mesh(new THREE.CylinderGeometry(3.05, 3.05, 420, 16), mat(0x666666, { metalness: 0.8 }));
+shaft.rotation.z = Math.PI / 2; shaft.position.set(SPLIT_X, yK0 + SEAT + K_MID / 2, AX_Z); k100.add(shaft);
+
+const labels = [];
+const label = (txt, x, y, z, hyp) => { const d = document.createElement('div'); d.className = 'lbl'; d.textContent = txt; if (hyp) d.style.color = '#f0b54a'; document.body.appendChild(d); const o = new THREE.Object3D(); o.position.set(x, y, z); model.add(o); labels.push({ d, o }); return o; };
+label('Tülle Ø41, innen 35, Wand 3', THROTTLE_X[0], TIP_Y - 8, AX_Z + 30);
+label('Abstand 75,86 (K100)', (THROTTLE_X[1] + THROTTLE_X[2]) / 2, TIP_Y, AX_Z + 40);
+label('Flansch wie v1', 40, -30, 10);
+label('Teilung', SPLIT_X, -40, 20);
+label('Bogen bis 90°', THROTTLE_X[5], 90, 140);
+const kLbl = label('Schlauch 100 frei + K100 (angedeutet)', THROTTLE_X[3], yK0 + 30, AX_Z + 40, true);
+
+// print bed outline (flange on bed, z = 5)
+let bedLine = null;
+const A = new THREE.Group(), B = new THREE.Group(), C = new THREE.Group(); model.add(A, B, C);
+let OLD = null;
+function updateBed() {
+  if (bedLine) { model.remove(bedLine); bedLine = null; }
+  const s = +document.getElementById('bed').value;
+  const half = document.getElementById('bedHalf').value === 'A' ? A : B;
+  if (!s || !half.children.length || document.getElementById('einbau').checked) return;
+  const bb = new THREE.Box3().setFromObject(half);
+  const cx = (bb.min.x + bb.max.x) / 2, cy = (bb.min.y + bb.max.y) / 2;
+  const g = new THREE.EdgesGeometry(new THREE.BoxGeometry(s, s, s));
+  bedLine = new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0xff7b6b }));
+  bedLine.position.set(cx, cy, 5 + s / 2); model.add(bedLine);
+}
+
+function applyGap() {
+  const g = +document.getElementById('gap').value;
+  const parts = [...A.children, ...B.children];
+  if (variant === 'guss') parts.forEach((m) => { m.position.x = (2.5 - m.userData.k) * g / 2; });
+  else { A.children.forEach((m) => { m.position.x = g / 2; }); B.children.forEach((m) => { m.position.x = -g / 2; }); }
+  updateBed();
+}
+
+const views = { iso: [-420, -520, 420], side: [700, 40, 70], front: [-100, -750, 70], top: [-100, 40, 800] };
+const setView = (v) => {
+  const p = new THREE.Vector3(...views[v]);
+  if (document.getElementById('einbau').checked) p.applyAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI / 2);
+  camera.position.copy(p); controls.target.set(-100, 0, 70); controls.update();
+};
+document.querySelectorAll('[data-v]').forEach((b) => b.onclick = () => setView(b.dataset.v));
+document.getElementById('einbau').onchange = (e) => { model.rotation.x = e.target.checked ? Math.PI / 2 : 0; updateBed(); setView('iso'); };
+document.getElementById('showA').onchange = (e) => { A.visible = e.target.checked; };
+document.getElementById('showB').onchange = (e) => { B.visible = e.target.checked; };
+document.getElementById('showC').onchange = (e) => { C.visible = e.target.checked; };
+document.getElementById('alt').onchange = (e) => { if (OLD) OLD.visible = e.target.checked; };
+document.getElementById('k100').onchange = (e) => { k100.visible = e.target.checked; kLbl.visible = e.target.checked; };
+document.getElementById('gap').oninput = applyGap;
+document.getElementById('bed').onchange = updateBed;
+document.getElementById('bedHalf').onchange = updateBed;
+function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+if (innerWidth < 900) document.getElementById('info').open = false;
+setView('iso');
+
+const base = 'downloads/ansaugung/';
+const GUSS = ['Rohr1_port_x+65.2', 'Rohr2_port_x+0.0', 'Rohr3_port_x-65.2', 'Rohr4_port_x-130.4', 'Rohr5_port_x-195.6', 'Rohr6_port_x-260.8']
+  .map((n) => `Ansaugung_v2_Guss_${n}.stl`);
+const VARIANTS = {
+  fdm: { A: ['Ansaugung_v2_FDM_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_FDM_Haelfte_B_x-minus.stl'], extra: ['Ansaugung_v2_FDM_komplett.stl'] },
+  modular: { A: ['Ansaugung_v2_FDM_Modular_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_FDM_Modular_Haelfte_B_x-minus.stl'], C: ['Ansaugung_v2_Adapter_K100_Tuelle41_alle6_Einbaulage.stl'],
+    extra: ['Ansaugung_v2_FDM_Modular_komplett.stl', 'Ansaugung_v2_Adapter_K100_Tuelle41_1Stueck_Druck.stl', 'Ansaugung_v2_Adapter_48er_Tuelle48_1Stueck_Druck.stl'], tip: [136.0, 82.0] },
+  modular48: { A: ['Ansaugung_v2_FDM_Modular_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_FDM_Modular_Haelfte_B_x-minus.stl'], C: ['Ansaugung_v2_Adapter_48er_Tuelle48_alle6_Einbaulage.stl'],
+    extra: ['Ansaugung_v2_FDM_Modular_komplett.stl', 'Ansaugung_v2_Adapter_48er_Tuelle48_1Stueck_Druck.stl'], tip: [136.0, 82.0] },
+  power: { A: ['Ansaugung_v2_FDM_Leistung_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_FDM_Leistung_Haelfte_B_x-minus.stl'], extra: ['Ansaugung_v2_FDM_Leistung_komplett.stl'], tip: [125.0, 82.0] },
+  power_sls: { A: ['Ansaugung_v2_SLS_Leistung_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_SLS_Leistung_Haelfte_B_x-minus.stl'], extra: ['Ansaugung_v2_SLS_Leistung_komplett.stl'], tip: [122.0, 82.0] },
+  opt: { A: ['Ansaugung_v2_FDM_opt_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_FDM_opt_Haelfte_B_x-minus.stl'], extra: ['Ansaugung_v2_FDM_opt_komplett.stl'], tip: [126.4, 83.4] },
+  kurz: { A: ['Ansaugung_v2_FDM_kurz_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_FDM_kurz_Haelfte_B_x-minus.stl'], extra: ['Ansaugung_v2_FDM_kurz_komplett.stl'], tip: [142.46, 83.29] },
+  sls: { A: ['Ansaugung_v2_SLS_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_SLS_Haelfte_B_x-minus.stl'], extra: ['Ansaugung_v2_SLS_komplett.stl'] },
+  guss: { A: GUSS.slice(0, 3), B: GUSS.slice(3), extra: [] },
+};
+const cache = {};
+const getGeo = async (f) => cache[f] ??= parseStl(await (await fetch(base + f)).arrayBuffer());
+let variant = 'fdm';
+async function loadVariant(name) {
+  variant = name;
+  const lb = document.createElement('div'); lb.id = 'load'; lb.textContent = 'Lade Modelle …'; document.body.appendChild(lb);
+  const V = VARIANTS[name];
+  const geosA = await Promise.all(V.A.map(getGeo)), geosB = await Promise.all(V.B.map(getGeo));
+  const geosC = await Promise.all((V.C || []).map(getGeo));
+  A.clear(); B.clear(); C.clear();
+  geosC.forEach((g) => C.add(new THREE.Mesh(g, mat(0x6fbf73))));
+  const metal = name === 'guss';
+  geosA.forEach((g, i) => { const m = new THREE.Mesh(g, mat(metal ? (i % 2 ? 0xb8bcc4 : 0x9aa0ac) : 0xd08a4a, metal ? { metalness: 0.5 } : {})); m.userData.k = i; A.add(m); });
+  geosB.forEach((g, i) => { const m = new THREE.Mesh(g, mat(metal ? (i % 2 ? 0x9aa0ac : 0xb8bcc4) : 0x5a8fd0, metal ? { metalness: 0.5 } : {})); m.userData.k = 3 + i; B.add(m); });
+  k100.position.set(0, (V.tip ? V.tip[0] : TIP_Y) - TIP_Y, (V.tip ? V.tip[1] : AX_Z) - AX_Z);
+  C.visible = document.getElementById('showC').checked;
+  A.visible = document.getElementById('showA').checked; B.visible = document.getElementById('showB').checked;
+  document.getElementById('dl').innerHTML = 'Download: ' + [...V.A, ...V.B, ...(V.C || []), ...V.extra]
+    .map((f) => `<a href="${base}${f}" download>${f.replace('Ansaugung_v2_', '').replace(/_port_x.*(?=\.stl$)/, '')}</a>`).join(' · ');
+  document.querySelectorAll('#load').forEach((e) => e.remove());
+  applyGap();
+}
+document.getElementById('variant').onchange = (e) => loadVariant(e.target.value);
+OLD = await load(base + 'Ansaugung_v1_original.stl', mat(0xffffff, { transparent: true, opacity: 0.25, depthWrite: false }));
+OLD.visible = false;
+const startVariant = new URLSearchParams(location.search).get('v') in VARIANTS ? new URLSearchParams(location.search).get('v') : 'modular';
+document.getElementById('variant').value = startVariant;
+await loadVariant(startVariant);
+
+const lblBox = document.getElementById('labels');
+const v = new THREE.Vector3();
+renderer.setAnimationLoop(() => {
+  controls.update(); renderer.render(scene, camera);
+  for (const l of labels) {
+    l.o.getWorldPosition(v); v.project(camera);
+    l.d.style.display = lblBox.checked && l.o.visible !== false && v.z < 1 ? '' : 'none';
+    l.d.style.left = (v.x + 1) / 2 * innerWidth + 'px'; l.d.style.top = (1 - v.y) / 2 * innerHeight + 'px';
+  }
+});
+</script>
+</body>
+</html>

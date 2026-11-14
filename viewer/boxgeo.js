@@ -12,7 +12,7 @@ export const B_BODY = HM20.X + B_STROKE;
 
 export const WALL_X = 262;       // inner face of the end wall with the clip holes
 export const WALL_T = 2;
-export const FLOOR_T = 8;
+export const FLOOR_T = 6;        // stainless 1.4301 (Festgelegt User 2026-11-11: everything stainless); 6 mm = Vorschlag Claude, stiffer than the former 8 mm alu
 export const FLOOR_EXT = 40;     // base plate runs on past the end wall under the gussets
 // user notes: rigid cable end inside the box 70 mm (Wählseil) / 130 mm (Schaltseil), clip hole Ø 25 / Ø 15 mm
 export const RIGID = { G: 70, R: 130 };
@@ -57,11 +57,44 @@ export const A_X0 = A_HEAD - A_BODY;
 
 // outer length rounded for fabrication (>= 5 mm air behind A, checked in the tests)
 export const BOX_L = 660;
-export const CB = { x0: WALL_X + WALL_T - BOX_L, x1: WALL_X + WALL_T, z0: POTI_Z - 8 - GAP - WALL_T, z1: CB_Z1, h: Math.ceil(AX_Y + HM25.D / 2 + 20) };
+// Tub like the relay box (Festgelegt User 2026-11-11): welded stainless tub, 25 mm flange inward on all four walls,
+// EPDM tape 10 x 5 (squeezed to ~3), PC lid 5 mm, M5 screws into stainless rivet nuts. Values = Vorschlag Claude.
+export const SHELL_T = 1.5;      // rear and side walls (end wall stays WALL_T = 2 for the cable clips)
+export const LID_T = 5;
+export const GASKET = 3;
+export const FLANGE = { w: 25, screw: 9, seal: 19, pitch: 100 }; // screw axis / seal centre from the outer edge, max pitch
+export const TUB_H = 92;         // underside of the base plate -> top of the flange
+// Valve stack (Festgelegt User 2026-11-11, variant B): 3 x Airtec M-04-53x-HN lying flat, stacked in the rear
+// poti/G corner, bolted through. Datasheet M-04 p. 4-05: 180 incl. sockets, 64 incl. coil + socket, body 32, 22 thick,
+// mounting Ø4.5: two holes 16 apart 5 mm below the 2/4 face, one centred 27 mm below it (scaled from the drawing).
+export const VALVE = { L: 180, H: 64, body: 32, W: 22, hole: 4.5, holes: [[-8, 5], [8, 5], [0, 27]] };
+export const STACK = { n: 3, base: 3, gap: 3, fit: 35, rear: 20, top: 13.5 }; // fit = silencers/supply on 1/3/5 (estimate)
+export const STACK_H = STACK.base + STACK.n * VALVE.W + (STACK.n - 1) * STACK.gap;
+const Z_REF = POTI_Z - 8 - GAP - WALL_T;              // poti-side outer edge before the valve stack (2026-11-01)
+export const VALVE_EXTRA = 20;                         // box wider on the poti side for the stack
+export const CB = { x0: WALL_X + WALL_T - BOX_L, x1: WALL_X + WALL_T, z0: Z_REF - VALVE_EXTRA, z1: CB_Z1, h: TUB_H + GASKET + LID_T };
 export const PLATE = { x0: CB.x0, x1: CB.x1 + FLOOR_EXT, z0: CB.z0, z1: CB.z1 };
-export const LID_T = 1.5;
-export const WALL_H = CB.h - FLOOR_T - LID_T - 0.5;   // end and rear wall, 0.5 mm below the cover
-export const GUSSET = { t: 4, base: FLOOR_EXT, h: 55, z: [26, 87, 146].map((q) => CB.z0 + q) };
+export const WALL_H = TUB_H - FLOOR_T;               // all four walls incl. flange, welded onto the plate
+export const UNDER_FLANGE = TUB_H - SHELL_T;         // clear height under the flanges (end wall: 0.5 less)
+// lid screws on the flange centre line, pitch <= FLANGE.pitch, corners included (x along the box, z across)
+function screwRow(a, b) {
+  const n = Math.ceil((b - a) / FLANGE.pitch);
+  return Array.from({ length: n + 1 }, (_, i) => a + ((b - a) * i) / n);
+}
+const SX = screwRow(CB.x0 + FLANGE.screw, CB.x1 - FLANGE.screw), SZ = screwRow(CB.z0 + FLANGE.screw, CB.z1 - FLANGE.screw);
+export const LID_SCREWS = [...SX.map((x) => [x, SZ[0]]), ...SX.map((x) => [x, SZ.at(-1)]),
+  ...SZ.slice(1, -1).flatMap((z) => [[SX[0], z], [SX.at(-1), z]])];
+// gussets stay beside the clip holes (absolute), independent of the wider poti side
+export const GUSSET = { t: 4, base: FLOOR_EXT, h: 55, z: [26, 87, 146].map((q) => Z_REF + q) };
+// stack placement: x from the rear wall, z: 1/3/5 face toward the poti-side wall, coils (2/4) toward the cylinders
+export const VSTACK = { x0: CB.x0 + WALL_T + STACK.rear, zOut: CB.z0 + WALL_T + STACK.fit };
+VSTACK.x1 = VSTACK.x0 + VALVE.L;
+VSTACK.zIn = VSTACK.zOut + VALVE.H;
+VSTACK.cx = VSTACK.x0 + VALVE.L / 2;
+export const valveY = (i) => FLOOR_T + STACK.base + i * (VALVE.W + STACK.gap); // underside of valve i (0 = G at the bottom)
+// rear-wall glands (Vorschlag Claude): in front of the silencer zone, behind the stack, one above the other
+// z moved inward 2026-11-11 so the corner rivet nut (9/9) clears the gland nuts
+export const REAR_GLANDS = { z: CB.z0 + 32, d: 16.5, y: [20, 45, 70].map((h) => FLOOR_T + h), what: ['Druckluft 8 mm', 'Sensorkabel', 'Spulenkabel'] };
 
 // brackets: front face sits nutGap behind the head face (nut in front), foot points to the rear
 export const G_BRACKET_X = G_HEAD - BRACKET.nutGap;

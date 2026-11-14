@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Elektronik-Koffer Montageplatte</title>
+<style>
+  html, body { margin: 0; background: #111; color: #ddd; font-family: system-ui, sans-serif; }
+  #bar { position: sticky; top: 0; padding: 8px 12px; background: #151517; display: flex; gap: 12px; align-items: center; font-size: 14px; flex-wrap: wrap; z-index: 2; }
+  #bar button { background: #222; color: #ddd; border: 1px solid #444; border-radius: 4px; padding: 4px 10px; }
+  #bar button.on { background: #2d5a8a; border-color: #4a8ad0; }
+  main { padding: 0 12px 24px; max-width: 1100px; }
+  svg { width: 100%; height: auto; background: #18181b; border-radius: 6px; margin-top: 10px; }
+  .box text { font-size: 9px; fill: #fff; }
+  .dim { font-size: 9px; fill: #8cf; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; margin-top: 10px; }
+  td, th { padding: 3px 6px; border-bottom: 1px solid #2a2a2e; text-align: left; vertical-align: top; }
+  th { color: #aaa; font-weight: normal; }
+  .hyp { color: #f0b54a; }
+  .ok { color: #7fd17f; }
+  .note { font-size: 13px; color: #bbb; margin-top: 8px; line-height: 1.45; }
+  #result { font-size: 15px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div id="bar">
+  <b>Elektronik-Koffer – Montageplatte (Vorschlag Claude, 2026-11-11)</b>
+  <span>Ventile seit 2026-11-11 in der Zylinderbox (<a href="zylinderbox-ventile.html" style="color:#8cf">3D</a>)</span>
+  <a href="ventilbox3d.html" style="color:#8cf">→ 3D</a>
+</div>
+<main>
+  <div id="result"></div>
+  <svg id="plate" viewBox="0 0 420 420"></svg>
+  <div class="note">Draufsicht, Maße in mm. <span class="ok">Grün umrandet</span> = Maß aus Datenblatt oder gemessen · <span class="hyp">orange gestrichelt</span> = Platzhalter/Hypothese (Teil noch nicht da oder Zubehörmaß geschätzt). Gesamtmaße sind Mindest-<b>Innen</b>maße des Koffers, ohne Montageplatte und Schaumstoff.</div>
+  <table id="parts"></table>
+  <div class="note">
+    <b>Quellen:</b> HW-039 gemessen 2026-11-10 (<a href="hw039.html" style="color:#8cf">hw039.html</a>), SN65HVD230 Händlerangabe. Nucleo-Trägerplatine wie Relaisbox 105 × 110 (<a href="nucleo-heck.html" style="color:#8cf">nucleo-heck.html</a>). Die Ventile sitzen seit 2026-11-11 als Stapel in der Zylinderbox (Festgelegt User) → Koffer trocken, ohne Abluft und Druckausgleich.
+  </div>
+</main>
+<script type="module">
+import { layout, GLAND as glands } from './ventilbox-layout.js';
+function render() {
+  const { all, W, H, zMax, innerZ } = layout();
+  const svg = document.getElementById('plate');
+  svg.setAttribute('viewBox', `-30 -30 ${W + 60} ${H + 60}`);
+  let s = `<rect x="0" y="0" width="${W}" height="${H}" fill="#202024" stroke="#666"/>`;
+  for (const b of all) {
+    const col = b.hyp ? '#f0b54a' : '#7fd17f';
+    s += `<g class="box"><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" fill="${b.hyp ? '#3a2e15' : '#1d3320'}" stroke="${col}" ${b.hyp ? 'stroke-dasharray="4 3"' : ''}/>`;
+    if (!b.small) {
+      s += `<text x="${b.x + 4}" y="${b.y + 12}">${b.label}</text>`;
+      if (b.sub) s += `<text x="${b.x + 4}" y="${b.y + 23}" fill="#aaa" style="fill:#aaa">${b.sub}</text>`;
+    } else s += `<text x="${b.x + 2}" y="${b.y + 10}" style="font-size:6px">${b.label}</text>`;
+    s += `</g>`;
+  }
+  s += `<text class="dim" x="${W / 2}" y="-8" text-anchor="middle">${W} mm</text>`;
+  s += `<text class="dim" x="-8" y="${H / 2}" text-anchor="middle" transform="rotate(-90 -8 ${H / 2})">${H} mm</text>`;
+  svg.innerHTML = s;
+  document.getElementById('result').innerHTML =
+    `Platte ≈ <b>${W} × ${H} mm</b> · Koffer innen mindestens ≈ <b>${W + glands} × ${H + glands} × ${innerZ} mm</b> ` +
+    `<span class="hyp">(+${glands} mm für Kabelverschraubungen innen, Höhe = höchstes Teil ${zMax} + 25 Kabel/Stecker; Hypothese)</span>`;
+  document.getElementById('parts').innerHTML = '<tr><th>Teil</th><th>Fläche</th><th>Höhe</th><th>Quelle</th></tr>' +
+    all.filter(b => b.z).map(b => `<tr><td>${b.label}</td><td>${b.w} × ${b.h}</td><td>${b.z}</td><td class="${b.hyp ? 'hyp' : 'ok'}">${b.hyp ? 'Hypothese' : 'Datenblatt/gemessen'}</td></tr>`).join('');
+}
+render();
+</script>
+</body>
+</html>

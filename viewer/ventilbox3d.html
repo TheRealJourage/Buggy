@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Elektronik-Koffer 3D</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #111; color: #ddd; font-family: system-ui, sans-serif; overflow: hidden; }
+  #bar { position: fixed; top: 0; left: 0; right: 0; padding: 8px 12px; background: #151517cc; display: flex; gap: 10px; align-items: center; font-size: 14px; z-index: 2; flex-wrap: wrap; }
+  #bar button { background: #222; color: #ddd; border: 1px solid #444; border-radius: 4px; padding: 3px 8px; }
+  #bar button.on { background: #2d5a8a; border-color: #4a8ad0; }
+  #bar .hint { color: #888; }
+  #panel { position: fixed; left: 8px; bottom: 8px; max-width: min(420px, calc(100vw - 32px)); background: #151517e6; padding: 8px 10px; border-radius: 6px; font-size: 13px; z-index: 2; max-height: 40vh; overflow: auto; line-height: 1.4; }
+  .hyp { color: #f0b54a; }
+  .ok { color: #7fd17f; }
+  .lbl { position: absolute; font-size: 11px; color: #fff; background: #000a; padding: 1px 4px; border-radius: 3px; pointer-events: none; white-space: nowrap; transform: translate(-50%, -50%); }
+  canvas { display: block; }
+</style>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.js" } }</script>
+</head>
+<body>
+<div id="bar">
+  <b>Elektronik-Koffer 3D</b>
+  <button data-var="minimal">Minimal</button><button data-var="platte">Platte (bisher)</button>
+  <button data-v="iso">Schräg</button><button data-v="top">Oben</button><button data-v="side">Seite</button>
+  <label><input id="labels" type="checkbox" checked> Beschriftung</label>
+  <label><input id="case" type="checkbox" checked> Koffer</label>
+  <label><input id="lid" type="checkbox"> Deckel</label>
+  <label><input id="wires" type="checkbox" checked> Leitungen</label>
+  <a href="ventilbox.html" style="color:#8cf">2D + Tabelle</a>
+  <span class="hint">Ziehen: drehen · Rad/Pinch: zoomen · rechts: verschieben</span>
+</div>
+<div id="panel">
+  <div id="result"></div>
+  <div style="margin-top:4px"><span class="ok">Grün/Grau/Schwarz</span> = Datenblatt oder gemessen (HW-039, SN65HVD230) · <span class="hyp">Orange durchsichtig</span> = Platzhalter/Hypothese (Module bestellt, Trägerplatine, Kabelverschraubungen, Größen M16/M20). Linien = Leitungsweg im Koffer (rot Motor, gelb 12 V/Masse, blau CAN, grün Eingänge, violett Spulen). Lage der Wände mit Verschraubungen hängt vom Einbauort ab. Ventile seit 2026-11-11 in der Zylinderbox (<a href="zylinderbox-ventile.html" style="color:#8cf">3D</a>). Vorschlag Claude 2026-11-11.</div>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from './vendor/OrbitControls.js';
+import { layout, minimalLayout, GLAND, WALL_T } from './ventilbox-layout.js';
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(devicePixelRatio);
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a1c);
+const camera = new THREE.PerspectiveCamera(35, 1, 1, 5000);
+camera.up.set(0, 0, 1);
+const controls = new OrbitControls(camera, renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x333344, 1.3));
+const sun = new THREE.DirectionalLight(0xffffff, 2.2); sun.position.set(-200, 300, 600); scene.add(sun);
+const fill = new THREE.DirectionalLight(0xffffff, 1.0); fill.position.set(300, -300, 200); scene.add(fill);
+
+const mat = (c, o = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.6, ...o });
+const M_HYP = new THREE.MeshStandardMaterial({ color: 0xf0b54a, transparent: true, opacity: 0.35, depthWrite: false });
+const M_HYP_EDGE = new THREE.LineBasicMaterial({ color: 0xf0b54a });
+
+let group = new THREE.Group(); scene.add(group);
+const labels = [];
+const label = (txt, x, y, z, hyp) => {
+  const d = document.createElement('div'); d.className = 'lbl'; d.textContent = txt; if (hyp) d.style.color = '#f0b54a';
+  document.body.appendChild(d); labels.push({ d, p: new THREE.Vector3(x, y, z) });
+};
+// Layout uses x right / y down; 3D uses y = -layoutY so the top view matches the 2D page.
+const box = (x, y, w, h, z0, zh, m, g = group) => {
+  const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, zh), m);
+  b.position.set(x + w / 2, -(y + h / 2), z0 + zh / 2); g.add(b);
+  if (m === M_HYP) { const e = new THREE.LineSegments(new THREE.EdgesGeometry(b.geometry), M_HYP_EDGE); e.position.copy(b.position); g.add(e); }
+  return b;
+};
+const cylZ = (x, y, z0, r, h, m) => {
+  const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 24), m);
+  c.rotation.x = Math.PI / 2; c.position.set(x, -y, z0 + h / 2); group.add(c); return c;
+};
+
+function hw039(b) {
+  const cx = b.x + 26, cy = b.y + 26;
+  for (let i = 0; i < 9; i++) box(b.x + 1 + i * 6, b.y + 10, 1.6, 32, 0, 22, mat(0x1c1c1e));
+  box(b.x + 1, b.y + 1, 50, 50, 22, 1, mat(0x1d4fa8));
+  box(b.x + 16, b.y + 1, 21, 10, 23, 14, mat(0x3fae4a));
+  cylZ(b.x + 12, b.y + 5, 23, 5, 17, mat(0x1a1d2a));
+  box(b.x + 30, b.y + 42, 10, 5, 23, 8, mat(0x111111));
+  label(b.label, cx, -cy, 46);
+}
+
+function nucleo(b) {
+  for (const [dx, dy] of [[4, 4], [101, 4], [4, 106], [101, 106]]) cylZ(b.x + dx, b.y + dy, 0, 2.5, 8, mat(0x999999));
+  box(b.x, b.y, b.w, b.h, 8, 1.6, mat(0x5a7d3a));
+  box(b.x + 17, b.y + 13, 70, 82.5, 20, 1.6, mat(0xf2f2f2));
+  for (const dx of [17, 84]) box(b.x + dx, b.y + 20, 3, 70, 9.6, 10.4, mat(0x111111));
+  box(b.x + 30, b.y + 15, 44, 25, 21.6, 6, mat(0x333333));
+  box(b.x, b.y, b.w, b.h, 0, b.z, M_HYP);
+  label('Nucleo-F091RC auf Träger (H ~45)', b.x + 52, -(b.y + 55), 55, true);
+}
+
+function parts(L) {
+  for (const b of L.all) {
+    if (b.id === 'nucleo') nucleo(b);
+    else if (b.id === 'hwl' || b.id === 'hwr') hw039(b);
+    else if (b.id === 'can' && b.onCarrier) {
+      for (const dx of [2, 14]) box(b.x + dx - 1, b.y + 2, 2, 11, 9.6, 3, mat(0x111111));
+      box(b.x, b.y, b.w, b.h, 12.6, 1.6, mat(0x1d4fa8)); label('CAN', b.x + 8, -(b.y + 8), 22);
+    }
+    else if (b.id === 'can') { box(b.x, b.y, b.w, b.h, 8, 1.6, mat(0x1d4fa8)); label('CAN', b.x + 8, -(b.y + 8), 16); }
+    else { box(b.x, b.y, b.w, b.h, 0, b.z, M_HYP); label(b.label, b.x + b.w / 2, -(b.y + b.h / 2), b.z + 6, true); }
+  }
+}
+
+const M_WALL = new THREE.MeshStandardMaterial({ color: 0xb8bcc4, metalness: 0.6, roughness: 0.35, transparent: true, opacity: 0.22, depthWrite: false, side: THREE.DoubleSide });
+const M_EDGE = new THREE.LineBasicMaterial({ color: 0xd8dce4 });
+const WIRE_C = { hwl: 0xff5050, hwr: 0xff5050, term: 0xffd040, can: 0x40c0ff, pc817: 0x9cff70, lr: 0xff80ff };
+
+function buildMinimal() {
+  const L = minimalLayout();
+  parts(L);
+  const [iw, ih, iz] = L.inner, t = WALL_T;
+  const cx = (L.x0 + L.x1) / 2, cy = (L.y0 + L.y1) / 2;
+  const panel = (w, h, d, x, y, z, name) => {
+    const g = new THREE.BoxGeometry(w, h, d), m = new THREE.Mesh(g, M_WALL);
+    m.position.set(x, -y, z); m.name = name; group.add(m);
+    const e = new THREE.LineSegments(new THREE.EdgesGeometry(g), M_EDGE); e.position.copy(m.position); e.name = name; group.add(e);
+  };
+  panel(iw + 2 * t, ih + 2 * t, t, cx, cy, -t / 2 - 3, 'case');            // floor under the 3 mm mounting plate
+  box(L.x0, L.y0, iw, ih, -3, 3, mat(0x3a3a40));                          // mounting plate = full inner floor
+  panel(t, ih + 2 * t, iz + 3, L.x0 - t / 2, cy, iz / 2 - 1.5, 'case');
+  panel(t, ih + 2 * t, iz + 3, L.x1 + t / 2, cy, iz / 2 - 1.5, 'case');
+  panel(iw, t, iz + 3, cx, L.y0 - t / 2, iz / 2 - 1.5, 'case');
+  panel(iw, t, iz + 3, cx, L.y1 + t / 2, iz / 2 - 1.5, 'case');
+  panel(iw + 2 * t, ih + 2 * t, t, cx, cy, iz + t / 2, 'lid');
+
+  const byId = Object.fromEntries(L.all.map(b => [b.id, b]));
+  const zG = iz / 2;
+  for (const g of L.glands) {
+    // inner point (end of gland nut) and normal pointing out of the case, in layout coordinates
+    const [px, py, nx, ny] = g.wall === 'top' ? [g.pos, L.y0, 0, -1] : g.wall === 'bottom' ? [g.pos, L.y1, 0, 1]
+      : g.wall === 'left' ? [L.x0, g.pos, -1, 0] : [L.x1, g.pos, 1, 0];
+    const r = g.size / 2, axis = new THREE.Vector3(nx, -ny, 0);
+    const piece = (len, rad, off, m, seg = 24) => {
+      const c = new THREE.Mesh(new THREE.CylinderGeometry(rad, rad, len, seg), m);
+      c.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), axis);
+      c.position.set(px + nx * off, -(py + ny * off), zG); c.name = 'case'; group.add(c);
+    };
+    piece(8, r * 1.35, -4, M_HYP, 6);                  // hex nut inside
+    piece(12, r * 1.25, t + 6, M_HYP, 6);              // hex body outside
+    piece(10, r * 0.95, t + 17, M_HYP);                // dome
+    label(`${g.label} M${g.size}`, px + nx * 30, -(py + ny * 30), zG + 14, true);
+    const b = byId[g.to];
+    const tx = g.to.startsWith('hw') ? b.x + 26 : b.x + b.w / 2, ty = g.to.startsWith('hw') ? b.y + 5 : b.y + b.h / 2;
+    const tz = b.onCarrier ? 16 : g.to.startsWith('hw') ? 37 : b.z;
+    const pts = [[px, py, zG], [px - nx * 12, py - ny * 12, zG], [tx, ty, tz + 4]].map(([x, y, z]) => new THREE.Vector3(x, -y, z));
+    const w = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: WIRE_C[g.to] }));
+    w.name = 'wire'; group.add(w);
+    if (g.label.startsWith('12 V EPB')) for (const h of ['hwl', 'hwr']) {   // B+/B- also to both bridges
+      const q = [pts[1], new THREE.Vector3(byId[h].x + 40, -(byId[h].y + 5), 41)];
+      const w2 = new THREE.Line(new THREE.BufferGeometry().setFromPoints(q), new THREE.LineBasicMaterial({ color: WIRE_C.term }));
+      w2.name = 'wire'; group.add(w2);
+    }
+  }
+  document.getElementById('result').innerHTML =
+    `<b>Minimal (Vorschlag Claude):</b> Koffer innen ≈ <b>${iw} × ${ih} × ${iz} mm</b>, außen ≈ ${L.outer.join(' × ')} mm ` +
+    `(Blech ${t} mm, Hypothese) + Verschraubungen ~25 mm über die Wand an 3 Seiten. Bisher: 286 × 285 × 70.`;
+  return { W: L.x1 - L.x0, H: L.y1 - L.y0, ox: L.x0, oy: L.y0 };
+}
+
+function buildPlate() {
+  const L = layout();
+  box(0, 0, L.W, L.H, -3, 3, mat(0x3a3a40));
+  parts(L);
+  // Case (inner minimum) and glands, both hypothesis
+  const g = GLAND / 2, [iw, ih, iz] = L.inner;
+  const caseBox = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(iw, ih, iz)), new THREE.LineBasicMaterial({ color: 0xff7b6b }));
+  caseBox.position.set(L.W / 2, -L.H / 2, iz / 2); caseBox.name = 'case'; group.add(caseBox);
+  const gl = (x, y, r, txt) => {
+    const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 18, 24), M_HYP);
+    c.rotation.z = Math.PI / 2; c.position.set(x, -y, 30); c.name = 'case'; group.add(c);
+    label(txt, x, -y, 30 + r + 6, true);
+  };
+  gl(-g, 60, 8, 'Sensorkabel');
+  gl(-g, 110, 8, 'Spulenkabel');
+  const xr = L.W + g;
+  gl(xr, 30, 8, '12 V / Masse');
+  gl(xr, 110, 8, 'CAN-Bündel');
+  gl(xr, 200, 9, 'Motor L+R');
+  document.getElementById('result').innerHTML =
+    `Platte ≈ <b>${L.W} × ${L.H} mm</b> · Koffer innen mind. ≈ <b>${iw} × ${ih} × ${iz} mm</b> (rote Linie)`;
+  return { W: L.W, H: L.H, ox: 0, oy: 0 };
+}
+
+let variant = new URLSearchParams(location.search).get('v') === 'platte' ? 'platte' : 'minimal';
+function build() {
+  scene.remove(group); group = new THREE.Group(); scene.add(group);
+  for (const l of labels) l.d.remove(); labels.length = 0;
+  current = variant === 'minimal' ? buildMinimal() : buildPlate();
+  setCase(document.getElementById('case').checked);
+  document.querySelectorAll('[data-var]').forEach(b => b.classList.toggle('on', b.dataset.var === variant));
+  setView(currentView);
+}
+
+let current, currentView = 'iso';
+function setView(v) {
+  currentView = v;
+  const cx = current.ox + current.W / 2, cy = -(current.oy + current.H / 2), d = Math.max(current.W, current.H);
+  const pos = { iso: [cx - d * 0.9, cy - d * 1.2, d * 1.0], top: [cx, cy - 0.01, d * 1.9], side: [cx, cy - d * 1.9, 60] }[v];
+  camera.position.set(...pos); controls.target.set(cx, cy, 20); controls.update();
+}
+function setCase(on) {
+  const lid = document.getElementById('lid').checked, wires = document.getElementById('wires').checked;
+  for (const o of group.children) {
+    if (o.name === 'case') o.visible = on;
+    if (o.name === 'lid') o.visible = on && lid;
+    if (o.name === 'wire') o.visible = wires;
+  }
+}
+document.querySelectorAll('[data-var]').forEach(b => b.onclick = () => {
+  variant = b.dataset.var; history.replaceState(null, '', variant === 'platte' ? '?v=platte' : location.pathname); build();
+});
+document.getElementById('lid').onchange = document.getElementById('wires').onchange = () => setCase(document.getElementById('case').checked);
+
+document.querySelectorAll('[data-v]').forEach(b => b.onclick = () => setView(b.dataset.v));
+
+document.getElementById('case').onchange = e => setCase(e.target.checked);
+const lblBox = document.getElementById('labels');
+
+function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+build();
+const v = new THREE.Vector3();
+renderer.setAnimationLoop(() => {
+  controls.update(); renderer.render(scene, camera);
+  for (const l of labels) {
+    v.copy(l.p).project(camera);
+    l.d.style.display = lblBox.checked && v.z < 1 ? '' : 'none';
+    l.d.style.left = (v.x + 1) / 2 * innerWidth + 'px'; l.d.style.top = (1 - v.y) / 2 * innerHeight + 'px';
+  }
+});
+</script>
+</body>
+</html>

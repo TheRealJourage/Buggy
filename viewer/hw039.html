@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – HW-039 BTS7960 Maße</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #111; color: #ddd; font-family: system-ui, sans-serif; overflow: hidden; }
+  #bar { position: fixed; top: 0; left: 0; right: 0; padding: 8px 12px; background: #151517cc; display: flex; gap: 14px; align-items: center; font-size: 14px; z-index: 2; flex-wrap: wrap; }
+  #bar .hint { color: #888; }
+  #panel { position: fixed; left: 8px; bottom: 8px; max-width: min(440px, calc(100vw - 32px)); background: #151517e6; padding: 10px 12px; border-radius: 6px; font-size: 13px; z-index: 2; max-height: 55vh; overflow: auto; }
+  #panel table { border-collapse: collapse; width: 100%; }
+  #panel td { padding: 2px 6px; border-bottom: 1px solid #2a2a2e; vertical-align: top; }
+  #panel td:last-child { text-align: right; white-space: nowrap; }
+  .hyp { color: #f0b54a; }
+  .warn { color: #ff7b6b; margin-top: 6px; }
+  .lbl { position: absolute; font-size: 12px; color: #fff; background: #000a; padding: 1px 4px; border-radius: 3px; pointer-events: none; white-space: nowrap; transform: translate(-50%, -50%); }
+  canvas { display: block; }
+</style>
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.js" } }</script>
+</head>
+<body>
+<div id="bar">
+  <b>HW-039 (BTS7960 / IBT-2)</b>
+  <button data-v="iso">Schräg</button><button data-v="top">Oben</button><button data-v="front">Vorn</button><button data-v="side">Seite</button><button data-v="foto">wie Foto 2</button>
+  <span>Modell: <a href="downloads/hw039/hw039.stl" download style="color:#8cf">STL</a> · <a href="downloads/hw039/hw039.step" download style="color:#8cf">STEP</a></span>
+  <label><input id="labels" type="checkbox" checked> Beschriftung</label>
+  <label><input id="frame" type="checkbox" checked> 40-mm-Rahmen</label>
+  <span class="hint">Maus: drehen · Rad: zoomen · rechts: verschieben</span>
+</div>
+<div id="panel">
+  <b>Maße (User 2026-11-10, bestätigt)</b>
+  <table>
+    <tr><td>Platine (Ecken angefast)</td><td>50 × 50 × 1</td></tr>
+    <tr><td>Löcher Ø / Mitte–Mitte (außen 43)</td><td>3 / 40 × 40</td></tr>
+    <tr><td>Kühlkörper Rückseite, 50 parallel Klemmenkante, Rippen quer</td><td>50 × 32 × 22</td></tr>
+    <tr><td>Schraubklemme 4-polig grün, oben rechts der Mitte</td><td>H 14</td></tr>
+    <tr><td>Elko 330 µF, Ecke oben links</td><td>H 17</td></tr>
+    <tr><td>Stiftleiste 2 × 4 stehend, links vom Loch unten rechts</td><td>2,54</td></tr>
+    <tr><td>Gesamthöhe gemessen</td><td>40</td></tr>
+    <tr class="hyp"><td>Aus Foto geschätzt: Lagen aller Bauteile, Klemme 21 × 10 (ragt ~1,5 über), Elko Ø 10 (ragt ~1,5 über), 2 Kühlkörperschrauben x ±13,5, BTS7960 + HC244, Fasen 2</td><td>Hypothese</td></tr>
+  </table>
+  <div style="color:#7fd17f;margin-top:6px">Höhe passt: 22 (Kühlkörper) + 1 (Platine) + 17 (Elko) = 40 gemessen.</div>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from './vendor/OrbitControls.js';
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(devicePixelRatio);
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x1a1a1c);
+const camera = new THREE.PerspectiveCamera(35, 1, 1, 2000);
+camera.up.set(0, 0, 1);
+const controls = new OrbitControls(camera, renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xffffff, 0x333344, 1.3));
+const sun = new THREE.DirectionalLight(0xffffff, 2.2); sun.position.set(-100, -150, 300); scene.add(sun);
+const fill = new THREE.DirectionalLight(0xffffff, 1.2); fill.position.set(100, 150, -300); scene.add(fill);
+
+const mat = (c, o = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.6, ...o });
+const box = (w, d, h, x, y, z, m) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, d, h), m); b.position.set(x, y, z + h / 2); scene.add(b); return b; };
+const cyl = (r, h, x, y, z, m, seg = 32) => { const c = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, seg), m); c.rotation.x = Math.PI / 2; c.position.set(x, y, z + h / 2); scene.add(c); return c; };
+
+// Origin = board centre, z = 0 board bottom. +y = terminal edge (top in photo 1), -y = header edge.
+const P = 50, T = 1, HOLE = 3, PITCH = 40, CH = 2;
+const h2 = P / 2;
+const shape = new THREE.Shape();
+shape.moveTo(-h2 + CH, -h2); shape.lineTo(h2 - CH, -h2); shape.lineTo(h2, -h2 + CH); shape.lineTo(h2, h2 - CH);
+shape.lineTo(h2 - CH, h2); shape.lineTo(-h2 + CH, h2); shape.lineTo(-h2, h2 - CH); shape.lineTo(-h2, -h2 + CH); shape.closePath();
+for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+  const h = new THREE.Path(); h.absarc(sx * PITCH / 2, sy * PITCH / 2, HOLE / 2, 0, Math.PI * 2, true); shape.holes.push(h);
+  const ring = new THREE.Mesh(new THREE.RingGeometry(HOLE / 2, 3, 32), mat(0xd8d8d8, { metalness: 0.7 }));
+  ring.position.set(sx * PITCH / 2, sy * PITCH / 2, T + 0.02); scene.add(ring);
+}
+scene.add(new THREE.Mesh(new THREE.ExtrudeGeometry(shape, { depth: T, bevelEnabled: false, curveSegments: 32 }), mat(0x1d4fa8)));
+
+// Heatsink on the back: 50 along x, 32 along y, fins are plates in y-z spaced along x (open toward header/terminal edges)
+const HS = { w: 50, d: 32, h: 22, base: 4, fins: 9, fin: 1.6 };
+const hsMat = mat(0x1c1c1e, { metalness: 0.4, roughness: 0.5 });
+box(HS.w, HS.d, HS.base, 0, 0, -HS.base, hsMat);
+for (let i = 0; i < HS.fins; i++) {
+  const x = -HS.w / 2 + HS.fin / 2 + i * (HS.w - HS.fin) / (HS.fins - 1);
+  box(HS.fin, HS.d, HS.h - HS.base, x, 0, -HS.h, hsMat);
+}
+// Heatsink screws (photo estimate)
+for (const x of [-13.5, 13.5]) { cyl(3, 2, x, -1.5, T, mat(0x111111)); }
+
+// Power stages U2/U3 (TO-263-7) and HC244 (SOIC-20), photo estimate
+const icMat = mat(0x151515, { roughness: 0.4 });
+for (const x of [-5.5, 5.5]) {
+  box(10, 9, 4.4, x, 0.5, T, icMat);
+  for (let i = 0; i < 7; i++) box(0.6, 3.5, 0.3, x - 3.8 + i * 1.27, -5.7, T, mat(0xcfcfcf, { metalness: 0.8 }));
+}
+box(13, 7.5, 2.5, 17.5, -9, T, icMat);
+for (let i = 0; i < 8; i++) box(1.6, 0.8, 0.5, -6 + i * 2, -14.5, T, mat(0x2a2a2a));
+
+// Screw terminal 4-pole green, overhangs top edge (photo estimate)
+const TERM = { w: 21, d: 10, h: 14, x: 4.5, yTop: h2 + 1.5 };
+const termY = TERM.yTop - TERM.d / 2;
+box(TERM.w, TERM.d, TERM.h, TERM.x, termY, T, mat(0x3fae4a));
+for (let i = 0; i < 4; i++) {
+  const sx = TERM.x - 1.5 * 5.08 + i * 5.08;
+  cyl(1.6, 0.6, sx, termY + 1, T + TERM.h, mat(0xcccccc, { metalness: 0.8 }));
+  box(3.2, 0.3, 3.5, sx, termY - TERM.d / 2 - 0.15, T + 2, mat(0x1d5e25));
+}
+
+// Electrolytic 330 uF upright in top-left corner, overhangs edge (photo estimate)
+const CAP = { r: 5, h: 17, x: -13.5, y: h2 - 3.5 };
+cyl(CAP.r, CAP.h, CAP.x, CAP.y, T, mat(0x1a1d2a));
+cyl(CAP.r - 0.6, 0.3, CAP.x, CAP.y, T + CAP.h, mat(0xbfc3c8, { metalness: 0.8 }));
+
+// 2x4 header, upright, left of lower-right hole
+const HP = 2.54, hx = 10.5, hy = -21;
+box(4 * HP, 2 * HP, 2.5, hx, hy, T, mat(0x111111));
+for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++)
+  box(0.64, 0.64, 6, hx - 1.5 * HP + i * HP, hy - HP / 2 + j * HP, T + 2.5, mat(0xd4a92a, { metalness: 0.8, roughness: 0.3 }));
+
+// Measured total height 40 from heatsink bottom
+const ref = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(P, P, 40)), new THREE.LineBasicMaterial({ color: 0xff7b6b, transparent: true, opacity: 0.5 }));
+ref.position.set(0, 0, -HS.h + 20); scene.add(ref);
+
+const labels = [];
+const label = (txt, x, y, z, hyp) => { const d = document.createElement('div'); d.className = 'lbl'; d.textContent = txt; if (hyp) d.style.color = '#f0b54a'; document.body.appendChild(d); labels.push({ d, p: new THREE.Vector3(x, y, z) }); };
+label('Platine 50×50×1', -10, -h2 + 3, T + 0.5);
+label('Ø3, Mitte–Mitte 40', -PITCH / 2, -PITCH / 2, T + 3);
+label('Kühlkörper 50×32×22', 0, -HS.d / 2, -HS.h / 2);
+label('Klemme H14', TERM.x, termY, T + TERM.h + 4);
+label('Elko 330 µF H17', CAP.x, CAP.y, T + CAP.h + 3);
+label('Stiftleiste 2×4', hx, hy, T + 11);
+label('Messung 40 gesamt', h2, h2, 18);
+
+const views = { iso: [-90, -110, 80], top: [0, -0.01, 170], front: [0, -170, 0], side: [170, 0, 0], foto: [-70, -120, 110] };
+const setView = (v) => { camera.position.set(...views[v]); controls.target.set(0, 0, 0); controls.update(); };
+document.querySelectorAll('[data-v]').forEach((b) => b.onclick = () => setView(b.dataset.v));
+setView('iso');
+const lblBox = document.getElementById('labels');
+document.getElementById('frame').onchange = (e) => { ref.visible = e.target.checked; };
+
+function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+const v = new THREE.Vector3();
+renderer.setAnimationLoop(() => {
+  controls.update(); renderer.render(scene, camera);
+  for (const l of labels) {
+    v.copy(l.p).project(camera);
+    l.d.style.display = lblBox.checked && v.z < 1 ? '' : 'none';
+    l.d.style.left = (v.x + 1) / 2 * innerWidth + 'px'; l.d.style.top = (1 - v.y) / 2 * innerHeight + 'px';
+  }
+});
+</script>
+</body>
+</html>

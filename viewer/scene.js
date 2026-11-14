@@ -6,6 +6,7 @@ import {
   HM20, HM25, G_BODY, A_BODY, B_BODY, WALL_X, WALL_T, FLOOR_T, FLOOR_EXT, RIGID, HOLE_D, CLEVIS, FK32, AX_Y,
   BRACKET, SLED_BRACKET, RAIL, CARRIAGE, SLED_T, SLED_W, ROW_Z, G_Z, POTI_Z, G_ROD_END0, G_X0, B_ROD_END0, B_OFFSET,
   A_ROD_END0, A_X0, CB, PLATE, GUSSET, WALL_H, G_BRACKET_X, A_BRACKET_X, SLED_TOP, SLED, RAIL_X0, MITN_BACK0,
+  VALVE, VSTACK, valveY, REAR_GLANDS, FLANGE, TUB_H, SHELL_T, LID_T, LID_SCREWS,
 } from './boxgeo.js';
 
 const CYL_R = HM20.D / 2;
@@ -113,12 +114,9 @@ function tube(points, material, r = 3) {
 }
 
 // ---- minimal cylinder box: geometry in boxgeo.js, build plan zylinderbox.html
-const VB = { x0: -280, x1: 50, z0: 72, z1: 235, h: 110 };    // valve + electronics box
-const HOSE_Y = 72;
-const BULK = { y: AX_Y + 8, z0: CB.z0 + 12, dz: 12 };       // rear-wall bulkheads behind G
+const EB = { x0: -330, x1: -60, z0: 110, z1: 240, h: 75 };   // electronics case (valves moved into the cylinder box 2026-11-11)
 const ANCHOR = { G: WALL_X, R: WALL_X };
-const VALVE_X = { G: -240, A: -205, B: -170 };
-const VALVE_ZC = 150;
+const VALVE_ZC = CB.z0 - 70; // valve K (option): beside the cylinder box, place open
 const GB = { x: 820, pivotY: 250, leverLen: 120 };       // gearbox shift tower (schematic)
 const topGears = ['R', '1', '3', '5'];
 const botGears = [null, '2', '4', null];
@@ -142,14 +140,19 @@ function enclosure(b, title, part, note, floorMat, floorT) {
   world.add(lid);
   lids.push(lid);
 }
-enclosure(CB, 'Zylinderbox (Minimalmaß) – Grundplatte', `Alu ${FLOOR_T} mm, außen ~${CB.x1 - CB.x0} × ${CB.z1 - CB.z0} × ${CB.h} mm`, 'Minimalbox: Stirnwand (2 mm) = Seil-Widerlager, Zylinder von der Wand aus rückwärts angeordnet. Kraftfluss Zylinderfüße → Grundplatte → Stirnwand, deshalb Stirnwand fest mit der Grundplatte verbinden und abstützen.', mat.frame, FLOOR_T);
-enclosure(VB, 'Ventilbox – Boden', `Kunststoff/Alu-Gehäuse IP65, ~${VB.x1 - VB.x0} × ${VB.z1 - VB.z0} × ${VB.h} mm`, 'Ventile auf Verteiler, Steuergerät, Lufteingang, Strom/CAN. Getrennt von der Zylinderbox, verbunden über Schlauchbündel + Sensorkabel. Kann woanders im Fahrzeug sitzen (Schläuche kurz halten).', mat.dark, 4);
+enclosure(CB, 'Zylinderbox – Grundplatte', `Edelstahl ${FLOOR_T} mm, Wanne mit PC-Deckel, außen ~${CB.x1 - CB.x0} × ${CB.z1 - CB.z0} × ${CB.h} mm`, 'Edelstahl-Wanne wie die Relaisbox (Festgelegt 2026-11-11): Flansch 25 innen, Dichtband, PC-Deckel 5 mm. Minimalbox: Stirnwand (2 mm) = Seil-Widerlager, Zylinder von der Wand aus rückwärts angeordnet. Kraftfluss Zylinderfüße → Grundplatte → Stirnwand, deshalb Stirnwand fest mit der Grundplatte verbinden und abstützen.', mat.frame, FLOOR_T);
+enclosure(EB, 'Elektronik-Koffer – Boden', `Hartschalenkoffer, Modell offen (Platzhalter ${EB.x1 - EB.x0} × ${EB.z1 - EB.z0} × ${EB.h} mm)`, 'Nucleo-F091RC, 2 × HW-039 (Feststellbremse), PC817, LR7843-Treiber, CAN. Seit 2026-11-11 ohne Ventile (die sitzen in der Zylinderbox) → trocken, kein Druckausgleich. Ort offen.', mat.frame, 4);
 world.add(label('Zylinderbox', (CB.x0 + CB.x1) / 2, CB.h + 30, CB.z0, 16));
-world.add(label('Ventilbox', (VB.x0 + VB.x1) / 2, VB.h + 30, VB.z1, 16));
-// bulkheads: rear wall of the cylinder box (free space behind the shorter G), long wall of the valve box
-world.add(info(box(8, 22, 6 * BULK.dz + 8, mat.blue, CB.x0, BULK.y, BULK.z0 + 2.5 * BULK.dz), 'Schlauchdurchführung Zylinderbox (Rückwand)', 'Gummitülle für 6 Schläuche 6 mm', 'In der Rückwand, Lage siehe zylinderbox.html. Schläuche kurz halten (Hypothese: lange Schläuche machen G träger).'));
-world.add(info(box(110, 22, 8, mat.blue, -205, HOSE_Y, VB.z0), 'Schottleiste Ventilbox', '6 × Schottverschraubung blue C-line (6 mm)', 'Schlauchbündel G/A/B (je 2 Schläuche) zur Zylinderbox.'));
-world.add(info(cyl(7, CB.x0 - 10, CB.x0 + 2, mat.dark, 'x', BULK.y + 22, BULK.z0 + 2.5 * BULK.dz), 'Sensorkabel Zylinderbox', 'Kabelverschraubung M16, LiYCY 8 × 0,25 (M12-Stecker nur Option)', '4 Endlagensensoren + Poti (3 Adern) → Steuergerät in der Ventilbox.'));
+{ // flange 25 inward on all walls (stainless tub, 2026-11-11); lid (glass) sits on top at CB.h
+  const L = CB.x1 - CB.x0, W = CB.z1 - CB.z0, f = FLANGE.w, y = TUB_H - SHELL_T / 2;
+  for (const [w, d, x, z] of [[L, f, (CB.x0 + CB.x1) / 2, CB.z0 + f / 2], [L, f, (CB.x0 + CB.x1) / 2, CB.z1 - f / 2], [f, W - 2 * f, CB.x0 + f / 2, (CB.z0 + CB.z1) / 2], [f, W - 2 * f, CB.x1 - f / 2, (CB.z0 + CB.z1) / 2]])
+    world.add(info(box(w, SHELL_T, d, mat.alu, x, y, z), 'Flansch der Wanne', `Edelstahl, ${f} mm nach innen`, `${LID_SCREWS.length} Einnietmuttern M5 A2, Dichtband EPDM 10 × 5, darauf PC-Deckel ${LID_T} mm (Haken „Deckel“). Wie Relaisbox.`));
+}
+world.add(label('Elektronik-Koffer', (EB.x0 + EB.x1) / 2, EB.h + 30, EB.z1, 16));
+// rear-wall glands of the cylinder box (Vorschlag Claude 2026-11-11): air, sensor cable, coil cable
+REAR_GLANDS.y.forEach((y, i) => world.add(info(cyl(8, CB.x0 - 12, CB.x0 + 2, i === 0 ? mat.blue : mat.dark, 'x', y, REAR_GLANDS.z),
+  `Rückwand: ${REAR_GLANDS.what[i]}`, 'Kabelverschraubung M16 (Ø 16,5)', i === 0 ? 'Druckluft vom Filterregler, 8-mm-Schlauch (Klemmbereich der Verschraubung prüfen).' : i === 1 ? '4 Endlagensensoren + Poti → Elektronik-Koffer (LiYCY 8 × 0,25).' : '6 Ventilspulen, gemeinsames +12 V → Elektronik-Koffer (~7 Adern, Querschnitt offen).')));
+for (const y of REAR_GLANDS.y.slice(1)) world.add(tube([V(CB.x0 - 12, y, REAR_GLANDS.z), V(CB.x0 - 60, y, REAR_GLANDS.z), V(EB.x0 + 40, 40, EB.z0 - 40), V(EB.x0 + 40, 30, EB.z0 + 2)], mat.dark, 3.5));
 
 // self-made brackets (angle, Ø22.5 hole, nose thread M22 x 1.5 + RM-25 nut); foot points to the rear
 function bracket(parent, x, z, b, base, title, part) {
@@ -161,7 +164,7 @@ function bracket(parent, x, z, b, base, title, part) {
 
 // G cylinder (gate / Wählseil)
 world.add(info(cyl(CYL_R, G_X0, G_X0 + G_BODY, mat.alu, 'x', AX_Y, G_Z), 'Zylinder G (Gasse → Wählseil)', `Airtec HM-20-0${GATE_TRAVEL} (Standardhub, nicht begrenzt)`, `Wählt die Gasse R · 1/2 · 3/4 · 5. Gemessener Gassenweg R → 5 = 27 mm, Hub ${GATE_TRAVEL} mm lässt je 6,5 mm Reserve: R und 5 enden am Gassenanschlag im Getriebe, nicht am Zylinder. 1/2 und 3/4 werden „fliegend“ eingelegt. Kraft gemessen 9 kg ≈ 88 N, HM-20 bei 7 bar ≈ 198 N aus / 166 N ein (Katalog).`));
-bracket(world, G_BRACKET_X, G_Z, BRACKET, FLOOR_T, 'Lagerbock G', 'Alu-Winkel 60 × 60 × 6, Langlöcher M6');
+bracket(world, G_BRACKET_X, G_Z, BRACKET, FLOOR_T, 'Lagerbock G', 'Edelstahl-Winkel 60 × 60 × 6, Langlöcher M6');
 const gRod = cyl(ROD_R, 0, 80, mat.steel, 'x', AX_Y, G_Z);
 world.add(gRod);
 const gPortCap = V(G_X0 + 14, AX_Y + CYL_R, G_Z);
@@ -173,7 +176,7 @@ world.add(label('G – Gasse', G_X0 + G_BODY / 2, AX_Y + 40, G_Z - 10));
 
 // A cylinder (fixed) + B cylinder (on linear guide, pushed by A) → Schaltseil
 world.add(info(cyl(A_CYL_R, A_X0, A_X0 + A_BODY, mat.alu, 'x', AX_Y, ROW_Z), 'Zylinder A (Reihe, Kaskade hinten)', `Airtec HM-25-0${A_CYL_STROKE}, mit Anschlaghülse auf ${A_STROKE} mm begrenzt`, `Unten → Neutral, ${A_STROKE} mm = gemessener Weg 2/4 (9,0) → Neutral (Mittel 36,8). Die Hülse auf der Kolbenstange nimmt ${A_STOP} mm vom Einfahren weg; mit Passscheiben lässt sich Neutral genau einstellen. Ø 25, weil A beim Einlegen oben die volle Kraft von B abstützen muss (265 > 170 N bei 6 bar).`));
-bracket(world, A_BRACKET_X, ROW_Z, BRACKET, FLOOR_T, 'Lagerbock A', 'Alu-Winkel 60 × 60 × 6, Langlöcher M6');
+bracket(world, A_BRACKET_X, ROW_Z, BRACKET, FLOOR_T, 'Lagerbock A', 'Edelstahl-Winkel 60 × 60 × 6, Langlöcher M6');
 const aRod = cyl(A_ROD_R, 0, 80, mat.steel, 'x', AX_Y, ROW_Z);
 world.add(aRod);
 world.add(label('A', A_X0 + A_BODY / 2, AX_Y + 26, ROW_Z + 32));
@@ -185,13 +188,13 @@ bGroup.add(info(cyl(8, A_ROD_END0 - A_WF - A_STOP, A_ROD_END0, mat.red, 'x', AX_
 bGroup.add(info(cyl(9, A_ROD_END0, A_ROD_END0 + FK32, mat.dark, 'x', AX_Y, ROW_Z), 'Ausgleichskupplung A → B', 'Airtec FK-32 (M10 × 1,25, 71,5 mm)', 'Verbindet Kolbenstange A mit dem Schlitten von B. Gleicht Winkel- und Parallelversatz aus, damit nichts klemmt.'));
 bGroup.add(info(cyl(CYL_R, A_ROD_END0 + B_OFFSET, A_ROD_END0 + B_OFFSET + B_BODY, mat.alu, 'x', AX_Y, ROW_Z), 'Zylinder B (Reihe, Kaskade vorn)', `Airtec HM-20-0${B_STROKE} (Standardhub, nicht begrenzt)`, `Neutral → oben. Gemessen bis zum Gang: R 22,5 · 1 21,8 · 3 28,1 · 5 25,2 mm → Gang endet am Anschlag im Getriebe, B erreicht sein Hubende nie. Sensor „aus“ bei ~21 mm. Kraft gemessen 6–8 kg ≈ 78 N, HM-20 bei 7 bar ≈ 198 / 166 N.`));
 for (const cx of [SLED.x0 + CARRIAGE.len / 2, SLED.x1 - CARRIAGE.len / 2]) bGroup.add(box(CARRIAGE.len, 10, CARRIAGE.w, mat.steel, cx, SLED_TOP - SLED_T - 5, ROW_Z));
-bGroup.add(info(box(SLED.x1 - SLED.x0, SLED_T, SLED_W, mat.frame, (SLED.x0 + SLED.x1) / 2, SLED_TOP - SLED_T / 2, ROW_Z), 'Schlitten B', `Alu ${SLED_T} mm auf 2 × MGN12H`, 'Trägt Lagerbock B vorn und den Mitnehmer hinten. Alle Schrauben oben versenkt (B liegt knapp darüber).'));
-bracket(bGroup, SLED.x1, ROW_Z, SLED_BRACKET, SLED_TOP, 'Lagerbock B (auf dem Schlitten)', 'Alu-Winkel 40 × 40 × 5');
+bGroup.add(info(box(SLED.x1 - SLED.x0, SLED_T, SLED_W, mat.frame, (SLED.x0 + SLED.x1) / 2, SLED_TOP - SLED_T / 2, ROW_Z), 'Schlitten B', `Edelstahl ${SLED_T} mm auf 2 × MGN12H`, 'Trägt Lagerbock B vorn und den Mitnehmer hinten. Alle Schrauben oben versenkt (B liegt knapp darüber).'));
+bracket(bGroup, SLED.x1, ROW_Z, SLED_BRACKET, SLED_TOP, 'Lagerbock B (auf dem Schlitten)', 'Edelstahl-Winkel 40 × 40 × 5');
 {
   const m = new THREE.Group();
   m.add(box(SLED_BRACKET.t, SLED_BRACKET.h, SLED_BRACKET.w, mat.red, MITN_BACK0 + SLED_BRACKET.t / 2, SLED_TOP + SLED_BRACKET.h / 2, ROW_Z));
   m.add(box(SLED_BRACKET.foot - SLED_BRACKET.t, SLED_BRACKET.t, SLED_BRACKET.w, mat.red, MITN_BACK0 + SLED_BRACKET.t + (SLED_BRACKET.foot - SLED_BRACKET.t) / 2, SLED_TOP + SLED_BRACKET.t / 2, ROW_Z));
-  bGroup.add(info(m, 'Mitnehmer', 'Alu-Winkel 40 × 40 × 5, Gewinde M10 × 1,25', 'FK-32 ist eingeschraubt und mit RL-25 gekontert. A schiebt hier den Schlitten mit B.'));
+  bGroup.add(info(m, 'Mitnehmer', 'Edelstahl-Winkel 40 × 40 × 5, Gewinde M10 × 1,25', 'FK-32 ist eingeschraubt und mit RL-25 gekontert. A schiebt hier den Schlitten mit B.'));
 }
 const bRod = cyl(ROD_R, 0, 80, mat.steel, 'x', AX_Y, ROW_Z);
 bGroup.add(bRod);
@@ -260,22 +263,26 @@ const sensorMats = {
   Bout: sensor(bGroup, A_ROD_END0 + B_OFFSET + B_BODY - 20 - (B_STROKE - 21), ROW_Z, 'Sensor B ausgefahren (bei ~21 mm)'),
 };
 
-// valves on manifold (long axis along Z)
-world.add(info(box(150, 20, 150, mat.frame, VALVE_X.A + 17, 16, VALVE_ZC), 'Ventilplatte / Verteiler', 'Airtec Reihenleiste (Option)', 'Gemeinsame Druckversorgung P (1), Abluft über Schalldämpfer 40-501-18.'));
+// valve stack in the cylinder box (Festgelegt 2026-11-11, variant B): lying flat, G at the bottom, bolted through
 const coilMats = {};
 const valvePorts = {};
-for (const [k, x] of Object.entries(VALVE_X)) {
-  world.add(info(box(22, 30, 100, mat.valve, x, 41, VALVE_ZC), `Ventil ${k}`, 'Airtec M-04-533-HN-441', '5/3-Wege, Mittelstellung entlüftet, 12 V DC / 4,2 W, G1/8. Spule 14 (orange) = ausfahren, Spule 12 (cyan) = einfahren, keine Spule = drucklos.'));
+const VZ = { body: VSTACK.zOut + VALVE.body / 2, coil: (VSTACK.zOut + VALVE.body + VSTACK.zIn) / 2, coilD: VALVE.H - VALVE.body };
+['G', 'A', 'B'].forEach((k, i) => {
+  const y = valveY(i) + VALVE.W / 2, x0 = VSTACK.x0;
+  world.add(info(box(160, VALVE.W, VALVE.body, mat.valve, VSTACK.cx, y, VZ.body), `Ventil ${k}`, 'Airtec M-04-533-HN-441', '5/3-Wege, Mittelstellung entlüftet, 12 V DC / 4,2 W, G1/8. Liegt flach im Stapel hinten in der Zylinderbox. Spule 14 (orange) = ausfahren, Spule 12 (cyan) = einfahren, keine Spule = drucklos.'));
   const c14 = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, emissive: 0x000000 });
   const c12 = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, emissive: 0x000000 });
-  world.add(info(box(26, 30, 26, c14, x, 41, VALVE_ZC - 63), `Spule 14 Ventil ${k}`, 'Stecker 28-ST-01', 'Bestromt = Zylinder ausfahren.'));
-  world.add(info(box(26, 30, 26, c12, x, 41, VALVE_ZC + 63), `Spule 12 Ventil ${k}`, 'Stecker 28-ST-01', 'Bestromt = Zylinder einfahren.'));
+  world.add(info(box(30, VALVE.W, VZ.coilD, c14, x0 + 33, y, VZ.coil), `Spule 14 Ventil ${k}`, 'Stecker 28-ST-01', 'Bestromt = Zylinder ausfahren.'));
+  world.add(info(box(30, VALVE.W, VZ.coilD, c12, x0 + 147, y, VZ.coil), `Spule 12 Ventil ${k}`, 'Stecker 28-ST-01', 'Bestromt = Zylinder einfahren.'));
+  for (const xs of [x0 + 9, x0 + 171]) world.add(box(18, 18, 22, mat.dark, xs, y, VSTACK.zIn - 15));
   coilMats[k] = { ext: c14, ret: c12 };
-  valvePorts[k] = { cap: V(x, 56, VALVE_ZC - 15), rod: V(x, 56, VALVE_ZC + 15) };
-  world.add(label(k, x, 80, VALVE_ZC, 12, '#ffd27a'));
-}
-world.add(info(cyl(7, VB.x0 - 15, VB.x0 + 10, mat.blue, 'x', 30, VALVE_ZC), 'Druckluft-Eingang (Schottverschraubung)', 'blue C-line', 'Vom Filterregler, Schaltdruck max. 10 bar.'));
-world.add(tube([V(VB.x0 + 10, 30, VALVE_ZC), V(VB.x0 + 25, 25, VALVE_ZC), V(VALVE_X.G - 30, 18, VALVE_ZC)], mat.supplyHose, 3));
+  valvePorts[k] = { cap: V(VSTACK.cx - 8, y, VSTACK.zOut + 47), rod: V(VSTACK.cx + 8, y, VSTACK.zOut + 47) };
+  for (const dx of [-16, 16]) world.add(cyl(6, VSTACK.zOut - 25, VSTACK.zOut, mat.alu, 'z', VSTACK.cx + dx, y));
+  world.add(label(k, VSTACK.cx, y, VSTACK.zOut - 34, 11, '#ffd27a'));
+});
+for (const [dx, dz] of VALVE.holes) world.add(cyl(2, FLOOR_T, valveY(2) + VALVE.W + 4, mat.steel, 'y', VSTACK.cx + dx, VSTACK.zOut + VALVE.body - dz));
+world.add(label('Ventilstapel', VSTACK.cx, valveY(2) + VALVE.W + 22, VSTACK.zOut + 20, 12));
+world.add(tube([V(CB.x0 + 2, REAR_GLANDS.y[0], REAR_GLANDS.z), V(VSTACK.x0 - 10, REAR_GLANDS.y[0], REAR_GLANDS.z), V(VSTACK.x0 + 40, 20, VSTACK.zOut - 12), V(VSTACK.cx, 20, VSTACK.zOut - 8)], mat.supplyHose, 3));
 
 // ---- clutch: pedal outside the box, optional cylinder K + valve K (auto mode only)
 const PEDAL = { x: 60, pivotY: 270, pivotZ: -360, arm: 220 }; // behind the box, out of the box view
@@ -302,7 +309,7 @@ kGroup.add(kRod);
 kGroup.add(label('K', PEDAL.x, K_Y + 40, K_BODY0 + K_BODY / 2, 12));
 const kValveX = -135;
 const kCoil = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, emissive: 0x000000 });
-kGroup.add(info(box(22, 30, 100, mat.valve, kValveX, 41, VALVE_ZC), 'Ventil K (Kupplung)', 'Vorschlag: Airtec M-04-511-HN-441 (5/2 monostabil)', 'Spule an = Pedal getreten. Spule aus = Federrückstellung, Pedal kommt gedrosselt zurück.'));
+kGroup.add(info(box(22, 30, 100, mat.valve, kValveX, 41, VALVE_ZC), 'Ventil K (Kupplung, Option)', 'Vorschlag: Airtec M-04-511-HN-441 (5/2 monostabil)', 'Ort offen (Stapel in der Zylinderbox hat nur 3 Plätze). Spule an = Pedal getreten. Spule aus = Federrückstellung, Pedal kommt gedrosselt zurück.'));
 kGroup.add(info(box(26, 30, 26, kCoil, kValveX, 41, VALVE_ZC - 63), 'Spule Ventil K', 'Stecker 28-ST-01', 'Bestromt = Kupplung trennen.'));
 kGroup.add(label('K', kValveX, 80, VALVE_ZC, 12, '#ffd27a'));
 const kHose = tube([V(kValveX, 56, VALVE_ZC - 15), V(kValveX, 100, VALVE_ZC - 80), V(-60, 135, CB.z0 + 10), V(PEDAL.x, 120, CB.z0 - 15), V(PEDAL.x, K_Y + 30, K_BODY0 + K_BODY - 14), V(PEDAL.x, K_Y + CYL_R, K_BODY0 + K_BODY - 14)], hoseMat.vent, 2.5);
@@ -310,9 +317,9 @@ kGroup.add(kHose);
 kGroup.visible = false;
 
 // controller
-world.add(info(box(120, 40, 90, new THREE.MeshStandardMaterial({ color: 0x2b5d34, roughness: 0.6 }), -40, 26, 160), 'Steuergerät', 'offen (Mikrocontroller + 6 MOSFET-Treiber)', 'Liest Poti + 4 Endlagensensoren, schaltet 6 Spulen (je ~0,35 A bei 12 V), CAN SHIFT.SELECT 0x150.'));
-world.add(label('Steuergerät', -40, 75, 160, 11));
-world.add(info(cyl(8, VB.x0 - 15, VB.x0 + 10, mat.dark, 'x', 30, 200), 'Kabelverschraubung Strom/CAN', '—', '12 V, GND, CAN-H/L.'));
+world.add(info(box(120, 40, 90, new THREE.MeshStandardMaterial({ color: 0x2b5d34, roughness: 0.6 }), -195, 26, 175), 'Steuergerät', 'Nucleo-F091RC (Festgelegt 2026-11-10) + LR7843-Treiber, PC817', 'Liest Poti + 4 Endlagensensoren, schaltet 6 Spulen (je ~0,35 A bei 12 V), CAN SHIFT.SELECT 0x150.'));
+world.add(label('Steuergerät', -195, 75, 175, 11));
+world.add(info(cyl(8, EB.x0 - 15, EB.x0 + 10, mat.dark, 'x', 30, 200), 'Kabelverschraubung Strom/CAN', '—', '12 V, GND, CAN-H/L.'));
 
 // cables (outer sleeves, static) to the gearbox shift tower
 const sleeveMat = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.8 });
@@ -371,7 +378,7 @@ supply.add(label('Filterregler', -500, 150, -250));
 
 supply.add(tube([V(-675, 40, -420), V(-650, 40, -420), V(-630, 40, -420), V(-605, 60, -430)], mat.supplyHose, 4));
 supply.add(tube([V(-20, 120, -430), V(0, 180, -400), V(-300, 200, -330), V(-500, 140, -260), V(-500, 125, -250)], mat.supplyHose, 4));
-const supplyLink = tube([V(-625, 95, -350), V(-560, 60, -250), V(-420, 30, 60), V(VB.x0 - 60, 30, VALVE_ZC), V(VB.x0 - 15, 30, VALVE_ZC)], mat.supplyHose, 4);
+const supplyLink = tube([V(-625, 95, -350), V(-560, 60, -250), V(-500, 30, CB.z0 - 60), V(CB.x0 - 60, REAR_GLANDS.y[0], REAR_GLANDS.z), V(CB.x0 - 12, REAR_GLANDS.y[0], REAR_GLANDS.z)], mat.supplyHose, 4);
 scene.add(supplyLink);
 
 // ---- dynamic hoses valve -> cylinder
@@ -382,9 +389,8 @@ for (const k of ['G', 'A', 'B']) for (const port of ['cap', 'rod']) {
   hoses[k + port] = m;
 }
 function routeHose(mesh, from, to, slot) {
-  const bz = BULK.z0 + slot * BULK.dz;
-  const pts = [from.clone(), V(from.x, HOSE_Y + 10, from.z - 30), V(from.x, HOSE_Y, VB.z0 + 4), V(CB.x0 - 30, HOSE_Y, VB.z0 - 12),
-    V(CB.x0 - 30, BULK.y, bz), V(CB.x0 + 12, BULK.y, bz), V((CB.x0 + to.x) / 2, CB.h - 8, (bz + to.z) / 2), V(to.x, to.y + 12, to.z), to.clone()];
+  const up = CB.h - 14 - slot * 2;
+  const pts = [from.clone(), V(from.x, from.y, from.z + 14), V(from.x + (to.x - from.x) * 0.3, up, (from.z + to.z) / 2), V(to.x, to.y + 12, to.z), to.clone()];
   mesh.geometry.dispose();
   mesh.geometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 48, 2.5, 6);
 }

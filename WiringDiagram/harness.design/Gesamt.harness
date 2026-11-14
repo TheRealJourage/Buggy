@@ -571,6 +571,18 @@
         {
           "id": "hA_k48",
           "signal": "E3 ABS-Lampe"
+        },
+        {
+          "id": "Vlkur3",
+          "signal": "E4 Kupplung S1 (Pull-up)"
+        },
+        {
+          "id": "MS1fXh",
+          "signal": "E5 Kupplung S2 (Pull-up)"
+        },
+        {
+          "id": "JmI4mA",
+          "signal": "GND Kupplung"
         }
       ]
     },
@@ -1046,6 +1058,28 @@
         {
           "id": "HECgtC",
           "signal": "CAN-L"
+        }
+      ]
+    },
+    {
+      "id": "Tu9BwI",
+      "label": "Kupplungsschalter S1/S2 (Pedal)",
+      "schematicPosition": {
+        "x": 1500,
+        "y": 900
+      },
+      "cavities": [
+        {
+          "id": "nA_bMM",
+          "signal": "S1 (loest bei Beginn des Tretens)"
+        },
+        {
+          "id": "Y8H2J_",
+          "signal": "S2 (loest erst ganz getreten)"
+        },
+        {
+          "id": "5tXE8d",
+          "signal": "Masse gemeinsam"
         }
       ]
     }
@@ -2891,6 +2925,43 @@
         "handle": "6QxmK3"
       },
       "stripeColor": "White"
+    },
+    {
+      "id": "6C0lt9",
+      "color": "Violet",
+      "source": {
+        "id": "Tu9BwI",
+        "handle": "nA_bMM"
+      },
+      "target": {
+        "id": "Caf3c_",
+        "handle": "Vlkur3"
+      }
+    },
+    {
+      "id": "xwR3P1",
+      "color": "Violet",
+      "source": {
+        "id": "Tu9BwI",
+        "handle": "Y8H2J_"
+      },
+      "target": {
+        "id": "Caf3c_",
+        "handle": "MS1fXh"
+      },
+      "stripeColor": "White"
+    },
+    {
+      "id": "hcNrTm",
+      "color": "Brown",
+      "source": {
+        "id": "Tu9BwI",
+        "handle": "5tXE8d"
+      },
+      "target": {
+        "id": "Caf3c_",
+        "handle": "JmI4mA"
+      }
     }
   ]
 }

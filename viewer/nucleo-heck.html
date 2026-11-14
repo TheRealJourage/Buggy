@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buggy – Nucleo Relaisbox Lötplan</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 12px; background: #111; color: #eee; font-size: 16px; line-height: 1.4; max-width: 1500px; }
+  h1 { font-size: 21px; margin: 4px 0 6px; }
+  h2 { font-size: 18px; margin: 26px 0 8px; color: #8cf; border-bottom: 1px solid #333; padding-bottom: 4px; }
+  p, li { color: #ddd; }
+  a { color: #8cf; }
+  code { background: #1d1d1d; border-radius: 4px; font-size: 14px; padding: 1px 4px; }
+  .hint { color: #aaa; font-size: 14px; }
+  .hyp { color: #e8c547; }
+  .warn { background: #3a2a10; border-left: 4px solid #e8a33d; padding: 8px 10px; margin: 10px 0; font-size: 15px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .bar button { background: #222; color: #ddd; border: 1px solid #444; border-radius: 6px; padding: 6px 10px; font-size: 14px; cursor: pointer; }
+  .bar button.on { background: #24425a; border-color: #8cf; color: #fff; }
+  .svgwrap { overflow: auto; background: #181818; border-radius: 8px; padding: 6px; margin: 8px 0; }
+  #plan { display: block; }
+  #plan text { font-family: system-ui, sans-serif; fill: #ddd; font-size: 11px; }
+  #plan .w { cursor: pointer; }
+  #plan .dim { opacity: 0.15; }
+  #info { min-height: 2.8em; background: #1d1d1d; border-radius: 6px; padding: 6px 10px; font-size: 15px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 6px 0; }
+  th, td { text-align: left; padding: 4px 6px; border-bottom: 1px solid #2a2a2a; vertical-align: top; }
+  th { color: #8cf; font-weight: 600; }
+  tr.sel td { background: #24425a; }
+  tr.done td { opacity: 0.45; }
+  .sw { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: -1px; border: 1px solid #555; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 600px), 1fr)); gap: 12px; }
+  .card { background: #181818; border: 1px solid #2c2c2c; border-radius: 8px; padding: 8px 10px; scroll-margin-top: 10px; }
+  .card.sel { border-color: #8cf; box-shadow: 0 0 0 2px #24425a; }
+  .card h3 { margin: 2px 0 4px; font-size: 16px; color: #fff; }
+  .card svg { display: block; width: 100%; height: auto; background: #141414; border-radius: 6px; }
+  .card svg text { font-family: system-ui, sans-serif; fill: #ddd; font-size: 11px; }
+  .card ul { margin: 6px 0 2px; padding-left: 18px; font-size: 14px; }
+  .card li { margin: 1px 0; }
+  .st { font-size: 12px; padding: 0 5px; border-radius: 4px; margin-left: 4px; white-space: nowrap; }
+  .st.b { background: #1f3a1f; color: #9be09b; }
+  .st.k { background: #4a1f1f; color: #ffb0b0; }
+  .st.p { background: #3a3315; color: #e8c547; }
+  .st.o { background: #1f2f4a; color: #9cc3ff; }
+  #plan .off { opacity: 0.07; }
+  #plan.vbot #lparts { opacity: 0.25; }
+  #plan.vbot #nucleo { opacity: 0.3; }
+  #plan.focus #nucleo { opacity: 0.35; }
+  #plan.nonuc #nucleo { display: none; }
+  #sys button { font-weight: 600; }
+  #steps { background: #181818; border-radius: 8px; padding: 2px 12px 6px; margin: 8px 0; }
+  #steps:empty { display: none; }
+  ol.steps { padding-left: 22px; margin: 4px 0; }
+  ol.steps li { margin: 4px 0; font-size: 15px; cursor: pointer; }
+  ol.steps li.done { opacity: 0.45; }
+  ol.steps li.sel { background: #24425a; }
+</style>
+</head>
+<body>
+<h1>Nucleo-F446RE in der Relaisbox – Lötplan</h1>
+<p class="hint">Stand 2026-11-10. <span class="hyp"><b>Pinbelegung = Vorschlag Claude vom 2026-11-07, nicht festgelegt</b></span> (<code>Relaisbox.md</code>, Tabelle auch in <a href="relaistreiber.html#nucleo">relaistreiber.html</a>). <span class="hyp">Layout, Bauteile und Werte = Vorschlag Claude (gerechnet, Netze per Skript geprüft, nicht aufgebaut). Maße der Module und des Nucleo = Hypothese.</span></p>
+<p>Lochraster mit Einzel-Lötaugen (Punktraster 2,54 mm), ca. <b>105 × 110 mm</b> (41 × 42 Löcher). Lochangaben <b>Sp|Re</b> = Spalte|Reihe, wie an den Linealen, Bauteilseite, oben links = 1|1. <b>Dicke gerade Linien</b> = Lötbrücke/Silberdraht unten · <b>dünne gebogene Linien</b> = isolierter Draht unten · <b>gestrichelt</b> = Leitung nach außen.</p>
+
+<div class="warn"><b>Vor dem Löten prüfen (Annahmen im Plan):</b> ① Pin 1 der Morpho-Leisten auf der USB-Seite, ungerade Pins links (Test: CN7, 4. Stiftreihe von der USB-Seite, der Stift innen piept gegen GND). ② Abstand der inneren Stiftreihen CN7 ↔ CN10 = 24 Raster (61 mm), mit Messschieber prüfen; sonst zwei Platinen. ③ Pinfolge Pegelwandler- und CAN-Modul am eigenen Modul ablesen.</div>
+
+<div class="bar" id="sys"></div>
+<div class="bar">
+  <button id="vTop" class="on">Bauteilseite (von oben)</button>
+  <button id="vBot">Lötseite (von unten, gespiegelt)</button>
+  <button id="nuc" class="on">Nucleo zeigen</button>
+  <button id="grid">Raster zeigen</button>
+  <span style="width:14px"></span>
+  <button data-z="1" class="on z">Ganz</button>
+  <button data-z="1.7" class="z">170 %</button>
+  <button data-z="2.6" class="z">260 %</button>
+</div>
+<div id="info">Oben eine Schaltung wählen → nur diese wird gezeigt, mit Schrittliste. Oder Bauteil/Leitung antippen.</div>
+<div class="svgwrap" id="wrap"><svg id="plan" viewBox="0 0 1500 1000" role="img" aria-label="Lötplan Nucleo-F446RE Relaisbox"></svg></div>
+<div id="steps"></div>
+
+<h2>Bestückungsliste</h2>
+<table id="parts"><thead><tr><th>✓</th><th>Teil</th><th>Wert</th><th>Löcher</th><th>Lage / Polung</th><th>Schaltung</th></tr></thead><tbody></tbody></table>
+
+<h2>Drähte zu den Buchsenleisten (Unterseite)</h2>
+<table id="list"><thead><tr><th>✓</th><th>Leiste</th><th>Signal</th><th>Draht</th><th>nach Loch</th><th>Zweck</th></tr></thead><tbody></tbody></table>
+<p class="hint">Nicht verwenden: PA13/PA14 (SWD), PA2/PA3 (USB-Seriell), PC14/PC15 und PH0 (ab Rev. C-02), BOOT0. Reserve: PC12, PD2, PC2, PC3 (ADC), PC6–PC9 (PWM), PC13 (Taster B1), PH1 (ab C-02).</p>
+
+<h2>Bündel A/B/C (Lötliste)</h2>
+<table id="blist"><thead><tr><th>✓</th><th>Leiste</th><th>Signal</th><th>Ader</th><th>Ziel</th></tr></thead><tbody></tbody></table>
+<div class="warn"><b>Weiß ist an der Treiberplatine dreifach belegt</b> (Masse, 12 V COM, Eingang 4). Die 12 V an COM dürfen nie an einen Nucleo-Pin kommen. Masse und COM vor dem Verlöten markieren.</div>
+
+<h2 id="bauteile">Schaltbild pro Leitung</h2>
+<p class="hint">Dieselben Schaltungen als Schaltplan. Bestand laut <code>Lager/Lagerbestand.md</code>: <span class="st b">Bestand</span> vorhanden · <span class="st p">prüfen</span> Menge/Wert unklar · <span class="st k">kaufen</span> fehlt.</p>
+<div class="cards" id="cards"></div>
+
+<h2>Offen, bevor gelötet wird</h2>
+<ul>
+  <li><b>Warnblinker ohne Zündung:</b> Der Nucleo hängt an der kleinen 5-V-Schiene (nur bei Zündung oder Parkmodus). Ohne Zündung wirkt der Schalter an PA1 nicht. Weckfunktion laut <code>Relaisbox.md</code> offen, muss vor dem Einbau gelöst sein (Pflicht).</li>
+  <li class="hyp">Warnblinkschalter: gezeichnet als Schalter gegen Masse (Annahme, nicht festgelegt).</li>
+  <li class="hyp">Abgriff Batteriespannung: Vorschlag Eingang des kleinen 5-V-Wandlers (Spannung nur, wenn der Nucleo läuft).</li>
+  <li>Tankgeber: welches Ende leer ist, steht als Messung in <code>To-Do.md</code>. 120-Ω-Abschluss am CAN-Modul: hängt am Busende.</li>
+  <li class="hyp">TVS 1.5KE24A: Drähte vermutlich zu dick (ca. 1,2 mm) → zwei Löcher auf 1,3 mm aufbohren.</li>
+</ul>
+
+<h2>Stückliste (Summe)</h2>
+<table id="bom"><thead><tr><th>Bauteil</th><th>Anzahl</th><th>Bestand</th><th>Für</th></tr></thead><tbody></tbody></table>
+
+<h2>Reihenfolge (Vorschlag Claude)</h2>
+<ol>
+  <li>Prüfungen oben (10 Min), Board-Revision ablesen („MB1136 C-0x“).</li>
+  <li>Buchsenleisten 2 × 19 einlöten, Nucleo dabei aufgesteckt.</li>
+  <li>Knopf „Schienen“: GND- und 3,3-V-Schiene als Silberdraht.</li>
+  <li>Dann je Knopf eine Schaltung von oben nach unten abarbeiten; nach jeder Schaltung Durchgang gegen die Nachbarlöcher prüfen.</li>
+  <li>Zuletzt Knopf „Bündel“ (21 Adern der Treiberplatine an CN10).</li>
+  <li>Vor dem ersten Einschalten: ohne Nucleo 5 V anlegen, an CN7-6 messen; zwischen 5 V, 3,3 V und GND darf es nicht piepen. <span class="hyp">Jumper für externe 5 V nach UM1724 (vermutlich JP5, nicht geprüft).</span></li>
+</ol>
+
+<script>
+// ---------- part cards (Vorschlag Claude 2026-11-10) ----------
+const B = 'b', K = 'k', PR = 'p', O = 'o';
+const STXT = { b: 'Bestand', k: 'kaufen', p: 'prüfen', o: 'bestellt' };
+// chain items: ['P', pin, header] ['R', value] ['D', value, 'r'|'l'] ['N', [shunts]] ['M', title, [lines]] ['E', [label lines]]
+// shunt: { t: 'R'|'C'|'CP'|'D'|'Z', v, to: '3V3'|'GND'|other label }
+function chain(items) {
+  const Y = 100;
+  let x = 10, s = '', maxX = 0;
+  const wire = (x1, x2) => `<path d="M${x1} ${Y}H${x2}" stroke="#bbb" stroke-width="2"/>`;
+  const lab = (x, y, t, a = 'middle', c = '#e8c547') => `<text x="${x}" y="${y}" text-anchor="${a}" style="fill:${c};font-size:11px">${t}</text>`;
+  const rail = (x, y, to) => {
+    if (to === 'GND') return `<path d="M${x - 9} ${y}h18M${x - 6} ${y + 4}h12M${x - 3} ${y + 8}h6" stroke="#bbb" stroke-width="2"/>`;
+    const c = to === '3V3' ? '#ff8fc8' : '#e8a33d';
+    return `<path d="M${x - 10} ${y}h20" stroke="${c}" stroke-width="3"/>` + lab(x, y - 5, to === '3V3' ? '3,3 V' : to, 'middle', c);
+  };
+  function shunt(xn, sh) {
+    let r = `<circle cx="${xn}" cy="${Y}" r="3.5" fill="#bbb"/>`;
+    const up = sh.to !== 'GND', d = up ? -1 : 1;
+    const a = Y + d * 14, b = Y + d * 48, e = Y + d * 60;
+    r += `<path d="M${xn} ${Y}V${a}M${xn} ${b}V${e}" stroke="#bbb" stroke-width="2"/>`;
+    const m = (a + b) / 2;
+    if (sh.t === 'R') r += `<rect x="${xn - 7}" y="${Math.min(a, b)}" width="14" height="34" rx="2" fill="#c9a36b" stroke="#eee"/>`;
+    if (sh.t === 'C' || sh.t === 'CP') {
+      r += `<path d="M${xn} ${a}V${m - 4}M${xn} ${m + 4}V${b}" stroke="#bbb" stroke-width="2"/><path d="M${xn - 11} ${m - 4}h22M${xn - 11} ${m + 4}h22" stroke="#eee" stroke-width="3"/>`;
+      if (sh.t === 'CP') r += lab(xn - 14, m - 6 * (up ? -1 : 1) + 3, '+', 'middle', '#fff');
+    }
+    if (sh.t === 'D' || sh.t === 'Z') {
+      // triangle points toward the rail when sh.dir === 'out', toward the node when 'in'
+      const out = sh.dir !== 'in', tipY = out ? m + d * 9 : m - d * 9, baseY = out ? m - d * 9 : m + d * 9;
+      r += `<path d="M${xn} ${a}V${b}" stroke="#bbb" stroke-width="2"/><path d="M${xn - 9} ${baseY}L${xn + 9} ${baseY}L${xn} ${tipY}Z" fill="#eee"/>`;
+      r += sh.t === 'Z' ? `<path d="M${xn - 12} ${tipY + 4}L${xn - 9} ${tipY}H${xn + 9}L${xn + 12} ${tipY - 4}" fill="none" stroke="#eee" stroke-width="2.5"/>` : `<path d="M${xn - 9} ${tipY}h18" stroke="#eee" stroke-width="2.5"/>`;
+    }
+    r += lab(xn + 12, m + 4, sh.v, 'start');
+    r += rail(xn, e, sh.to);
+    return r;
+  }
+  items.forEach(it => {
+    const k = it[0];
+    if (k === 'P') {
+      s += `<rect x="${x}" y="${Y - 20}" width="88" height="40" rx="4" fill="#ecebe5" stroke="#999"/>`;
+      s += `<text x="${x + 44}" y="${Y - 3}" text-anchor="middle" style="fill:#000;font-weight:700;font-size:13px">${it[1]}</text>`;
+      s += `<text x="${x + 44}" y="${Y + 12}" text-anchor="middle" style="fill:#444;font-size:10px">${it[2]}</text>`;
+      x += 88;
+    } else if (k === 'R') {
+      s += wire(x, x + 16) + `<rect x="${x + 16}" y="${Y - 7}" width="40" height="14" rx="2" fill="#c9a36b" stroke="#eee"/>` + wire(x + 56, x + 74) + lab(x + 36, Y - 13, it[1]);
+      x += 74;
+    } else if (k === 'D') {
+      const r = it[2] === 'r', a = x + 18, b = x + 40;
+      s += wire(x, a) + wire(b, b + 20);
+      s += r ? `<path d="M${a} ${Y - 9}L${a} ${Y + 9}L${b} ${Y}Z" fill="#eee"/><path d="M${b} ${Y - 9}v18" stroke="#eee" stroke-width="2.5"/>`
+             : `<path d="M${b} ${Y - 9}L${b} ${Y + 9}L${a} ${Y}Z" fill="#eee"/><path d="M${a} ${Y - 9}v18" stroke="#eee" stroke-width="2.5"/>`;
+      s += lab(x + 29, Y - 14, it[1]);
+      x += 60;
+    } else if (k === 'N') {
+      const n = it[1].length, step = 92;
+      s += wire(x, x + 20 + (n - 1) * step + 20);
+      it[1].forEach((sh, i) => { s += shunt(x + 20 + i * step, sh); });
+      x += 20 + (n - 1) * step + 20;
+    } else if (k === 'M') {
+      const lines = it[2], h = 30 + lines.length * 13;
+      s += wire(x, x + 12) + `<rect x="${x + 12}" y="${Y - h / 2}" width="190" height="${h}" rx="5" fill="#1d2a3a" stroke="#8cf"/>`;
+      s += `<text x="${x + 107}" y="${Y - h / 2 + 17}" text-anchor="middle" style="font-weight:700;fill:#fff">${it[1]}</text>`;
+      lines.forEach((l, i) => { s += `<text x="${x + 107}" y="${Y - h / 2 + 32 + i * 13}" text-anchor="middle" style="font-size:10px;fill:#bcd">${l}</text>`; });
+      x += 202;
+    } else if (k === 'E') {
+      s += `<path d="M${x} ${Y}H${x + 34}" stroke="#bbb" stroke-width="2" stroke-dasharray="5 4"/><path d="M${x + 34} ${Y - 5}l8 5l-8 5z" fill="#bbb"/>`;
+      it[1].forEach((l, i) => { s += `<text x="${x + 48}" y="${Y + 4 + (i - (it[1].length - 1) / 2) * 14}" style="font-size:12px">${l}</text>`; });
+      maxX = x + 48 + Math.max(...it[1].map(l => l.length)) * 6.3;
+      x += 48;
+    }
+  });
+  const w = Math.max(maxX, x) + 10;
+  return `<svg viewBox="0 0 ${w} 200" style="max-width:${Math.round(w * 1.15)}px">${s}</svg>`;
+}
+
+const IN_DIODE = (pin, hdr, ext) => chain([['P', pin, hdr], ['N', [{ t: 'R', v: '10 kΩ', to: '3V3' }, { t: 'C', v: '100 nF', to: 'GND' }]], ['D', '1N5819', 'r'], ['E', ext]]);
+const IN_DIV = (pin, hdr, ext) => chain([['P', pin, hdr], ['N', [{ t: 'D', v: '1N5819', to: '3V3' }, { t: 'R', v: '2 kΩ', to: 'GND' }, { t: 'C', v: '100 nF', to: 'GND' }]], ['R', '10 kΩ'], ['E', ext]]);
+const P_IN_DIODE = [['Schottky 1N5819', 1, B], ['R 10 kΩ', 1, PR], ['C 100 nF', 1, K]];
+const P_IN_DIV = [['Schottky 1N5819', 1, B], ['R 10 kΩ', 1, PR], ['R 2 kΩ', 1, PR], ['C 100 nF', 1, K]];
+
+// transistor stages drawn by hand
+function pwmStage() {
+  const Y = 135;
+  let s = '';
+  const lab = (x, y, t, a = 'middle', c = '#e8c547') => `<text x="${x}" y="${y}" text-anchor="${a}" style="fill:${c};font-size:11px">${t}</text>`;
+  const gnd = (x, y) => `<path d="M${x} ${y - 10}V${y}M${x - 9} ${y}h18M${x - 6} ${y + 4}h12M${x - 3} ${y + 8}h6" stroke="#bbb" stroke-width="2"/>`;
+  s += `<rect x="10" y="${Y - 20}" width="88" height="40" rx="4" fill="#ecebe5" stroke="#999"/><text x="54" y="${Y - 3}" text-anchor="middle" style="fill:#000;font-weight:700;font-size:13px">PA15</text><text x="54" y="${Y + 12}" text-anchor="middle" style="fill:#444;font-size:10px">CN7-17</text>`;
+  s += `<path d="M98 ${Y}H114M154 ${Y}H236" stroke="#bbb" stroke-width="2"/><rect x="114" y="${Y - 7}" width="40" height="14" rx="2" fill="#c9a36b" stroke="#eee"/>` + lab(134, Y - 13, '1 kΩ');
+  // base pull-down
+  s += `<circle cx="190" cy="${Y}" r="3.5" fill="#bbb"/><path d="M190 ${Y}V${Y + 14}M190 ${Y + 48}V${Y + 62}" stroke="#bbb" stroke-width="2"/><rect x="183" y="${Y + 14}" width="14" height="34" rx="2" fill="#c9a36b" stroke="#eee"/>` + lab(202, Y + 35, '10 kΩ', 'start') + gnd(190, Y + 72);
+  // NPN
+  s += `<circle cx="262" cy="${Y}" r="26" fill="none" stroke="#666"/><path d="M236 ${Y}H250M250 ${Y - 16}V${Y + 16}" stroke="#eee" stroke-width="2.5"/>`;
+  s += `<path d="M250 ${Y - 7}L272 ${Y - 24}V${Y - 60}M250 ${Y + 7}L272 ${Y + 24}V${Y + 62}" stroke="#eee" stroke-width="2" fill="none"/><path d="M272 ${Y + 24}l-10 -1l5 -7z" fill="#eee"/>`;
+  s += gnd(272, Y + 72) + lab(300, Y + 4, 'BC547B', 'start', '#fff') + lab(300, Y + 18, 'C-B-E messen', 'start', '#aaa');
+  // collector node, pull-up to Kl.15, series 100R, TVS
+  s += `<path d="M272 ${Y - 60}H460" stroke="#bbb" stroke-width="2"/><circle cx="330" cy="${Y - 60}" r="3.5" fill="#bbb"/>`;
+  s += `<path d="M330 ${Y - 60}V${Y - 70}M330 ${Y - 104}V${Y - 112}" stroke="#bbb" stroke-width="2"/><rect x="323" y="${Y - 104}" width="14" height="34" rx="2" fill="#c9a36b" stroke="#eee"/>`;
+  s += lab(342, Y - 88, '2 × 2 kΩ parallel', 'start') + `<path d="M318 ${Y - 112}h24" stroke="#e8a33d" stroke-width="3"/>` + lab(330, Y - 115, 'Kl. 15 (12 V)', 'middle', '#e8a33d');
+  s += `<rect x="390" y="${Y - 67}" width="40" height="14" rx="2" fill="#c9a36b" stroke="#eee"/>` + lab(410, Y - 73, '100 Ω');
+  s += `<circle cx="460" cy="${Y - 60}" r="3.5" fill="#bbb"/><path d="M460 ${Y - 60}V${Y - 30}M460 ${Y - 6}V${Y + 62}" stroke="#bbb" stroke-width="2"/>`;
+  s += `<path d="M451 ${Y - 6}L469 ${Y - 6}L460 ${Y - 24}Z" fill="#eee"/><path d="M448 ${Y - 20}L451 ${Y - 24}H469L472 ${Y - 28}" fill="none" stroke="#eee" stroke-width="2.5"/>`;
+  s += lab(476, Y - 12, 'TVS 1.5KE24A', 'start') + lab(476, Y + 2, 'Ring nach oben', 'start', '#aaa') + gnd(460, Y + 72);
+  s += `<path d="M460 ${Y - 60}H500" stroke="#bbb" stroke-width="2" stroke-dasharray="5 4"/><path d="M500 ${Y - 65}l8 5l-8 5z" fill="#bbb"/>`;
+  s += `<text x="514" y="${Y - 63}" style="font-size:12px">Leitung PWM</text><text x="514" y="${Y - 49}" style="font-size:12px">→ J293 (Lüfter)</text>`;
+  return `<svg viewBox="0 0 640 225" style="max-width:740px">${s}</svg>`;
+}
+function zlStage() {
+  const Y = 120;
+  let s = '';
+  const lab = (x, y, t, a = 'middle', c = '#e8c547') => `<text x="${x}" y="${y}" text-anchor="${a}" style="fill:${c};font-size:11px">${t}</text>`;
+  const gnd = (x, y) => `<path d="M${x} ${y - 10}V${y}M${x - 9} ${y}h18M${x - 6} ${y + 4}h12M${x - 3} ${y + 8}h6" stroke="#bbb" stroke-width="2"/>`;
+  s += `<rect x="10" y="${Y - 20}" width="88" height="40" rx="4" fill="#ecebe5" stroke="#999"/><text x="54" y="${Y - 3}" text-anchor="middle" style="fill:#000;font-weight:700;font-size:13px">PB7</text><text x="54" y="${Y + 12}" text-anchor="middle" style="fill:#444;font-size:10px">CN7-21</text>`;
+  s += `<path d="M98 ${Y}H114M154 ${Y}H244" stroke="#bbb" stroke-width="2"/><rect x="114" y="${Y - 7}" width="40" height="14" rx="2" fill="#c9a36b" stroke="#eee"/>` + lab(134, Y - 13, '1 kΩ');
+  s += `<circle cx="190" cy="${Y}" r="3.5" fill="#bbb"/><path d="M190 ${Y}V${Y + 14}M190 ${Y + 48}V${Y + 62}" stroke="#bbb" stroke-width="2"/><rect x="183" y="${Y + 14}" width="14" height="34" rx="2" fill="#c9a36b" stroke="#eee"/>` + lab(202, Y + 35, '10 kΩ', 'start') + gnd(190, Y + 72);
+  // N-MOSFET
+  s += `<path d="M244 ${Y}V${Y + 14}M244 ${Y - 18}V${Y + 18}" stroke="#eee" stroke-width="2.5"/><path d="M252 ${Y - 20}V${Y - 8}M252 ${Y - 6}V${Y + 6}M252 ${Y + 8}V${Y + 20}" stroke="#eee" stroke-width="3"/>`;
+  s += `<path d="M252 ${Y - 14}H272V${Y - 60}M252 ${Y + 14}H272V${Y + 62}M252 ${Y}H272V${Y + 14}" stroke="#eee" stroke-width="2" fill="none"/><path d="M254 ${Y}l8 -4v8z" fill="#eee"/>`;
+  s += gnd(272, Y + 72) + lab(284, Y + 4, 'IRLZ44N', 'start', '#fff') + lab(284, Y + 18, 'G-D-S', 'start', '#aaa');
+  s += lab(284, Y + 40, 'Source: eigene Ader', 'start', '#aaa') + lab(284, Y + 53, 'zum Massepunkt', 'start', '#aaa');
+  s += `<path d="M272 ${Y - 60}H380" stroke="#bbb" stroke-width="2" stroke-dasharray="5 4"/>` + lab(326, Y - 66, 'Leitung zur Spule (−)', 'middle', '#ddd');
+  // relay coil with flyback diode, drawn at the relay
+  s += `<rect x="378" y="${Y - 108}" width="182" height="178" rx="6" fill="none" stroke="#555" stroke-dasharray="4 3"/>` + lab(469, Y - 94, 'am ZL180 (nicht auf der Platine)', 'middle', '#aaa');
+  s += `<path d="M380 ${Y - 60}H420M420 ${Y - 60}V${Y - 44}M420 ${Y + 4}V${Y + 30}M420 ${Y + 30}H500" stroke="#bbb" stroke-width="2" fill="none"/>`;
+  s += `<rect x="408" y="${Y - 44}" width="24" height="48" fill="#262626" stroke="#eee"/>` + lab(420, Y - 16, 'Spule', 'middle', '#ddd');
+  s += `<path d="M420 ${Y - 60}H500V${Y - 26}M500 ${Y - 4}V${Y + 30}" stroke="#bbb" stroke-width="2" fill="none"/><path d="M491 ${Y - 26}L509 ${Y - 26}L500 ${Y - 4}Z" fill="#eee"/><path d="M491 ${Y - 4}h18" stroke="#eee" stroke-width="2.5"/>`;
+  s += lab(512, Y - 20, '1N4007', 'start') + lab(512, Y - 6, 'Ring unten', 'start', '#aaa') + lab(512, Y + 8, '(an Plus)', 'start', '#aaa');
+  s += `<path d="M420 ${Y + 30}V${Y + 50}" stroke="#bbb" stroke-width="2"/><path d="M408 ${Y + 50}h24" stroke="#e8a33d" stroke-width="3"/>` + lab(438, Y + 54, 'Spulen-Plus = Zünd-Plus', 'start', '#e8a33d');
+  return `<svg viewBox="0 0 600 210" style="max-width:700px">${s}</svg>`;
+}
+
+const CARDS = [
+  { id: 'ser', title: 'Serial3 zum/vom Speeduino · CN7-1 / CN7-2', svg: chain([['P', 'PC10', 'CN7-1 · TX'], ['M', 'Pegelwandler 4 Kanäle', ['LV1 ← PC10 · HV1 → D15', 'LV = 3,3 V · HV = 5 V', 'GND an GND']], ['E', ['D15 = RX3 Speeduino (weiß)']]]) + chain([['P', 'PC11', 'CN7-2 · RX'], ['R', '10 kΩ'], ['E', ['D14 = TX3 Speeduino (rot)', '5 V, PC11 ist 5-V-tolerant']]]),
+    parts: [['Pegelwandler-Modul 4 Kanäle (BSS138?)', 1, O], ['R 10 kΩ', 1, PR]],
+    note: '10 kΩ statt 1 kΩ: begrenzt den Strom in den stromlosen Nucleo auf unter 0,5 mA; bei 115200 Baud unkritisch (gerechnet). Pegelwandler: 4-Kanal-Modul statt 8-Kanal (User 2026-11-10), nur Kanal 1 belegt. Typ BSS138 mit Pull-ups und Pinfolge LV1 LV2 LV GND LV3 LV4 / HV1 HV2 HV GND HV3 HV4 = Hypothese Claude (übliches Modul, nicht am eigenen geprüft). Beide GND-Pins sind auf diesen Modulen nach Kenntnisstand verbunden (ungeprüft) → einer reicht.' },
+  { id: 'e5v', title: '5-V-Einspeisung · CN7-6 (E5V)', svg: chain([['P', 'E5V', 'CN7-6'], ['N', [{ t: 'CP', v: '100 µF/25 V', to: 'GND' }, { t: 'C', v: '100 nF', to: 'GND' }]], ['E', ['+5 V kleine 5-V-Schiene', '(Klemme/Stecker)']]]),
+    parts: [['Elko 100 µF/25 V', 1, B], ['C 100 nF', 1, K]],
+    note: 'Jumper am Nucleo auf externe 5 V (E5V) stellen, Bezeichnung in UM1724 prüfen (vermutlich JP5, nicht geprüft). Elko: Minus (Streifen) an GND.' },
+  { id: 'v3', title: '3,3-V-Schiene · CN7-16', svg: chain([['P', '+3V3', 'CN7-16'], ['N', [{ t: 'CP', v: '10 µF/25 V', to: 'GND' }]], ['E', ['3,3-V-Schiene: Pull-ups, Klemmdioden,', 'Pegelwandler LV, CAN-Modul 3V3']]]),
+    parts: [['Elko 10 µF/25 V', 1, B]],
+    note: 'Last auf der Schiene klein (CAN-Modul, Pull-ups, Pegelwandler); den Wert habe ich nicht gerechnet. Der 3,3-V-Regler des Nucleo ist nach Kenntnisstand Claude für ca. 500 mA ausgelegt (nicht geprüft).' },
+  { id: 'gnd', title: 'GND-Schiene · CN7-20', svg: chain([['P', 'GND', 'CN7-20'], ['E', ['GND-Schiene → zentraler Massepunkt', '(eigene Ader, festgelegt 2026-11-06)']]]),
+    parts: [], note: 'Alle Schaltungen hier gehen mit GND an diese Schiene. Der Spulenstrom des ZL180 geht nicht über die Schiene (eigene Ader, siehe ZL180).' },
+  { id: 'pwm', title: 'Lüfter-PWM · CN7-17 (PA15, TIM2_CH1)', svg: pwmStage(),
+    parts: [['R 1 kΩ', 1, PR], ['R 10 kΩ', 1, PR], ['Transistor BC547B', 1, B], ['R 2 kΩ', 2, PR], ['R 100 Ω', 1, PR], ['TVS 1.5KE24A', 1, B]],
+    note: 'Schaltung wie der Lüfter-Prüfstand (<a href="luefter.html">luefter.html</a>, dort IRLZ44N), hier mit BC547B: Basis (3,3 − 0,7 V) / 1 kΩ ≈ 2,6 mA, Kollektor ≈ 14 mA → sicher durchgeschaltet (gerechnet). 2 × 2 kΩ parallel = 1 kΩ, je 14,4² V / 2 kΩ ≈ 0,10 W → normale 0,25-W-Widerstände reichen (gerechnet). Pin high = Leitung low → Firmware dreht das Signal um. Kl. 15 kommt vom ZL180-Ausgang in der Box.' },
+  { id: 'zl', title: 'ZL180-Spule (Low-Side) · CN7-21 (PB7)', svg: zlStage(),
+    parts: [['R 1 kΩ', 1, PR], ['R 10 kΩ', 1, PR], ['MOSFET IRLZ44N', 1, PR], ['Diode 1N4007', 1, B]],
+    note: 'Spulenstrom ca. 0,48 A (30 Ω bei 14,4 V, <code>Bordnetz-Konzept.md</code>). Gate-Werte wie Lüfter-Prüfstand. <span class="hyp">IRLZ44N mit 3,3 V am Gate = Hypothese → am Prüfstand U<sub>DS</sub> bei eingeschalteter Spule messen (soll deutlich unter 0,1 V).</span> IRLZ44N-Menge im Lager offen. 1N4007 direkt an den Spulenanschlüssen, Ring (Kathode) an Spulen-Plus.' },
+  { id: 'd47', title: 'Speeduino-Lüftersignal D47 · CN7-28 (PA0)', svg: IN_DIODE('PA0', 'CN7-28', ['Speeduino D47', '(ULN, schaltet gegen Masse)']), parts: P_IN_DIODE,
+    note: 'Leitung gegen Masse → Pin ≈ 0,3 V (Low). Leitung offen oder auf 12 V → Diode sperrt, Pull-up hält den Pin auf 3,3 V (High). Dadurch verträgt der Eingang auch 12 V. 10 kΩ × 100 nF = 1 ms Entprellung (gerechnet).' },
+  { id: 'wb', title: 'Warnblinkschalter an der Box · CN7-30 (PA1)', svg: IN_DIODE('PA1', 'CN7-30', ['Warnblinkschalter', '→ Masse (Annahme)']), parts: P_IN_DIODE,
+    note: 'Gleiche Schaltung wie D47. <b>Offen:</b> Ohne Zündung hat der Nucleo keinen Strom → Weckfunktion fehlt noch (siehe „Offen“).' },
+  { id: 'k15', title: 'Kl.-15-Rückmeldung · CN7-32 (PA4, ADC)', svg: IN_DIV('PA4', 'CN7-32', ['Kl. 15', '(ZL180-Ausgang)']), parts: P_IN_DIV,
+    note: 'Teiler 10 kΩ / 2 kΩ: U<sub>Pin</sub> = U · 2/12 → 12 V ≙ 2,0 V, 14,4 V ≙ 2,4 V, Messbereich bis ca. 19,8 V (gerechnet). Als ADC lesen, Schwelle in der Firmware. PA4 ist <b>nicht</b> 5-V-tolerant → 1N5819 klemmt Spitzen auf die 3,3-V-Schiene (Ring zur Schiene).' },
+  { id: 'zs', title: 'Zündschalter-Zustand · CN7-34 (PB0)', svg: IN_DIODE('PB0', 'CN7-34', ['Zündschalter-Schaltkontakt', '(schaltet gegen Masse, gemessen 2026-11-06)']), parts: P_IN_DIODE,
+    note: 'Funktioniert auch, wenn an derselben Leitung später die Spule eines Hilfsrelais hängt (Variante offen): die Diode sperrt die 12 V.' },
+  { id: 'tank', title: 'Tankgeber 0–190 Ω · CN7-36 (PC1, ADC)', svg: chain([['P', 'PC1', 'CN7-36'], ['N', [{ t: 'D', v: '1N5819', to: '3V3' }, { t: 'C', v: '100 nF', to: 'GND' }]], ['R', '1 kΩ'], ['N', [{ t: 'R', v: '1 kΩ', to: '3V3' }]], ['E', ['Tankgeber, 1. Ader', '2. Ader → GND']]]),
+    parts: [['R 1 kΩ', 2, PR], ['Schottky 1N5819', 1, B], ['C 100 nF', 1, K]],
+    note: 'Pull-up 1 kΩ an 3,3 V: U = 3,3 V · R / (R + 1 kΩ) → 0 Ω ≙ 0 V, 190 Ω ≙ 0,53 V, ca. 650 ADC-Stufen, Strom höchstens 3,3 mA (gerechnet). 1 kΩ in Reihe + Diode schützen den Pin, falls die Leitung zum Tank an 12 V kommt.' },
+  { id: 'bat', title: 'Batteriespannung · CN7-38 (PC0, ADC)', svg: IN_DIV('PC0', 'CN7-38', ['+12 V am Eingang des kleinen', '5-V-Wandlers (Vorschlag)']), parts: P_IN_DIV,
+    note: 'Gleicher Teiler wie Kl. 15 (14,4 V ≙ 2,4 V, Auflösung ca. 5 mV, gerechnet). Abgriff siehe „Offen“: dort liegt nur Spannung an, wenn der Nucleo läuft.' },
+  { id: 'can', title: 'CAN · CN10-12 (PA12 TX) / CN10-14 (PA11 RX)', svg: chain([['P', 'PA12', 'CN10-12 · TX'], ['M', 'SN65HVD230-Modul', ['PA12 → CTX · PA11 ← CRX', '3V3 → 3,3-V-Schiene · GND', 'R2 = 120 Ω fest auf dem Modul']], ['E', ['CAN-H / CAN-L', '→ Bus-Stecker']]]),
+    parts: [['CAN-Modul SN65HVD230', 1, O]],
+    note: '10 Stück bestellt 2026-11-10 (WCMCU-230, 16,1 × 14,5 mm). Laut Händlerfoto ist R2 = 120 Ω („121“) fest zwischen CANH und CANL aufgelötet: auslöten, wenn die Relaisbox kein Busende ist. Original-Chip unsicher → Modul vor dem Einlöten am Bus testen.' },
+  { id: 'uln', title: 'Bündel A, B, C → Treiberplatine · CN10', svg: '', parts: [],
+    note: 'Keine Bauteile auf der Trägerplatine: Die Pull-downs sitzen schon auf der Treiberplatine (gebaut 2026-11-07). Die Adern werden direkt an die Buchsenleiste gelötet, Reihenfolge siehe Lötliste.' }
+];
+
+// ---------- compact perfboard layout (Vorschlag Claude 2026-11-10) ----------
+const S = 7, P = 2.54 * S, W = 1500, H = 1000;
+const NI = 41, NJ = 42;
+const LX = 260, LY = 70, LW = (NI - 1) * P + 20, LH = (NJ - 1) * P + 20;
+const hx = i => LX + 10 + i * P, hy = j => LY + 10 + j * P;
+const hole = ([i, j]) => `${i + 1}|${j + 1}`;
+
+const CN = {
+  CN7: ['PC10', 'PC11', 'PC12', 'PD2', 'VDD', 'E5V', 'BOOT0', 'GND', '–', '–', '–', 'IOREF', 'PA13', 'RESET', 'PA14', '+3V3', 'PA15', '+5V', 'GND', 'GND', 'PB7', 'GND', 'PC13', 'VIN', 'PC14', '–', 'PC15', 'PA0', 'PH0', 'PA1', 'PH1', 'PA4', 'VBAT', 'PB0', 'PC2', 'PC1', 'PC3', 'PC0'],
+  CN10: ['PC9', 'PC8', 'PB8', 'PC6', 'PB9', 'PC5', 'AVDD', 'U5V', 'GND', '–', 'PA5', 'PA12', 'PA6', 'PA11', 'PA7', 'PB12', 'PB6', '–', 'PC7', 'GND', 'PA9', 'PB2', 'PA8', 'PB1', 'PB10', 'PB15', 'PB4', 'PB14', 'PB5', 'PB13', 'PB3', 'AGND', 'PA10', 'PC4', 'PA2', '–', 'PA3', '–']
+};
+const RESERVE = new Set(['PC12', 'PD2', 'PC2', 'PC3', 'PC9', 'PC8', 'PC6', 'PC7', 'PC13', 'PH1']);
+const FORBID = new Set(['PA13', 'PA14', 'PA2', 'PA3', 'PC14', 'PC15', 'PH0', 'BOOT0']);
+const ULN = [['Lila', '#b05fd8'], ['Grün', '#3cb44b'], ['Orange', '#f58231'], ['Weiß', '#eeeeee'], ['Gelb', '#ffe119'], ['Blau', '#4a7dff'], ['Grau', '#9a9a9a']];
+const DRV = { C: [3, 5, 6, 13, 15, 17, 11], B: [16, 22, 24, 26, 28, 30, 34], A: [21, 23, 25, 27, 29, 31, 33] };
+const DRV_TOP = { C: 285, B: 440, A: 590 };
+const C = {
+  braun: ['Braun', '#a0522d'], tuerkis: ['Türkis', '#30d5c8'], rot: ['Rot', '#e53935'], rosa: ['Rosa', '#ff8fc8'],
+  schwarz: ['Schwarz', '#1b1b1b'], gruen: ['Grün', '#3cb44b'], blau: ['Blau', '#4a7dff'], gelb: ['Gelb', '#ffe119'],
+  orange: ['Orange', '#f58231'], lila: ['Lila', '#b05fd8'], grau: ['Grau', '#9a9a9a'], weiss: ['Weiß', '#eeeeee']
+};
+const SYSCOL = { ser: '#30d5c8', e5v: '#e53935', pwm: '#3cb44b', zl: '#6f9bff', d47: '#ffe119', wb: '#f58231', k15: '#c77dff', zs: '#a3e635', bat: '#ff9e5e', tank: '#5ec8ff', can: '#00e0b0', gnd: '#9e9e9e', v3: '#ff8fc8' };
+const NETCOL = { g: '#9e9e9e', v: '#ff8fc8', 5: '#e53935', k: '#e8a33d' };
+const SYSTEMS = [['rails', 'Schienen', ['gnd', 'v3']], ['ser', 'Serial3'], ['e5v', '5 V'], ['pwm', 'Lüfter-PWM'], ['zl', 'ZL180'], ['d47', 'D47'], ['wb', 'Warnblinker'], ['k15', 'Kl. 15'], ['zs', 'Zündschalter'], ['bat', 'Batterie'], ['tank', 'Tank'], ['can', 'CAN'], ['uln', 'Bündel'], ['all', 'Alles']];
+const sysOf = card => (card === 'gnd' || card === 'v3') ? 'rails' : card;
+
+// Nucleo: CN7 odd (outer) col 13, even col 14; CN10 odd (inner) col 38, even col 39; pin 1 in row 12
+function hdr(h, n) {
+  const r = (n - 1) >> 1, odd = n % 2 === 1;
+  return [h === 'CN7' ? (odd ? 13 : 14) : (odd ? 38 : 39), 12 + r];
+}
+const BX = hx(13) - 2 * S, BW = 70 * S, BY = LY, BH = 82.5 * S;
+const G = 8, V = 10;
+
+const PARTS = [], BR = [], FW = [], PADS = [];
+const cnt = {};
+const id = k => k + (cnt[k] = (cnt[k] || 0) + 1);
+const two = (t, v, a, b, card, note) => PARTS.push({ id: id(t === 'TVS' ? 'D' : t === 'E' ? 'C' : t), t, v, a, b, card, note });
+const br = (net, nc, pts, card) => BR.push({ net, nc, pts, card });
+const pad = (at, label, side, card) => PADS.push({ at, label, side, card });
+const fw = (from, to, c, what, card, h) => FW.push({ from, to, c, what, card, h });
+
+// rails
+br('GND-Schiene', 'g', [[G, 7], [G, 41], [40, 41]], 'gnd');
+br('3,3-V-Schiene', 'v', [[V, 0], [V, 40], [40, 40]], 'v3');
+// SER: module U1 pins in rows 1 (LV side) and 6 (HV side), cols 0..5
+PARTS.push({ id: 'U1', t: 'MODL', v: 'Pegelwandler 4 Kanäle', card: 'ser', pinsA: ['LV1', 'LV2', 'LV', 'GND', 'LV3', 'LV4'], pinsB: ['HV1', 'HV2', 'HV', 'GND', 'HV3', 'HV4'], i0: 0, ja: 1, jb: 6, note: 'LV-Seite in Reihe 2, HV-Seite in Reihe 7; Pinfolge und Reihenabstand = Hypothese, am Modul prüfen' });
+br('3,3 V an LV', 'v', [[2, 1], [2, 0], [V, 0]], 'ser');
+br('GND', 'g', [[3, 6], [3, 7], [G, 7]], 'ser');
+br('HV1 → D15', 's', [[0, 6], [0, 7]], 'ser');
+pad([0, 7], 'Speeduino RX3 = D15 (weiß)', 'L', 'ser');
+pad([0, 8], 'Speeduino TX3 = D14 (rot)', 'L', 'ser');
+br('D14', 's', [[0, 8], [1, 8]], 'ser');
+two('R', '10 kΩ', [1, 8], [5, 8], 'ser');
+br('PC11', 's', [[5, 8], [6, 8]], 'ser');
+// E5V
+pad([0, 11], '+5 V kleine Schiene', 'L', 'e5v');
+br('+5 V', '5', [[0, 11], [5, 11]], 'e5v'); br('+5 V', '5', [[1, 11], [1, 10]], 'e5v');
+two('C', '100 nF', [1, 10], [3, 10], 'e5v');
+br('GND', 'g', [[3, 10], [G, 10]], 'e5v');
+PARTS.push({ id: id('C'), t: 'E', v: '100 µF/25 V', p: [5, 11], m: [6, 11], r: 28, card: 'e5v', note: 'Plus links, Minus (Streifen) rechts' });
+br('GND', 'g', [[6, 11], [G, 11]], 'e5v');
+// PWM (TVS row 14, rows 16..21)
+two('TVS', '1.5KE24A', [1, 14], [7, 14], 'pwm', 'Ring (Kathode) links an der PWM-Leitung; Löcher ggf. aufbohren');
+br('GND', 'g', [[7, 14], [G, 14]], 'pwm');
+pad([0, 16], 'Leitung PWM → J293', 'L', 'pwm'); pad([0, 17], 'Kl. 15 (12 V)', 'L', 'pwm');
+br('PWM-Leitung', 's', [[0, 16], [1, 16], [1, 14]], 'pwm');
+two('R', '100 Ω', [1, 16], [5, 16], 'pwm');
+br('Kl. 15', 'k', [[0, 17], [1, 17], [1, 18]], 'pwm');
+two('R', '2 kΩ', [1, 17], [5, 17], 'pwm'); two('R', '2 kΩ', [1, 18], [5, 18], 'pwm');
+br('Kollektor', 's', [[5, 16], [5, 19]], 'pwm');
+PARTS.push({ id: 'Q1', t: 'TO92', v: 'BC547B', pins: [[5, 19, 'C'], [6, 19, 'B'], [7, 19, 'E']], card: 'pwm', note: 'flache Seite nach unten; C-B-E vor dem Einlöten messen' });
+br('Emitter → GND', 'g', [[7, 19], [G, 19]], 'pwm');
+br('Basis', 's', [[6, 19], [6, 21], [4, 21]], 'pwm');
+two('R', '1 kΩ', [2, 20], [6, 20], 'pwm');
+two('R', '10 kΩ', [4, 21], [G, 21], 'pwm', 'rechts direkt in die GND-Schiene');
+// ZL180 (rows 23..26)
+PARTS.push({ id: 'Q2', t: 'TO220', v: 'IRLZ44N', pins: [[3, 24, 'G'], [4, 24, 'D'], [5, 24, 'S']], card: 'zl', note: 'stehend, Metallfahne nach oben (Reihe 24); G-D-S von vorn gesehen' });
+pad([0, 23], 'ZL180-Spule (−)', 'L', 'zl');
+br('Drain → Spule (−)', 's', [[4, 24], [4, 23], [0, 23]], 'zl');
+br('Gate', 's', [[3, 24], [3, 25], [1, 25], [1, 26]], 'zl');
+two('R', '1 kΩ', [3, 25], [7, 25], 'zl');
+two('R', '10 kΩ', [1, 26], [5, 26], 'zl');
+br('Source', 's', [[6, 24], [5, 24], [5, 26]], 'zl');
+pad([6, 24], 'S → Massepunkt', 'here', 'zl');
+
+function inDiode(a, card, label) {
+  const b = a + 1, c = a + 2;
+  pad([0, b], label, 'L', card);
+  br('Leitung', 's', [[0, b], [1, b]], card);
+  two('D', '1N5819', [1, b], [5, b], card, 'Ring links (zur Leitung)');
+  br('Pin-Knoten', 's', [[5, b], [7, b]], card); br('Pin-Knoten', 's', [[6, a], [6, c]], card);
+  two('R', '10 kΩ', [6, a], [V, a], card, 'rechts in die 3,3-V-Schiene, über die GND-Schiene hinweg');
+  two('C', '100 nF', [6, c], [G, c], card, 'rechts direkt in die GND-Schiene');
+  return [7, b];
+}
+function inDiv(a, card, label) {
+  const b = a + 1, c = a + 2, d = a + 3;
+  pad([0, b], label, 'L', card);
+  br('Leitung', 's', [[0, b], [1, b]], card);
+  two('R', '10 kΩ', [1, b], [5, b], card);
+  br('Pin-Knoten', 's', [[4, b], [7, b]], card); br('Pin-Knoten', 's', [[4, b], [4, c]], card); br('Pin-Knoten', 's', [[6, a], [6, d]], card);
+  two('D', '1N5819', [V, a], [6, a], card, 'Ring rechts (an der 3,3-V-Schiene)');
+  two('R', '2 kΩ', [4, c], [G, c], card, 'rechts direkt in die GND-Schiene');
+  two('C', '100 nF', [6, d], [G, d], card, 'rechts direkt in die GND-Schiene');
+  return [7, b];
+}
+const nD47 = inDiode(27, 'd47', 'Speeduino D47');
+const nWB = inDiode(30, 'wb', 'Warnblinkschalter');
+const nK15 = inDiv(33, 'k15', 'Kl. 15 (ZL180-Ausgang)');
+const nZS = inDiode(37, 'zs', 'Zündschalter');
+// battery (below the Nucleo, rails in rows 41/42)
+pad([11, 37], 'Batterie +12 V (Wandlereingang)', 'B', 'bat');
+br('Leitung', 's', [[11, 37], [13, 37]], 'bat');
+two('R', '10 kΩ', [13, 37], [17, 37], 'bat');
+br('Pin-Knoten', 's', [[17, 37], [17, 36], [18, 36]], 'bat');
+two('D', '1N5819', [18, 40], [18, 36], 'bat', 'senkrecht, Ring unten (3,3-V-Schiene)');
+br('Pin-Knoten', 's', [[17, 37], [21, 37], [21, 39]], 'bat');
+two('R', '2 kΩ', [19, 37], [19, 41], 'bat', 'senkrecht, unten in die GND-Schiene');
+two('C', '100 nF', [21, 39], [21, 41], 'bat', 'senkrecht, über die 3,3-V-Schiene in die GND-Schiene');
+// tank
+pad([22, 36], 'Tankgeber (1. Ader)', 'B', 'tank');
+br('Leitung', 's', [[22, 36], [24, 36]], 'tank');
+two('R', '1 kΩ', [23, 36], [23, 40], 'tank', 'senkrecht, Pull-up unten in die 3,3-V-Schiene');
+two('R', '1 kΩ', [24, 36], [28, 36], 'tank');
+br('Pin-Knoten', 's', [[28, 36], [29, 36]], 'tank'); br('Pin-Knoten', 's', [[28, 36], [28, 39]], 'tank');
+two('D', '1N5819', [29, 40], [29, 36], 'tank', 'senkrecht, Ring unten (3,3-V-Schiene)');
+two('C', '100 nF', [28, 39], [28, 41], 'tank', 'senkrecht, über die 3,3-V-Schiene in die GND-Schiene');
+pad([26, 41], 'Tankgeber 2. Ader (GND)', 'B', 'tank');
+// CAN
+PARTS.push({ id: 'U2', t: 'CANM', v: 'SN65HVD230-Modul', card: 'can', pins: ['3V3', 'GND', 'CTX', 'CRX', 'CANH', 'CANL'], i0: 31, j: 36, note: 'Stiftreihe in Reihe 37, Modul nach unten; Pinfolge 3V3 GND CTX CRX CANH CANL laut Händlerfoto, am eigenen Modul gegenprüfen' });
+br('3,3 V', 'v', [[31, 36], [31, 40]], 'can');
+pad([35, 36], 'CAN-H → Bus', 'B', 'can'); pad([36, 36], 'CAN-L → Bus', 'B', 'can');
+// 3V3 buffer, ground exit
+PARTS.push({ id: id('C'), t: 'E', v: '10 µF/25 V', p: [13, 40], m: [13, 41], r: 18, card: 'v3', note: 'Plus oben (3,3-V-Schiene), Minus unten (GND-Schiene)' });
+pad([G, 41], 'GND → zentraler Massepunkt', 'B', 'gnd');
+
+fw(hdr('CN7', 1), [0, 1], 'braun', 'PC10 → Pegelwandler LV1', 'ser', 'CN7-1');
+fw(hdr('CN7', 2), [6, 8], 'tuerkis', 'PC11 ← 10 kΩ ← D14', 'ser', 'CN7-2');
+fw(hdr('CN7', 6), [3, 11], 'rot', 'E5V ← +5 V', 'e5v', 'CN7-6');
+fw([2, 11], [2, 6], 'rot', '+5 V → Pegelwandler HV', 'ser');
+fw(hdr('CN7', 16), [V, 19], 'rosa', '+3V3 → 3,3-V-Schiene', 'v3', 'CN7-16');
+fw(hdr('CN7', 17), [2, 20], 'gruen', 'PA15 → 1 kΩ → Basis', 'pwm', 'CN7-17');
+fw(hdr('CN7', 20), [G, 22], 'schwarz', 'GND → GND-Schiene', 'gnd', 'CN7-20');
+fw(hdr('CN7', 21), [7, 25], 'blau', 'PB7 → 1 kΩ → Gate', 'zl', 'CN7-21');
+fw(hdr('CN7', 28), nD47, 'gelb', 'PA0 ← D47-Eingang', 'd47', 'CN7-28');
+fw(hdr('CN7', 30), nWB, 'orange', 'PA1 ← Warnblink-Eingang', 'wb', 'CN7-30');
+fw(hdr('CN7', 32), nK15, 'lila', 'PA4 ← Kl.-15-Teiler', 'k15', 'CN7-32');
+fw(hdr('CN7', 34), nZS, 'grau', 'PB0 ← Zündschalter-Eingang', 'zs', 'CN7-34');
+fw(hdr('CN7', 36), [28, 37], 'weiss', 'PC1 ← Tank-Eingang', 'tank', 'CN7-36');
+fw(hdr('CN7', 38), [20, 37], 'braun', 'PC0 ← Batterie-Teiler', 'bat', 'CN7-38');
+fw(hdr('CN10', 12), [33, 36], 'braun', 'PA12 → CAN-Modul CTX', 'can', 'CN10-12');
+fw(hdr('CN10', 14), [34, 36], 'tuerkis', 'PA11 ← CAN-Modul CRX', 'can', 'CN10-14');
+fw([32, 36], [32, 41], 'schwarz', 'CAN-Modul GND → GND-Schiene', 'can');
+
+const TPX = 1060, TPY = 250, TPW = 210, TPH = 455;
+const BUND = [];
+Object.entries(DRV).forEach(([chip, pins]) => pins.forEach((n, i) => BUND.push({ n, chip, i, y: DRV_TOP[chip] + i * 16 })));
+
+// ---------- render ----------
+let s = '';
+const T = (x, y, t, st = '', a = 'start') => `<text x="${x}" y="${y}" text-anchor="${a}" style="${st}">${t}</text>`;
+s += `<text id="ttl" x="20" y="26" style="font-size:16px;font-weight:700;fill:#fff">Bauteilseite: Lochraster ca. 105 × 110 mm, Raster 2,54 mm</text>`;
+s += `<g id="flip">`;
+s += `<rect x="${LX}" y="${LY}" width="${LW}" height="${LH}" rx="6" fill="none" stroke="#3a3a3a" stroke-dasharray="6 5"/>`;
+s += `<g id="gridg" style="display:none">`;
+for (let i = 0; i < NI; i++) for (let j = 0; j < NJ; j++) s += `<circle cx="${hx(i)}" cy="${hy(j)}" r="2.2" fill="#333"/>`;
+s += `</g>`;
+for (let i = 0; i < NI; i++) { const st = `font-size:8px;fill:${(i + 1) % 5 === 0 ? '#bbb' : '#666'}`; s += T(hx(i), LY - 4, i + 1, st, 'middle') + T(hx(i), LY + LH + 9, i + 1, st, 'middle'); }
+for (let j = 0; j < NJ; j++) s += T(LX - 3, hy(j) + 3, j + 1, `font-size:8px;fill:${(j + 1) % 5 === 0 ? '#bbb' : '#666'}`, 'end');
+
+const sysAttr = card => `data-sys="${sysOf(card)}"`;
+// solder side: bridges then wires
+s += `<g id="under">`;
+BR.forEach((b, k) => {
+  const d = 'M' + b.pts.map(([i, j]) => `${hx(i)} ${hy(j)}`).join('L');
+  const col = b.nc === 's' ? SYSCOL[b.card] : NETCOL[b.nc], rail = /Schiene/.test(b.net);
+  s += `<g class="sel" data-k="br${k}" ${sysAttr(b.card)}><path d="${d}" fill="none" stroke="transparent" stroke-width="12"/>`;
+  s += `<path d="${d}" fill="none" stroke="#000" stroke-width="${rail ? 9 : 8}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  s += `<path d="${d}" fill="none" stroke="${col}" stroke-width="${rail ? 5.5 : 4.5}" stroke-linecap="round" stroke-linejoin="round"/></g>`;
+});
+FW.forEach((w, k) => {
+  const [x1, y1, x2, y2] = [hx(w.from[0]), hy(w.from[1]), hx(w.to[0]), hy(w.to[1])];
+  const mx = (x1 + x2) / 2, my = (y1 + y2) / 2 - 14 - (k % 4) * 5;
+  const d = `M${x1} ${y1}Q${mx} ${my} ${x2} ${y2}`, col = C[w.c][1], cas = w.c === 'schwarz' ? '#bbb' : '#000';
+  s += `<g class="sel" data-k="fw${k}" ${sysAttr(w.card)}><path d="${d}" fill="none" stroke="transparent" stroke-width="10"/>`;
+  s += `<path d="${d}" fill="none" stroke="${cas}" stroke-width="4" stroke-dasharray="${w.c === 'schwarz' ? '' : ''}"/><path d="${d}" fill="none" stroke="${col}" stroke-width="2.2"/></g>`;
+});
+s += `</g>`;
+
+const used = {};
+const mark = ([i, j], card) => { const k = i + ',' + j; (used[k] = used[k] || new Set()).add(sysOf(card)); };
+BR.forEach(b => b.pts.forEach(p => mark(p, b.card)));
+FW.forEach(w => { mark(w.from, w.card); mark(w.to, w.card); });
+
+s += '%%JOINTS%%';
+s += `<g id="lparts">`;
+function twoLead(p) {
+  const [x1, y1, x2, y2] = [hx(p.a[0]), hy(p.a[1]), hx(p.b[0]), hy(p.b[1])];
+  mark(p.a, p.card); mark(p.b, p.card);
+  const cx = (x1 + x2) / 2, cy = (y1 + y2) / 2, ang = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+  const vert = Math.abs(ang) > 45 && Math.abs(ang) < 135;
+  const dim = { R: [46, 15, '#d9b47e'], D: [36, 16, '#222'], TVS: [62, 30, '#1d1d1d'], C: [24, 15, '#c9781f'] }[p.t];
+  const short = { '10 kΩ': '10k', '2 kΩ': '2k', '1 kΩ': '1k', '100 Ω': '100R' }[p.v] || '';
+  const dark = p.t === 'R' || p.t === 'C', col = dark ? '#111' : '#fff';
+  let g = `<g class="sel" data-k="${p.id}" ${sysAttr(p.card)}>`;
+  g += `<path d="M${x1} ${y1}L${x2} ${y2}" stroke="#c8c8c8" stroke-width="2.4"/>`;
+  g += `<g transform="rotate(${ang} ${cx} ${cy})"><rect x="${cx - dim[0] / 2}" y="${cy - dim[1] / 2}" width="${dim[0]}" height="${dim[1]}" rx="${p.t === 'C' ? 6 : 4}" fill="${dim[2]}" stroke="#000"/>`;
+  if (p.t === 'D' || p.t === 'TVS') g += `<rect x="${cx - dim[0] / 2 + 3}" y="${cy - dim[1] / 2}" width="${p.t === 'TVS' ? 7 : 5}" height="${dim[1]}" fill="#e0e0e0"/>`;
+  g += `</g>`;
+  if (vert) {
+    g += T(cx, cy + (short ? -2 : 3), p.id, `font-size:7.5px;font-weight:700;fill:${col}`, 'middle');
+    if (short) g += T(cx, cy + 8, short, `font-size:7.5px;font-weight:700;fill:${col}`, 'middle');
+  } else {
+    g += T(cx + (p.t === 'D' ? 3 : 0), cy + 3.2, p.t === 'R' ? `${p.id} ${short}` : p.t === 'TVS' ? `${p.id} TVS` : p.id, `font-size:8.5px;font-weight:700;fill:${col}`, 'middle');
+  }
+  return g + `</g>`;
+}
+PARTS.forEach(p => {
+  if (['R', 'D', 'C', 'TVS'].includes(p.t)) { s += twoLead(p); return; }
+  const open = `<g class="sel" data-k="${p.id}" ${sysAttr(p.card)}>`;
+  if (p.t === 'E') {
+    mark(p.p, p.card); mark(p.m, p.card);
+    const cx = (hx(p.p[0]) + hx(p.m[0])) / 2, cy = (hy(p.p[1]) + hy(p.m[1])) / 2, horiz = p.p[1] === p.m[1];
+    s += open + `<circle cx="${cx}" cy="${cy}" r="${p.r}" fill="#1f3550" stroke="#000" opacity="0.9"/>`;
+    s += T(hx(p.p[0]) + (horiz ? -3 : 10), hy(p.p[1]) + 4, '+', 'font-size:12px;font-weight:700;fill:#fff', 'middle');
+    s += T(hx(p.m[0]) + (horiz ? 4 : 10), hy(p.m[1]) + 4, '−', 'font-size:14px;font-weight:700;fill:#9cf', 'middle');
+    s += T(cx, cy - p.r - 4, `${p.id} ${p.v.split('/')[0]}`, 'font-size:9px;fill:#fff;font-weight:700', 'middle') + `</g>`;
+  } else if (p.t === 'TO92') {
+    p.pins.forEach(q => mark(q, p.card));
+    const x = hx(p.pins[1][0]), y = hy(p.pins[1][1]);
+    s += open + `<path d="M${x - 17} ${y + 6}H${x + 17}A17 17 0 0 0 ${x - 17} ${y + 6}Z" fill="#222" stroke="#888"/>`;
+    p.pins.forEach(([i, j, l]) => { s += T(hx(i), hy(j) - 4, l, 'font-size:7.5px;fill:#fff;font-weight:700', 'middle'); });
+    s += T(x + 20, y - 7, p.id, 'font-size:8.5px;fill:#fff;font-weight:700') + `</g>`;
+  } else if (p.t === 'TO220') {
+    p.pins.forEach(q => mark(q, p.card));
+    const x = hx(p.pins[1][0]), y = hy(p.pins[1][1]);
+    s += open + `<rect x="${x - 36}" y="${y - 25}" width="72" height="9" fill="#9a9a9a" stroke="#000"/><rect x="${x - 36}" y="${y - 16}" width="72" height="22" fill="#222" stroke="#888"/>`;
+    p.pins.forEach(([i, j, l]) => { s += T(hx(i) + 6, hy(j) - 6, l, 'font-size:7.5px;fill:#fff;font-weight:700', 'middle'); });
+    s += T(x - 24, y - 17.5, p.id, 'font-size:7.5px;fill:#111;font-weight:700', 'middle') + `</g>`;
+  } else if (p.t === 'MODL') {
+    const x0 = hx(p.i0) - 10, x1 = hx(p.i0 + p.pinsA.length - 1) + 10, y0 = hy(p.ja) - 10, y1 = hy(p.jb) + 10;
+    s += open + `<rect x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" rx="4" fill="#123a8a" stroke="#000" opacity="0.9"/>`;
+    s += T((x0 + x1) / 2, (y0 + y1) / 2 + 4, `${p.id} Pegel`, 'font-size:11px;fill:#fff;font-weight:700', 'middle');
+    p.pinsA.forEach((l, k) => { mark([p.i0 + k, p.ja], p.card); s += `<rect x="${hx(p.i0 + k) - 5}" y="${hy(p.ja) - 5}" width="10" height="10" fill="#d4af37"/>` + T(hx(p.i0 + k), hy(p.ja) + 15, l, 'font-size:7px;fill:#fff', 'middle'); });
+    p.pinsB.forEach((l, k) => { mark([p.i0 + k, p.jb], p.card); s += `<rect x="${hx(p.i0 + k) - 5}" y="${hy(p.jb) - 5}" width="10" height="10" fill="#d4af37"/>` + T(hx(p.i0 + k), hy(p.jb) - 9, l, 'font-size:7px;fill:#fff', 'middle'); });
+    s += `</g>`;
+  } else if (p.t === 'CANM') {
+    const x0 = hx(p.i0) - 10, x1 = hx(p.i0 + 5) + 10, y0 = hy(p.j) - 9, y1 = hy(p.j) + 5.3 * P;
+    s += open + `<rect x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" rx="4" fill="#1d5a2a" stroke="#000" opacity="0.9"/>`;
+    s += T((x0 + x1) / 2, y0 + 50, `${p.id} CAN`, 'font-size:11px;fill:#fff;font-weight:700', 'middle');
+    p.pins.forEach((l, k) => { mark([p.i0 + k, p.j], p.card); s += `<rect x="${hx(p.i0 + k) - 5}" y="${hy(p.j) - 5}" width="10" height="10" fill="#d4af37"/>` + T(hx(p.i0 + k), hy(p.j) + 16, l.replace('CAN', ''), 'font-size:7px;fill:#fff', 'middle'); });
+    s += `</g>`;
+  }
+});
+s += `</g>`;
+s = s.replace('%%JOINTS%%', Object.entries(used).map(([k, set]) => {
+  const [i, j] = k.split(',').map(Number);
+  return `<circle class="joint" data-sys="${[...set].join(' ')}" cx="${hx(i)}" cy="${hy(j)}" r="3.6" fill="#f0f0f0" stroke="#000" stroke-width="0.8"/>`;
+}).join(''));
+
+// sockets (visible when the Nucleo is hidden)
+['CN7', 'CN10'].forEach(h => {
+  const [ia] = hdr(h, 1), [ib] = hdr(h, 2);
+  const x0 = hx(Math.min(ia, ib)) - 9, x1 = hx(Math.max(ia, ib)) + 9;
+  s += `<rect x="${x0}" y="${hy(12) - 9}" width="${x1 - x0}" height="${18 * P + 18}" fill="#0c0c0c" stroke="#444" rx="2"/>`;
+  for (let n = 1; n <= 38; n++) { const [i, j] = hdr(h, n); s += `<circle cx="${hx(i)}" cy="${hy(j)}" r="3" fill="#555"/>`; }
+  s += T((x0 + x1) / 2, hy(12) - 14, h, 'font-size:12px;font-weight:700;fill:#ccc', 'middle');
+});
+
+// Nucleo on top
+s += `<g id="nucleo">`;
+s += `<rect x="${BX + BW / 2 - 28}" y="${BY - 14}" width="56" height="40" rx="3" fill="#b8b8b8" stroke="#555"/>`;
+s += T(BX + BW / 2, BY - 18, 'USB – Platz für den Stecker frei lassen', 'fill:#8cf', 'middle');
+s += `<rect x="${BX}" y="${BY}" width="${BW}" height="${BH}" rx="7" fill="#ecebe5" stroke="#999" stroke-width="2" opacity="0.93"/>`;
+s += `<line x1="${BX + 4}" y1="${BY + 22 * S}" x2="${BX + BW - 4}" y2="${BY + 22 * S}" stroke="#999" stroke-dasharray="6 5"/>`;
+s += T(BX + BW / 2, BY + 70, 'ST-LINK-Teil', 'fill:#333;font-size:14px;font-weight:700', 'middle');
+const mx = BX + BW / 2, my = BY + 56 * S;
+s += `<rect x="${mx - 35}" y="${my - 35}" width="70" height="70" fill="#262626" transform="rotate(45 ${mx} ${my})"/>` + T(mx, my + 4, 'F446RE', 'fill:#eee;font-size:10px', 'middle');
+s += T(mx, BY + BH - 12, 'NUCLEO-F446RE · 70 × 82,5 mm', 'fill:#333;font-size:12px;font-weight:700', 'middle');
+function labelCol(name) {
+  if (name === '–') return '#aaa';
+  if (FORBID.has(name)) return '#c62828';
+  if (RESERVE.has(name)) return '#9a7400';
+  if (!/^P[A-H]\d+$/.test(name)) return '#666';
+  return '#999';
+}
+const usedPin = {};
+FW.forEach((w, k) => { if (w.h) usedPin[w.h] = 'fw' + k; });
+BUND.forEach((b, k) => { usedPin['CN10-' + b.n] = 'bu' + k; });
+['CN7', 'CN10'].forEach(h => {
+  const [ia] = hdr(h, 1), [ib] = hdr(h, 2);
+  const x0 = hx(Math.min(ia, ib)) - 9, x1 = hx(Math.max(ia, ib)) + 9;
+  s += `<rect x="${x0}" y="${hy(12) - 9}" width="${x1 - x0}" height="${18 * P + 18}" fill="#111" rx="2"/>`;
+  s += T((x0 + x1) / 2, hy(12) - 14, h, 'fill:#222;font-weight:700;font-size:13px', 'middle');
+  for (let r = 0; r < 19; r++) {
+    const no = 2 * r + 1, ne = 2 * r + 2;
+    const lab = n => { const name = CN[h][n - 1], u = usedPin[h + '-' + n]; return `<tspan style="fill:${u ? '#000' : labelCol(name)};font-weight:${u ? 700 : 400}">${name}</tspan>`; };
+    const y = hy(12 + r) + 3.5, sep = '<tspan style="fill:#bbb"> | </tspan>';
+    const at = h === 'CN7' ? `x="${x1 + 6}"` : `x="${x0 - 6}" text-anchor="end"`;
+    s += `<text class="lt" ${at} y="${y}" style="font-size:10px">${lab(no)}${sep}${lab(ne)}</text>`;
+    s += `<text class="lb" ${at} y="${y}" style="font-size:10px;display:none">${lab(ne)}${sep}${lab(no)}</text>`;
+  }
+  for (let n = 1; n <= 38; n++) {
+    const [i, j] = hdr(h, n), name = CN[h][n - 1], x = hx(i), y = hy(j);
+    s += `<g class="pin" data-pin="${h}-${n}"><rect x="${x - 6}" y="${y - 6}" width="12" height="12" fill="#d4af37" stroke="#7a5f10"/>` + T(x, y + 2.5, n, 'fill:#222;font-size:7px;font-weight:700', 'middle');
+    if (RESERVE.has(name)) s += `<circle cx="${x}" cy="${y}" r="8.5" fill="none" stroke="#e8c547" stroke-width="1.5" stroke-dasharray="3 2"/>`;
+    if (FORBID.has(name)) s += `<path d="M${x - 7} ${y - 7}L${x + 7} ${y + 7}M${x + 7} ${y - 7}L${x - 7} ${y + 7}" stroke="#e53935" stroke-width="2"/>`;
+    s += `</g>`;
+  }
+});
+s += `</g>`;
+
+// external pads and leads
+const bottomOrder = PADS.filter(p => p.side === 'B').sort((a, b) => a.at[0] - b.at[0]);
+PADS.forEach(p => {
+  const x = hx(p.at[0]), y = hy(p.at[1]);
+  s += `<g ${sysAttr(p.card)} class="padg"><rect x="${x - 7}" y="${y - 7}" width="14" height="14" fill="none" stroke="#fff" stroke-width="2"/>`;
+  if (p.side === 'L') s += `<path d="M${x} ${y}H${LX - 24}" stroke="#fff" stroke-width="1.6" stroke-dasharray="5 4"/>` + T(LX - 28, y + 4, p.label, 'fill:#fff', 'end');
+  else if (p.side === 'B') {
+    const k = bottomOrder.indexOf(p), yl = LY + LH + 26 + k * 14;
+    s += `<path d="M${x} ${y}V${yl}H${x + 8}" fill="none" stroke="#fff" stroke-width="1.6" stroke-dasharray="5 4"/>` + T(x + 12, yl + 4, p.label, 'fill:#fff');
+  } else s += T(x + 10, y + 3, p.label, 'font-size:9px;fill:#fff');
+  s += `</g>`;
+});
+
+// bundles to the driver board
+function bundlePath(b) {
+  const [i, j] = hdr('CN10', b.n), x = hx(i), y = hy(j), inner = i === 38;
+  let d = `M${x} ${y}`, ey = y;
+  if (inner) { ey = y + P / 2; d += `L${x + P / 2} ${ey}`; }
+  const ex = BX + BW + 12, k = Math.max(40, (TPX - ex) * 0.4);
+  return d + `L${ex} ${ey} C${ex + k} ${ey} ${TPX - k} ${b.y} ${TPX} ${b.y}`;
+}
+s += `<g id="bund">`;
+BUND.forEach((b, k) => {
+  const d = bundlePath(b), col = ULN[b.i][1];
+  s += `<g class="sel" data-k="bu${k}" data-sys="uln"><path d="${d}" fill="none" stroke="transparent" stroke-width="10"/><path d="${d}" fill="none" stroke="#000" stroke-width="5"/><path d="${d}" fill="none" stroke="${col}" stroke-width="3"/></g>`;
+});
+s += `</g>`;
+s += `<g data-sys="uln" class="padg"><rect x="${TPX}" y="${TPY}" width="${TPW}" height="${TPH}" rx="5" fill="#1f3326" stroke="#7fbf7f" stroke-width="1.5"/>`;
+s += T(TPX + TPW / 2, TPY - 26, 'Treiberplatine (gebaut)', 'font-weight:700;font-size:13px;fill:#fff', 'middle');
+s += T(TPX + TPW / 2, TPY - 11, '30 × 65 mm · Schema', 'font-size:10px;fill:#aaa', 'middle');
+Object.entries(DRV_TOP).forEach(([chip, y0]) => {
+  const cx = TPX + 48, cy = y0 - 12, ch = 7 * 16 + 8;
+  s += `<rect x="${cx}" y="${cy}" width="80" height="${ch}" rx="3" fill="#202020" stroke="#888"/><path d="M${cx + 30} ${cy}a10 10 0 0 0 20 0" fill="#3a3a3a" stroke="#888"/>`;
+  s += T(cx + 40, cy + ch / 2 - 4, chip, 'font-size:22px;font-weight:700;fill:#fff', 'middle') + T(cx + 40, cy + ch / 2 + 14, 'ULN2003AN', 'font-size:9px;fill:#aaa', 'middle');
+  if (chip === 'C') s += T(cx + 40, cy + ch / 2 + 27, 'äußerer Chip', 'font-size:9px;fill:#e8c547', 'middle');
+  ULN.forEach(([, col], i) => { const y = y0 + i * 16; s += `<path d="M${TPX} ${y}H${cx}" stroke="${col}" stroke-width="3"/>` + T(cx + 5, y + 3.5, i + 1, 'font-size:8px;fill:#ccc'); });
+});
+[[300, 'Masse (weiß!) → Massepunkt'], [345, 'COM (weiß!) → +12 V Steuer'], [390, 'Pin 10–16 → Relaisträger']].forEach(([y, l]) => {
+  s += `<path d="M${TPX + TPW} ${y}h14" stroke="#bbb" stroke-width="2" stroke-dasharray="5 4"/>` + T(TPX + TPW + 18, y + 4, l, 'font-size:10px');
+});
+s += `</g></g>`;
+
+// legend
+const ly = H - 40;
+s += `<rect x="20" y="${H - 60}" width="1460" height="54" rx="6" fill="#151515" stroke="#333"/>`;
+s += T(34, ly, 'Legende:', 'font-weight:700;fill:#fff');
+const sw = (x, col, w) => `<path d="M${x} ${ly - 4}h34" stroke="#000" stroke-width="${w + 3}" stroke-linecap="round"/><path d="M${x} ${ly - 4}h34" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/>`;
+s += sw(105, '#9e9e9e', 5) + T(145, ly, 'GND') + sw(185, '#ff8fc8', 5) + T(225, ly, '3,3 V') + sw(275, '#e53935', 4.5) + T(315, ly, '+5 V') + sw(360, '#e8a33d', 4.5) + T(400, ly, 'Kl. 15');
+s += sw(455, '#ffe119', 4.5) + T(495, ly, 'Signal (Farbe je Schaltung) – dicke gerade Linie = Lötbrücke unten');
+s += `<path d="M845 ${ly + 2}q17 -14 34 0" fill="none" stroke="#000" stroke-width="4"/><path d="M845 ${ly + 2}q17 -14 34 0" fill="none" stroke="#e8c547" stroke-width="2.2"/>` + T(885, ly, 'isolierter Draht unten');
+s += `<rect x="1020" y="${ly - 11}" width="14" height="14" fill="none" stroke="#fff" stroke-width="2"/>` + T(1040, ly, 'Anschlussloch nach außen');
+s += `<rect x="1210" y="${ly - 10}" width="5" height="12" fill="#e0e0e0"/><rect x="1215" y="${ly - 10}" width="25" height="12" fill="#222"/>` + T(1246, ly, 'Diode: Ring = Kathode');
+s += T(34, ly + 18, 'Zinn nur dort, wo eine Linie gezeichnet ist. Teile, die über eine Schiene „springen“, berühren sie nicht. Alle C (orange) = 100 nF, alle D (schwarz klein) = 1N5819.', 'fill:#e8c547;font-size:11px');
+
+const svg = document.getElementById('plan');
+svg.innerHTML = s;
+
+// ---------- cards + BOM ----------
+document.getElementById('cards').innerHTML = CARDS.map(c => `<div class="card" id="k-${c.id}"><h3>${c.title}</h3>${c.svg}` +
+  (c.parts.length ? `<ul>${c.parts.map(([n, q, st]) => `<li>${q} × ${n}<span class="st ${st}">${STXT[st]}</span></li>`).join('')}</ul>` : '') +
+  `<p class="hint" style="margin:4px 0">${c.note}</p></div>`).join('');
+const bom = {};
+CARDS.forEach(c => c.parts.forEach(([n, q, st]) => {
+  if (!bom[n]) bom[n] = { q: 0, st, use: [] };
+  bom[n].q += q; bom[n].use.push(c.title.split(' · ')[0]);
+}));
+const STOCK = {
+  'C 100 nF': 'Lager: 3 Stück (Keramik 50 V) → ca. 10 nachkaufen',
+  'R 10 kΩ': 'Lager: Menge offen (1 bereits verbaut)', 'R 2 kΩ': 'Lager: Menge offen', 'R 1 kΩ': 'Lager: Menge offen',
+  'R 100 Ω': 'Lager: „kleinere Werte“, 100 Ω nicht genannt', 'Schottky 1N5819': 'Lager: ca. 10 (2 davon für Bremslicht-Dioden-ODER vorgeschlagen)',
+  'MOSFET IRLZ44N': 'Lager: Menge offen, im Test am Lüfter-Prüfstand', 'Transistor BC547B': 'Lager: 4, Beinbelegung messen',
+  'TVS 1.5KE24A': 'Lager: 4', 'Diode 1N4007': 'Lager: 9 (sitzt am ZL180, nicht auf der Platine)', 'Elko 100 µF/25 V': 'Lager: 2', 'Elko 10 µF/25 V': 'Lager: 1',
+  'Pegelwandler-Modul 4 Kanäle (BSS138?)': '10 Stück, AliExpress 2026-11-10 (8-Kanal-Module im Lager bleiben frei)', 'CAN-Modul SN65HVD230': '10 Stück, AliExpress 2026-11-10 (WCMCU-230)'
+};
+const extra = [['Buchsenleiste 2 × 19, Raster 2,54 mm', 2, PR, 'nicht im Lagerbestand gelistet → fragen/kaufen', 'Nucleo-Sockel'],
+  ['Lochraster Punktraster, mind. 105 × 110 mm', 1, PR, 'nicht im Lagerbestand gelistet → fragen/kaufen', 'Trägerplatine'],
+  ['Silberdraht (verzinnter Kupferdraht) ca. 0,6 mm', 1, PR, 'für Brücken und Schienen', 'Unterseite'],
+  ['isolierter Schaltdraht dünn (Fädeldraht)', 1, PR, 'für die Drähte zu den Buchsenleisten', 'Unterseite']];
+document.querySelector('#bom tbody').innerHTML = Object.entries(bom).map(([n, o]) =>
+  `<tr><td>${n}</td><td>${o.q}</td><td><span class="st ${o.st}">${STXT[o.st]}</span> <span class="hint">${STOCK[n] || ''}</span></td><td class="hint">${[...new Set(o.use)].join(', ')}</td></tr>`).join('') +
+  extra.map(([n, q, st, t, u]) => `<tr><td>${n}</td><td>${q}</td><td><span class="st ${st}">${STXT[st]}</span> <span class="hint">${t}</span></td><td class="hint">${u}</td></tr>`).join('');
+
+// ---------- tables ----------
+const cardOf = id => CARDS.find(c => c.id === id);
+const cardName = id => { const c = cardOf(id); return c ? c.title.split(' · ')[0] : ''; };
+const holesTxt = p => {
+  if (p.t === 'MODL') return `Reihe ${p.ja + 1} und ${p.jb + 1}, Spalte ${p.i0 + 1}–${p.i0 + p.pinsA.length}`;
+  if (p.t === 'CANM') return `Reihe ${p.j + 1}, Spalte ${p.i0 + 1}–${p.i0 + 6}`;
+  if (p.pins) return p.pins.map(([i, j, l]) => `${l} ${hole([i, j])}`).join(' · ');
+  if (p.p) return `+ ${hole(p.p)} · − ${hole(p.m)}`;
+  if (p.t === 'D' || p.t === 'TVS') return `Ring ${hole(p.a)} · ${hole(p.b)}`;
+  return `${hole(p.a)} – ${hole(p.b)}`;
+};
+const typeName = { R: 'Widerstand', C: 'Kondensator', E: 'Elko', D: 'Diode', TVS: 'TVS-Diode', TO92: 'Transistor', TO220: 'MOSFET', MODL: 'Modul', CANM: 'Modul' };
+const ORDER = ['R', 'D', 'C', 'TVS', 'TO92', 'E', 'TO220', 'MODL', 'CANM'];
+const byOrder = (a, b) => ORDER.indexOf(a.t) - ORDER.indexOf(b.t) || a.id.localeCompare(b.id, 'de', { numeric: true });
+const KEY = 'nucleo-heck-done2';
+const load = k => { try { return JSON.parse(localStorage.getItem(k) || '{}'); } catch (e) { return {}; } };
+const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage unavailable */ } };
+const done = load(KEY);
+const box = k => `<input type="checkbox" data-c="${k}"${done[k] ? ' checked' : ''}>`;
+const hdrName = h => h ? `${h} (${CN[h.split('-')[0]][+h.split('-')[1] - 1]})` : '';
+document.querySelector('#parts tbody').innerHTML = PARTS.slice().sort(byOrder)
+  .map(p => `<tr data-k="${p.id}" class="${done[p.id] ? 'done' : ''}"><td>${box(p.id)}</td><td><b>${p.id}</b> ${typeName[p.t]}</td><td>${p.v}</td><td>${holesTxt(p)}</td><td class="hint">${p.note || ''}</td><td><a href="#k-${p.card}">${cardName(p.card)}</a></td></tr>`).join('');
+document.querySelector('#list tbody').innerHTML = FW.map((w, k) => `<tr data-k="fw${k}" class="${done['fw' + k] ? 'done' : ''}"><td>${box('fw' + k)}</td><td>${w.h || hole(w.from)}</td><td>${w.h ? CN[w.h.split('-')[0]][+w.h.split('-')[1] - 1] : ''}</td><td><span class="sw" style="background:${C[w.c][1]}"></span> ${C[w.c][0]} <span class="hyp">(Vorschlag)</span></td><td>${hole(w.to)}</td><td>${w.what}</td></tr>`).join('');
+document.querySelector('#blist tbody').innerHTML = BUND.map((b, k) => `<tr data-k="bu${k}" class="${done['bu' + k] ? 'done' : ''}"><td>${box('bu' + k)}</td><td>CN10-${b.n}</td><td>${CN.CN10[b.n - 1]}</td><td><span class="sw" style="background:${ULN[b.i][1]}"></span> ${ULN[b.i][0]}</td><td>Treiber ${b.chip} IN${b.i + 1}${b.n === 11 ? ' <span class="hint">(PA5: LED LD2 leuchtet mit)</span>' : ''}</td></tr>`).join('');
+
+// ---------- systems + steps ----------
+const stepsEl = document.getElementById('steps');
+function stepsFor(sys) {
+  const cards = sys === 'rails' ? ['gnd', 'v3'] : [sys];
+  const inSys = x => cards.includes(x.card);
+  const st = [];
+  PARTS.filter(inSys).sort(byOrder).forEach(p => st.push([p.id, `<b>${p.id}</b> ${typeName[p.t]} <b>${p.v}</b> einstecken: ${holesTxt(p)}${p.note ? ' – <i>' + p.note + '</i>' : ''}`]));
+  BR.forEach((b, k) => { if (inSys(b)) st.push(['br' + k, `Unterseite: <span class="sw" style="background:${b.nc === 's' ? SYSCOL[b.card] : NETCOL[b.nc]}"></span> Brücke <b>${b.pts.map(hole).join(' → ')}</b> (${b.net})`]); });
+  FW.forEach((w, k) => { if (inSys(w)) st.push(['fw' + k, `Unterseite: <span class="sw" style="background:${C[w.c][1]}"></span> isolierter Draht ${C[w.c][0].toLowerCase()} von <b>${w.h ? hdrName(w.h) : hole(w.from)}</b> nach <b>${hole(w.to)}</b> – ${w.what}`]); });
+  PADS.forEach(p => { if (inSys(p)) st.push(['pd' + hole(p.at), `Leitung nach außen <b>${p.label}</b> in Loch <b>${hole(p.at)}</b>`]); });
+  if (sys === 'uln') BUND.forEach((b, k) => st.push(['bu' + k, `Ader <span class="sw" style="background:${ULN[b.i][1]}"></span> ${ULN[b.i][0]} von Treiber ${b.chip} an <b>${hdrName('CN10-' + b.n)}</b> (Unterseite, Lötauge der Buchsenleiste)`]));
+  return st;
+}
+function showSys(sys) {
+  document.querySelectorAll('#sys button').forEach(b => b.classList.toggle('on', b.dataset.s === sys));
+  svg.querySelectorAll('[data-sys]').forEach(el => {
+    const on = sys === 'all' || el.dataset.sys.split(' ').includes(sys);
+    el.classList.toggle('off', !on);
+  });
+  svg.classList.toggle('focus', sys !== 'all');
+  curSys = sys;
+  fitView();
+  if (sys === 'all') { stepsEl.innerHTML = ''; return; }
+  const name = SYSTEMS.find(x => x[0] === sys)[1];
+  stepsEl.innerHTML = `<h3 style="margin:6px 0">Schritte: ${name}</h3><ol class="steps">${stepsFor(sys).map(([k, t]) => `<li data-k="${k}" class="${done[k] ? 'done' : ''}">${box(k)} ${t}</li>`).join('')}</ol>` +
+    (cardOf(sys) ? `<p class="hint"><a href="#k-${sys}">Schaltbild ${cardName(sys)} ›</a></p>` : '');
+}
+let curSys = 'all', mirrored = false;
+function fitView() {
+  if (curSys === 'all') { svg.setAttribute('viewBox', `0 0 ${W} ${H}`); return; }
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  const grow = (x, y, w, h) => { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x + w); y1 = Math.max(y1, y + h); };
+  svg.querySelectorAll('[data-sys]').forEach(el => { if (!el.classList.contains('joint') && el.dataset.sys.split(' ').includes(curSys)) { const b = el.getBBox(); grow(b.x, b.y, b.width, b.height); } });
+  if (mirrored) [x0, x1] = [W - x1, W - x0];
+  const pad = 30, w = Math.max(x1 - x0 + 2 * pad, 560), h = Math.max(y1 - y0 + 2 * pad, 380);
+  const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+  svg.setAttribute('viewBox', `${cx - w / 2} ${cy - h / 2} ${w} ${h}`);
+}
+document.getElementById('sys').innerHTML = SYSTEMS.map(([k, n]) => `<button data-s="${k}" class="${k === 'all' ? 'on' : ''}" style="border-left:4px solid ${SYSCOL[k] || (k === 'rails' ? '#ff8fc8' : k === 'uln' ? '#b05fd8' : '#444')}">${n}</button>`).join('');
+document.getElementById('sys').addEventListener('click', e => { const b = e.target.closest('button'); if (b) showSys(b.dataset.s); });
+
+// ---------- interaction ----------
+const info = document.getElementById('info');
+function describe(k) {
+  if (k.startsWith('br')) { const b = BR[+k.slice(2)]; return `<b>Lötbrücke (Unterseite)</b> · ${b.net} · ${b.pts.map(hole).join(' → ')} · ${cardName(b.card)}`; }
+  if (k.startsWith('fw')) { const w = FW[+k.slice(2)]; return `<b>isolierter Draht (Unterseite)</b> · ${w.h ? hdrName(w.h) : hole(w.from)} → ${hole(w.to)} · ${w.what} · <span class="sw" style="background:${C[w.c][1]}"></span> ${C[w.c][0]}`; }
+  if (k.startsWith('bu')) { const b = BUND[+k.slice(2)]; return `<b>Bündel ${b.chip}</b> · ${hdrName('CN10-' + b.n)} → Treiber ${b.chip} IN${b.i + 1} · Ader <span class="sw" style="background:${ULN[b.i][1]}"></span> ${ULN[b.i][0]}`; }
+  const p = PARTS.find(q => q.id === k);
+  return `<b>${p.id}</b> ${typeName[p.t]} ${p.v} · ${holesTxt(p)}${p.note ? ' · ' + p.note : ''} · ${cardName(p.card)}`;
+}
+function select(k) {
+  svg.querySelectorAll('.sel').forEach(g => g.classList.toggle('dim', k !== null && g.dataset.k !== k));
+  document.querySelectorAll('tr[data-k], li[data-k]').forEach(tr => tr.classList.toggle('sel', tr.dataset.k === k));
+  info.innerHTML = k === null ? 'Oben eine Schaltung wählen → nur diese wird gezeigt, mit Schrittliste. Oder Bauteil/Leitung antippen.' : describe(k);
+}
+svg.addEventListener('click', e => {
+  const g = e.target.closest('.sel');
+  if (g) { select(g.dataset.k); return; }
+  const pn = e.target.closest('.pin');
+  if (!pn) { select(null); return; }
+  const [h, n] = pn.dataset.pin.split('-'), name = CN[h][n - 1], k = usedPin[pn.dataset.pin];
+  if (k) { select(k); return; }
+  select(null);
+  info.innerHTML = `<b>${h}-${n}</b> · ${name} · ${RESERVE.has(name) ? 'Reserve' : FORBID.has(name) ? 'nicht verwenden' : /GND/.test(name) ? 'Masse' : name === '–' ? 'nicht belegt' : 'frei/Versorgung'}`;
+});
+document.body.addEventListener('change', e => {
+  const c = e.target.dataset && e.target.dataset.c;
+  if (!c) return;
+  done[c] = e.target.checked;
+  save(KEY, done);
+  document.querySelectorAll(`[data-k="${c}"]`).forEach(el => { if (el.tagName === 'TR' || el.tagName === 'LI') el.classList.toggle('done', e.target.checked); });
+  document.querySelectorAll(`input[data-c="${c}"]`).forEach(i => { i.checked = e.target.checked; });
+});
+document.querySelectorAll('tbody, #steps').forEach(tb => tb.addEventListener('click', e => {
+  const tr = e.target.closest('[data-k]');
+  if (!tr || e.target.matches('input') || e.target.closest('a')) return;
+  select(tr.dataset.k);
+  if (tr.tagName === 'TR') document.getElementById('wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}));
+
+function mirror(on) {
+  const flip = document.getElementById('flip');
+  flip.setAttribute('transform', on ? `translate(${W} 0) scale(-1 1)` : '');
+  flip.querySelectorAll('text').forEach(t => {
+    if (!t.dataset.a) t.dataset.a = t.getAttribute('text-anchor') || 'start';
+    const x = +t.getAttribute('x'), a = t.dataset.a;
+    if (on) { t.setAttribute('transform', `translate(${2 * x} 0) scale(-1 1)`); t.setAttribute('text-anchor', a === 'start' ? 'end' : a === 'end' ? 'start' : 'middle'); }
+    else { t.removeAttribute('transform'); t.setAttribute('text-anchor', a); }
+  });
+  svg.classList.toggle('vbot', on);
+  svg.querySelectorAll('.lt').forEach(t => { t.style.display = on ? 'none' : ''; });
+  svg.querySelectorAll('.lb').forEach(t => { t.style.display = on ? '' : 'none'; });
+  const ttl = document.getElementById('ttl');
+  ttl.textContent = (on ? 'Lötseite (von unten, gespiegelt)' : 'Bauteilseite') + ttl.textContent.slice(ttl.textContent.indexOf(':'));
+  document.getElementById('vTop').classList.toggle('on', !on);
+  document.getElementById('vBot').classList.toggle('on', on);
+  mirrored = on;
+  fitView();
+}
+document.getElementById('vTop').onclick = () => mirror(false);
+document.getElementById('vBot').onclick = () => mirror(true);
+document.getElementById('nuc').onclick = e => { const off = svg.classList.toggle('nonuc'); e.target.classList.toggle('on', !off); };
+document.getElementById('grid').onclick = e => { const g = document.getElementById('gridg'), on = g.style.display === 'none'; g.style.display = on ? '' : 'none'; e.target.classList.toggle('on', on); };
+document.querySelectorAll('button.z').forEach(b => b.onclick = () => {
+  document.querySelectorAll('button.z').forEach(x => x.classList.toggle('on', x === b));
+  svg.style.width = (+b.dataset.z * 100) + '%';
+});
+svg.style.width = '100%';
+svg.style.minWidth = '760px';
+</script>
+</body>
+</html>

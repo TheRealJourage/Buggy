@@ -26,6 +26,8 @@ LEVER_REST, LEVER_TRIP = 4.2, 1.0                        # lever tip below the p
 PIN = 8.0              # square pin, cannot turn
 CLR = 0.25             # per side
 TUN = PIN + 2 * CLR
+PIN_W = PIN - 0.1       # printed pin slightly smaller: first print sat too tight in the tunnel (user 2026-11-07)
+PIN_H = PIN - 0.1       # also sets how far the switch levers are pushed
 GAP = 0.6              # plunger edge above the pin top -> lever pushed to 0.6, 0.4 beyond the trip point
 LEAD = (2.5, 30.0)     # chamfer on the pin's leading top edge (height, angle to the top): rides over a lever
                        # or switch that sits a bit low, or a step in the tunnel (user 2026-10-31)
@@ -50,7 +52,7 @@ LEAD_TAN = math.tan(math.radians(LEAD[1]))
 LEAD_L = LEAD[0] / LEAD_TAN
 
 
-def lever_at(u):
+def lever_at(u, gap=EDGE - PIN_H):
     """Lever tip below the plunger edge with the pin tip u past the hinge: the straight lever rests on the
     highest point of the pin top (flat at GAP, chamfer lower towards the tip)."""
     if u <= 0:
@@ -58,39 +60,41 @@ def lever_at(u):
     tip = LEVER_REST
     for i in range(1, 401):
         w = min(u, SW_L) * i / 400
-        below = GAP + max(0.0, w - (u - LEAD_L)) * LEAD_TAN
+        below = gap + max(0.0, w - (u - LEAD_L)) * LEAD_TAN
         tip = min(tip, SW_L * below / w)
     return tip
 
 
-def first_u(limit):
+def first_u(limit, gap=EDGE - PIN_H):
     u = 0.0
-    while lever_at(u) > limit:
+    while lever_at(u, gap) > limit:
         u += 0.01
     return u
 
 
-U_TOUCH = first_u(LEVER_REST - 1e-6)              # pin tip past the hinge when it first lifts the lever
-U_TRIP = first_u(LEVER_TRIP)                      # ... when the switch trips
+# switch positions laid out for the nominal 8.0 pin, so the printed block stays as it is
+U_TOUCH = first_u(LEVER_REST - 1e-6, GAP)         # pin tip past the hinge when it first lifts the lever
+U_TRIP = first_u(LEVER_TRIP, GAP)                 # ... when the switch trips
 REST_IN = U_TOUCH - REST_MARGIN
 X1 = P0 - REST_IN                                 # S1 hinge (front of the body)
-S1_AT = U_TRIP - REST_IN
-S2_AT = STROKE - S2_BEFORE_END
-X2 = P0 + S2_AT - U_TRIP                          # S2 hinge
+X2 = P0 + STROKE - S2_BEFORE_END - U_TRIP         # S2 hinge
+U_TRIP_REAL = first_u(LEVER_TRIP)                 # with the smaller printed pin
+S1_AT = X1 - P0 + U_TRIP_REAL
+S2_AT = X2 - P0 + U_TRIP_REAL
 RAIL = (X1 - ADJ, X2 + SW_L + ADJ)
 TUN_L = max(RAIL[1] + 3.0, P0 + STROKE_MAX + 3.0)
 PIN_L = P0 + STROKE_MAX + 5.0                         # square part; the eye stays outside the tunnel at full travel
 EYE_R = 7.0
 CLEVIS_X = TUN_L + 7.0
 OUT_Y = TUN / 2 + WALL
-WALL_Y0 = SW_T / 2 + 0.15                         # switch face, window edge
+WALL_Y0 = SW_T / 2 + 0.25                         # switch face, window edge; walls on both sides, the screws pull them in
 
 assert REST_IN < U_TOUCH
 assert X2 - (X1 + SW_L) >= 1.0, f'stroke {STROKE} too short for two switches in a row'
 
 
 def rail():
-    """One window for both switch bodies, one screw slot and one nut channel along the whole rail."""
+    """One window for both switch bodies, one screw slot through both walls and one nut channel along the whole rail."""
     x0, x1 = RAIL
     h0 = x0 + (SW_L - SW_HOLE_PITCH) / 2              # first possible hole centre
     h1 = x1 - (SW_L - SW_HOLE_PITCH) / 2
@@ -98,8 +102,8 @@ def rail():
     with BuildPart() as cut:
         with Locations((x0 - 0.3, -WALL_Y0, TUN - 0.1)):
             Box(x1 - x0 + 0.6, 2 * WALL_Y0, CEIL + SW_H + 2, align=(Align.MIN, Align.MIN, Align.MIN))
-        with Locations(((h0 + h1) / 2, WALL_Y0 - 0.1, z)):
-            Box(h1 - h0 + 2.4, OUT_Y - WALL_Y0 + 0.2, 2.4, align=(Align.CENTER, Align.MIN, Align.CENTER))
+        with Locations(((h0 + h1) / 2, -OUT_Y - 0.1, z)):
+            Box(h1 - h0 + 2.4, 2 * OUT_Y + 0.2, 2.4, align=(Align.CENTER, Align.MIN, Align.CENTER))
         with Locations(((h0 + h1) / 2, OUT_Y - M2_NUT[1], z)):
             Box(h1 - h0 + M2_NUT[0], M2_NUT[1] + 0.1, M2_NUT[0], align=(Align.CENTER, Align.MIN, Align.CENTER))
     return cut.part
@@ -110,8 +114,9 @@ def build_block():
     with BuildPart() as p:
         with Locations((0, -OUT_Y, -FLOOR)):
             Box(TUN_L, 2 * OUT_Y, FLOOR + TUN + CEIL, align=(Align.MIN, Align.MIN, Align.MIN))
-        with Locations((0, WALL_Y0, TUN)):
-            Box(TUN_L, OUT_Y - WALL_Y0, top - TUN, align=(Align.MIN, Align.MIN, Align.MIN))
+        for y0 in (WALL_Y0, -OUT_Y):                   # switches clamped between two walls (user 2026-11-07)
+            with Locations((0, y0, TUN)):
+                Box(TUN_L, OUT_Y - WALL_Y0, top - TUN, align=(Align.MIN, Align.MIN, Align.MIN))
         for side in (-1, 1):
             y0 = TUN / 2 if side > 0 else -OUT_Y
             with Locations((TUN_L - 1, y0, -FLOOR)):
@@ -130,16 +135,16 @@ def build_pin():
     """Pin with its tip at X = 0 (rest position is X = P0), bottom on the tunnel floor."""
     with BuildPart() as p:
         with BuildSketch(Plane.XZ):
-            Polygon((-PIN_L, 0), (-LEAD_EDGE, 0), (0, LEAD_EDGE), (0, PIN - LEAD[0]), (-LEAD_L, PIN), (-PIN_L, PIN),
+            Polygon((-PIN_L, 0), (-LEAD_EDGE, 0), (0, LEAD_EDGE), (0, PIN_H - LEAD[0]), (-LEAD_L, PIN_H), (-PIN_L, PIN_H),
                     align=None)
-        extrude(amount=PIN / 2, both=True)
+        extrude(amount=PIN_W / 2, both=True)
         with BuildSketch(Plane.XY.offset(-1)):
-            h = PIN / 2
+            h = PIN_W / 2
             Polygon((-PIN_L - 1, -h), (-LEAD_EDGE, -h), (0, LEAD_EDGE - h), (0, h - LEAD_EDGE), (-LEAD_EDGE, h),
                     (-PIN_L - 1, h), align=None)
-        extrude(amount=PIN + 2, mode=Mode.INTERSECT)
-        with Locations((-PIN_L - EYE_R + 2, 0, PIN / 2)):
-            Cylinder(EYE_R, PIN, rotation=(90, 0, 0))
+        extrude(amount=PIN_H + 2, mode=Mode.INTERSECT)
+        with Locations((-PIN_L - EYE_R + 2, 0, PIN_H / 2)):
+            Cylinder(EYE_R, PIN_W, rotation=(90, 0, 0))
             Cylinder(BOLT_D / 2, PIN + 2, rotation=(90, 0, 0), mode=Mode.SUBTRACT)
     return p.part
 
@@ -158,8 +163,8 @@ def lever_tip(s):
 
 
 def meta():
-    return {'sw': [SW_L, SW_H, SW_T], 'leverRest': LEVER_REST, 'leverTrip': LEVER_TRIP, 'pin': PIN, 'tun': TUN,
-            'edge': EDGE, 'gap': GAP, 'x1': X1, 'x2': X2, 'p0': P0, 'stroke': STROKE, 'strokeMax': STROKE_MAX, 'lead': [LEAD[0], LEAD_TAN],
+    return {'sw': [SW_L, SW_H, SW_T], 'leverRest': LEVER_REST, 'leverTrip': LEVER_TRIP, 'pin': PIN, 'pinW': PIN_W, 'pinH': PIN_H, 'tun': TUN,
+            'edge': EDGE, 'gap': EDGE - PIN_H, 'x1': X1, 'x2': X2, 'p0': P0, 'stroke': STROKE, 'strokeMax': STROKE_MAX, 'lead': [LEAD[0], LEAD_TAN],
             's1At': S1_AT, 's2At': S2_AT, 'rail': RAIL}
 
 
