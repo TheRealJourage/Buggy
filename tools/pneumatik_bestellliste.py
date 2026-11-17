@@ -44,7 +44,7 @@ BLOCKS = [
     ]),
     ("Airtec – Ventile", [
         ("M-04-533-HN-441", "5/3-Wegeventil, Mitte entlüftet, G1/8, 12 V DC 4,2 W, Form B Industrienorm", "3", "Ventilstapel", "ohne Steckdose geliefert"),
-        ("28-ST-01", "Steckdose Form B Industrienorm (22 mm, 11 mm), 0–250 V, mit Flachdichtung", "6", "je Spule 1", "nicht 28-ST-01-G (10 mm)"),
+        ("28-ST-01", "Steckdose Form B Industrienorm (22 mm, 11 mm), 0–250 V", "6", "je Spule 1", "Flachdichtung dabei? Nicht 28-ST-01-G (10 mm)"),
     ]),
     ("Riegler – Verschraubungen »metallica« (Messing vernickelt, max. 16 bar)", [
         ("108897 / 854.018-6", "L-Steckverschraubung drehbar, G1/8 – Schlauch 6", "4", "Ventile G, A Anschl. 2/4", "gerade/Winkel nach Einbauprobe"),
@@ -55,9 +55,10 @@ BLOCKS = [
         ("108978 / 851.016-8", "Schott-Steckverbindung 8 mm, M16 × 1", "1", "Rückwand Zylinderbox (1,5 mm)", "Gegenmutter dabei?"),
     ]),
     ("Riegler – Drosseln, Schalldämpfer, Aufbereitung", [
-        ("115705 / 343.018-6-D", "Drosselrückschlagventil Abluftdrosselung, G1/8 – Schlauch 6, drehbar, Metall", "6", "direkt in alle Zylinderanschlüsse", "2 nötig (G), 4 für A/B statt Winkel; lieferbar? Ersatz 340.018-6-D ist 10 mm höher – bitte vorher melden"),
+        ("106937 / 343.018-6", "Drosselrückschlagventil Abluftdrosselung, Hohlschraube, G1/8 – Steckanschluss 6, Messing vernickelt, Schlitzschraube", "6", "direkt in alle Zylinderanschlüsse", "2 nötig (G), 4 für A/B statt Winkel; nicht die höhere Rändel-Ausführung (42 mm)"),
         ("113338 / 567-1", "Schalldämpfer Sinterbronze G1/8, mit Sechskant", "6", "Ventile Anschl. 3/5", "max. 8 bar"),
-        ("C 06 K-10-HA", "Filterregler multifix-mini Gr. 0, G1/4, 0,5–10 bar, 5 µm, halbautom. Ablass, mit Manometer", "1", "vor der Zylinderbox, 7 bar", "mit Wandhalter"),
+        ("C 06 K-10-HA", "Filterregler multifix-mini Gr. 0, G1/4, 0,5–10 bar, 5 µm, halbautom. Ablass, mit Manometer", "1", "vor der Zylinderbox, 7 bar", "Umgebung max. 60 °C"),
+        ("MV 30", "Haltewinkel mit Mutter R 11-55 für multifix-mini", "1", "Wandmontage Filterregler", ""),
         ("—", "Rückschlagventil Steckanschluss 8 mm, mind. 16 bar", "1", "Kompressor → Tank", "bitte Typ vorschlagen (Riegler 204.08-2 nur 10 bar); bei Gewinde + 2 Anschlüsse 8 mm"),
     ]),
     ("Riegler – Schlauch PA 12", [
@@ -67,7 +68,7 @@ BLOCKS = [
 ]
 
 DROPPED = [
-    ("44-XSCF-60", "Inline-Drossel → Drosseln direkt am Zylinder (Riegler 343.018-6-D)"),
+    ("44-XSCF-60", "Inline-Drossel → Drosseln direkt am Zylinder (Riegler 343.018-6)"),
     ("44-XCVPU-80, 40-501-18, blue C-line, PU-Schlauch, FRY", "→ Riegler"),
     ("RA-25, RB-25", "Böcke Eigenbau (Edelstahl) mit RM-25"),
     ("Reihenleiste, Schottverschraubungen 6 mm", "Ventile seit 11.11. als Stapel in der Zylinderbox"),
@@ -80,7 +81,7 @@ QUESTIONS = [
     "Passen ZS-6701 und KA-10-01 zusammen (Stecker verschraubt oder Schnapp)? NT-550 für Ø 20 und Ø 25?",
     "Ventilspule 12 V DC 4,2 W, Toleranz laut Datenblatt ±10 %: verträgt sie im Fahrzeug Dauerbetrieb bei 14,4 V?",
     "Rückschlagventil 8 mm für mind. 16 bar (Leitung Kompressor → Tank) – welcher Typ?",
-    "Riegler: Drossel 343.018-6-D (115705) noch lieferbar? PA-Schlauch als Meterware? Passender Wandhalter zum Filterregler C 06 K-10-HA?",
+    "Riegler: Drossel 343.018-6 (106937) lieferbar? PA-Schlauch als Meterware?",
 ]
 
 
