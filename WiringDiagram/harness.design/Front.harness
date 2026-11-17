@@ -359,34 +359,40 @@
           "signal": "Masse"
         },
         {
-          "id": "coVo_t"
+          "id": "coVo_t",
+          "signal": "CAN-H (SN65HVD230, PA12 TX / PA11 RX)"
         },
         {
-          "id": "H7vsSz"
+          "id": "H7vsSz",
+          "signal": "CAN-L (SN65HVD230)"
         },
         {
           "id": "xPjqIk",
-          "signal": "E1 Pumpe laeuft (Pull-up 1k)"
+          "signal": "E1 PC3 Pumpe laeuft (10k an 3V3 + 1N5819)"
         },
         {
           "id": "d8SLZT",
-          "signal": "E2 Bremslicht (Teiler 10k/2k7)"
+          "signal": "E2 PC2 Bremslicht (Teiler 10k/2k7 + 1N5819)"
         },
         {
           "id": "hA_k48",
-          "signal": "E3 ABS-Lampe"
+          "signal": "E3 PC4 ABS-Lampe (Teiler 10k/2k7, Pull-up 1k an Kl. 15)"
         },
         {
           "id": "Vlkur3",
-          "signal": "E4 Kupplung S1 (Pull-up)"
+          "signal": "E4 PB13 Kupplung S1 (10k an 3V3 + 1N5819)"
         },
         {
           "id": "MS1fXh",
-          "signal": "E5 Kupplung S2 (Pull-up)"
+          "signal": "E5 PB14 Kupplung S2 (10k an 3V3 + 1N5819)"
         },
         {
           "id": "JmI4mA",
           "signal": "GND Kupplung"
+        },
+        {
+          "id": "PkCUJm",
+          "signal": "Kl. 15 (V4) -> 1k 0,5 W Pull-up ABS-Lampe"
         }
       ]
     },
@@ -2205,6 +2211,19 @@
         "id": "Caf3c_",
         "handle": "JmI4mA"
       }
+    },
+    {
+      "id": "R3yVr7",
+      "color": "Black",
+      "source": {
+        "id": "FxJN4n",
+        "handle": "_VIhsq"
+      },
+      "target": {
+        "id": "Caf3c_",
+        "handle": "PkCUJm"
+      },
+      "stripeColor": "Yellow"
     }
   ]
 }
