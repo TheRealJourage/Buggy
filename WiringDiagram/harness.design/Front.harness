@@ -360,35 +360,35 @@
         },
         {
           "id": "coVo_t",
-          "signal": "CAN-H (SN65HVD230, PB9 TX / PB8 RX)"
+          "signal": "CAN-H (J7/1, SN65HVD230, PB9 TX / PB8 RX)"
         },
         {
           "id": "H7vsSz",
-          "signal": "CAN-L (SN65HVD230)"
+          "signal": "CAN-L (J7/2)"
         },
         {
           "id": "xPjqIk",
-          "signal": "E1 PB10 Pumpe laeuft (10k an 3V3 + 1N5819)"
+          "signal": "E1 PA8 Pumpe laeuft (J9/1, 10k an 3V3 + 1N5819)"
         },
         {
           "id": "d8SLZT",
-          "signal": "E2 PC0 Bremslicht (Teiler 10k/2k7 + 1N5819)"
+          "signal": "E2 PA7 Bremslicht (J12/1, Teiler 10k/2k7 + 1N5819)"
         },
         {
           "id": "hA_k48",
-          "signal": "E3 PC9 ABS-Lampe (Teiler 10k/2k7, Pull-up 1k an Kl. 15)"
+          "signal": "E3 PC9 ABS-Lampe (J6/2, Teiler 10k/2k7, Pull-up 1k an Kl. 15)"
         },
         {
           "id": "Vlkur3",
-          "signal": "E4 PA10 Kupplung S1 (10k an 3V3 + 1N5819)"
+          "signal": "E4 PB4 Kupplung S1 (J9/3, 10k an 3V3 + 1N5819)"
         },
         {
           "id": "MS1fXh",
-          "signal": "E5 PB5 Kupplung S2 (10k an 3V3 + 1N5819)"
+          "signal": "E5 PB10 Kupplung S2 (J9/2, 10k an 3V3 + 1N5819)"
         },
         {
           "id": "JmI4mA",
-          "signal": "GND Kupplung"
+          "signal": "GND Kupplung (J9/4)"
         },
         {
           "id": "PkCUJm",

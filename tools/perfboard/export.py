@@ -1,10 +1,11 @@
+import sys, os; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import json, left, right
-CARD = {'TXD': 'lin', 'RXD': 'lin', 'CS': 'lin', 'V12': 'lin', 'LBUS': 'lin', 'PU': 'lin', 'E5V': 'e5v', '3V3': 'v3', 'GND': 'gnd', 'GNDT': 'gnd',
+CARD = {'TXD': 'lin', 'RXD': 'lin', 'CS': 'lin', 'V12': 'lin', 'LBUS': 'lin', 'PU': 'lin', 'E5V': 'e5v', '3V3': 'v3', 'GND': 'gnd', 'GNDT': 'gnd', 'GNDB': 'gnd',
         'BRK': 'brake', 'BRKL': 'brake', 'PMP': 'pump', 'PMPL': 'pump', 'BLK': 'stalk', 'FRN': 'stalk', 'WPR': 'stalk', 'WPF': 'stalk',
         'ABS': 'abs', 'ABSL': 'abs', 'KL15': 'abs', 'LED': 'led', 'LEDY': 'led', 'DIN': 'led', 'V5': 'led',
         'CTX': 'can', 'CRX': 'can', 'CANH': 'can', 'CANL': 'can', 'KAN': 'comp', 'KAU': 'comp', 'FAN': 'fan', 'S1': 'clutch', 'S2': 'clutch',
         'S1L': 'clutch', 'S2L': 'clutch', 'POT': 'poti'}
-KIND = {'GND': 'g', 'GNDT': 'g', '3V3': 'v', 'E5V': '5', 'V5': '5', 'V12': 'k', 'KL15': 'k'}
+KIND = {'GND': 'g', 'GNDT': 'g', 'GNDB': 'g', '3V3': 'v', 'E5V': '5', 'V5': '5', 'V12': 'k', 'KL15': 'k'}
 out = {}
 for mod in (left, right):
     b, order = mod.build()

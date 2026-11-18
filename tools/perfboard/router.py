@@ -100,7 +100,7 @@ class Board:
     def free(self, h, net):
         return self.inside(h) and self.occ.get(h) in (None, net)
 
-    def route(self, net, jumper_cost=40, max_jump=6, avoid=()):
+    def route(self, net, jumper_cost=40, max_jump=12, avoid=()):
         guard = 0
         while True:
             comps = self.components(net)
