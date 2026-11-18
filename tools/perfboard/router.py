@@ -113,12 +113,13 @@ class Board:
             src, targets = comps[0], set().union(*comps[1:])
             # Dijkstra with state (hole, dir)
             pq, best, prev = [], {}, {}
+            tick = iter(range(10**9))
             for h in src:
-                heapq.heappush(pq, (0, h, None))
+                heapq.heappush(pq, (0, next(tick), h, None))
                 best[(h, None)] = 0
             found = None
             while pq:
-                d, h, dr = heapq.heappop(pq)
+                d, _, h, dr = heapq.heappop(pq)
                 if best.get((h, dr), 1e9) < d:
                     continue
                 if h in targets and h not in src:
@@ -132,7 +133,7 @@ class Board:
                     nd = d + 1 + (0.6 if dr not in (None, (ddx, ddy)) else 0) + (0.4 if self.occ.get(n) is None and n in self.fixed else 0)
                     key = (n, (ddx, ddy))
                     if nd < best.get(key, 1e9):
-                        best[key] = nd; prev[key] = ((h, dr), 'b'); heapq.heappush(pq, (nd, n, (ddx, ddy)))
+                        best[key] = nd; prev[key] = ((h, dr), 'b'); heapq.heappush(pq, (nd, next(tick), n, (ddx, ddy)))
                 for ddx, ddy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
                     if h in self.fixed:
                         break
@@ -143,7 +144,7 @@ class Board:
                         nd = d + jumper_cost + L
                         key = (n, ('J', ddx, ddy))
                         if nd < best.get(key, 1e9):
-                            best[key] = nd; prev[key] = ((h, dr), 'j'); heapq.heappush(pq, (nd, n, ('J', ddx, ddy)))
+                            best[key] = nd; prev[key] = ((h, dr), 'j'); heapq.heappush(pq, (nd, next(tick), n, ('J', ddx, ddy)))
             if not found:
                 raise RuntimeError(f'{self.name}: no route for {net}')
             # backtrack
