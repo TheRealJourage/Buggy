@@ -83,6 +83,6 @@ genannten Datei; andere Notizen und Memory verlinken, statt zu wiederholen.
 - Git nur mit `git -c safe.directory=/srv/data/projects/buggy …` (Repo gehört ftk). Commits direkt auf `main`.
 - **core kann nicht pushen.** Nach Commits auf core den User bitten, am PC `git pull core main` + `git push origin main` zu machen. Nach Arbeit am PC auf core `git fetch origin` + `git merge origin/main`.
 - `srcTest/` (Firmware) wird auf dem Windows-PC entwickelt und getestet; die core-Kopie ist nur Spiegel. `lib/steering_key/key_secret.h` nie committen.
-- Viewer: Port 8112 (`podman-compose`, `viewer/`), Tests `node --test` in `viewer/`. Schaltlogik in `sim.js` immer zusammen mit `Druckluftanlage.md` ändern.
+- Viewer: http://dev.home/v/buggy/ (`viewer/`, ausgeliefert von `dev-index`, Mount in `/srv/data/projects/_dev-index/static.json`; Port 8112/Container seit 2026-11-19 aus), Tests `node --test` in `viewer/`. Schaltlogik in `sim.js` immer zusammen mit `Druckluftanlage.md` ändern.
 - `tools/harness_front_v3/v4/v5.py` sind einmalige Migrationen und laufen nicht erneut; wiederholbar ist nur `harness_layout.py`. Quelle sind die `.harness`-Dateien.
 - Keine Fremd-PDFs und keine Build-Ordner ins Git.
