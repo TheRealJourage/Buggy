@@ -564,15 +564,15 @@
         },
         {
           "id": "xPjqIk",
-          "signal": "E1 PC3 Pumpe laeuft (10k an 3V3 + 1N5819)"
+          "signal": "E1 PB7 Pumpe laeuft (10k an 3V3 + 1N5819)"
         },
         {
           "id": "d8SLZT",
-          "signal": "E2 PC2 Bremslicht (Teiler 10k/2k7 + 1N5819)"
+          "signal": "E2 PA15 Bremslicht (Teiler 10k/2k7 + 1N5819)"
         },
         {
           "id": "hA_k48",
-          "signal": "E3 PC4 ABS-Lampe (Teiler 10k/2k7, Pull-up 1k an Kl. 15)"
+          "signal": "E3 PC8 ABS-Lampe (Teiler 10k/2k7, Pull-up 1k an Kl. 15)"
         },
         {
           "id": "Vlkur3",

@@ -58,48 +58,45 @@
 </style>
 </head>
 <body>
-<h1>Nucleo-F446RE an der Lenksäule (Front-Controller / Hub) – Lötplan</h1>
-<p class="hint">Stand 2026-11-17. <span class="hyp"><b>Pinbelegung, Layout, Bauteile und Werte = Vorschlag Claude vom 2026-11-17, nicht festgelegt</b></span> (<code>Kabelbaum-Übersicht.md</code> „Pinbelegung Front-Controller“). Festgelegt (User 2026-11-17): ABS-Lampe über 1 kΩ an Kl. 15 + Teiler; LED-Leiste an der großen 5-V-Schiene. Board: zweiter Nucleo-F446RE, linke Lenksäulen-Box (<a href="lenksaeule.html">lenksaeule.html</a>). Aufbau wie <a href="nucleo-heck.html">nucleo-heck.html</a> (Relaisbox): Nucleo auf Buchsenleisten, darunter Lochraster.</p>
-<p>Lochraster mit Einzel-Lötaugen (Punktraster 2,54 mm), ca. <b>137 × 107 mm</b> (54 × 42 Löcher). Lochangaben <b>Sp|Re</b> = Spalte|Reihe, wie an den Linealen, Bauteilseite, oben links = 1|1. <b>Dicke gerade Linien</b> = Lötbrücke/Silberdraht unten · <b>dünne gebogene Linien</b> = isolierter Draht unten. Links die Schaltungen für CN7, rechts für CN10, unten das CAN-Modul. GND- und 3,3-V-Schiene laufen als U um den Nucleo.</p>
+<h1>Front-Controller (Nucleo-F446RE, Hub) – zwei Steckplatinen, Lötplan</h1>
+<p class="hint">Stand 2026-11-18. <span class="hyp"><b>Pinbelegung, Layout, Bauteile und Werte = Vorschlag Claude, nicht festgelegt.</b></span> Festgelegt (User): ABS-Lampe über 1 kΩ an Kl. 15 + Teiler, LED-Leiste an der großen 5-V-Schiene (2026-11-17); <b>zwei getrennte Lochraster-Platinen, von hinten auf die Morpho-Stifte gesteckt, größer als der Nucleo erlaubt (2026-11-18)</b>. Details: <code>Kabelbaum-Übersicht.md</code> „Pinbelegung Front-Controller“.</p>
+<p>Je Platine eine Buchsenleiste 2 × 19 (links CN7, rechts CN10), Bauteile außen neben dem Nucleo, unter dem Nucleo nur Lötbahnen. Verbunden wird <b>wie auf einer Leiterplatte</b>: Lötbahnen auf der Unterseite (Zinnbrücke oder Silberdraht), <b>eine Drahtbrücke</b> (J1, links) und <b>ein Kabel</b> für 3,3 V von links nach rechts. Fast alle Signale liegen dafür an der <b>äußeren</b> Stiftreihe; nur RXD, 5 V, 3,3 V und GND kommen innen heraus und laufen als Bahn unter dem Nucleo nach außen. Die Bahnen hat ein Routing-Skript gelegt und geprüft (jede Bahn genau ein Netz, jedes Netz durchgehend).</p>
 
-<div class="warn"><b>Vor dem Löten prüfen (Annahmen im Plan):</b> ① Pin 1 der Morpho-Leisten auf der USB-Seite, ungerade Pins links (CN7-8 piept gegen GND). ② Abstand CN7 ↔ CN10 = 24 Raster wie beim Relaisbox-Plan. ③ Board-Revision „MB1136 C-0x“ ablesen, Jumper für E5V (vermutlich JP5) in UM1724 nachsehen. ④ Pinfolge 74AHCT125 im Datenblatt prüfen (Kenntnisstand Claude). ⑤ <span class="hyp">Platz in der linken Box: <code>lenkbox.js</code> rechnet bisher nur mit 82,5 × 70 mm (Nucleo) → Träger 137 × 107 mm im Viewer nachziehen (Hypothese: passt, Box ca. 190–290 × 150 mm).</span></div>
+<div class="warn"><b>Vor dem Löten prüfen:</b> ① Die Morpho-Stifte stehen unten lang genug für die Buchsenleisten heraus (Hypothese). ② Pin 1 auf der USB-Seite, CN7 ungerade = äußere Reihe, CN10 gerade = äußere Reihe (wie Relaisbox-Plan). ③ Board-Revision „MB1136 C-0x“, Jumper für E5V (vermutlich JP5) in UM1724. ④ Pinfolge 74AHCT125 im Datenblatt. ⑤ <span class="hyp">Plan zeigt die Bauteilseite <b>von oben durch den Nucleo</b>: Die Platinen liegen unter dem Nucleo, Bauteile zeigen nach oben zum Nucleo. Wenn du sie andersherum bestücken willst (Bauteile nach unten), gilt die gespiegelte Ansicht.</span></div>
 
 <div class="bar" id="sys"></div>
 <div class="bar">
   <button id="vTop" class="on">Bauteilseite (von oben)</button>
   <button id="vBot">Lötseite (von unten, gespiegelt)</button>
-  <button id="nuc" class="on">Nucleo zeigen</button>
+  <button id="nuc" class="on">Nucleo-Umriss</button>
   <button id="grid">Raster zeigen</button>
   <span style="width:14px"></span>
   <button data-z="1" class="on z">Ganz</button>
   <button data-z="1.7" class="z">170 %</button>
   <button data-z="2.6" class="z">260 %</button>
 </div>
-<div id="info">Oben eine Schaltung wählen → nur diese wird gezeigt, mit Schrittliste. Oder Bauteil/Leitung antippen.</div>
-<div class="svgwrap" id="wrap"><svg id="plan" viewBox="0 0 1500 1000" role="img" aria-label="Lötplan Nucleo-F446RE Front-Controller"></svg></div>
+<div id="info">Oben eine Schaltung wählen → nur diese wird gezeigt, mit Schrittliste. Oder Bauteil/Bahn antippen.</div>
+<div class="svgwrap" id="wrap"><svg id="plan" viewBox="0 0 1530 1000" role="img" aria-label="Lötplan Front-Controller, zwei Platinen"></svg></div>
 <div id="steps"></div>
 
 <h2>Pinliste</h2>
 <table id="pins"><thead><tr><th>Pin</th><th>Leiste</th><th>Funktion</th><th>Beschaltung</th></tr></thead><tbody></tbody></table>
+<p class="hint">Gegenüber dem Plan vom 2026-11-17 geändert (damit keine Drähte zu den inneren Stiften nötig sind): Bremslicht PC2 → PA15, Pumpe PC3 → PB7, Lichthebel PA0/PA4 → PC2/PC3, Wischerhebel PA1/PB0 → PB1/PC5, Lüfter-Poti PC1 → PC4, ABS-Lampe PC4 → PC8, LED-Leiste PB5 → PC6, GND über CN7-22 und CN10-9. ADC-Kanäle laut STM32duino <code>PeripheralPins.c</code>.</p>
 
 <h2>Bestückungsliste</h2>
-<table id="parts"><thead><tr><th>✓</th><th>Teil</th><th>Wert</th><th>Löcher</th><th>Lage / Polung</th><th>Schaltung</th></tr></thead><tbody></tbody></table>
-
-<h2>Drähte zu den Buchsenleisten (Unterseite)</h2>
-<table id="list"><thead><tr><th>✓</th><th>Leiste</th><th>Signal</th><th>Draht</th><th>nach Loch</th><th>Zweck</th></tr></thead><tbody></tbody></table>
-<p class="hint">Nicht verwenden: PA13/PA14 (SWD), PA2/PA3 (USB-Seriell, bleibt zum Debuggen), PC14/PC15 und PH0 (ab Rev. C-02), BOOT0. Reserve (gelb gestrichelt): PA6, PA7 (2 Knöpfe, Idee), PC5 (Winden-Freigabe, Überlegung).</p>
+<table id="parts"><thead><tr><th>✓</th><th>Platine</th><th>Teil</th><th>Wert</th><th>Löcher (Sp|Re)</th><th>Lage / Polung</th><th>Schaltung</th></tr></thead><tbody></tbody></table>
 
 <h2 id="bauteile">Schaltbild pro Leitung</h2>
-<p class="hint">Dieselben Schaltungen als Schaltplan. Bestand laut <code>Lager/Lagerbestand.md</code>: <span class="st b">Bestand</span> vorhanden · <span class="st p">prüfen</span> Menge/Wert unklar · <span class="st k">kaufen</span> fehlt · <span class="st o">bestellt</span>.</p>
+<p class="hint">Bestand laut <code>Lager/Lagerbestand.md</code>: <span class="st b">Bestand</span> vorhanden · <span class="st p">prüfen</span> Menge/Wert unklar · <span class="st k">kaufen</span> fehlt · <span class="st o">bestellt</span>.</p>
 <div class="cards" id="cards"></div>
 
 <h2>Offen, bevor gelötet wird</h2>
 <ul>
   <li><b>Versorgung im Kabelbaum:</b> <code>Front.harness</code> führt den Front-Controller noch an „+12 V Kl. 30 (X1/8)“; festgelegt ist die kleine 5-V-Leitung aus dem Heck. Die 12-V-Ader vom Zündschalter (MCP2003) fehlt dort noch.</li>
-  <li class="hyp">ABS-Lampe: J104 mit 1 kΩ statt Lampe = Hypothese → am Fahrzeug messen (Selbsttest ca. 2 s low).</li>
-  <li class="hyp">Elko 10 µF: das einzige Stück im Lager ist auch für die Relaisbox eingeplant → zweiten kaufen.</li>
-  <li>MCP2003: Der Chip vom Uno-Testmaster wird frei, sobald der Hub den LIN-Master übernimmt. Bis dahin Sockel leer lassen oder einen dritten Chip kaufen.</li>
-  <li>Lüfter-Poti: Wert/Typ aus dem Panel-Teil übernehmen (hier nicht geprüft).</li>
+  <li class="hyp">ABS-Lampe: J104 mit 1 kΩ statt Lampe = Hypothese → am Fahrzeug messen.</li>
+  <li class="hyp">Platz: <code>lenkbox.js</code> rechnet bisher nur mit dem Nucleo; mit den Platinen ca. 175 × 107 mm Grundfläche (Hypothese: passt in die linke Box).</li>
+  <li>STM32Wiper-Firmware: Hebel-Pins auf PC2/PC3/PB1/PC5 umstellen.</li>
+  <li>MCP2003: der vom Uno-Testmaster wird frei, wenn der Hub läuft.</li>
 </ul>
 
 <h2>Stückliste (Summe)</h2>
@@ -107,17 +104,17 @@
 
 <h2>Reihenfolge (Vorschlag Claude)</h2>
 <ol>
-  <li>Prüfungen oben (10 Min), Board-Revision ablesen.</li>
-  <li>Buchsenleisten 2 × 19 einlöten, Nucleo dabei aufgesteckt.</li>
-  <li>Knopf „Schienen“: GND- und 3,3-V-Schiene als Silberdraht (U-Form).</li>
-  <li>IC-Sockel für MCP2003 und 74AHCT125 einlöten (Kerbe wie gezeichnet), Chips erst ganz zum Schluss einsetzen.</li>
-  <li>Dann je Knopf eine Schaltung abarbeiten; nach jeder Schaltung Durchgang gegen die Nachbarlöcher prüfen.</li>
-  <li>Vor dem ersten Einschalten: ohne Nucleo und ohne Chips 5 V an E5V anlegen; zwischen 5 V, 3,3 V, GND und den 12-V-Pads darf es nicht piepen.</li>
+  <li>Prüfungen oben, Buchsenleisten einlöten – dabei beide Platinen auf den Nucleo gesteckt lassen, damit sie fluchten.</li>
+  <li>Knopf „Versorgung“: GND-, 3,3-V- und 5-V-Bahnen ziehen, dann Drahtbrücke J1.</li>
+  <li>IC-Sockel (Kerbe wie gezeichnet), CAN-Modul stehend.</li>
+  <li>Je Knopf eine Schaltung: erst Bauteile, dann Bahnen; danach Durchgang gegen die Nachbarbahnen prüfen.</li>
+  <li>Kabel 3,3 V links → rechts. Vor dem ersten Einschalten ohne Nucleo und ohne Chips: zwischen 5 V, 3,3 V, GND und den 12-V-Pads darf es nicht piepen.</li>
 </ol>
 
 <script>
 const B = 'b', K = 'k', PR = 'p', O = 'o';
 const STXT = { b: 'Bestand', k: 'kaufen', p: 'prüfen', o: 'bestellt' };
+const DATA = {"L": {"cols": [0, 21], "rows": [9, 41], "header": "CN7", "paths": [{"net": "CS", "pts": [[13, 13], [12, 13], [12, 10], [21, 10], [21, 36], [13, 36], [13, 37]], "card": "lin", "kind": "s"}, {"net": "TXD", "pts": [[13, 12], [13, 11], [20, 11], [20, 35], [12, 35]], "card": "lin", "kind": "s"}, {"net": "RXD", "pts": [[14, 12], [19, 12], [19, 34], [10, 34], [10, 38], [12, 38]], "card": "lin", "kind": "s"}, {"net": "E5V", "pts": [[14, 14], [18, 14], [18, 33], [4, 33]], "card": "e5v", "kind": "5"}, {"net": "3V3", "pts": [[14, 19], [17, 19], [17, 32], [3, 32], [3, 12]], "card": "v3", "kind": "v"}, {"net": "GND", "pts": [[14, 22], [16, 22], [16, 31], [5, 31], [5, 12]], "card": "gnd", "kind": "g"}, {"net": "BRK", "pts": [[13, 20], [9, 20], [9, 17]], "card": "brake", "kind": "s"}, {"net": "BRK", "pts": [[9, 18], [7, 18]], "card": "brake", "kind": "s"}, {"net": "BRK", "pts": [[7, 18], [7, 16]], "card": "brake", "kind": "s"}, {"net": "BRK", "pts": [[7, 18], [7, 19], [6, 19]], "card": "brake", "kind": "s"}, {"net": "PMP", "pts": [[7, 23], [7, 24]], "card": "pump", "kind": "s"}, {"net": "PMP", "pts": [[7, 24], [7, 25], [6, 25]], "card": "pump", "kind": "s"}, {"net": "PMP", "pts": [[7, 23], [7, 22], [13, 22]], "card": "pump", "kind": "s"}, {"net": "BLK", "pts": [[9, 29], [7, 29]], "card": "stalk", "kind": "s"}, {"net": "BLK", "pts": [[9, 29], [13, 29]], "card": "stalk", "kind": "s"}, {"net": "FRN", "pts": [[13, 30], [10, 30]], "card": "stalk", "kind": "s"}, {"net": "FRN", "pts": [[10, 30], [7, 30]], "card": "stalk", "kind": "s"}, {"net": "BRKL", "pts": [[0, 19], [2, 19]], "card": "brake", "kind": "s"}, {"net": "PMPL", "pts": [[0, 25], [2, 25]], "card": "pump", "kind": "s"}, {"net": "CS", "pts": [[13, 37], [12, 37]], "card": "lin", "kind": "s"}, {"net": "V12", "pts": [[9, 40], [8, 40], [8, 37]], "card": "lin", "kind": "k"}, {"net": "V12", "pts": [[8, 37], [9, 37]], "card": "lin", "kind": "k"}, {"net": "V12", "pts": [[8, 37], [6, 37]], "card": "lin", "kind": "k"}, {"net": "LBUS", "pts": [[4, 36], [5, 36]], "card": "lin", "kind": "s"}, {"net": "LBUS", "pts": [[5, 36], [7, 36]], "card": "lin", "kind": "s"}, {"net": "LBUS", "pts": [[7, 36], [9, 36]], "card": "lin", "kind": "s"}, {"net": "PU", "pts": [[4, 40], [5, 40]], "card": "lin", "kind": "s"}, {"net": "GND", "pts": [[8, 34], [8, 35]], "card": "gnd", "kind": "g"}, {"net": "GND", "pts": [[8, 35], [7, 35]], "card": "gnd", "kind": "g"}, {"net": "GND", "pts": [[8, 35], [9, 35]], "card": "gnd", "kind": "g"}], "jumpers": [{"net": "GND", "a": [8, 31], "b": [8, 34], "card": "gnd"}], "parts": [{"ref": "U1", "t": "DIP", "v": "MCP2003 (DIP-8, Sockel)", "leads": [[12, 38, "RXD", "1"], [12, 37, "CS", "2"], [12, 36, null, "3"], [12, 35, "TXD", "4"], [9, 35, "GND", "5"], [9, 36, "LBUS", "6"], [9, 37, "V12", "7"], [9, 38, null, "8"]], "card": "lin", "note": "Kerbe unten (Pin 1 unten rechts). Pin 3 WAKE und Pin 8 VREN bleiben frei", "notch": "B", "names": ["RXD", "CS", "WAKE", "TXD", "VSS", "LBUS", "VBB", "VREN"]}, {"ref": "R1", "t": "R", "v": "5,1 kΩ", "leads": [[11, 32, "3V3", "a"], [11, 34, "RXD", "b"]], "card": "lin", "note": "stehend/kurz: RXD-Pull-up, springt über die 5-V-Bahn"}, {"ref": "C1", "t": "C", "v": "100 nF", "leads": [[8, 37, "V12", "a"], [8, 35, "GND", "b"]], "card": "lin", "note": "senkrecht VBB–VSS, dicht am Chip"}, {"ref": "C2", "t": "C", "v": "220 pF", "leads": [[7, 36, "LBUS", "a"], [7, 35, "GND", "b"]], "card": "lin", "note": "nie 100 nF an LBUS"}, {"ref": "R2", "t": "R", "v": "1 kΩ", "leads": [[4, 36, "LBUS", "a"], [4, 40, "PU", "b"]], "card": "lin", "note": "senkrecht, Master-Pull-up"}, {"ref": "D1", "t": "D", "v": "1N4148", "leads": [[5, 40, "PU", "k"], [9, 40, "V12", "a"]], "card": "lin", "note": "Ring links (zum 1 kΩ)"}, {"ref": "C3", "t": "E", "v": "100 µF/25 V", "leads": [[6, 33, "E5V", "+"], [6, 31, "GND", "-"]], "card": "e5v", "note": "Plus unten (5-V-Bahn), Minus oben (GND), springt über die 3,3-V-Bahn"}, {"ref": "C4", "t": "C", "v": "100 nF", "leads": [[9, 33, "E5V", "a"], [9, 31, "GND", "b"]], "card": "e5v", "note": "springt über die 3,3-V-Bahn"}, {"ref": "C5", "t": "E", "v": "10 µF/25 V", "leads": [[3, 21, "3V3", "+"], [5, 21, "GND", "-"]], "card": "v3", "note": "zwischen den Schienen: Plus links (3,3 V), Minus rechts (GND)"}, {"ref": "D2", "t": "D", "v": "1N5819", "leads": [[3, 16, "3V3", "k"], [7, 16, "BRK", "a"]], "card": "brake", "note": "Ring links an der 3,3-V-Schiene"}, {"ref": "R3", "t": "R", "v": "2,7 kΩ", "leads": [[9, 17, "BRK", "a"], [5, 17, "GND", "b"]], "card": "brake", "note": ""}, {"ref": "C6", "t": "C", "v": "100 nF", "leads": [[7, 18, "BRK", "a"], [5, 18, "GND", "b"]], "card": "brake", "note": ""}, {"ref": "R4", "t": "R", "v": "10 kΩ", "leads": [[2, 19, "BRKL", "a"], [6, 19, "BRK", "b"]], "card": "brake", "note": "springt über beide Schienen"}, {"ref": "R5", "t": "R", "v": "10 kΩ", "leads": [[3, 23, "3V3", "a"], [7, 23, "PMP", "b"]], "card": "pump", "note": "Pull-up, springt über die GND-Schiene"}, {"ref": "C7", "t": "C", "v": "100 nF", "leads": [[7, 24, "PMP", "a"], [5, 24, "GND", "b"]], "card": "pump", "note": ""}, {"ref": "D3", "t": "D", "v": "1N5819", "leads": [[2, 25, "PMPL", "k"], [6, 25, "PMP", "a"]], "card": "pump", "note": "Ring links (zur Leitung), springt über beide Schienen"}, {"ref": "R6", "t": "R", "v": "220 Ω", "leads": [[3, 29, "3V3", "a"], [7, 29, "BLK", "b"]], "card": "stalk", "note": "springt über die GND-Schiene"}, {"ref": "R7", "t": "R", "v": "220 Ω", "leads": [[3, 30, "3V3", "a"], [7, 30, "FRN", "b"]], "card": "stalk", "note": "springt über die GND-Schiene"}], "pads": [{"at": [5, 36], "net": "LBUS", "label": "LIN-Draht zum Lenkrad", "side": "L", "card": "lin"}, {"at": [6, 37], "net": "V12", "label": "12 V vom Zündschalter", "side": "L", "card": "lin"}, {"at": [4, 33], "net": "E5V", "label": "+5 V kleine 5-V-Leitung", "side": "L", "card": "e5v"}, {"at": [0, 19], "net": "BRKL", "label": "Bremslicht (nach V7)", "side": "L", "card": "brake"}, {"at": [0, 25], "net": "PMPL", "label": "K3/87a Pumpe-Status", "side": "L", "card": "pump"}, {"at": [9, 29], "net": "BLK", "label": "Lichthebel weiß-schwarz (Blinker)", "side": "L", "card": "stalk"}, {"at": [10, 30], "net": "FRN", "label": "Lichthebel weiß (Lichthupe/Fernlicht)", "side": "L", "card": "stalk"}, {"at": [5, 27], "net": "GND", "label": "Lichthebel gelb-braun (Masse)", "side": "L", "card": "stalk"}, {"at": [3, 14], "net": "3V3", "label": "3,3 V → rechte Platine", "side": "L", "card": "v3"}, {"at": [5, 12], "net": "GND", "label": "GND → Massepunkt", "side": "L", "card": "gnd"}]}, "R": {"cols": [37, 56], "rows": [0, 41], "header": "CN10", "paths": [{"net": "GND", "pts": [[38, 16], [37, 16], [37, 0], [56, 0], [56, 41]], "card": "gnd", "kind": "g"}, {"net": "3V3", "pts": [[54, 2], [54, 40]], "card": "v3", "kind": "v"}, {"net": "ABS", "pts": [[39, 12], [40, 12], [40, 2], [50, 2]], "card": "abs", "kind": "s"}, {"net": "LED", "pts": [[39, 13], [41, 13], [41, 10], [45, 10], [45, 9]], "card": "led", "kind": "s"}, {"net": "WPR", "pts": [[39, 14], [42, 14], [42, 11], [50, 11]], "card": "stalk", "kind": "s"}, {"net": "CTX", "pts": [[39, 17], [48, 17]], "card": "can", "kind": "s"}, {"net": "CRX", "pts": [[39, 18], [48, 18]], "card": "can", "kind": "s"}, {"net": "KAN", "pts": [[39, 19], [46, 19], [46, 21], [52, 21]], "card": "comp", "kind": "s"}, {"net": "FAN", "pts": [[39, 22], [45, 22], [45, 24], [52, 24]], "card": "fan", "kind": "s"}, {"net": "WPF", "pts": [[39, 23], [44, 23], [44, 27], [50, 27]], "card": "stalk", "kind": "s"}, {"net": "KAU", "pts": [[39, 24], [43, 24], [43, 29], [52, 29]], "card": "comp", "kind": "s"}, {"net": "S2", "pts": [[39, 25], [42, 25], [42, 32], [52, 32]], "card": "clutch", "kind": "s"}, {"net": "S1", "pts": [[39, 26], [41, 26], [41, 35], [52, 35]], "card": "clutch", "kind": "s"}, {"net": "POT", "pts": [[39, 28], [40, 28], [40, 38], [52, 38]], "card": "poti", "kind": "s"}, {"net": "ABS", "pts": [[45, 2], [45, 1]], "card": "abs", "kind": "s"}, {"net": "ABS", "pts": [[49, 2], [49, 1]], "card": "abs", "kind": "s"}, {"net": "ABS", "pts": [[46, 2], [46, 4]], "card": "abs", "kind": "s"}, {"net": "ABSL", "pts": [[42, 4], [41, 4]], "card": "abs", "kind": "s"}, {"net": "ABSL", "pts": [[42, 4], [42, 5]], "card": "abs", "kind": "s"}, {"net": "KL15", "pts": [[46, 5], [47, 5]], "card": "abs", "kind": "k"}, {"net": "LEDY", "pts": [[48, 10], [46, 10], [46, 9]], "card": "led", "kind": "s"}, {"net": "DIN", "pts": [[53, 10], [52, 10]], "card": "led", "kind": "s"}, {"net": "V5", "pts": [[44, 6], [45, 6]], "card": "led", "kind": "5"}, {"net": "V5", "pts": [[45, 6], [46, 6]], "card": "led", "kind": "5"}, {"net": "V5", "pts": [[46, 6], [46, 7], [48, 7], [48, 6]], "card": "led", "kind": "5"}, {"net": "V5", "pts": [[48, 6], [49, 6]], "card": "led", "kind": "5"}, {"net": "V5", "pts": [[48, 7], [51, 7]], "card": "led", "kind": "5"}, {"net": "V5", "pts": [[51, 7], [52, 7]], "card": "led", "kind": "5"}, {"net": "CANH", "pts": [[49, 19], [48, 19]], "card": "can", "kind": "s"}, {"net": "CANL", "pts": [[48, 20], [49, 20]], "card": "can", "kind": "s"}, {"net": "KAN", "pts": [[52, 21], [52, 22]], "card": "comp", "kind": "s"}, {"net": "FAN", "pts": [[52, 24], [52, 25]], "card": "fan", "kind": "s"}, {"net": "KAU", "pts": [[52, 29], [52, 30]], "card": "comp", "kind": "s"}, {"net": "S2", "pts": [[48, 32], [48, 33]], "card": "clutch", "kind": "s"}, {"net": "S2", "pts": [[52, 32], [52, 33]], "card": "clutch", "kind": "s"}, {"net": "S2L", "pts": [[43, 33], [44, 33]], "card": "clutch", "kind": "s"}, {"net": "S1", "pts": [[47, 35], [47, 36]], "card": "clutch", "kind": "s"}, {"net": "S1", "pts": [[52, 35], [52, 36]], "card": "clutch", "kind": "s"}, {"net": "S1L", "pts": [[42, 36], [43, 36]], "card": "clutch", "kind": "s"}, {"net": "POT", "pts": [[52, 38], [52, 39]], "card": "poti", "kind": "s"}, {"net": "3V3", "pts": [[54, 15], [48, 15]], "card": "v3", "kind": "v"}, {"net": "GND", "pts": [[41, 0], [41, 1]], "card": "gnd", "kind": "g"}, {"net": "GND", "pts": [[47, 0], [47, 1]], "card": "gnd", "kind": "g"}, {"net": "GND", "pts": [[53, 0], [53, 8], [52, 8]], "card": "gnd", "kind": "g"}, {"net": "GND", "pts": [[52, 8], [52, 9], [50, 9]], "card": "gnd", "kind": "g"}, {"net": "GND", "pts": [[50, 9], [50, 8], [48, 8], [48, 9]], "card": "gnd", "kind": "g"}, {"net": "GND", "pts": [[48, 9], [47, 9]], "card": "gnd", "kind": "g"}, {"net": "GND", "pts": [[48, 8], [44, 8], [44, 9]], "card": "gnd", "kind": "g"}, {"net": "GND", "pts": [[51, 9], [51, 14], [47, 14], [47, 16], [48, 16]], "card": "gnd", "kind": "g"}], "jumpers": [], "parts": [{"ref": "D1", "t": "D", "v": "1N5819", "leads": [[54, 2, "3V3", "k"], [50, 2, "ABS", "a"]], "card": "abs", "note": "Ring rechts an der 3,3-V-Schiene"}, {"ref": "R1", "t": "R", "v": "2,7 kΩ", "leads": [[41, 1, "GND", "a"], [45, 1, "ABS", "b"]], "card": "abs", "note": ""}, {"ref": "C1", "t": "C", "v": "100 nF", "leads": [[47, 1, "GND", "a"], [49, 1, "ABS", "b"]], "card": "abs", "note": ""}, {"ref": "R2", "t": "R", "v": "10 kΩ", "leads": [[42, 4, "ABSL", "a"], [46, 4, "ABS", "b"]], "card": "abs", "note": "Reihenwiderstand Leitung → Pin"}, {"ref": "R3", "t": "R", "v": "1 kΩ 0,5 W", "leads": [[42, 5, "ABSL", "a"], [46, 5, "KL15", "b"]], "card": "abs", "note": "0,5-W-Typ (0,21 W gerechnet)"}, {"ref": "U1", "t": "DIP", "v": "74AHCT125 (DIP-14, Sockel)", "leads": [[44, 9, "GND", "1"], [45, 9, "LED", "2"], [46, 9, "LEDY", "3"], [47, 9, "GND", "4"], [48, 9, "GND", "5"], [49, 9, null, "6"], [50, 9, "GND", "7"], [50, 6, null, "8"], [49, 6, "V5", "9"], [48, 6, "V5", "10"], [47, 6, null, "11"], [46, 6, "V5", "12"], [45, 6, "V5", "13"], [44, 6, "V5", "14"]], "card": "led", "note": "Kerbe links; Pinfolge im Datenblatt prüfen. Gatter 2 an Masse, Gatter 3/4 an 5 V (aus)", "notch": "L", "names": ["1OE", "1A", "1Y", "2OE", "2A", "2Y", "GND", "3Y", "3A", "3OE", "4Y", "4A", "4OE", "VCC"]}, {"ref": "R4", "t": "R", "v": "330 Ω", "leads": [[48, 10, "LEDY", "a"], [52, 10, "DIN", "b"]], "card": "led", "note": ""}, {"ref": "C2", "t": "C", "v": "100 nF", "leads": [[52, 7, "V5", "a"], [52, 8, "GND", "b"]], "card": "led", "note": "dicht am Chip, 5 V–GND"}, {"ref": "R5", "t": "R", "v": "220 Ω", "leads": [[50, 11, "WPR", "a"], [54, 11, "3V3", "b"]], "card": "stalk", "note": ""}, {"ref": "U2", "t": "CANM", "v": "SN65HVD230-Modul (stehend)", "leads": [[48, 15, "3V3", "3V3"], [48, 16, "GND", "GND"], [48, 17, "CTX", "CTX"], [48, 18, "CRX", "CRX"], [48, 19, "CANH", "CANH"], [48, 20, "CANL", "CANL"]], "card": "can", "note": "stehend eingelötet, Bauteilseite nach rechts; Pinfolge am Modul prüfen"}, {"ref": "R_KAN", "t": "R", "v": "10 kΩ", "leads": [[50, 21, "KAN", "a"], [54, 21, "3V3", "b"]], "card": "comp", "note": "Pull-up, rechts in die 3,3-V-Schiene"}, {"ref": "C_KAN", "t": "C", "v": "100 nF", "leads": [[52, 22, "KAN", "a"], [56, 22, "GND", "b"]], "card": "comp", "note": "springt über die 3,3-V-Schiene in die GND-Schiene"}, {"ref": "R_FAN", "t": "R", "v": "10 kΩ", "leads": [[50, 24, "FAN", "a"], [54, 24, "3V3", "b"]], "card": "fan", "note": "Pull-up, rechts in die 3,3-V-Schiene"}, {"ref": "C_FAN", "t": "C", "v": "100 nF", "leads": [[52, 25, "FAN", "a"], [56, 25, "GND", "b"]], "card": "fan", "note": "springt über die 3,3-V-Schiene in die GND-Schiene"}, {"ref": "R6", "t": "R", "v": "220 Ω", "leads": [[50, 27, "WPF", "a"], [54, 27, "3V3", "b"]], "card": "stalk", "note": ""}, {"ref": "R_KAU", "t": "R", "v": "10 kΩ", "leads": [[50, 29, "KAU", "a"], [54, 29, "3V3", "b"]], "card": "comp", "note": "Pull-up, rechts in die 3,3-V-Schiene"}, {"ref": "C_KAU", "t": "C", "v": "100 nF", "leads": [[52, 30, "KAU", "a"], [56, 30, "GND", "b"]], "card": "comp", "note": "springt über die 3,3-V-Schiene in die GND-Schiene"}, {"ref": "R_S2", "t": "R", "v": "10 kΩ", "leads": [[50, 32, "S2", "a"], [54, 32, "3V3", "b"]], "card": "clutch", "note": "Pull-up, rechts in die 3,3-V-Schiene"}, {"ref": "C_S2", "t": "C", "v": "100 nF", "leads": [[52, 33, "S2", "a"], [56, 33, "GND", "b"]], "card": "clutch", "note": "springt über die 3,3-V-Schiene in die GND-Schiene"}, {"ref": "D_S2", "t": "D", "v": "1N5819", "leads": [[44, 33, "S2L", "k"], [48, 33, "S2", "a"]], "card": "clutch", "note": "Ring links (zur Leitung)"}, {"ref": "R_S1", "t": "R", "v": "10 kΩ", "leads": [[50, 35, "S1", "a"], [54, 35, "3V3", "b"]], "card": "clutch", "note": "Pull-up, rechts in die 3,3-V-Schiene"}, {"ref": "C_S1", "t": "C", "v": "100 nF", "leads": [[52, 36, "S1", "a"], [56, 36, "GND", "b"]], "card": "clutch", "note": "springt über die 3,3-V-Schiene in die GND-Schiene"}, {"ref": "D_S1", "t": "D", "v": "1N5819", "leads": [[43, 36, "S1L", "k"], [47, 36, "S1", "a"]], "card": "clutch", "note": "Ring links (zur Leitung)"}, {"ref": "C_POT", "t": "C", "v": "100 nF", "leads": [[52, 39, "POT", "a"], [56, 39, "GND", "b"]], "card": "poti", "note": "springt über die 3,3-V-Schiene"}], "pads": [{"at": [41, 4], "net": "ABSL", "label": "J104 Pin 16 (ABS-Lampe)", "side": "R", "card": "abs"}, {"at": [47, 5], "net": "KL15", "label": "Kl. 15 (V4)", "side": "R", "card": "abs"}, {"at": [53, 10], "net": "DIN", "label": "DIN LED-Leiste", "side": "R", "card": "led"}, {"at": [51, 7], "net": "V5", "label": "+5 V große 5-V-Schiene", "side": "R", "card": "led"}, {"at": [47, 11], "net": "WPR", "label": "Wischerhebel Signal hinten", "side": "R", "card": "stalk"}, {"at": [54, 13], "net": "3V3", "label": "3,3 V von der linken Platine", "side": "R", "card": "v3"}, {"at": [49, 19], "net": "CANH", "label": "CAN-H → Stecker CAN Front", "side": "R", "card": "can"}, {"at": [49, 20], "net": "CANL", "label": "CAN-L → Stecker CAN Front", "side": "R", "card": "can"}, {"at": [47, 21], "net": "KAN", "label": "Kompressor AN", "side": "R", "card": "comp"}, {"at": [47, 24], "net": "FAN", "label": "Lüfter Auto/manuell", "side": "R", "card": "fan"}, {"at": [47, 27], "net": "WPF", "label": "Wischerhebel Signal vorn", "side": "R", "card": "stalk"}, {"at": [56, 26], "net": "GND", "label": "Wischerhebel Masse", "side": "R", "card": "stalk"}, {"at": [47, 29], "net": "KAU", "label": "Kompressor AUTO", "side": "R", "card": "comp"}, {"at": [56, 28], "net": "GND", "label": "Kompressor Mittelkontakt (Masse)", "side": "R", "card": "comp"}, {"at": [43, 33], "net": "S2L", "label": "Kupplung S2", "side": "R", "card": "clutch"}, {"at": [42, 36], "net": "S1L", "label": "Kupplung S1", "side": "R", "card": "clutch"}, {"at": [47, 38], "net": "POT", "label": "Lüfter-Poti Schleifer", "side": "R", "card": "poti"}, {"at": [54, 40], "net": "3V3", "label": "Lüfter-Poti Ende 3,3 V", "side": "R", "card": "poti"}, {"at": [56, 37], "net": "GND", "label": "Lüfter-Poti Ende GND", "side": "R", "card": "poti"}]}};
 function chain(items) {
   const Y = 100;
   let x = 10, s = '', maxX = 0;
@@ -198,44 +195,41 @@ const P_12V = [['Schottky 1N5819', 1, B], ['R 10 kΩ', 1, PR], ['R 2,7 kΩ', 1, 
 
 const GROUPS = { hebel: ['Lenkstockhebel', '#ffe119'], fahr: ['Fahrzeug-Eingänge', '#f58231'], panel: ['Panel „Motor“', '#3cb44b'], lin: ['LIN', '#b05fd8'], can: ['CAN', '#00e0b0'], led: ['LED-Leiste', '#4a7dff'], pwr: ['Versorgung', '#e53935'], res: ['Reserve', '#666'] };
 
-// [pin, header, function, wiring, group, card]
+// [pin, header, function, wiring, group, card]   (Vorschlag Claude 2026-11-18: nur äußere Stiftreihe, außer RXD/5 V/3,3 V/GND)
 const PINS = [
-  ['PA0', 'CN7-28', 'Lichthebel Blinker (ADC1_IN0)', '220 Ω an 3,3 V, Ader weiß-schwarz', 'hebel', 'stalk'],
-  ['PA4', 'CN7-32', 'Lichthebel Lichthupe/Fernlicht (ADC1_IN4)', '220 Ω an 3,3 V, Ader weiß; nicht FT', 'hebel', 'stalk'],
-  ['PA1', 'CN7-30', 'Wischerhebel vorn (ADC1_IN1)', '220 Ω an 3,3 V', 'hebel', 'stalk'],
-  ['PB0', 'CN7-34', 'Wischerhebel hinten (ADC1_IN8)', '220 Ω an 3,3 V', 'hebel', 'stalk'],
-  ['PC2', 'CN7-35', 'E2 Bremslicht', 'Teiler 10 kΩ / 2,7 kΩ + 1N5819 an 3,3 V', 'fahr', 'brake'],
-  ['PC3', 'CN7-37', 'E1 Pumpe läuft (K3/87a)', '10 kΩ an 3,3 V + 1N5819; 87a = Masse, solange Pumpe aus', 'fahr', 'pump'],
-  ['PC4', 'CN10-34', 'E3 ABS-Lampe (J104 Pin 16)', '1 kΩ 0,5 W an Kl. 15 (V4) + Teiler 10 kΩ / 2,7 kΩ; Lampe an = low', 'fahr', 'abs'],
-  ['PB13', 'CN10-30', 'E4 Kupplung S1', '10 kΩ an 3,3 V + 1N5819, Schalter gegen Masse', 'fahr', 'clutch'],
-  ['PB14', 'CN10-28', 'E5 Kupplung S2', '10 kΩ an 3,3 V + 1N5819, Schalter gegen Masse', 'fahr', 'clutch'],
-  ['PB15', 'CN10-26', 'Kompressor AUTO', '10 kΩ an 3,3 V, gegen Masse', 'panel', 'comp'],
-  ['PB12', 'CN10-16', 'Kompressor AN', '10 kΩ an 3,3 V, gegen Masse; beide offen = AUS', 'panel', 'comp'],
-  ['PB2', 'CN10-22', 'Lüfter Auto/manuell', '10 kΩ an 3,3 V, gegen Masse', 'panel', 'fan'],
-  ['PC1', 'CN7-36', 'Lüfter-Poti (ADC1_IN11)', 'Poti zwischen 3,3 V und GND, 100 nF', 'panel', 'poti'],
   ['PC10', 'CN7-1', 'LIN TXD (UART4_TX)', '→ MCP2003 Pin 4', 'lin', 'lin'],
-  ['PC11', 'CN7-2', 'LIN RXD (UART4_RX)', '← MCP2003 Pin 1, 5,1 kΩ an 3,3 V', 'lin', 'lin'],
-  ['PC12', 'CN7-3', 'LIN CS', '→ MCP2003 Pin 2, high = aktiv, kein Pull-up', 'lin', 'lin'],
+  ['PC11', 'CN7-2', 'LIN RXD (UART4_RX)', '← MCP2003 Pin 1, 5,1 kΩ an 3,3 V (innen, Bahn unter dem Nucleo)', 'lin', 'lin'],
+  ['PC12', 'CN7-3', 'LIN CS', '→ MCP2003 Pin 2', 'lin', 'lin'],
+  ['PA15', 'CN7-17', 'E2 Bremslicht', 'Teiler 10 kΩ / 2,7 kΩ + 1N5819 an 3,3 V', 'fahr', 'brake'],
+  ['PB7', 'CN7-21', 'E1 Pumpe läuft (K3/87a)', '10 kΩ an 3,3 V + 1N5819', 'fahr', 'pump'],
+  ['PC2', 'CN7-35', 'Lichthebel Blinker (ADC1_IN12)', '220 Ω an 3,3 V', 'hebel', 'stalk'],
+  ['PC3', 'CN7-37', 'Lichthebel Lichthupe/Fernlicht (ADC1_IN13)', '220 Ω an 3,3 V', 'hebel', 'stalk'],
+  ['E5V', 'CN7-6', '5 V Einspeisung', 'kleine 5-V-Leitung aus dem Heck (innen)', 'pwr', 'e5v'],
+  ['+3V3', 'CN7-16', '3,3 V', 'linke Platine + Kabel zur rechten (innen)', 'pwr', 'v3'],
+  ['GND', 'CN7-22 · CN10-9', 'Masse', 'je Platine ein innerer GND-Pin', 'pwr', 'gnd'],
+  ['PC8', 'CN10-2', 'E3 ABS-Lampe (J104 Pin 16)', '1 kΩ an Kl. 15 + Teiler 10 kΩ / 2,7 kΩ', 'fahr', 'abs'],
+  ['PC6', 'CN10-4', 'LED-Leiste Daten', '→ 74AHCT125 → 330 Ω → DIN', 'led', 'led'],
+  ['PC5', 'CN10-6', 'Wischerhebel hinten (ADC1_IN15)', '220 Ω an 3,3 V', 'hebel', 'stalk'],
   ['PA12', 'CN10-12', 'CAN TX (CAN1)', '→ SN65HVD230 CTX', 'can', 'can'],
   ['PA11', 'CN10-14', 'CAN RX (CAN1)', '← SN65HVD230 CRX', 'can', 'can'],
-  ['PB5', 'CN10-29', 'LED-Leiste Daten', '→ 74AHCT125 → 330 Ω → DIN', 'led', 'led'],
-  ['E5V', 'CN7-6', '5 V Einspeisung', 'kleine 5-V-Leitung aus dem Heck', 'pwr', 'e5v'],
-  ['+3V3', 'CN7-16', '3,3-V-Schiene', 'Pull-ups, Klemmdioden, CAN-Modul', 'pwr', 'v3'],
-  ['GND', 'CN7-20 · CN10-20', 'Masse', 'GND-Schienen links und rechts', 'pwr', 'gnd'],
-  ['PA6', 'CN10-13', 'Reserve: Knopf Touch aus/an', 'Idee User, nicht belegt', 'res', 'res'],
-  ['PA7', 'CN10-15', 'Reserve: Knopf Display-Modus', 'Idee User, nicht belegt', 'res', 'res'],
-  ['PC5', 'CN10-6', 'Reserve: Winden-Freigabe', 'Überlegung User, nicht belegt', 'res', 'res']
+  ['PB12', 'CN10-16', 'Kompressor AN', '10 kΩ an 3,3 V, gegen Masse', 'panel', 'comp'],
+  ['PB2', 'CN10-22', 'Lüfter Auto/manuell', '10 kΩ an 3,3 V, gegen Masse', 'panel', 'fan'],
+  ['PB1', 'CN10-24', 'Wischerhebel vorn (ADC1_IN9)', '220 Ω an 3,3 V', 'hebel', 'stalk'],
+  ['PB15', 'CN10-26', 'Kompressor AUTO', '10 kΩ an 3,3 V, gegen Masse', 'panel', 'comp'],
+  ['PB14', 'CN10-28', 'E5 Kupplung S2', '10 kΩ an 3,3 V + 1N5819', 'fahr', 'clutch'],
+  ['PB13', 'CN10-30', 'E4 Kupplung S1', '10 kΩ an 3,3 V + 1N5819', 'fahr', 'clutch'],
+  ['PC4', 'CN10-34', 'Lüfter-Poti (ADC1_IN14)', 'Poti zwischen 3,3 V und GND, 100 nF', 'panel', 'poti']
 ];
 
 const CARDS = [
-  { id: 'stalk', title: 'Lenkstockhebel (4 × ADC) · CN7-28/32/30/34', svg: STALK('PA0', 'CN7-28', ['Lichthebel weiß-schwarz (Blinker)', 'Masse-Ader gelb-braun → GND']) + STALK('PA4', 'CN7-32', ['Lichthebel weiß (Lichthupe/Fernlicht)']) + STALK('PA1', 'CN7-30', ['Wischerhebel vorn']) + STALK('PB0', 'CN7-34', ['Wischerhebel hinten']),
+  { id: 'stalk', title: 'Lenkstockhebel (4 × ADC) · CN7-35/37, CN10-24/6', svg: STALK('PC2', 'CN7-35', ['Lichthebel weiß-schwarz (Blinker)', 'Masse-Ader gelb-braun → GND']) + STALK('PC3', 'CN7-37', ['Lichthebel weiß (Lichthupe/Fernlicht)']) + STALK('PB1', 'CN10-24', ['Wischerhebel vorn']) + STALK('PC5', 'CN10-6', ['Wischerhebel hinten']),
     parts: [['R 220 Ω', 4, PR]],
-    note: 'Gleiche Pins und 220-Ω-Pull-ups wie im Messaufbau STM32Wiper (<code>srcTest/STM32Wiper/include/config.h</code>), damit die gemessenen Schwellen gelten. Die 220-Ω-Widerstände sitzen heute auf dem Versuchsaufbau am ersten Nucleo (jetzt Relaisbox) → für das zweite Board umsetzen oder neu bestücken. Strom je Kanal höchstens 15 mA (3,3 V / 220 Ω, gerechnet).' },
-  { id: 'brake', title: 'E2 Bremslicht · CN7-35 (PC2)', svg: IN_12V('PC2', 'CN7-35', ['Bremslicht-Leitung', '(Spleiß nach Bremslichtschalter, V7)']), parts: P_12V,
+    note: '220-Ω-Pull-ups wie im Messaufbau STM32Wiper, die gemessenen Schwellen gelten weiter. <b>Pins neu (2026-11-18):</b> PC2/PC3 (Lichthebel, linke Platine) und PB1/PC5 (Wischerhebel, rechte Platine) statt PA0/PA4/PA1/PB0, weil diese an der inneren Stiftreihe liegen → <code>config.h</code> anpassen. ADC-Kanäle laut STM32duino <code>PeripheralPins.c</code> (F446R(C-E)T). Strom je Kanal höchstens 15 mA (3,3 V / 220 Ω, gerechnet).' },
+  { id: 'brake', title: 'E2 Bremslicht · CN7-17 (PA15)', svg: IN_12V('PA15', 'CN7-17', ['Bremslicht-Leitung', '(Spleiß nach Bremslichtschalter, V7)']), parts: P_12V,
     note: 'Teiler aus <code>Front.harness</code> (10 kΩ / 2,7 kΩ): 14,4 V ≙ 3,06 V, 12 V ≙ 2,55 V (gerechnet). 1N5819 klemmt Spitzen auf die 3,3-V-Schiene (Ring zur Schiene). Als ADC oder Digitaleingang lesbar.' },
-  { id: 'pump', title: 'E1 Unterdruckpumpe läuft · CN7-37 (PC3)', svg: IN_GND('PC3', 'CN7-37', ['K3/87a Pumpe-Status', '(87a = Masse, solange K3 abgefallen)']), parts: P_GND,
+  { id: 'pump', title: 'E1 Unterdruckpumpe läuft · CN7-21 (PB7)', svg: IN_GND('PB7', 'CN7-21', ['K3/87a Pumpe-Status', '(87a = Masse, solange K3 abgefallen)']), parts: P_GND,
     note: 'K3 abgefallen (Pumpe aus) → 87a an K3/30 = Masse → Pin low. K3 angezogen (Pumpe läuft) → 87a offen → Pull-up → high. Diode wie in der Relaisbox, damit eine Fehlverbindung an 12 V den Pin nicht trifft. Ersetzt den 1-kΩ-Pull-up aus <code>Front.harness</code> (Vorschlag Claude).' },
-  { id: 'abs', title: 'E3 ABS-Lampe · CN10-34 (PC4)', svg: IN_12V('PC4', 'CN10-34', ['J104 Pin 16 (gr/ws)', 'ABS-Lampe, ECU schaltet gegen Masse'], [['N', [{ t: 'R', v: '1 kΩ 0,5 W', to: 'Kl. 15 (V4)' }]]]),
+  { id: 'abs', title: 'E3 ABS-Lampe · CN10-2 (PC8)', svg: IN_12V('PC8', 'CN10-2', ['J104 Pin 16 (gr/ws)', 'ABS-Lampe, ECU schaltet gegen Masse'], [['N', [{ t: 'R', v: '1 kΩ 0,5 W', to: 'Kl. 15 (V4)' }]]]),
     parts: [...P_12V, ['R 1 kΩ 0,5 W', 1, PR]],
     note: '<b>Festgelegt (User 2026-11-17):</b> 1 kΩ gegen Kl. 15 statt Lampe. Lampe aus: 14,4 V · 2,7 / 13,7 ≈ 2,84 V (high); Lampe an: Pin ≈ 0 V (low). Verlust im 1 kΩ: 14,4² / 1000 ≈ 0,21 W → 0,5-W-Typ; Strom in J104 ≈ 14 mA (gerechnet). Kl. 15 von V4 (ABS Zündung 5 A), damit der Pull-up nur zusammen mit dem ABS Strom hat (Vorschlag Claude). Firmware: Selbsttest ca. 2 s nach Kl. 15 erwarten, danach high; bleibt low → Warnung per CAN.' },
   { id: 'clutch', title: 'E4/E5 Kupplung S1/S2 · CN10-30 / CN10-28', svg: IN_GND('PB13', 'CN10-30', ['S1 (löst bei Beginn des Tretens)', 'gemeinsame Masse → GND']) + IN_GND('PB14', 'CN10-28', ['S2 (löst erst ganz getreten)']),
@@ -246,401 +240,195 @@ const CARDS = [
     note: 'Schalter Typ B (Ein-Aus-Ein) aus dem Panel „Motor“, reine Eingänge am Nucleo (Festgelegt User 2026-11-07). Kurze Leitung durch das Schutzrohr rechte → linke Box, daher ohne Diode. Beide Pins low = Schalterfehler.' },
   { id: 'fan', title: 'Lüfter Auto/manuell · CN10-22 (PB2)', svg: IN_PANEL('PB2', 'CN10-22', ['Lüfterschalter A/M', '(Typ A oder C offen) → GND']), parts: P_PANEL,
     note: 'Ein Eingang reicht für zwei Stellungen. Ist der Schalter ein Typ C (Taster), wertet die Firmware ein Umschalten aus.' },
-  { id: 'poti', title: 'Lüfter-Poti · CN7-36 (PC1, ADC)', svg: chain([['P', 'PC1', 'CN7-36'], ['N', [{ t: 'C', v: '100 nF', to: 'GND' }]], ['E', ['Poti-Schleifer', 'Enden: 3,3 V und GND']]]), parts: [['C 100 nF', 1, B]],
+  { id: 'poti', title: 'Lüfter-Poti · CN10-34 (PC4, ADC)', svg: chain([['P', 'PC4', 'CN10-34'], ['N', [{ t: 'C', v: '100 nF', to: 'GND' }]], ['E', ['Poti-Schleifer', 'Enden: 3,3 V und GND']]]), parts: [['C 100 nF', 1, B]],
     note: 'Poti direkt aus der 3,3-V-Schiene, kein Schutz nötig (keine Fremdspannung im Panel).' },
   { id: 'lin', title: 'LIN-Master MCP2003 · CN7-1/2/3 (UART4)', svg: chain([['P', 'PC10', 'CN7-1 · TX'], ['M', 'MCP2003 (Front)', ['PC10 → Pin 4 TXD', 'PC11 ← Pin 1 RXD (5,1 kΩ an 3,3 V)', 'PC12 → Pin 2 CS (ohne Pull-up)', 'Pin 7 VBB = 12 V Zündschalter', '100 nF Pin 7–5 · Pin 5 VSS = GND', 'LBUS ← 1 kΩ ← 1N4148 ← 12 V ZS', '220 pF LBUS–GND · Pin 3 WAKE, Pin 8 VREN frei']], ['E', ['Pin 6 LBUS', '→ LIN-Draht zum Lenkrad']]]) + chain([['P', 'PC11', 'CN7-2 · RX'], ['N', [{ t: 'R', v: '5,1 kΩ', to: '3V3' }]], ['E', ['MCP2003 Pin 1 RXD (Open-Drain)']]]),
     parts: [['MCP2003 (DIP-8)', 1, PR], ['IC-Sockel DIP-8', 1, PR], ['R 5,1 kΩ', 1, PR], ['R 1 kΩ', 1, PR], ['Diode 1N4148', 1, PR], ['C 100 nF', 1, B], ['C 220 pF', 1, B]],
     note: 'Wie Master-Seite im SteeringControl-Steckplan (Uno), nur RXD-Pull-up an 3,3 V statt 5 V. Pinnummern MCP2003 aus <code>SteeringControl/Steckplan.md</code> (VBB = Pin 7). 12 V für VBB und den Master-Pull-up kommen vom Zündschalter (Festgelegt User 2026-11-07). UART4 = gleiche Pins wie Serial3-Brücke in der Relaisbox.' },
   { id: 'can', title: 'CAN · CN10-12 (PA12 TX) / CN10-14 (PA11 RX)', svg: chain([['P', 'PA12', 'CN10-12 · TX'], ['M', 'SN65HVD230-Modul', ['PA12 → CTX · PA11 ← CRX', '3V3 → 3,3-V-Schiene · GND', 'R2 = 120 Ω fest auf dem Modul']], ['E', ['CAN-H / CAN-L', '→ Stecker „CAN Front“']]]),
     parts: [['CAN-Modul SN65HVD230', 1, O]],
-    note: 'Gleiche Pins wie in der Relaisbox. Der Front-Controller ist voraussichtlich ein Busende (vorderster Knoten) → 120 Ω auf dem Modul lassen (Hypothese, Bus-Topologie nicht festgelegt).' },
-  { id: 'led', title: 'LED-Leiste (WS2812/SK6812) · CN10-29 (PB5)', svg: chain([['P', 'PB5', 'CN10-29'], ['M', '74AHCT125 (Kanal 1)', ['PB5 → Pin 2 (1A) · Pin 3 (1Y) →', 'Pin 1 (1OE) → GND', 'Pin 14 VCC = große 5-V-Schiene', 'Pin 7 GND · 100 nF an VCC', 'freie Eingänge an GND, OE an VCC']], ['R', '330 Ω'], ['E', ['DIN LED-Leiste', '5 V + GND: große 5-V-Schiene', '1000 µF an der Leiste']]]),
+    note: 'Gleiche Pins wie in der Relaisbox. Modul <b>stehend</b> eingelötet (Stiftleiste senkrecht). Der Front-Controller ist voraussichtlich ein Busende (vorderster Knoten) → 120 Ω auf dem Modul lassen (Hypothese, Bus-Topologie nicht festgelegt).' },
+  { id: 'led', title: 'LED-Leiste (WS2812/SK6812) · CN10-4 (PC6)', svg: chain([['P', 'PC6', 'CN10-4'], ['M', '74AHCT125 (Kanal 1)', ['PC6 → Pin 2 (1A) · Pin 3 (1Y) →', 'Pin 1 (1OE) → GND', 'Pin 14 VCC = große 5-V-Schiene', 'Pin 7 GND · 100 nF an VCC', 'freie Eingänge an GND, OE an VCC']], ['R', '330 Ω'], ['E', ['DIN LED-Leiste', '5 V + GND: große 5-V-Schiene', '1000 µF an der Leiste']]]),
     parts: [['74AHCT125 (DIP-14)', 1, K], ['IC-Sockel DIP-14', 1, PR], ['R 330 Ω', 1, PR], ['C 100 nF', 1, B]],
     note: '<b>Festgelegt (User 2026-11-17):</b> Leiste an der großen 5-V-Schiene (Kl. 15), nicht an der kleinen 5-V-Leitung. Der 74AHCT125 bekommt seine 5 V von derselben Schiene, damit er die stromlose Leiste nicht über DIN speist. Folge: Leiste vor Kl. 15 dunkel; Firmware sendet erst, wenn Kl. 15 per CAN gemeldet ist. Bis 60 mA je LED (Kenntnisstand) → ca. 10 LEDs ≈ 0,6 A in die Strombilanz der großen Schiene. Werte 330 Ω/1000 µF aus <code>Funktionsliste.md</code>. Der 1000-µF-Elko sitzt an der Leiste, nicht auf der Platine.' },
   { id: 'e5v', title: '5-V-Einspeisung · CN7-6 (E5V)', svg: chain([['P', 'E5V', 'CN7-6'], ['N', [{ t: 'CP', v: '100 µF/25 V', to: 'GND' }, { t: 'C', v: '100 nF', to: 'GND' }]], ['E', ['+5 V kleine 5-V-Leitung', 'aus dem Heck (eigener Kreis)']]]),
     parts: [['Elko 100 µF/25 V', 1, B], ['C 100 nF', 1, B]],
     note: 'Zwei getrennte 5-V-Kreise, kein Dioden-ODER (Festgelegt User 2026-11-07). Jumper auf E5V nach UM1724 (vermutlich JP5, nicht geprüft). Elko: Minus (Streifen) an GND.' },
-  { id: 'v3', title: '3,3-V-Schiene · CN7-16', svg: chain([['P', '+3V3', 'CN7-16'], ['N', [{ t: 'CP', v: '10 µF/25 V', to: 'GND' }]], ['E', ['3,3-V-Schiene links + rechts: Pull-ups,', 'Klemmdioden, Poti, CAN-Modul']]]),
+  { id: 'v3', title: '3,3 V · CN7-16 → linke Platine, Kabel zur rechten', svg: chain([['P', '+3V3', 'CN7-16'], ['N', [{ t: 'CP', v: '10 µF/25 V', to: 'GND' }]], ['E', ['3,3-V-Schiene links + rechts: Pull-ups,', 'Klemmdioden, Poti, CAN-Modul']]]),
     parts: [['Elko 10 µF/25 V', 1, B]],
-    note: 'Größte Last: 4 × 220 Ω am Lenkstock, zusammen höchstens ca. 60 mA, wenn alle Hebel auf Stufe 2 stehen (gerechnet). Der 3,3-V-Regler des Nucleo ist nach Kenntnisstand Claude für ca. 500 mA ausgelegt (nicht geprüft).' },
-  { id: 'gnd', title: 'GND-Schienen · CN7-20 / CN10-20', svg: chain([['P', 'GND', 'CN7-20'], ['E', ['GND-Schiene links, über Reihe 42', 'mit der rechten verbunden → Massepunkt']]]),
-    parts: [], note: 'Die Schienen laufen als U um den Nucleo (links Spalte 9, unten Reihe 42, rechts Spalte 46). Zweite Masse-Ader von CN10-20 an die rechte Schiene.' },
-  { id: 'res', title: 'Reserve · CN10-13 / CN10-15 / CN10-6', svg: '', parts: [],
-    note: 'PA6/PA7 für die 2 Knöpfe (Touch aus/an, Display-Modus; Idee User 2026-11-07), PC5 für die Winden-Freigabe (Überlegung User). Beschaltung dann wie Panel-Eingänge (10 kΩ + 100 nF). Weitere freie Pins: PA8–PA10, PB1, PB3, PB4, PB6–PB10, PC0, PC6–PC9, PC13, PD2.' }
+    note: 'Die 3,3 V gibt es nur an CN7 → <b>ein Kabel</b> vom Pad „3,3 V → rechte Platine“ (links) zum Pad „3,3 V von der linken Platine“ (rechts). Größte Last: 4 × 220 Ω am Lenkstock, zusammen höchstens ca. 60 mA, wenn alle Hebel auf Stufe 2 stehen (gerechnet). Der 3,3-V-Regler des Nucleo ist nach Kenntnisstand Claude für ca. 500 mA ausgelegt (nicht geprüft).' },
+  { id: 'gnd', title: 'GND · CN7-22 (links) / CN10-9 (rechts)', svg: chain([['P', 'GND', 'CN7-22'], ['E', ['GND-Bahn links; rechts über CN10-9', 'Pad „GND → Massepunkt“ links']]]),
+    parts: [], note: 'Jede Platine holt Masse über einen inneren GND-Pin, die Bahn läuft unter dem Nucleo nach außen. Die beiden Platinen sind über den Nucleo verbunden, kein eigenes Massekabel nötig.' },
+  { id: 'res', title: 'Reserve', svg: '', parts: [],
+    note: 'Alle Pins der äußeren Reihen sind belegt (außer PC13 = Taster B1). Für die 2 Knöpfe (Idee User) und die Winden-Freigabe (Überlegung) bleiben innere Pins (z. B. PA6, PA7, PB8, PB9) – die brauchen dann je eine kurze Drahtbrücke.' }
 ];
 
 
-// ---------- board geometry (Vorschlag Claude 2026-11-17) ----------
-const S = 7, P = 2.54 * S, W = 1500, H = 1000;
-const NI = 54, NJ = 42;
-const LX = 260, LY = 70, LW = (NI - 1) * P + 20, LH = (NJ - 1) * P + 20;
+// ---------- geometry ----------
+const S = 7, P = 2.54 * S, W = 1530, H = 1000;
+const NI = 57, NJ = 42;
+const LX = 250, LY = 70;
 const hx = i => LX + 10 + i * P, hy = j => LY + 10 + j * P;
 const hole = ([i, j]) => `${i + 1}|${j + 1}`;
-
 const CN = {
   CN7: ['PC10', 'PC11', 'PC12', 'PD2', 'VDD', 'E5V', 'BOOT0', 'GND', '–', '–', '–', 'IOREF', 'PA13', 'RESET', 'PA14', '+3V3', 'PA15', '+5V', 'GND', 'GND', 'PB7', 'GND', 'PC13', 'VIN', 'PC14', '–', 'PC15', 'PA0', 'PH0', 'PA1', 'PH1', 'PA4', 'VBAT', 'PB0', 'PC2', 'PC1', 'PC3', 'PC0'],
   CN10: ['PC9', 'PC8', 'PB8', 'PC6', 'PB9', 'PC5', 'AVDD', 'U5V', 'GND', '–', 'PA5', 'PA12', 'PA6', 'PA11', 'PA7', 'PB12', 'PB6', '–', 'PC7', 'GND', 'PA9', 'PB2', 'PA8', 'PB1', 'PB10', 'PB15', 'PB4', 'PB14', 'PB5', 'PB13', 'PB3', 'AGND', 'PA10', 'PC4', 'PA2', '–', 'PA3', '–']
 };
-const RESERVE = new Set(['PA6', 'PA7', 'PC5']);
 const FORBID = new Set(['PA13', 'PA14', 'PA2', 'PA3', 'PC14', 'PC15', 'PH0', 'BOOT0']);
-const C = {
-  braun: ['Braun', '#a0522d'], tuerkis: ['Türkis', '#30d5c8'], rot: ['Rot', '#e53935'], rosa: ['Rosa', '#ff8fc8'],
-  schwarz: ['Schwarz', '#1b1b1b'], gruen: ['Grün', '#3cb44b'], blau: ['Blau', '#4a7dff'], gelb: ['Gelb', '#ffe119'],
-  orange: ['Orange', '#f58231'], lila: ['Lila', '#b05fd8'], grau: ['Grau', '#9a9a9a'], weiss: ['Weiß', '#eeeeee']
-};
+function hdr(h, n) { const r = (n - 1) >> 1, odd = n % 2 === 1; return [h === 'CN7' ? (odd ? 13 : 14) : (odd ? 38 : 39), 12 + r]; }
+const BX = hx(13) - 2 * S, BW = 70 * S, BY = LY, BH = 82.5 * S;
 const SYSCOL = { e5v: '#e53935', stalk: '#ffe119', brake: '#ff9e5e', pump: '#a3e635', poti: '#5ec8ff', lin: '#b05fd8', led: '#4a7dff', comp: '#3cb44b', fan: '#30d5c8', clutch: '#f58231', abs: '#c77dff', can: '#00e0b0', gnd: '#9e9e9e', v3: '#ff8fc8' };
 const NETCOL = { g: '#9e9e9e', v: '#ff8fc8', 5: '#e53935', k: '#e8a33d' };
-const SYSTEMS = [['rails', 'Schienen', ['gnd', 'v3']], ['e5v', '5 V'], ['stalk', 'Lenkstockhebel'], ['brake', 'Bremslicht'], ['pump', 'Pumpe'], ['poti', 'Lüfter-Poti'], ['lin', 'LIN'], ['led', 'LED-Leiste'], ['comp', 'Kompressor'], ['fan', 'Lüfter A/M'], ['clutch', 'Kupplung'], ['abs', 'ABS-Lampe'], ['can', 'CAN'], ['all', 'Alles']];
-const sysOf = card => (card === 'gnd' || card === 'v3') ? 'rails' : card;
+const SYSTEMS = [['rails', 'Versorgung'], ['lin', 'LIN'], ['brake', 'Bremslicht'], ['pump', 'Pumpe'], ['stalk', 'Lenkstockhebel'], ['abs', 'ABS-Lampe'], ['led', 'LED-Leiste'], ['can', 'CAN'], ['comp', 'Kompressor'], ['fan', 'Lüfter A/M'], ['clutch', 'Kupplung'], ['poti', 'Lüfter-Poti'], ['all', 'Alles']];
+const sysOf = card => (card === 'gnd' || card === 'v3' || card === 'e5v') ? 'rails' : card;
+const BOARDS = Object.entries(DATA).map(([k, b]) => ({ key: k, ...b }));
+const PARTS = [], BR = [], JP = [], PADS = [];
+BOARDS.forEach(b => {
+  b.parts.forEach(p => PARTS.push({ ...p, board: b.key, id: `${b.key}-${p.ref.replace(/_/g, '')}` }));
+  b.paths.forEach(p => BR.push({ ...p, board: b.key }));
+  b.jumpers.forEach((j, k) => JP.push({ ...j, board: b.key, id: `${b.key}-J${k + 1}` }));
+  b.pads.forEach(p => PADS.push({ ...p, board: b.key }));
+});
+const BNAME = { L: 'links (CN7)', R: 'rechts (CN10)' };
+const colOf = x => x.kind && x.kind !== 's' ? NETCOL[x.kind] : SYSCOL[x.card];
 
-// Nucleo: CN7 odd col 13, even col 14; CN10 odd col 38, even col 39; pin 1 in row 12 (as nucleo-heck.html)
-function hdr(h, n) {
-  const r = (n - 1) >> 1, odd = n % 2 === 1;
-  return [h === 'CN7' ? (odd ? 13 : 14) : (odd ? 38 : 39), 12 + r];
-}
-const BX = hx(13) - 2 * S, BW = 70 * S, BY = LY, BH = 82.5 * S;
-// rails: left GND col 9, left 3V3 col 11 (1-based); right side mirrored
-const G = 8, V = 10, GR = NI - 1 - G, VR = NI - 1 - V;
-
-const PARTS = [], BR = [], FW = [], PADS = [];
-const cnt = {};
-const id = k => k + (cnt[k] = (cnt[k] || 0) + 1);
-const two = (t, v, a, b, card, note) => PARTS.push({ id: id(t === 'TVS' ? 'D' : t === 'E' ? 'C' : t), t, v, a, b, card, note });
-const br = (net, nc, pts, card) => BR.push({ net, nc, pts, card });
-const pad = (at, label, side, card) => PADS.push({ at, label, side, card });
-const fw = (from, to, c, what, card, h) => FW.push({ from, to, c, what, card, h });
-// side mapper: left strip as drawn, right strip mirrored (col i -> NI-1-i)
-const SIDE = { L: { x: i => i, g: G, v: V, pad: 'L', ring: ['links', 'rechts'] }, R: { x: i => NI - 1 - i, g: GR, v: VR, pad: 'R', ring: ['rechts', 'links'] } };
-
-// rails
-br('GND-Schiene', 'g', [[G, 0], [G, 41], [GR, 41], [GR, 0]], 'gnd');
-br('3,3-V-Schiene', 'v', [[V, 0], [V, 40], [VR, 40], [VR, 0]], 'v3');
-
-function inDiode(sd, a, card, label) {
-  const s = SIDE[sd], X = s.x, b = a + 1, c = a + 2;
-  pad([X(0), b], label, s.pad, card);
-  br('Leitung', 's', [[X(0), b], [X(1), b]], card);
-  two('D', '1N5819', [X(1), b], [X(5), b], card, `Ring ${s.ring[0]} (zur Leitung)`);
-  br('Pin-Knoten', 's', [[X(5), b], [X(7), b]], card); br('Pin-Knoten', 's', [[X(6), a], [X(6), c]], card);
-  two('R', '10 kΩ', [X(6), a], [s.v, a], card, 'in die 3,3-V-Schiene, über die GND-Schiene hinweg');
-  two('C', '100 nF', [X(6), c], [s.g, c], card, 'direkt in die GND-Schiene');
-  return [X(7), b];
-}
-function inPanel(sd, a, card, label) {
-  const s = SIDE[sd], X = s.x, b = a + 1, c = a + 2;
-  pad([X(0), b], label, s.pad, card);
-  br('Leitung', 's', [[X(0), b], [X(7), b]], card); br('Pin-Knoten', 's', [[X(6), a], [X(6), c]], card);
-  two('R', '10 kΩ', [X(6), a], [s.v, a], card, 'in die 3,3-V-Schiene, über die GND-Schiene hinweg');
-  two('C', '100 nF', [X(6), c], [s.g, c], card, 'direkt in die GND-Schiene');
-  return [X(7), b];
-}
-function inDiv(sd, a, card, label) {
-  const s = SIDE[sd], X = s.x, b = a + 1, c = a + 2, d = a + 3;
-  pad([X(0), b], label, s.pad, card);
-  br('Leitung', 's', [[X(0), b], [X(1), b]], card);
-  two('R', '10 kΩ', [X(1), b], [X(5), b], card);
-  br('Pin-Knoten', 's', [[X(4), b], [X(7), b]], card); br('Pin-Knoten', 's', [[X(4), b], [X(4), c]], card); br('Pin-Knoten', 's', [[X(6), a], [X(6), d]], card);
-  two('D', '1N5819', [s.v, a], [X(6), a], card, 'Ring an der 3,3-V-Schiene');
-  two('R', '2,7 kΩ', [X(4), c], [s.g, c], card, 'direkt in die GND-Schiene');
-  two('C', '100 nF', [X(6), d], [s.g, d], card, 'direkt in die GND-Schiene');
-  return [X(7), b];
-}
-
-// ---- left strip (CN7 signals) ----
-// E5V rows 1-2
-pad([0, 1], '+5 V kleine 5-V-Leitung (Heck)', 'L', 'e5v');
-br('+5 V', '5', [[0, 1], [5, 1]], 'e5v'); br('+5 V', '5', [[1, 1], [1, 0]], 'e5v');
-two('C', '100 nF', [1, 0], [3, 0], 'e5v');
-br('GND', 'g', [[3, 0], [G, 0]], 'e5v');
-PARTS.push({ id: id('C'), t: 'E', v: '100 µF/25 V', p: [5, 1], m: [6, 1], r: 26, card: 'e5v', note: 'Plus links, Minus (Streifen) rechts' });
-br('GND', 'g', [[6, 1], [G, 1]], 'e5v');
-// stalks rows 4-9
-const stalk = (j, label) => { pad([0, j], label, 'L', 'stalk'); br('Leitung', 's', [[0, j], [6, j]], 'stalk'); two('R', '220 Ω', [6, j], [V, j], 'stalk', 'Pull-up in die 3,3-V-Schiene, über die GND-Schiene hinweg'); return [4, j]; };
-const nBlink = stalk(3, 'Lichthebel weiß-schwarz (Blinker)');
-const nHigh = stalk(4, 'Lichthebel weiß (Lichthupe/Fernlicht)');
-pad([0, 5], 'Lichthebel gelb-braun (Masse)', 'L', 'stalk'); br('GND', 'g', [[0, 5], [G, 5]], 'stalk');
-const nWipF = stalk(6, 'Wischerhebel Signal vorn');
-const nWipR = stalk(7, 'Wischerhebel Signal hinten');
-pad([0, 8], 'Wischerhebel Masse', 'L', 'stalk'); br('GND', 'g', [[0, 8], [G, 8]], 'stalk');
-// brake rows 11-14, pump rows 15-17
-const nBrake = inDiv('L', 10, 'brake', 'Bremslicht (nach V7)');
-const nPump = inDiode('L', 14, 'pump', 'K3/87a Pumpe-Status');
-// fan poti rows 19-22
-pad([0, 18], 'Lüfter-Poti Schleifer', 'L', 'poti'); br('Leitung', 's', [[0, 18], [6, 18]], 'poti'); br('Leitung', 's', [[6, 18], [6, 19]], 'poti');
-two('C', '100 nF', [6, 19], [G, 19], 'poti', 'direkt in die GND-Schiene');
-pad([0, 20], 'Lüfter-Poti Ende GND', 'L', 'poti'); br('GND', 'g', [[0, 20], [G, 20]], 'poti');
-pad([0, 21], 'Lüfter-Poti Ende 3,3 V', 'L', 'poti'); br('3,3 V', 'v', [[0, 21], [3, 21]], 'poti');
-fw([3, 21], [V, 21], 'rosa', 'Poti 3,3 V → 3,3-V-Schiene (über die GND-Schiene)', 'poti');
-// LIN rows 24-31: MCP2003 DIP-8, notch at the bottom, pins 1-4 right column (bottom → top), 5-8 left column (top → bottom)
-PARTS.push({ id: 'U1', t: 'DIP', v: 'MCP2003 (DIP-8, Sockel)', card: 'lin', notch: 'B', pins: [[5, 27, 1, 'RXD'], [5, 26, 2, 'CS'], [5, 25, 3, 'WAKE'], [5, 24, 4, 'TXD'], [2, 24, 5, 'VSS'], [2, 25, 6, 'LBUS'], [2, 26, 7, 'VBB'], [2, 27, 8, 'VREN']], note: 'Kerbe unten; Pin 1 unten rechts. Pin 3 WAKE und Pin 8 VREN frei lassen (Steckplan SteeringControl). Sockel verwenden' });
-br('GND', 'g', [[2, 24], [2, 23], [G, 23]], 'lin'); br('GND', 'g', [[1, 23], [2, 23]], 'lin');
-pad([0, 26], '12 V vom Zündschalter (MCP2003)', 'L', 'lin'); br('12 V Zündschalter', 'k', [[0, 26], [2, 26]], 'lin');
-two('C', '100 nF', [1, 23], [1, 26], 'lin', 'senkrecht zwischen VSS-Masse (oben) und VBB (unten), dicht am Chip');
-pad([0, 25], 'LIN-Draht zum Lenkrad', 'L', 'lin'); br('LBUS', 's', [[0, 25], [2, 25]], 'lin');
-br('12 V Zündschalter', 'k', [[1, 26], [1, 28]], 'lin');
-two('D', '1N4148', [5, 28], [1, 28], 'lin', 'Ring rechts (weg von den 12 V, zum 1 kΩ)');
-br('Pull-up', 's', [[5, 28], [5, 29]], 'lin');
-two('R', '1 kΩ', [5, 29], [1, 29], 'lin', 'Master-Pull-up');
-fw([1, 29], [1, 25], 'lila', 'Master-Pull-up → LBUS', 'lin');
-br('LBUS', 's', [[1, 29], [1, 30]], 'lin');
-two('C', '220 pF', [1, 30], [5, 30], 'lin', 'nie 100 nF an LBUS');
-br('GND', 'g', [[5, 30], [G, 30]], 'lin');
-br('TXD', 's', [[5, 24], [6, 24]], 'lin'); br('CS', 's', [[5, 26], [6, 26]], 'lin');
-br('RXD', 's', [[5, 27], [7, 27]], 'lin'); br('RXD', 's', [[6, 27], [6, 28]], 'lin');
-two('R', '5,1 kΩ', [6, 28], [V, 28], 'lin', 'RXD-Pull-up in die 3,3-V-Schiene, über die GND-Schiene hinweg');
-
-// ---- right strip (CN10 signals) ----
-// LED driver rows 1-12: 74AHCT125 DIP-14, notch left, pins 1-7 bottom row (row 7), 14-8 top row (row 4)
-const LT = 3, LB = 6;
-PARTS.push({ id: 'U2', t: 'DIP', v: '74AHCT125 (DIP-14, Sockel)', card: 'led', notch: 'L', pins: [[46, LB, 1, '1OE'], [47, LB, 2, '1A'], [48, LB, 3, '1Y'], [49, LB, 4, '2OE'], [50, LB, 5, '2A'], [51, LB, 6, '2Y'], [52, LB, 7, 'GND'], [52, LT, 8, '3Y'], [51, LT, 9, '3A'], [50, LT, 10, '3OE'], [49, LT, 11, '4Y'], [48, LT, 12, '4A'], [47, LT, 13, '4OE'], [46, LT, 14, 'VCC']], note: 'Kerbe links; Pinfolge = Kenntnisstand Claude, im Datenblatt prüfen. Gatter 2 an Masse (aktiv, Ausgang frei), Gatter 3/4 an VCC (aus)' });
-pad([53, 2], '+5 V große 5-V-Schiene', 'R', 'led');
-br('+5 V groß', '5', [[53, 2], [46, 2]], 'led');
-[46, 47, 48, 50, 51].forEach(i => br('+5 V groß', '5', [[i, 2], [i, LT]], 'led'));
-two('C', '100 nF', [46, 0], [46, 2], 'led', 'senkrecht, oben an der Masse, unten am 5-V-Bus');
-br('GND', 'g', [[46, 0], [GR, 0]], 'led');
-br('GND', 'g', [[46, LB], [GR, LB]], 'led');
-br('GND', 'g', [[49, LB], [50, LB]], 'led');
-br('GND', 'g', [[50, LB], [50, LB + 1], [52, LB + 1], [52, LB]], 'led');
-br('GND', 'g', [[50, LB + 1], [50, LB + 2], [GR, LB + 2]], 'led');
-br('1A', 's', [[47, LB], [47, LB + 1]], 'led');
-br('1Y', 's', [[48, LB], [48, LB + 1]], 'led');
-two('R', '330 Ω', [48, LB + 1], [48, LB + 5], 'led', 'senkrecht, springt über die Masse-Brücke');
-pad([53, LB + 5], 'DIN LED-Leiste', 'R', 'led'); br('DIN', 's', [[48, LB + 5], [53, LB + 5]], 'led');
-// inputs rows 14-34
-const nCompA = inPanel('R', 13, 'comp', 'Kompressor AUTO');
-const nCompN = inPanel('R', 16, 'comp', 'Kompressor AN');
-pad([53, 12], 'Kompressor Mittelkontakt (Masse)', 'R', 'comp'); br('GND', 'g', [[53, 12], [GR, 12]], 'comp');
-const nFan = inPanel('R', 19, 'fan', 'Lüfter Auto/manuell');
-const nS1 = inDiode('R', 22, 'clutch', 'Kupplung S1');
-const nS2 = inDiode('R', 25, 'clutch', 'Kupplung S2');
-const nAbs = inDiv('R', 28, 'abs', 'J104 Pin 16 (ABS-Lampe)');
-br('Leitung', 's', [[52, 29], [52, 30]], 'abs');
-two('R', '1 kΩ 0,5 W', [52, 30], [52, 34], 'abs', 'senkrecht; 0,5-W-Typ (0,21 W gerechnet)');
-pad([53, 34], 'Kl. 15 (V4)', 'R', 'abs'); br('Kl. 15', 'k', [[53, 34], [52, 34]], 'abs');
-// CAN (bottom)
-PARTS.push({ id: 'U3', t: 'CANM', v: 'SN65HVD230-Modul', card: 'can', pins: ['3V3', 'GND', 'CTX', 'CRX', 'CANH', 'CANL'], i0: 30, j: 35, note: 'Stiftreihe in Reihe 36, Modul nach unten; Pinfolge laut Händlerfoto, am eigenen Modul gegenprüfen' });
-br('3,3 V', 'v', [[30, 35], [30, 40]], 'can');
-pad([34, 35], 'CAN-H → Stecker CAN Front', 'B', 'can'); pad([35, 35], 'CAN-L → Stecker CAN Front', 'B', 'can');
-// 3V3 buffer, ground exit
-PARTS.push({ id: id('C'), t: 'E', v: '10 µF/25 V', p: [13, 40], m: [13, 41], r: 18, card: 'v3', note: 'Plus oben (3,3-V-Schiene), Minus unten (GND-Schiene)' });
-pad([G, 41], 'GND → Massepunkt', 'B', 'gnd');
-
-// wires to the header sockets (underside)
-fw(hdr('CN7', 6), [3, 1], 'rot', 'E5V ← +5 V', 'e5v', 'CN7-6');
-fw(hdr('CN7', 16), [V, 19], 'rosa', '+3V3 → 3,3-V-Schiene', 'v3', 'CN7-16');
-fw(hdr('CN7', 20), [G, 22], 'schwarz', 'GND → GND-Schiene links', 'gnd', 'CN7-20');
-fw(hdr('CN10', 20), [GR, 20], 'schwarz', 'GND → GND-Schiene rechts', 'gnd', 'CN10-20');
-fw(hdr('CN7', 28), nBlink, 'gelb', 'PA0 ← Blinker', 'stalk', 'CN7-28');
-fw(hdr('CN7', 32), nHigh, 'weiss', 'PA4 ← Lichthupe/Fernlicht', 'stalk', 'CN7-32');
-fw(hdr('CN7', 30), nWipF, 'blau', 'PA1 ← Wischer vorn', 'stalk', 'CN7-30');
-fw(hdr('CN7', 34), nWipR, 'grau', 'PB0 ← Wischer hinten', 'stalk', 'CN7-34');
-fw(hdr('CN7', 35), nBrake, 'orange', 'PC2 ← Bremslicht-Teiler', 'brake', 'CN7-35');
-fw(hdr('CN7', 37), nPump, 'gruen', 'PC3 ← Pumpe-Status', 'pump', 'CN7-37');
-fw(hdr('CN7', 36), [4, 18], 'tuerkis', 'PC1 ← Poti-Schleifer', 'poti', 'CN7-36');
-fw(hdr('CN7', 1), [6, 24], 'braun', 'PC10 → MCP2003 TXD', 'lin', 'CN7-1');
-fw(hdr('CN7', 2), [7, 27], 'tuerkis', 'PC11 ← MCP2003 RXD', 'lin', 'CN7-2');
-fw(hdr('CN7', 3), [6, 26], 'lila', 'PC12 → MCP2003 CS', 'lin', 'CN7-3');
-fw(hdr('CN10', 29), [47, LB + 1], 'blau', 'PB5 → 74AHCT125 1A', 'led', 'CN10-29');
-fw(hdr('CN10', 26), nCompA, 'gruen', 'PB15 ← Kompressor AUTO', 'comp', 'CN10-26');
-fw(hdr('CN10', 16), nCompN, 'gelb', 'PB12 ← Kompressor AN', 'comp', 'CN10-16');
-fw(hdr('CN10', 22), nFan, 'tuerkis', 'PB2 ← Lüfter A/M', 'fan', 'CN10-22');
-fw(hdr('CN10', 30), nS1, 'orange', 'PB13 ← Kupplung S1', 'clutch', 'CN10-30');
-fw(hdr('CN10', 28), nS2, 'braun', 'PB14 ← Kupplung S2', 'clutch', 'CN10-28');
-fw(hdr('CN10', 34), nAbs, 'lila', 'PC4 ← ABS-Teiler', 'abs', 'CN10-34');
-fw(hdr('CN10', 12), [32, 35], 'braun', 'PA12 → CAN-Modul CTX', 'can', 'CN10-12');
-fw(hdr('CN10', 14), [33, 35], 'tuerkis', 'PA11 ← CAN-Modul CRX', 'can', 'CN10-14');
-fw([31, 35], [31, 41], 'schwarz', 'CAN-Modul GND → GND-Schiene', 'can');
 // ---------- render ----------
 let s = '';
 const T = (x, y, t, st = '', a = 'start') => `<text x="${x}" y="${y}" text-anchor="${a}" style="${st}">${t}</text>`;
-s += `<text id="ttl" x="20" y="26" style="font-size:16px;font-weight:700;fill:#fff">Bauteilseite: Lochraster ca. 137 × 107 mm (54 × 42 Löcher), Raster 2,54 mm</text>`;
+s += `<text id="ttl" x="20" y="26" style="font-size:16px;font-weight:700;fill:#fff">Bauteilseite (von oben, Nucleo durchsichtig): zwei Lochraster-Platinen, Raster 2,54 mm</text>`;
 s += `<g id="flip">`;
-s += `<rect x="${LX}" y="${LY}" width="${LW}" height="${LH}" rx="6" fill="none" stroke="#3a3a3a" stroke-dasharray="6 5"/>`;
-s += `<g id="gridg" style="display:none">`;
-for (let i = 0; i < NI; i++) for (let j = 0; j < NJ; j++) s += `<circle cx="${hx(i)}" cy="${hy(j)}" r="2.2" fill="#333"/>`;
-s += `</g>`;
-for (let i = 0; i < NI; i++) { const st = `font-size:8px;fill:${(i + 1) % 5 === 0 ? '#bbb' : '#666'}`; s += T(hx(i), LY - 4, i + 1, st, 'middle') + T(hx(i), LY + LH + 9, i + 1, st, 'middle'); }
-for (let j = 0; j < NJ; j++) s += T(LX - 3, hy(j) + 3, j + 1, `font-size:8px;fill:${(j + 1) % 5 === 0 ? '#bbb' : '#666'}`, 'end');
+BOARDS.forEach(b => {
+  const x0 = hx(b.cols[0]) - 10, y0 = hy(b.rows[0]) - 10, x1 = hx(b.cols[1]) + 10, y1 = hy(b.rows[1]) + 10;
+  s += `<rect x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" rx="5" fill="#1b2a1b" stroke="#6a8f6a" stroke-width="1.5"/>`;
+  s += `<g class="gridg" style="display:none">`;
+  for (let i = b.cols[0]; i <= b.cols[1]; i++) for (let j = b.rows[0]; j <= b.rows[1]; j++) s += `<circle cx="${hx(i)}" cy="${hy(j)}" r="2.2" fill="#3b4f3b"/>`;
+  s += `</g>`;
+  for (let i = b.cols[0]; i <= b.cols[1]; i++) { const n = i - b.cols[0] + 1, st = `font-size:8px;fill:${n % 5 === 0 ? '#bbb' : '#666'}`; s += T(hx(i), y0 - 4, n, st, 'middle') + T(hx(i), y1 + 9, n, st, 'middle'); }
+  for (let j = b.rows[0]; j <= b.rows[1]; j++) { const n = j - b.rows[0] + 1; s += T(b.key === 'L' ? x0 - 3 : x1 + 3, hy(j) + 3, n, `font-size:8px;fill:${n % 5 === 0 ? '#bbb' : '#666'}`, b.key === 'L' ? 'end' : 'start'); }
+  s += T((x0 + x1) / 2, y1 + 22, `Platine ${BNAME[b.key]}: ${b.cols[1] - b.cols[0] + 1} × ${b.rows[1] - b.rows[0] + 1} Löcher ≈ ${Math.round((b.cols[1] - b.cols[0] + 1) * 2.54)} × ${Math.round((b.rows[1] - b.rows[0] + 1) * 2.54)} mm`, 'font-size:12px;font-weight:700;fill:#9be09b', 'middle');
+});
+// local hole label: board-relative "Sp|Re"
+const boardOf = k => BOARDS.find(b => b.key === k);
+const lh = (bk, [i, j]) => { const b = boardOf(bk); return `${i - b.cols[0] + 1}|${j - b.rows[0] + 1}`; };
 
 const sysAttr = card => `data-sys="${sysOf(card)}"`;
-// solder side: bridges then wires
 s += `<g id="under">`;
 BR.forEach((b, k) => {
-  const d = 'M' + b.pts.map(([i, j]) => `${hx(i)} ${hy(j)}`).join('L');
-  const col = b.nc === 's' ? SYSCOL[b.card] : NETCOL[b.nc], rail = /Schiene/.test(b.net);
+  const d = 'M' + b.pts.map(([i, j]) => `${hx(i)} ${hy(j)}`).join('L'), col = colOf(b);
   s += `<g class="sel" data-k="br${k}" ${sysAttr(b.card)}><path d="${d}" fill="none" stroke="transparent" stroke-width="12"/>`;
-  s += `<path d="${d}" fill="none" stroke="#000" stroke-width="${rail ? 9 : 8}" stroke-linecap="round" stroke-linejoin="round"/>`;
-  s += `<path d="${d}" fill="none" stroke="${col}" stroke-width="${rail ? 5.5 : 4.5}" stroke-linecap="round" stroke-linejoin="round"/></g>`;
-});
-FW.forEach((w, k) => {
-  const [x1, y1, x2, y2] = [hx(w.from[0]), hy(w.from[1]), hx(w.to[0]), hy(w.to[1])];
-  const mx = (x1 + x2) / 2, my = (y1 + y2) / 2 - 14 - (k % 4) * 5;
-  const d = `M${x1} ${y1}Q${mx} ${my} ${x2} ${y2}`, col = C[w.c][1], cas = w.c === 'schwarz' ? '#bbb' : '#000';
-  s += `<g class="sel" data-k="fw${k}" ${sysAttr(w.card)}><path d="${d}" fill="none" stroke="transparent" stroke-width="10"/>`;
-  s += `<path d="${d}" fill="none" stroke="${cas}" stroke-width="4" stroke-dasharray="${w.c === 'schwarz' ? '' : ''}"/><path d="${d}" fill="none" stroke="${col}" stroke-width="2.2"/></g>`;
+  s += `<path d="${d}" fill="none" stroke="#000" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`;
+  s += `<path d="${d}" fill="none" stroke="${col}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></g>`;
 });
 s += `</g>`;
-
 const used = {};
 const mark = ([i, j], card) => { const k = i + ',' + j; (used[k] = used[k] || new Set()).add(sysOf(card)); };
 BR.forEach(b => b.pts.forEach(p => mark(p, b.card)));
-FW.forEach(w => { mark(w.from, w.card); mark(w.to, w.card); });
-
 s += '%%JOINTS%%';
+// header sockets (female 2 x 19 on each board)
+const usedPin = {};
+['CN7', 'CN10'].forEach(h => {
+  const [ia] = hdr(h, 1), [ib] = hdr(h, 2), x0 = hx(Math.min(ia, ib)) - 9, x1 = hx(Math.max(ia, ib)) + 9;
+  s += `<rect x="${x0}" y="${hy(12) - 9}" width="${x1 - x0}" height="${18 * P + 18}" fill="#0c0c0c" stroke="#555" rx="2"/>`;
+  s += T((x0 + x1) / 2, hy(12) - 14, h, 'font-size:12px;font-weight:700;fill:#ccc', 'middle');
+  for (let n = 1; n <= 38; n++) {
+    const [i, j] = hdr(h, n), name = CN[h][n - 1], x = hx(i), y = hy(j);
+    const u = BR.find(b => b.pts.some(p => p[0] === i && p[1] === j));
+    if (u) usedPin[`${h}-${n}`] = u;
+    s += `<g class="pin" data-pin="${h}-${n}"><rect x="${x - 6}" y="${y - 6}" width="12" height="12" fill="${u ? colOf(u) : '#444'}" stroke="#000"/>` + T(x, y + 2.5, n, `fill:${u ? '#000' : '#999'};font-size:7px;font-weight:700`, 'middle');
+    if (FORBID.has(name)) s += `<path d="M${x - 6} ${y - 6}L${x + 6} ${y + 6}M${x + 6} ${y - 6}L${x - 6} ${y + 6}" stroke="#e53935" stroke-width="1.5"/>`;
+    s += `</g>`;
+  }
+});
 s += `<g id="lparts">`;
 function twoLead(p) {
-  const [x1, y1, x2, y2] = [hx(p.a[0]), hy(p.a[1]), hx(p.b[0]), hy(p.b[1])];
-  mark(p.a, p.card); mark(p.b, p.card);
-  const cx = (x1 + x2) / 2, cy = (y1 + y2) / 2, ang = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+  const a = p.leads[0], b = p.leads[1];
+  const [x1, y1, x2, y2] = [hx(a[0]), hy(a[1]), hx(b[0]), hy(b[1])];
+  mark(a, p.card); mark(b, p.card);
+  const cx = (x1 + x2) / 2, cy = (y1 + y2) / 2, ang = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI, len = Math.hypot(x2 - x1, y2 - y1);
   const vert = Math.abs(ang) > 45 && Math.abs(ang) < 135;
-  const dim = { R: [46, 15, '#d9b47e'], D: [36, 16, '#222'], TVS: [62, 30, '#1d1d1d'], C: [24, 15, '#c9781f'] }[p.t];
-  const short = { '10 kΩ': '10k', '2,7 kΩ': '2k7', '1 kΩ': '1k', '1 kΩ 0,5 W': '1k', '5,1 kΩ': '5k1', '220 Ω': '220', '330 Ω': '330', '220 pF': '220p' }[p.v] || '';
-  const dark = p.t === 'R' || p.t === 'C', col = dark ? '#111' : '#fff';
-  let g = `<g class="sel" data-k="${p.id}" ${sysAttr(p.card)}>`;
-  g += `<path d="M${x1} ${y1}L${x2} ${y2}" stroke="#c8c8c8" stroke-width="2.4"/>`;
-  g += `<g transform="rotate(${ang} ${cx} ${cy})"><rect x="${cx - dim[0] / 2}" y="${cy - dim[1] / 2}" width="${dim[0]}" height="${dim[1]}" rx="${p.t === 'C' ? 6 : 4}" fill="${dim[2]}" stroke="#000"/>`;
-  if (p.t === 'D' || p.t === 'TVS') g += `<rect x="${cx - dim[0] / 2 + 3}" y="${cy - dim[1] / 2}" width="${p.t === 'TVS' ? 7 : 5}" height="${dim[1]}" fill="#e0e0e0"/>`;
-  g += `</g>`;
-  if (vert) {
-    g += T(cx, cy + (short ? -2 : 3), p.id, `font-size:7.5px;font-weight:700;fill:${col}`, 'middle');
-    if (short) g += T(cx, cy + 8, short, `font-size:7.5px;font-weight:700;fill:${col}`, 'middle');
-  } else {
-    g += T(cx + (p.t === 'D' ? 3 : 0), cy + 3.2, p.t === 'R' ? `${p.id} ${short}` : p.t === 'TVS' ? `${p.id} TVS` : p.id, `font-size:8.5px;font-weight:700;fill:${col}`, 'middle');
+  if (p.t === 'E') {
+    const r = p.v.startsWith('100') ? 20 : 15;
+    let g = `<g class="sel" data-k="${p.id}" ${sysAttr(p.card)}><circle cx="${cx}" cy="${cy}" r="${r}" fill="#1f3550" stroke="#000" opacity="0.9"/>`;
+    g += T(x1 + (vert ? 9 : 0), y1 + (vert ? 4 : -7), '+', 'font-size:12px;font-weight:700;fill:#fff', 'middle');
+    return g + T(cx, cy + 3, p.ref, 'font-size:8.5px;fill:#fff;font-weight:700', 'middle') + `</g>`;
   }
+  const dim = { R: [Math.min(46, len - 8), 15, '#d9b47e'], D: [Math.min(36, len - 8), 16, '#222'], C: [Math.min(24, len - 6), 15, '#c9781f'] }[p.t];
+  const short = { '10 kΩ': '10k', '2,7 kΩ': '2k7', '1 kΩ': '1k', '1 kΩ 0,5 W': '1k', '5,1 kΩ': '5k1', '220 Ω': '220', '330 Ω': '330', '220 pF': '220p' }[p.v] || '';
+  const col = p.t === 'D' ? '#fff' : '#111';
+  let g = `<g class="sel" data-k="${p.id}" ${sysAttr(p.card)}><path d="M${x1} ${y1}L${x2} ${y2}" stroke="#c8c8c8" stroke-width="2.4"/>`;
+  g += `<g transform="rotate(${ang} ${cx} ${cy})"><rect x="${cx - dim[0] / 2}" y="${cy - dim[1] / 2}" width="${dim[0]}" height="${dim[1]}" rx="${p.t === 'C' ? 6 : 4}" fill="${dim[2]}" stroke="#000"/>`;
+  if (p.t === 'D') g += `<rect x="${cx - dim[0] / 2 + 3}" y="${cy - dim[1] / 2}" width="5" height="${dim[1]}" fill="#e0e0e0"/>`;
+  g += `</g>`;
+  const lab = p.ref.replace(/_.*/, '') + (short && p.t === 'R' ? ' ' + short : p.t === 'C' && short ? ' ' + short : '');
+  g += vert ? T(cx + 11, cy + 3, lab, `font-size:8px;font-weight:700;fill:#fff`) : T(cx + (p.t === 'D' ? 3 : 0), cy + 3.2, lab, `font-size:8px;font-weight:700;fill:${col}`, 'middle');
   return g + `</g>`;
 }
 PARTS.forEach(p => {
-  if (['R', 'D', 'C', 'TVS'].includes(p.t)) { s += twoLead(p); return; }
+  if (['R', 'D', 'C', 'E'].includes(p.t)) { s += twoLead(p); return; }
   const open = `<g class="sel" data-k="${p.id}" ${sysAttr(p.card)}>`;
-  if (p.t === 'E') {
-    mark(p.p, p.card); mark(p.m, p.card);
-    const cx = (hx(p.p[0]) + hx(p.m[0])) / 2, cy = (hy(p.p[1]) + hy(p.m[1])) / 2, horiz = p.p[1] === p.m[1];
-    s += open + `<circle cx="${cx}" cy="${cy}" r="${p.r}" fill="#1f3550" stroke="#000" opacity="0.9"/>`;
-    s += T(hx(p.p[0]) + (horiz ? -3 : 10), hy(p.p[1]) + 4, '+', 'font-size:12px;font-weight:700;fill:#fff', 'middle');
-    s += T(hx(p.m[0]) + (horiz ? 4 : 10), hy(p.m[1]) + 4, '−', 'font-size:14px;font-weight:700;fill:#9cf', 'middle');
-    s += T(cx, cy - p.r - 4, `${p.id} ${p.v.split('/')[0]}`, 'font-size:9px;fill:#fff;font-weight:700', 'middle') + `</g>`;
-  } else if (p.t === 'TO92') {
-    p.pins.forEach(q => mark(q, p.card));
-    const x = hx(p.pins[1][0]), y = hy(p.pins[1][1]);
-    s += open + `<path d="M${x - 17} ${y + 6}H${x + 17}A17 17 0 0 0 ${x - 17} ${y + 6}Z" fill="#222" stroke="#888"/>`;
-    p.pins.forEach(([i, j, l]) => { s += T(hx(i), hy(j) - 4, l, 'font-size:7.5px;fill:#fff;font-weight:700', 'middle'); });
-    s += T(x + 20, y - 7, p.id, 'font-size:8.5px;fill:#fff;font-weight:700') + `</g>`;
-  } else if (p.t === 'TO220') {
-    p.pins.forEach(q => mark(q, p.card));
-    const x = hx(p.pins[1][0]), y = hy(p.pins[1][1]);
-    s += open + `<rect x="${x - 36}" y="${y - 25}" width="72" height="9" fill="#9a9a9a" stroke="#000"/><rect x="${x - 36}" y="${y - 16}" width="72" height="22" fill="#222" stroke="#888"/>`;
-    p.pins.forEach(([i, j, l]) => { s += T(hx(i) + 6, hy(j) - 6, l, 'font-size:7.5px;fill:#fff;font-weight:700', 'middle'); });
-    s += T(x - 24, y - 17.5, p.id, 'font-size:7.5px;fill:#111;font-weight:700', 'middle') + `</g>`;
-  } else if (p.t === 'MODL') {
-    const x0 = hx(p.i0) - 10, x1 = hx(p.i0 + p.pinsA.length - 1) + 10, y0 = hy(p.ja) - 10, y1 = hy(p.jb) + 10;
-    s += open + `<rect x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" rx="4" fill="#123a8a" stroke="#000" opacity="0.9"/>`;
-    s += T((x0 + x1) / 2, (y0 + y1) / 2 + 4, `${p.id} Pegel`, 'font-size:11px;fill:#fff;font-weight:700', 'middle');
-    p.pinsA.forEach((l, k) => { mark([p.i0 + k, p.ja], p.card); s += `<rect x="${hx(p.i0 + k) - 5}" y="${hy(p.ja) - 5}" width="10" height="10" fill="#d4af37"/>` + T(hx(p.i0 + k), hy(p.ja) + 15, l, 'font-size:7px;fill:#fff', 'middle'); });
-    p.pinsB.forEach((l, k) => { mark([p.i0 + k, p.jb], p.card); s += `<rect x="${hx(p.i0 + k) - 5}" y="${hy(p.jb) - 5}" width="10" height="10" fill="#d4af37"/>` + T(hx(p.i0 + k), hy(p.jb) - 9, l, 'font-size:7px;fill:#fff', 'middle'); });
-    s += `</g>`;
-  } else if (p.t === 'DIP') {
-    p.pins.forEach(([i, j]) => mark([i, j], p.card));
-    const xs = p.pins.map(q => hx(q[0])), ys = p.pins.map(q => hy(q[1]));
-    const x0 = Math.min(...xs) - 9, x1 = Math.max(...xs) + 9, y0 = Math.min(...ys) - 9, y1 = Math.max(...ys) + 9, cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+  p.leads.forEach(l => mark(l, p.card));
+  const xs = p.leads.map(l => hx(l[0])), ys = p.leads.map(l => hy(l[1]));
+  const x0 = Math.min(...xs) - 9, x1 = Math.max(...xs) + 9, y0 = Math.min(...ys) - 9, y1 = Math.max(...ys) + 9, cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+  if (p.t === 'DIP') {
     s += open + `<rect x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" rx="3" fill="#262626" stroke="#999" opacity="0.92"/>`;
     s += p.notch === 'B' ? `<path d="M${cx - 8} ${y1}a8 8 0 0 1 16 0" fill="#555"/>` : `<path d="M${x0} ${cy - 8}a8 8 0 0 1 0 16" fill="#555"/>`;
-    p.pins.forEach(([i, j, n, l]) => {
-      s += `<rect x="${hx(i) - 5}" y="${hy(j) - 5}" width="10" height="10" fill="${n === 1 ? '#e8c547' : '#c8c8c8'}"/>` + T(hx(i), hy(j) + 3, n, 'font-size:7px;fill:#000;font-weight:700', 'middle');
-      const lx = p.notch === 'B' ? (hx(i) < cx ? hx(i) + 9 : hx(i) - 9) : hx(i), ly = p.notch === 'B' ? hy(j) + 3 : (hy(j) < cy ? hy(j) + 16 : hy(j) - 9);
-      s += T(lx, ly, l, 'font-size:6.5px;fill:#bcd', p.notch === 'B' ? (hx(i) < cx ? 'start' : 'end') : 'middle');
+    p.leads.forEach(([i, j, net, n], k) => {
+      s += `<rect x="${hx(i) - 5}" y="${hy(j) - 5}" width="10" height="10" fill="${n === '1' ? '#e8c547' : net ? '#c8c8c8' : '#555'}"/>` + T(hx(i), hy(j) + 3, n, 'font-size:7px;fill:#000;font-weight:700', 'middle');
+      const nm = p.names[k];
+      if (p.notch === 'B') s += T(hx(i) < cx ? hx(i) + 8 : hx(i) - 8, hy(j) + 3, nm, 'font-size:6.5px;fill:#bcd', hx(i) < cx ? 'start' : 'end');
+      else s += T(hx(i), hy(j) < cy ? hy(j) + 15 : hy(j) - 8, nm, 'font-size:6px;fill:#bcd', 'middle');
     });
-    s += T(cx, p.notch === 'B' ? y0 - 4 : cy + 3, p.id, 'font-size:9px;font-weight:700;fill:#fff', 'middle') + `</g>`;
+    s += T(cx, p.notch === 'B' ? y0 - 4 : cy + 3, p.ref, 'font-size:9px;font-weight:700;fill:#fff', 'middle') + `</g>`;
   } else if (p.t === 'CANM') {
-    const x0 = hx(p.i0) - 10, x1 = hx(p.i0 + 5) + 10, y0 = hy(p.j) - 9, y1 = hy(p.j) + 5.3 * P;
-    s += open + `<rect x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" rx="4" fill="#1d5a2a" stroke="#000" opacity="0.9"/>`;
-    s += T((x0 + x1) / 2, y0 + 50, `${p.id} CAN`, 'font-size:11px;fill:#fff;font-weight:700', 'middle');
-    p.pins.forEach((l, k) => { mark([p.i0 + k, p.j], p.card); s += `<rect x="${hx(p.i0 + k) - 5}" y="${hy(p.j) - 5}" width="10" height="10" fill="#d4af37"/>` + T(hx(p.i0 + k), hy(p.j) + 16, l.replace('CAN', ''), 'font-size:7px;fill:#fff', 'middle'); });
-    s += `</g>`;
+    s += open + `<rect x="${x0 + 3}" y="${y0}" width="${x1 - x0 - 6}" height="${y1 - y0}" rx="2" fill="#1d5a2a" stroke="#000"/>`;
+    p.leads.forEach(([i, j, net, l]) => { s += `<rect x="${hx(i) - 5}" y="${hy(j) - 5}" width="10" height="10" fill="#d4af37"/>` + T(hx(i) - 9, hy(j) + 3, l, 'font-size:7px;fill:#fff', 'end'); });
+    s += T(cx, y0 - 4, `${p.ref} CAN (stehend)`, 'font-size:9px;font-weight:700;fill:#fff', 'middle') + `</g>`;
   }
+});
+JP.forEach(j => {
+  mark(j.a, j.card); mark(j.b, j.card);
+  const [x1, y1, x2, y2] = [hx(j.a[0]), hy(j.a[1]), hx(j.b[0]), hy(j.b[1])];
+  s += `<g class="sel" data-k="${j.id}" ${sysAttr(j.card)}><path d="M${x1} ${y1}L${x2} ${y2}" stroke="#000" stroke-width="6"/><path d="M${x1} ${y1}L${x2} ${y2}" stroke="#d0ff60" stroke-width="3"/>` + T(x1 + 8, (y1 + y2) / 2 + 3, j.id.split('-')[1], 'font-size:9px;font-weight:700;fill:#d0ff60') + `</g>`;
 });
 s += `</g>`;
-s = s.replace('%%JOINTS%%', Object.entries(used).map(([k, set]) => {
-  const [i, j] = k.split(',').map(Number);
-  return `<circle class="joint" data-sys="${[...set].join(' ')}" cx="${hx(i)}" cy="${hy(j)}" r="3.6" fill="#f0f0f0" stroke="#000" stroke-width="0.8"/>`;
-}).join(''));
-// sockets (visible when the Nucleo is hidden)
-['CN7', 'CN10'].forEach(h => {
-  const [ia] = hdr(h, 1), [ib] = hdr(h, 2);
-  const x0 = hx(Math.min(ia, ib)) - 9, x1 = hx(Math.max(ia, ib)) + 9;
-  s += `<rect x="${x0}" y="${hy(12) - 9}" width="${x1 - x0}" height="${18 * P + 18}" fill="#0c0c0c" stroke="#444" rx="2"/>`;
-  for (let n = 1; n <= 38; n++) { const [i, j] = hdr(h, n); s += `<circle cx="${hx(i)}" cy="${hy(j)}" r="3" fill="#555"/>`; }
-  s += T((x0 + x1) / 2, hy(12) - 14, h, 'font-size:12px;font-weight:700;fill:#ccc', 'middle');
-});
-
-// Nucleo on top
-s += `<g id="nucleo">`;
-s += `<rect x="${BX + BW / 2 - 28}" y="${BY - 14}" width="56" height="40" rx="3" fill="#b8b8b8" stroke="#555"/>`;
-s += T(BX + BW / 2, BY - 18, 'USB – Platz für den Stecker frei lassen', 'fill:#8cf', 'middle');
-s += `<rect x="${BX}" y="${BY}" width="${BW}" height="${BH}" rx="7" fill="#ecebe5" stroke="#999" stroke-width="2" opacity="0.93"/>`;
-s += `<line x1="${BX + 4}" y1="${BY + 22 * S}" x2="${BX + BW - 4}" y2="${BY + 22 * S}" stroke="#999" stroke-dasharray="6 5"/>`;
-s += T(BX + BW / 2, BY + 70, 'ST-LINK-Teil', 'fill:#333;font-size:14px;font-weight:700', 'middle');
-const mx = BX + BW / 2, my = BY + 56 * S;
-s += `<rect x="${mx - 35}" y="${my - 35}" width="70" height="70" fill="#262626" transform="rotate(45 ${mx} ${my})"/>` + T(mx, my + 4, 'F446RE', 'fill:#eee;font-size:10px', 'middle');
-s += T(mx, BY + BH - 12, 'NUCLEO-F446RE · 70 × 82,5 mm', 'fill:#333;font-size:12px;font-weight:700', 'middle');
-function labelCol(name) {
-  if (name === '–') return '#aaa';
-  if (FORBID.has(name)) return '#c62828';
-  if (RESERVE.has(name)) return '#9a7400';
-  if (!/^P[A-H]\d+$/.test(name)) return '#666';
-  return '#999';
-}
-const usedPin = {};
-FW.forEach((w, k) => { if (w.h) usedPin[w.h] = 'fw' + k; });
-['CN7', 'CN10'].forEach(h => {
-  const [ia] = hdr(h, 1), [ib] = hdr(h, 2);
-  const x0 = hx(Math.min(ia, ib)) - 9, x1 = hx(Math.max(ia, ib)) + 9;
-  s += `<rect x="${x0}" y="${hy(12) - 9}" width="${x1 - x0}" height="${18 * P + 18}" fill="#111" rx="2"/>`;
-  s += T((x0 + x1) / 2, hy(12) - 14, h, 'fill:#222;font-weight:700;font-size:13px', 'middle');
-  for (let r = 0; r < 19; r++) {
-    const no = 2 * r + 1, ne = 2 * r + 2;
-    const lab = n => { const name = CN[h][n - 1], u = usedPin[h + '-' + n]; return `<tspan style="fill:${u ? '#000' : labelCol(name)};font-weight:${u ? 700 : 400}">${name}</tspan>`; };
-    const y = hy(12 + r) + 3.5, sep = '<tspan style="fill:#bbb"> | </tspan>';
-    const at = h === 'CN7' ? `x="${x1 + 6}"` : `x="${x0 - 6}" text-anchor="end"`;
-    s += `<text class="lt" ${at} y="${y}" style="font-size:10px">${lab(no)}${sep}${lab(ne)}</text>`;
-    s += `<text class="lb" ${at} y="${y}" style="font-size:10px;display:none">${lab(ne)}${sep}${lab(no)}</text>`;
-  }
-  for (let n = 1; n <= 38; n++) {
-    const [i, j] = hdr(h, n), name = CN[h][n - 1], x = hx(i), y = hy(j);
-    s += `<g class="pin" data-pin="${h}-${n}"><rect x="${x - 6}" y="${y - 6}" width="12" height="12" fill="#d4af37" stroke="#7a5f10"/>` + T(x, y + 2.5, n, 'fill:#222;font-size:7px;font-weight:700', 'middle');
-    if (RESERVE.has(name)) s += `<circle cx="${x}" cy="${y}" r="8.5" fill="none" stroke="#e8c547" stroke-width="1.5" stroke-dasharray="3 2"/>`;
-    if (FORBID.has(name)) s += `<path d="M${x - 7} ${y - 7}L${x + 7} ${y + 7}M${x + 7} ${y - 7}L${x - 7} ${y + 7}" stroke="#e53935" stroke-width="2"/>`;
-    s += `</g>`;
-  }
-});
-s += `</g>`;
-
-// external pads and leads
-const bottomOrder = PADS.filter(p => p.side === 'B').sort((a, b) => a.at[0] - b.at[0]);
+s = s.replace('%%JOINTS%%', Object.entries(used).map(([k, set]) => { const [i, j] = k.split(',').map(Number); return `<circle class="joint" data-sys="${[...set].join(' ')}" cx="${hx(i)}" cy="${hy(j)}" r="3.4" fill="#f0f0f0" stroke="#000" stroke-width="0.8"/>`; }).join(''));
+// pads
+const padOrder = { L: [], R: [] };
 PADS.forEach(p => {
-  const x = hx(p.at[0]), y = hy(p.at[1]);
+  const x = hx(p.at[0]), y = hy(p.at[1]), b = boardOf(p.board);
   s += `<g ${sysAttr(p.card)} class="padg"><rect x="${x - 7}" y="${y - 7}" width="14" height="14" fill="none" stroke="#fff" stroke-width="2"/>`;
-  if (p.side === 'L') s += `<path d="M${x} ${y}H${LX - 24}" stroke="#fff" stroke-width="1.6" stroke-dasharray="5 4"/>` + T(LX - 28, y + 4, p.label, 'fill:#fff', 'end');
-  else if (p.side === 'R') s += `<path d="M${x} ${y}H${LX + LW + 24}" stroke="#fff" stroke-width="1.6" stroke-dasharray="5 4"/>` + T(LX + LW + 28, y + 4, p.label, 'fill:#fff');
-  else if (p.side === 'B') {
-    const k = bottomOrder.indexOf(p), yl = LY + LH + 26 + k * 14;
-    s += `<path d="M${x} ${y}V${yl}H${x + 8}" fill="none" stroke="#fff" stroke-width="1.6" stroke-dasharray="5 4"/>` + T(x + 12, yl + 4, p.label, 'fill:#fff');
-  } else s += T(x + 10, y + 3, p.label, 'font-size:9px;fill:#fff');
+  if (p.side === 'L') { const ex = hx(b.cols[0]) - 30; s += `<path d="M${x} ${y}H${ex}" stroke="#fff" stroke-width="1.4" stroke-dasharray="5 4"/>` + T(ex - 4, y + 4, p.label, 'fill:#fff;font-size:11px', 'end'); }
+  else { const ex = hx(b.cols[1]) + 30; s += `<path d="M${x} ${y}H${ex}" stroke="#fff" stroke-width="1.4" stroke-dasharray="5 4"/>` + T(ex + 4, y + 4, p.label, 'fill:#fff;font-size:11px'); }
   s += `</g>`;
 });
+// Nucleo outline (transparent, above)
+s += `<g id="nucleo">`;
+s += `<rect x="${BX}" y="${BY}" width="${BW}" height="${BH}" rx="7" fill="#ecebe5" fill-opacity="0.10" stroke="#ddd" stroke-width="2" stroke-dasharray="8 5"/>`;
+s += T(BX + BW / 2, BY + 18, 'Nucleo-F446RE (liegt darüber, USB oben) · 70 × 82,5 mm', 'fill:#ddd;font-size:12px;font-weight:700', 'middle');
+s += T(BX + BW / 2, BY + 34, 'unter dem Nucleo nur Lötbahnen, keine Bauteile', 'fill:#aaa;font-size:11px', 'middle');
+['CN7', 'CN10'].forEach(h => {
+  for (let n = 1; n <= 38; n++) {
+    const [i, j] = hdr(h, n), name = CN[h][n - 1], u = usedPin[`${h}-${n}`];
+    if (!u) continue;
+    const left = h === 'CN7' ? hx(14) + 12 : hx(38) - 12;
+    if ((h === 'CN7' && n % 2 === 1) || (h === 'CN10' && n % 2 === 1)) continue;
+    s += T(left, hy(j) + 3.5, `${n}: ${name}`, `font-size:9px;fill:#ddd`, h === 'CN7' ? 'start' : 'end');
+  }
+});
+s += `</g>`;
 s += `</g>`;
 // legend
 const ly = H - 40;
-s += `<rect x="20" y="${H - 60}" width="1460" height="54" rx="6" fill="#151515" stroke="#333"/>`;
+s += `<rect x="20" y="${H - 60}" width="${W - 40}" height="54" rx="6" fill="#151515" stroke="#333"/>`;
 s += T(34, ly, 'Legende:', 'font-weight:700;fill:#fff');
-const sw = (x, col, w) => `<path d="M${x} ${ly - 4}h34" stroke="#000" stroke-width="${w + 3}" stroke-linecap="round"/><path d="M${x} ${ly - 4}h34" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/>`;
-s += sw(105, '#9e9e9e', 5) + T(145, ly, 'GND') + sw(185, '#ff8fc8', 5) + T(225, ly, '3,3 V') + sw(275, '#e53935', 4.5) + T(315, ly, '+5 V') + sw(360, '#e8a33d', 4.5) + T(400, ly, 'Kl. 15');
-s += sw(455, '#ffe119', 4.5) + T(495, ly, 'Signal (Farbe je Schaltung) – dicke gerade Linie = Lötbrücke unten');
-s += `<path d="M845 ${ly + 2}q17 -14 34 0" fill="none" stroke="#000" stroke-width="4"/><path d="M845 ${ly + 2}q17 -14 34 0" fill="none" stroke="#e8c547" stroke-width="2.2"/>` + T(885, ly, 'isolierter Draht unten');
-s += `<rect x="1020" y="${ly - 11}" width="14" height="14" fill="none" stroke="#fff" stroke-width="2"/>` + T(1040, ly, 'Anschlussloch nach außen');
-s += `<rect x="1210" y="${ly - 10}" width="5" height="12" fill="#e0e0e0"/><rect x="1215" y="${ly - 10}" width="25" height="12" fill="#222"/>` + T(1246, ly, 'Diode: Ring = Kathode');
-s += T(34, ly + 18, 'Zinn nur dort, wo eine Linie gezeichnet ist. Teile, die über eine Schiene „springen“, berühren sie nicht. Alle C (orange) = 100 nF außer C7 = 220 pF; alle D (schwarz klein) = 1N5819 außer D3 = 1N4148.', 'fill:#e8c547;font-size:11px');
-
+const sw = (x, col) => `<path d="M${x} ${ly - 4}h34" stroke="#000" stroke-width="8" stroke-linecap="round"/><path d="M${x} ${ly - 4}h34" stroke="${col}" stroke-width="4.5" stroke-linecap="round"/>`;
+s += sw(105, '#9e9e9e') + T(145, ly, 'GND') + sw(185, '#ff8fc8') + T(225, ly, '3,3 V') + sw(275, '#e53935') + T(315, ly, '5 V') + sw(350, '#e8a33d') + T(390, ly, '12 V / Kl. 15');
+s += sw(480, '#ffe119') + T(520, ly, 'Signal (Farbe je Schaltung) = Lötbahn unten (Zinnbrücke oder Silberdraht)');
+s += `<path d="M960 ${ly - 4}h34" stroke="#000" stroke-width="6"/><path d="M960 ${ly - 4}h34" stroke="#d0ff60" stroke-width="3"/>` + T(1000, ly, 'Drahtbrücke oben (J)');
+s += `<rect x="1150" y="${ly - 11}" width="14" height="14" fill="none" stroke="#fff" stroke-width="2"/>` + T(1170, ly, 'Anschlussloch nach außen');
+s += T(34, ly + 18, 'Zinn nur dort, wo eine Bahn gezeichnet ist. Bauteile, die über eine Bahn „springen“, berühren sie nicht. Diode: heller Ring = Kathode. Lochangaben Sp|Re je Platine, oben links = 1|1.', 'fill:#e8c547;font-size:11px');
 const svg = document.getElementById('plan');
+svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
 svg.innerHTML = s;
 
 // ---------- cards + BOM ----------
@@ -648,10 +436,7 @@ document.getElementById('cards').innerHTML = CARDS.map(c => `<div class="card" i
   (c.parts.length ? `<ul>${c.parts.map(([n, q, st]) => `<li>${q} × ${n}<span class="st ${st}">${STXT[st]}</span></li>`).join('')}</ul>` : '') +
   `<p class="hint" style="margin:4px 0">${c.note}</p></div>`).join('');
 const bom = {};
-CARDS.forEach(c => c.parts.forEach(([n, q, st]) => {
-  if (!bom[n]) bom[n] = { q: 0, st, use: [] };
-  bom[n].q += q; bom[n].use.push(c.title.split(' · ')[0]);
-}));
+CARDS.forEach(c => c.parts.forEach(([n, q, st]) => { if (!bom[n]) bom[n] = { q: 0, st, use: [] }; bom[n].q += q; bom[n].use.push(c.title.split(' · ')[0]); }));
 const STOCK = {
   'C 100 nF': 'Lager: Keramik-Sortiment, Fach „104“ (je 30) + 3 × CK05BX104K',
   'C 220 pF': 'Lager: Keramik-Sortiment, Fach 220 pF (je 30)',
@@ -665,116 +450,94 @@ const STOCK = {
   'Elko 100 µF/25 V': 'Lager: 2 (Relaisbox braucht 1)', 'Elko 10 µF/25 V': 'Lager: 1 (Relaisbox braucht ihn auch → 2. kaufen)',
   'CAN-Modul SN65HVD230': '10 Stück, AliExpress 2026-11-10 (WCMCU-230)'
 };
-const extra = [['Buchsenleiste 2 × 19, Raster 2,54 mm', 2, PR, 'nicht im Lagerbestand gelistet → fragen/kaufen', 'Nucleo-Sockel'],
-  ['Lochraster Punktraster, mind. 137 × 107 mm (54 × 42 Löcher)', 1, PR, 'nicht im Lagerbestand gelistet → fragen/kaufen', 'Trägerplatine'],
+const extra = [['Buchsenleiste 2 × 19, Raster 2,54 mm (passend zu den Morpho-Stiften unten)', 2, PR, 'nicht im Lagerbestand gelistet → fragen/kaufen', 'je Platine eine'],
+  ['Lochraster Punktraster, 2 Stück: links 22 × 33 Löcher (≈ 56 × 84 mm), rechts 20 × 42 Löcher (≈ 51 × 107 mm)', 2, PR, 'nicht im Lagerbestand gelistet → fragen/kaufen', 'Trägerplatinen'],
   ['Silberdraht (verzinnter Kupferdraht) ca. 0,6 mm', 1, PR, 'für Brücken und Schienen', 'Unterseite'],
-  ['isolierter Schaltdraht dünn (Fädeldraht)', 1, PR, 'für die Drähte zu den Buchsenleisten', 'Unterseite']];
+  ['Draht für Drahtbrücke J1 + 1 Kabel 3,3 V links → rechts', 1, PR, 'isoliert, kurz', 'Bauteilseite']];
 document.querySelector('#bom tbody').innerHTML = Object.entries(bom).map(([n, o]) =>
   `<tr><td>${n}</td><td>${o.q}</td><td><span class="st ${o.st}">${STXT[o.st]}</span> <span class="hint">${STOCK[n] || ''}</span></td><td class="hint">${[...new Set(o.use)].join(', ')}</td></tr>`).join('') +
   extra.map(([n, q, st, t, u]) => `<tr><td>${n}</td><td>${q}</td><td><span class="st ${st}">${STXT[st]}</span> <span class="hint">${t}</span></td><td class="hint">${u}</td></tr>`).join('');
 
 // ---------- tables ----------
-const cardOf = id => CARDS.find(c => c.id === id);
-const cardName = id => { const c = cardOf(id); return c ? c.title.split(' · ')[0] : ''; };
-const holesTxt = p => {
-  if (p.t === 'MODL') return `Reihe ${p.ja + 1} und ${p.jb + 1}, Spalte ${p.i0 + 1}–${p.i0 + p.pinsA.length}`;
-  if (p.t === 'CANM') return `Reihe ${p.j + 1}, Spalte ${p.i0 + 1}–${p.i0 + 6}`;
-  if (p.pins) return p.pins.map(([i, j, l]) => `${l} ${hole([i, j])}`).join(' · ');
-  if (p.p) return `+ ${hole(p.p)} · − ${hole(p.m)}`;
-  if (p.t === 'D' || p.t === 'TVS') return `Ring ${hole(p.a)} · ${hole(p.b)}`;
-  return `${hole(p.a)} – ${hole(p.b)}`;
-};
-const typeName = { R: 'Widerstand', C: 'Kondensator', E: 'Elko', D: 'Diode', TVS: 'TVS-Diode', TO92: 'Transistor', TO220: 'MOSFET', MODL: 'Modul', CANM: 'Modul', DIP: 'IC im Sockel' };
-const ORDER = ['DIP', 'R', 'D', 'C', 'TVS', 'TO92', 'E', 'TO220', 'MODL', 'CANM'];
-const byOrder = (a, b) => ORDER.indexOf(a.t) - ORDER.indexOf(b.t) || a.id.localeCompare(b.id, 'de', { numeric: true });
-const KEY = 'nucleo-front-done1';
+const KEY = 'nucleo-front-pcb1';
 const load = k => { try { return JSON.parse(localStorage.getItem(k) || '{}'); } catch (e) { return {}; } };
 const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage unavailable */ } };
 const done = load(KEY);
 const box = k => `<input type="checkbox" data-c="${k}"${done[k] ? ' checked' : ''}>`;
-const hdrName = h => h ? `${h} (${CN[h.split('-')[0]][+h.split('-')[1] - 1]})` : '';
+const cardOf = id => CARDS.find(c => c.id === id);
+const cardName = id => { const c = cardOf(id); return c ? c.title.split(' · ')[0] : id; };
+const typeName = { R: 'Widerstand', C: 'Kondensator', E: 'Elko', D: 'Diode', DIP: 'IC im Sockel', CANM: 'Modul' };
+const ORDER = ['DIP', 'CANM', 'R', 'D', 'C', 'E'];
+const holesTxt = p => {
+  if (p.t === 'DIP' || p.t === 'CANM') { const f = p.leads[0], l = p.leads[p.leads.length - 1]; return `Pin ${f[3]} ${lh(p.board, f)} … Pin ${l[3]} ${lh(p.board, l)}`; }
+  const [a, b] = p.leads;
+  return p.t === 'D' ? `Ring ${lh(p.board, a)} · ${lh(p.board, b)}` : p.t === 'E' ? `+ ${lh(p.board, a)} · − ${lh(p.board, b)}` : `${lh(p.board, a)} – ${lh(p.board, b)}`;
+};
+const byOrder = (a, b) => a.board.localeCompare(b.board) || ORDER.indexOf(a.t) - ORDER.indexOf(b.t) || a.id.localeCompare(b.id, 'de', { numeric: true });
 document.querySelector('#parts tbody').innerHTML = PARTS.slice().sort(byOrder)
-  .map(p => `<tr data-k="${p.id}" class="${done[p.id] ? 'done' : ''}"><td>${box(p.id)}</td><td><b>${p.id}</b> ${typeName[p.t]}</td><td>${p.v}</td><td>${holesTxt(p)}</td><td class="hint">${p.note || ''}</td><td><a href="#k-${p.card}">${cardName(p.card)}</a></td></tr>`).join('');
-document.querySelector('#list tbody').innerHTML = FW.map((w, k) => `<tr data-k="fw${k}" class="${done['fw' + k] ? 'done' : ''}"><td>${box('fw' + k)}</td><td>${w.h || hole(w.from)}</td><td>${w.h ? CN[w.h.split('-')[0]][+w.h.split('-')[1] - 1] : ''}</td><td><span class="sw" style="background:${C[w.c][1]}"></span> ${C[w.c][0]} <span class="hyp">(Vorschlag)</span></td><td>${hole(w.to)}</td><td>${w.what}</td></tr>`).join('');
+  .map(p => `<tr data-k="${p.id}" class="${done[p.id] ? 'done' : ''}"><td>${box(p.id)}</td><td>${p.board === 'L' ? 'links' : 'rechts'}</td><td><b>${p.ref.replace(/_.*/, '')}</b> ${typeName[p.t]}</td><td>${p.v}</td><td>${holesTxt(p)}</td><td class="hint">${p.note || ''}</td><td><a href="#k-${p.card}">${cardName(p.card)}</a></td></tr>`).join('') +
+  JP.map(j => `<tr data-k="${j.id}" class="${done[j.id] ? 'done' : ''}"><td>${box(j.id)}</td><td>${j.board === 'L' ? 'links' : 'rechts'}</td><td><b>${j.id.split('-')[1]}</b> Drahtbrücke</td><td>Draht oben</td><td>${lh(j.board, j.a)} – ${lh(j.board, j.b)}</td><td class="hint">überspringt fremde Bahnen auf der Bauteilseite (${j.net})</td><td>${cardName(j.card)}</td></tr>`).join('');
 
 // ---------- systems + steps ----------
 const stepsEl = document.getElementById('steps');
 function stepsFor(sys) {
-  const cards = sys === 'rails' ? ['gnd', 'v3'] : [sys];
-  const inSys = x => cards.includes(x.card);
+  const inSys = x => sysOf(x.card) === sys;
   const st = [];
-  PARTS.filter(inSys).sort(byOrder).forEach(p => st.push([p.id, `<b>${p.id}</b> ${typeName[p.t]} <b>${p.v}</b> einstecken: ${holesTxt(p)}${p.note ? ' – <i>' + p.note + '</i>' : ''}`]));
-  BR.forEach((b, k) => { if (inSys(b)) st.push(['br' + k, `Unterseite: <span class="sw" style="background:${b.nc === 's' ? SYSCOL[b.card] : NETCOL[b.nc]}"></span> Brücke <b>${b.pts.map(hole).join(' → ')}</b> (${b.net})`]); });
-  FW.forEach((w, k) => { if (inSys(w)) st.push(['fw' + k, `Unterseite: <span class="sw" style="background:${C[w.c][1]}"></span> isolierter Draht ${C[w.c][0].toLowerCase()} von <b>${w.h ? hdrName(w.h) : hole(w.from)}</b> nach <b>${hole(w.to)}</b> – ${w.what}`]); });
-  PADS.forEach(p => { if (inSys(p)) st.push(['pd' + hole(p.at), `Leitung nach außen <b>${p.label}</b> in Loch <b>${hole(p.at)}</b>`]); });
+  PARTS.filter(inSys).sort(byOrder).forEach(p => st.push([p.id, `Platine ${p.board === 'L' ? 'links' : 'rechts'}: <b>${p.ref.replace(/_.*/, '')}</b> ${typeName[p.t]} <b>${p.v}</b> einstecken: ${holesTxt(p)}${p.note ? ' – <i>' + p.note + '</i>' : ''}`]));
+  BR.forEach((b, k) => { if (inSys(b)) st.push(['br' + k, `Unterseite ${b.board === 'L' ? 'links' : 'rechts'}: <span class="sw" style="background:${colOf(b)}"></span> Bahn <b>${b.pts.map(p => lh(b.board, p)).join(' → ')}</b> (${b.net})`]); });
+  JP.forEach(j => { if (inSys(j)) st.push([j.id, `Bauteilseite ${j.board === 'L' ? 'links' : 'rechts'}: Drahtbrücke <b>${j.id.split('-')[1]}</b> ${lh(j.board, j.a)} – ${lh(j.board, j.b)}`]); });
+  PADS.forEach(p => { if (inSys(p)) st.push(['pd' + p.board + lh(p.board, p.at), `Leitung nach außen <b>${p.label}</b> in Loch <b>${lh(p.board, p.at)}</b> (${p.board === 'L' ? 'links' : 'rechts'})`]); });
   return st;
-}
-function showSys(sys) {
-  document.querySelectorAll('#sys button').forEach(b => b.classList.toggle('on', b.dataset.s === sys));
-  svg.querySelectorAll('[data-sys]').forEach(el => {
-    const on = sys === 'all' || el.dataset.sys.split(' ').includes(sys);
-    el.classList.toggle('off', !on);
-  });
-  svg.classList.toggle('focus', sys !== 'all');
-  curSys = sys;
-  fitView();
-  if (sys === 'all') { stepsEl.innerHTML = ''; return; }
-  const name = SYSTEMS.find(x => x[0] === sys)[1];
-  stepsEl.innerHTML = `<h3 style="margin:6px 0">Schritte: ${name}</h3><ol class="steps">${stepsFor(sys).map(([k, t]) => `<li data-k="${k}" class="${done[k] ? 'done' : ''}">${box(k)} ${t}</li>`).join('')}</ol>` +
-    (cardOf(sys) ? `<p class="hint"><a href="#k-${sys}">Schaltbild ${cardName(sys)} ›</a></p>` : '');
 }
 let curSys = 'all', mirrored = false;
 function fitView() {
   if (curSys === 'all') { svg.setAttribute('viewBox', `0 0 ${W} ${H}`); return; }
   let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
-  const grow = (x, y, w, h) => { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x + w); y1 = Math.max(y1, y + h); };
-  svg.querySelectorAll('[data-sys]').forEach(el => { if (!el.classList.contains('joint') && el.dataset.sys.split(' ').includes(curSys)) { const b = el.getBBox(); grow(b.x, b.y, b.width, b.height); } });
+  svg.querySelectorAll('[data-sys]').forEach(el => { if (!el.classList.contains('joint') && el.dataset.sys.split(' ').includes(curSys)) { const b = el.getBBox(); x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y); x1 = Math.max(x1, b.x + b.width); y1 = Math.max(y1, b.y + b.height); } });
   if (mirrored) [x0, x1] = [W - x1, W - x0];
-  const pad = 30, w = Math.max(x1 - x0 + 2 * pad, 560), h = Math.max(y1 - y0 + 2 * pad, 380);
-  const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+  const pad = 30, w = Math.max(x1 - x0 + 2 * pad, 560), h = Math.max(y1 - y0 + 2 * pad, 380), cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
   svg.setAttribute('viewBox', `${cx - w / 2} ${cy - h / 2} ${w} ${h}`);
 }
-document.getElementById('sys').innerHTML = SYSTEMS.map(([k, n]) => `<button data-s="${k}" class="${k === 'all' ? 'on' : ''}" style="border-left:4px solid ${SYSCOL[k] || (k === 'rails' ? '#ff8fc8' : k === 'uln' ? '#b05fd8' : '#444')}">${n}</button>`).join('');
+function showSys(sys) {
+  document.querySelectorAll('#sys button').forEach(b => b.classList.toggle('on', b.dataset.s === sys));
+  svg.querySelectorAll('[data-sys]').forEach(el => el.classList.toggle('off', !(sys === 'all' || el.dataset.sys.split(' ').includes(sys))));
+  curSys = sys; fitView();
+  if (sys === 'all') { stepsEl.innerHTML = ''; return; }
+  const name = SYSTEMS.find(x => x[0] === sys)[1];
+  stepsEl.innerHTML = `<h3 style="margin:6px 0">Schritte: ${name}</h3><ol class="steps">${stepsFor(sys).map(([k, t]) => `<li data-k="${k}" class="${done[k] ? 'done' : ''}">${box(k)} ${t}</li>`).join('')}</ol>`;
+}
+document.getElementById('sys').innerHTML = SYSTEMS.map(([k, n]) => `<button data-s="${k}" class="${k === 'all' ? 'on' : ''}" style="border-left:4px solid ${SYSCOL[k] || (k === 'rails' ? '#ff8fc8' : '#444')}">${n}</button>`).join('');
 document.getElementById('sys').addEventListener('click', e => { const b = e.target.closest('button'); if (b) showSys(b.dataset.s); });
 
 // ---------- interaction ----------
 const info = document.getElementById('info');
 function describe(k) {
-  if (k.startsWith('br')) { const b = BR[+k.slice(2)]; return `<b>Lötbrücke (Unterseite)</b> · ${b.net} · ${b.pts.map(hole).join(' → ')} · ${cardName(b.card)}`; }
-  if (k.startsWith('fw')) { const w = FW[+k.slice(2)]; return `<b>isolierter Draht (Unterseite)</b> · ${w.h ? hdrName(w.h) : hole(w.from)} → ${hole(w.to)} · ${w.what} · <span class="sw" style="background:${C[w.c][1]}"></span> ${C[w.c][0]}`; }
+  if (k.startsWith('br')) { const b = BR[+k.slice(2)]; return `<b>Lötbahn unten</b> (${b.board === 'L' ? 'links' : 'rechts'}) · ${b.net} · ${b.pts.map(p => lh(b.board, p)).join(' → ')}`; }
+  const j = JP.find(x => x.id === k);
+  if (j) return `<b>Drahtbrücke ${j.id.split('-')[1]}</b> (Bauteilseite) · ${j.net} · ${lh(j.board, j.a)} – ${lh(j.board, j.b)}`;
   const p = PARTS.find(q => q.id === k);
-  return `<b>${p.id}</b> ${typeName[p.t]} ${p.v} · ${holesTxt(p)}${p.note ? ' · ' + p.note : ''} · ${cardName(p.card)}`;
+  return p ? `<b>${p.ref.replace(/_.*/, '')}</b> ${typeName[p.t]} ${p.v} · ${holesTxt(p)}${p.note ? ' · ' + p.note : ''} · ${cardName(p.card)}` : '';
 }
 function select(k) {
   svg.querySelectorAll('.sel').forEach(g => g.classList.toggle('dim', k !== null && g.dataset.k !== k));
   document.querySelectorAll('tr[data-k], li[data-k]').forEach(tr => tr.classList.toggle('sel', tr.dataset.k === k));
-  info.innerHTML = k === null ? 'Oben eine Schaltung wählen → nur diese wird gezeigt, mit Schrittliste. Oder Bauteil/Leitung antippen.' : describe(k);
+  info.innerHTML = k === null ? 'Oben eine Schaltung wählen → nur diese wird gezeigt, mit Schrittliste. Oder Bauteil/Bahn antippen.' : describe(k);
 }
 svg.addEventListener('click', e => {
-  const g = e.target.closest('.sel');
-  if (g) { select(g.dataset.k); return; }
-  const pn = e.target.closest('.pin');
-  if (!pn) { select(null); return; }
-  const [h, n] = pn.dataset.pin.split('-'), name = CN[h][n - 1], k = usedPin[pn.dataset.pin];
-  if (k) { select(k); return; }
-  select(null);
-  info.innerHTML = `<b>${h}-${n}</b> · ${name} · ${RESERVE.has(name) ? 'Reserve' : FORBID.has(name) ? 'nicht verwenden' : /GND/.test(name) ? 'Masse' : name === '–' ? 'nicht belegt' : 'frei/Versorgung'}`;
+  const g = e.target.closest('.sel'); if (g) { select(g.dataset.k); return; }
+  const pn = e.target.closest('.pin'); select(null);
+  if (pn) { const [h, n] = pn.dataset.pin.split('-'); info.innerHTML = `<b>${h}-${n}</b> · ${CN[h][n - 1]} · ${usedPin[pn.dataset.pin] ? 'belegt: ' + usedPin[pn.dataset.pin].net : FORBID.has(CN[h][n - 1]) ? 'nicht verwenden' : 'frei'}`; }
 });
 document.body.addEventListener('change', e => {
-  const c = e.target.dataset && e.target.dataset.c;
-  if (!c) return;
-  done[c] = e.target.checked;
-  save(KEY, done);
+  const c = e.target.dataset && e.target.dataset.c; if (!c) return;
+  done[c] = e.target.checked; save(KEY, done);
   document.querySelectorAll(`[data-k="${c}"]`).forEach(el => { if (el.tagName === 'TR' || el.tagName === 'LI') el.classList.toggle('done', e.target.checked); });
   document.querySelectorAll(`input[data-c="${c}"]`).forEach(i => { i.checked = e.target.checked; });
 });
-document.querySelectorAll('tbody, #steps').forEach(tb => tb.addEventListener('click', e => {
-  const tr = e.target.closest('[data-k]');
-  if (!tr || e.target.matches('input') || e.target.closest('a')) return;
-  select(tr.dataset.k);
-  if (tr.tagName === 'TR') document.getElementById('wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+document.querySelectorAll('#parts tbody, #steps').forEach(tb => tb.addEventListener('click', e => {
+  const tr = e.target.closest('[data-k]'); if (!tr || e.target.matches('input') || e.target.closest('a')) return;
+  select(tr.dataset.k); if (tr.tagName === 'TR') document.getElementById('wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }));
-
 function mirror(on) {
   const flip = document.getElementById('flip');
   flip.setAttribute('transform', on ? `translate(${W} 0) scale(-1 1)` : '');
@@ -785,23 +548,16 @@ function mirror(on) {
     else { t.removeAttribute('transform'); t.setAttribute('text-anchor', a); }
   });
   svg.classList.toggle('vbot', on);
-  svg.querySelectorAll('.lt').forEach(t => { t.style.display = on ? 'none' : ''; });
-  svg.querySelectorAll('.lb').forEach(t => { t.style.display = on ? '' : 'none'; });
   const ttl = document.getElementById('ttl');
-  ttl.textContent = (on ? 'Lötseite (von unten, gespiegelt)' : 'Bauteilseite') + ttl.textContent.slice(ttl.textContent.indexOf(':'));
-  document.getElementById('vTop').classList.toggle('on', !on);
-  document.getElementById('vBot').classList.toggle('on', on);
-  mirrored = on;
-  fitView();
+  ttl.textContent = on ? 'Lötseite (von unten, gespiegelt): Bahnen aus Zinn/Silberdraht' : 'Bauteilseite (von oben, Nucleo durchsichtig): zwei Lochraster-Platinen, Raster 2,54 mm';
+  document.getElementById('vTop').classList.toggle('on', !on); document.getElementById('vBot').classList.toggle('on', on);
+  mirrored = on; fitView();
 }
 document.getElementById('vTop').onclick = () => mirror(false);
 document.getElementById('vBot').onclick = () => mirror(true);
 document.getElementById('nuc').onclick = e => { const off = svg.classList.toggle('nonuc'); e.target.classList.toggle('on', !off); };
-document.getElementById('grid').onclick = e => { const g = document.getElementById('gridg'), on = g.style.display === 'none'; g.style.display = on ? '' : 'none'; e.target.classList.toggle('on', on); };
-document.querySelectorAll('button.z').forEach(b => b.onclick = () => {
-  document.querySelectorAll('button.z').forEach(x => x.classList.toggle('on', x === b));
-  svg.style.width = (+b.dataset.z * 100) + '%';
-});
+document.getElementById('grid').onclick = e => { const on = !e.target.classList.contains('on'); svg.querySelectorAll('.gridg').forEach(g => { g.style.display = on ? '' : 'none'; }); e.target.classList.toggle('on', on); };
+document.querySelectorAll('button.z').forEach(b => b.onclick = () => { document.querySelectorAll('button.z').forEach(x => x.classList.toggle('on', x === b)); svg.style.width = (+b.dataset.z * 100) + '%'; });
 svg.style.width = '100%';
 svg.style.minWidth = '760px';
 
