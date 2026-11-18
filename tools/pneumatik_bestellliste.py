@@ -13,7 +13,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, KeepTogether
 
-STAND = "17.11.2026"
+STAND = "18.11.2026"
 
 FD = "/usr/share/fonts/truetype/dejavu/"
 pdfmetrics.registerFont(TTFont("DV", FD + "DejaVuSans.ttf"))
@@ -46,20 +46,22 @@ BLOCKS = [
         ("M-04-533-HN-441", "5/3-Wegeventil, Mitte entlüftet, G1/8, 12 V DC 4,2 W, Form B Industrienorm", "3", "Ventilstapel", "ohne Steckdose geliefert"),
         ("28-ST-01", "Steckdose Form B Industrienorm (22 mm, 11 mm), 0–250 V", "6", "je Spule 1", "Flachdichtung dabei? Nicht 28-ST-01-G (10 mm)"),
     ]),
-    ("Riegler – Verschraubungen »metallica« (Messing vernickelt, max. 16 bar)", [
-        ("108897 / 854.018-6", "L-Steckverschraubung drehbar, G1/8 – Schlauch 6", "4", "Ventile G, A Anschl. 2/4", "gerade/Winkel nach Einbauprobe"),
-        ("108857 / 845.018-6", "Gerade Steckverschraubung, G1/8 – Schlauch 6", "4", "Ventil B Anschl. 2/4 + 2 Reserve", ""),
-        ("108858 / 845.018-8", "Gerade Steckverschraubung, G1/8 – Schlauch 8", "3", "Ventile Anschl. 1", "Versorgung durchgehend 8 mm"),
-        ("108990 / 849.008", "T-Steckverbindung 3 × 8 mm", "2", "Verteilung auf 3 Ventile", ""),
-        ("108862 / 845.014-8", "Gerade Steckverschraubung, G1/4 – Schlauch 8", "2", "Filterregler ein/aus", ""),
-        ("108978 / 851.016-8", "Schott-Steckverbindung 8 mm, M16 × 1", "1", "Rückwand Zylinderbox (1,5 mm)", "Gegenmutter dabei?"),
+    ("Camozzi – Steckverschraubungen Serie 6000 (Messing vernickelt, 16 bar), Drosseln, Rückschlagventil", [
+        ("S6520 6-1/8", "Winkel-Steckverschraubung drehbar, G1/8 – Schlauch 6, Sprint (PTFE-Gewindebeschichtung)", "4", "Ventile G, A Anschl. 2/4", "gerade/Winkel nach Einbauprobe"),
+        ("S6510 6-1/8", "Gerade Steckverschraubung, G1/8 – Schlauch 6, Sprint", "4", "Ventil B Anschl. 2/4 + 2 Reserve", ""),
+        ("S6510 8-1/8", "Gerade Steckverschraubung, G1/8 – Schlauch 8, Sprint", "3", "Ventile Anschl. 1", "Versorgung durchgehend 8 mm"),
+        ("6540 8", "T-Steckverbindung 3 × 8 mm", "2", "Verteilung auf 3 Ventile", ""),
+        ("S6510 8-1/4", "Gerade Steckverschraubung, G1/4 – Schlauch 8, Sprint", "2", "Filterregler ein/aus", ""),
+        ("6590 8", "Schott-Steckverbindung 8 mm, M16 × 1 mit Mutter (Wand bis 11,5 mm)", "1", "Rückwand Zylinderbox (1,5 mm)", "Bohrungsmaß?"),
+        ("SCU 604-1/8", "Drosselrückschlagventil Hohlschraube G1/8, Abluftdrosselung, Schlitzverstellung, Messing", "6", "direkt in alle Zylinderanschlüsse", "2 nötig (G), 4 für A/B statt Winkel; 1–10 bar; nicht MCU/GSCU (zu hoch)"),
+        ("6610 6-1/8", "Ringstück (Banjo) mit Steckanschluss 6 für SCU 604-1/8", "6", "zu SCU 604-1/8", "wird getrennt geliefert"),
+        ("VNR-238-3/8", "Rückschlagventil G3/8 Innengewinde, Messing, max. 25 bar, NBR 0…80 °C", "1", "Kompressor → Tank", "nah am Tank montieren (Luft kühler); NBR bis 80 °C"),
+        ("S6510 8-3/8", "Gerade Steckverschraubung, G3/8 – Schlauch 8, Sprint", "2", "an VNR-238-3/8", ""),
     ]),
-    ("Riegler – Drosseln, Schalldämpfer, Aufbereitung", [
-        ("106937 / 343.018-6", "Drosselrückschlagventil Abluftdrosselung, Hohlschraube, G1/8 – Steckanschluss 6, Messing vernickelt, Schlitzschraube", "6", "direkt in alle Zylinderanschlüsse", "2 nötig (G), 4 für A/B statt Winkel; nicht die höhere Rändel-Ausführung (42 mm)"),
+    ("Riegler – Schalldämpfer, Aufbereitung", [
         ("113338 / 567-1", "Schalldämpfer Sinterbronze G1/8, mit Sechskant", "6", "Ventile Anschl. 3/5", "max. 8 bar"),
         ("C 06 K-10-HA", "Filterregler multifix-mini Gr. 0, G1/4, 0,5–10 bar, 5 µm, halbautom. Ablass, mit Manometer", "1", "vor der Zylinderbox, 7 bar", "Umgebung max. 60 °C"),
         ("MV 30", "Haltewinkel mit Mutter R 11-55 für multifix-mini", "1", "Wandmontage Filterregler", ""),
-        ("—", "Rückschlagventil Steckanschluss 8 mm, mind. 16 bar", "1", "Kompressor → Tank", "bitte Typ vorschlagen (Riegler 204.08-2 nur 10 bar); bei Gewinde + 2 Anschlüsse 8 mm"),
     ]),
     ("Riegler – Schlauch PA 12", [
         ("259.11 S-V2", "PA-Schlauch 6 × 4, schwarz (29 bar bei 23 °C, Biegeradius min. 35 mm)", "5 m", "Arbeitsleitungen", "Rolle 25 m, falls nicht als Meterware"),
@@ -68,11 +70,12 @@ BLOCKS = [
 ]
 
 DROPPED = [
-    ("44-XSCF-60", "Inline-Drossel → Drosseln direkt am Zylinder (Riegler 343.018-6)"),
+    ("44-XSCF-60", "Inline-Drossel → Drosseln direkt am Zylinder (Camozzi SCU)"),
     ("44-XCVPU-80, 40-501-18, blue C-line, PU-Schlauch, FRY", "→ Riegler"),
     ("RA-25, RB-25", "Böcke Eigenbau (Edelstahl) mit RM-25"),
     ("Reihenleiste, Schottverschraubungen 6 mm", "Ventile seit 11.11. als Stapel in der Zylinderbox"),
     ("PE-14-01", "Pressostat vorhanden"),
+    ("Riegler »metallica«, Drossel 343.018-6", "→ Camozzi (Rat Händler 18.11.: robuster bei mechanischer Belastung)"),
 ]
 
 QUESTIONS = [
@@ -80,8 +83,8 @@ QUESTIONS = [
     "RD-20: Bolzen und Sicherung dabei? FK-32: Muttern dabei?",
     "Passen ZS-6701 und KA-10-01 zusammen (Stecker verschraubt oder Schnapp)? NT-550 für Ø 20 und Ø 25?",
     "Ventilspule 12 V DC 4,2 W, Toleranz laut Datenblatt ±10 %: verträgt sie im Fahrzeug Dauerbetrieb bei 14,4 V?",
-    "Rückschlagventil 8 mm für mind. 16 bar (Leitung Kompressor → Tank) – welcher Typ?",
-    "Riegler: Drossel 343.018-6 (106937) lieferbar? PA-Schlauch als Meterware?",
+    "Camozzi: Bohrungsmaß für Schott 6590 8 (geplant 16,5 mm)?",
+    "Riegler: PA-Schlauch als Meterware?",
 ]
 
 
@@ -123,8 +126,8 @@ def build(out):
     doc = SimpleDocTemplate(out, pagesize=A4, leftMargin=18*mm, rightMargin=18*mm, topMargin=16*mm, bottomMargin=18*mm,
                             title="Bestellliste Pneumatik", author="")
     s = [Paragraph("Bestellliste Pneumatik – Gangschaltung Buggy", h1),
-         Paragraph(f"Stand {STAND}. Airtec für Zylinder und Ventile samt Zubehör, Riegler für alles andere "
-                   "(Metallverschraubungen, PA-Schlauch). Versorgung 7 bar über Filterregler, Tank bis 10,3 bar.", base),
+         Paragraph(f"Stand {STAND}. Airtec für Zylinder und Ventile samt Zubehör, Camozzi für Steckverschraubungen, Drosseln und "
+                   "Rückschlagventil, Riegler für Aufbereitung und PA-Schlauch. Versorgung 7 bar über Filterregler, Tank bis 10,3 bar.", base),
          Spacer(1, 2*mm)]
     for title, rows in numbered():
         s.append(table(title, rows))
