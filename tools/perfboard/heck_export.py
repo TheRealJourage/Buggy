@@ -11,7 +11,8 @@ for n in order:
 bad = b.check(order)
 assert not bad, bad
 L = sum(abs(q[0] - p[0]) + abs(q[1] - p[1]) for pa in b.paths for p, q in zip(pa['pts'], pa['pts'][1:]))
-out = {'L': dict(cols=[b.c0, b.c1], rows=[b.r0, b.r1], header=b.header,
+# routed inside (1..33, 5..40); shown and numbered on the full carrier of 2026-11-10 (41 x 42 holes, right side built)
+out = {'L': dict(cols=[0, 40], rows=[0, 41], header=b.header,
                  paths=[dict(p, card=CARD[p['net']], kind=KIND.get(p['net'], 's')) for p in b.paths],
                  jumpers=[dict(j, card=CARD[j['net']]) for j in b.jumpers], parts=b.parts, pads=b.pads)}
 print(b.name, len(b.paths), 'paths', len(b.jumpers), 'jumpers', len(b.parts), 'parts', len(b.pads), 'pads', 'bridge length', L, 'holes')
