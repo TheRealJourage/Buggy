@@ -1,7 +1,10 @@
 """Intake adapter v2 variants with mesh booleans (manifold3d).
 sls : wall 4 mm, two halves (split between cyl 3/4)
 cast: wall 6 mm, six single runners each with its own flange segment, shrink + machining allowance
-usage: intake_v2_variants.py <fdm|fdm_kurz|fdm_opt|fdm_power|fdm_modular|sls|sls_power|cast> <outdir>
+usage: intake_v2_variants.py <fdm|fdm_kurz|fdm_opt|fdm_power|fdm_modular|sls|sls_power|cast> <outdir> [--step]
+--step (fdm_modular only): additionally build the part as BREP with build123d and export STEP
+run long jobs via run_watchdog.sh, e.g. run_watchdog.sh 900 300 out/log.txt -- python intake_v2_variants.py fdm_modular out --step
+(normal: ~2.5 min mesh only, ~6 min with --step; OCC booleans can hang on near-coincident surfaces)
 """
 import sys, os, json, math, tempfile
 import numpy as np
@@ -9,9 +12,11 @@ import trimesh
 import manifold3d as mf
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import intake_v2_geom as G
-from build123d import import_step, export_stl, Plane, Keep, Pos, Box, extrude, RectangleRounded
+from build123d import (import_step, export_stl, export_step, Plane, Keep, Pos, Box, extrude, RectangleRounded,
+                       Solid, Edge, Wire, Face, Axis, Vector)
 
 MODE, OUT = sys.argv[1], sys.argv[2]
+STEP = "--step" in sys.argv[3:]
 os.makedirs(OUT, exist_ok=True)
 CFG = {
     "sls": dict(wall=4.0, spigot_od=41.0, cone=4.0, tag="SLS", eyes=True),
@@ -73,11 +78,12 @@ def save(man, path, keep_all=False):
 
 
 src = import_step(G.SRC)
-flange = to_mf(src.split(Plane.XY.offset(G.FLANGE_TOP), keep=Keep.BOTTOM))
+flange_b = src.split(Plane.XY.offset(G.FLANGE_TOP), keep=Keep.BOTTOM)
+flange = to_mf(flange_b)
 (bx0, by0, bz0), (bx1, by1, bz1) = G.NIPPLE_BOX
-nipple = to_mf(src & Pos((bx0 + bx1) / 2, (by0 + by1) / 2, (bz0 + bz1) / 2) * Box(bx1 - bx0, by1 - by0, bz1 - bz0))
+nipple_b = src & Pos((bx0 + bx1) / 2, (by0 + by1) / 2, (bz0 + bz1) / 2) * Box(bx1 - bx0, by1 - by0, bz1 - bz0)
+nipple = to_mf(nipple_b)
 
-from build123d import Vector
 
 
 def centreline_compact(port, x_end, n=90):
@@ -173,10 +179,13 @@ if CFG.get("opt"):
     flange0 = flange
     for port in G.PORTS:
         # fill the old vertical bore only above the face-side pocket (z 10.5); the original port collars below stay untouched
-        flange += to_mf(Pos(port[0], port[1], 10.6) * extrude(RectangleRounded(port[2] + 0.4, port[3] + 0.4, port[4] + 0.2), amount=23.0 - 10.6))
+        fill = Pos(port[0], port[1], 10.6) * extrude(RectangleRounded(port[2] + 0.4, port[3] + 0.4, port[4] + 0.2), amount=23.0 - 10.6)
+        flange += to_mf(fill)
+        flange_b = flange_b + fill
     G.FLANGE_TOP = FACE_Z
     FACE_POCKET = None
 runners = []
+runners_b = []
 ENDS = []
 for port, xe in zip(G.PORTS, G.THROTTLE_X):
     outer, end = G.runner(port, xe, G.WALL)
@@ -192,6 +201,7 @@ for port, xe in zip(G.PORTS, G.THROTTLE_X):
         add += to_mf(Pos(port[0], port[1], G.FLANGE_TOP - 1.5) * extrude(RectangleRounded(w, h, r), amount=1.5))
     sub = to_mf(inner[0]) + (inner[1] if isinstance(inner[1], mf.Manifold) else to_mf(inner[1])) + (mf.Manifold() if CFG.get("modular") else to_mf(G.spigot(end, False)))
     runners.append((add, sub))
+    runners_b.append((outer, inner[0]))
     ENDS.append((end.X, end.Y, end.Z))
     print("runner", port[0], "ok", flush=True)
 
@@ -380,4 +390,128 @@ else:
         cx = (G.PORTS[i][0])
         seg = seg.translate((-cx, 0, 0)).scale((CFG["shrink"],) * 3).translate((cx, 0, 0))
         info[f"Rohr_{i + 1}"] = save(seg, f"{OUT}/Ansaugung_v2_Guss_Rohr{i + 1}_port_x{cx:+.1f}.stl")
+# ---- BREP (STEP) build of fdm_modular: same construction as the mesh booleans above, with exact cylinders/cones
+def _yplane(x, y, z):
+    return Plane(origin=(x, y, z), x_dir=(1, 0, 0), z_dir=(0, 1, 0))
+
+
+def b_ycyl(r0, y0, y1, x, z, r1=None):
+    if r1 is None or abs(r1 - r0) < 1e-9:
+        return Solid.make_cylinder(r0, y1 - y0, _yplane(x, y0, z))
+    return Solid.make_cone(r0, r1, y1 - y0, _yplane(x, y0, z))
+
+
+def b_ybox(x, y0, y1, z, w, d):
+    return Pos(x, (y0 + y1) / 2, z) * Box(w, y1 - y0, d)
+
+
+def b_ytab(x, y0, y1, z_edge):
+    hw, R, zc = TAB["w"] / 2, TAB["fillet"], TAB["zc"]
+    Rz = min(R, zc - z_edge)
+    P = lambda px, pz: Vector(x + px, y0, pz)
+    # ellipse plane: local x = world x, local y = world z
+    ep = lambda cx, cz: Plane(origin=(x + cx, y0, cz), x_dir=(1, 0, 0), z_dir=(0, -1, 0))
+    e = [Edge.make_line(P(-(hw + R) - 2.0, z_edge - 1.0), P(-(hw + R), z_edge)),
+         Edge.make_ellipse(R, Rz, ep(-(hw + R), z_edge + Rz), -90, 0)]
+    if z_edge + Rz < zc:
+        e.append(Edge.make_line(P(-hw, z_edge + Rz), P(-hw, zc)))
+    e.append(Edge.make_circle(hw, ep(0, zc), 0, 180))
+    if z_edge + Rz < zc:
+        e.append(Edge.make_line(P(hw, zc), P(hw, z_edge + Rz)))
+    e += [Edge.make_ellipse(R, Rz, ep(hw + R, z_edge + Rz), 180, 270),
+          Edge.make_line(P(hw + R, z_edge), P(hw + R + 2.0, z_edge - 1.0)),
+          Edge.make_line(P(hw + R + 2.0, z_edge - 1.0), P(-(hw + R) - 2.0, z_edge - 1.0))]
+    face = Face(Wire(e))
+    return Solid.extrude(face, Vector(0, y1 - y0, 0))
+
+
+def b_base_flange(x, y, z):
+    add = b_ybox(x, y - J["ft"], y, z, J["fw"], J["fd"])
+    sub = [b_ycyl(J["bore_r"] + 0.05, y - J["ft"] - 1, y + 1, x, z)]
+    g0, g1, gd = J["groove"]
+    sub.append(b_ycyl(g1, y - gd, y + 1, x, z) - b_ycyl(g0, y - gd - 1, y + 2, x, z))
+    for bx, bz in bolt_xy(x, z):
+        sub.append(b_ycyl(J["hole_base"] / 2, y - J["ft"] - 1, y + 1, bx, bz))
+    return add, sub
+
+
+def b_adapter(x, y, z, od, idd, bead_od, flare):
+    ft, nl, sl = J["adp_ft"], J["neck_l"], J["spigot_l"]
+    neck_r = max(23.0, od / 2 + 1.5)
+    a = b_ybox(x, y, y + ft, z, J["fw"], J["fd"])
+    sh_r = min(neck_r + 4.0, J["fd"] / 2 - 0.5)
+    if sh_r > neck_r + 0.05:
+        a += b_ycyl(sh_r, y + ft - 0.1, y + ft + (sh_r - neck_r), x, z, neck_r)
+    a += b_ycyl(neck_r, y + ft - 0.1, y + ft + nl, x, z)
+    step = neck_r - od / 2
+    a += b_ycyl(neck_r, y + ft + nl - 0.1, y + ft + nl + step, x, z, od / 2)
+    a += b_ycyl(od / 2, y + ft + nl + step - 0.1, y + ft + nl + sl, x, z)
+    tip = y + ft + nl + sl
+    b0 = tip - 4.0 - 1.5
+    a += b_ycyl(od / 2, b0 - 1.5, b0, x, z, bead_od / 2) + b_ycyl(bead_od / 2, b0, b0 + 3.0, x, z) + b_ycyl(bead_od / 2, b0 + 3.0, b0 + 4.5, x, z, od / 2)
+    v = b_ycyl(J["bore_r"] + 0.05, y - 1, y + ft, x, z)
+    v += b_ycyl(J["bore_r"], y + ft - 0.01, y + ft + nl, x, z, idd / 2)
+    v += b_ycyl(idd / 2, y + ft + nl - 0.01, tip + 1, x, z)
+    if flare:
+        v += b_ycyl(idd / 2, tip - 1.5 * flare, tip + 0.01, x, z, idd / 2 + flare)
+    for bx, bz in bolt_xy(x, z):
+        v += b_ycyl(J["hole_adp"] / 2, y - 1, y + ft + 1, bx, bz)
+    return a - v
+
+
+def b_export(shape, path):
+    n = len(shape.solids())
+    if n != 1 or not shape.is_valid:
+        raise RuntimeError(f"STEP check failed for {path}: solids={n}, valid={shape.is_valid}")
+    export_step(shape, path)
+    b = shape.bounding_box()
+    return {"vol_cm3": round(shape.volume / 1000, 1), "size": [round(b.size.X, 1), round(b.size.Y, 1), round(b.size.Z, 1)]}
+
+
+def build_step():
+    keep_up = Pos(0, 0, 22.5 + 500) * Box(2000, 2000, 1000)
+    adds = [flange_b, nipple_b]
+    subs = []
+    for outer, inner in runners_b:
+        adds.append(outer & keep_up)
+        subs.append(inner)
+    for (ex, ey, ez) in ENDS:
+        fa, fs = b_base_flange(ex, ey, ez)
+        adds.append(fa)
+        subs += fs
+    for grp in (ENDS[:3], ENDS[3:]):
+        xs = [e[0] for e in grp]
+        x0, x1 = min(xs) - J["fw"] / 2, max(xs) + J["fw"] / 2
+        adds.append(b_ybox((x0 + x1) / 2, grp[0][1] - J["ft"], grp[0][1], grp[0][2], x1 - x0, J["fd"]))
+    ey, ez = ENDS[0][1], ENDS[0][2]
+    for tx in TAB_X:
+        adds.append(b_ytab(tx, ey - J["ft"], ey, ez + J["fd"] / 2))
+        subs.append(b_ycyl(TAB["hole"] / 2, ey - J["ft"] - 1, ey + 1, tx, TAB["zc"]))
+    for bx, by in G.BOLT_BORES:
+        subs.append(Solid.make_cylinder(8.0, 300, Plane(origin=(bx, by, 23.0))))
+    subs.append(Solid.make_cylinder(3.0, _t1 - _t0, Plane(origin=(0, 0, _t0))).rotate(Axis.X, 55.5).translate((-130.4, 48.3, 31.3)))
+    part = adds[0]
+    for k, a in enumerate(adds[1:]):
+        part = part + a
+        print(f"STEP: union {k + 2}/{len(adds)}", flush=True)
+    for k, v in enumerate(subs):
+        part = part - v
+        print(f"STEP: cut {k + 1}/{len(subs)}", flush=True)   # progress line per cut, read by run_watchdog.sh
+    if len(part.solids()) > 1:
+        part = max(part.solids(), key=lambda x: x.volume)
+    res = {"komplett": b_export(part, f"{OUT}/Ansaugung_v2_{CFG['tag']}_komplett.step")}
+    for name, keep in (("Haelfte_A_x-plus", Keep.TOP), ("Haelfte_B_x-minus", Keep.BOTTOM)):
+        res[name] = b_export(part.split(Plane(origin=(G.SPLIT_X, 0, 0), z_dir=(1, 0, 0)), keep=keep),
+                             f"{OUT}/Ansaugung_v2_{CFG['tag']}_{name}.step")
+    for name, od, idd, bead, flare in (("K100_Tuelle41", 41.0, 35.0, 43.0, 1.0), ("48er_Tuelle48", 48.3, 40.0, 50.3, 1.5)):
+        one = b_adapter(0.0, 0.0, 0.0, od, idd, bead, flare).rotate(Axis.X, 90)
+        res["adapter_" + name] = b_export(one, f"{OUT}/Ansaugung_v2_Adapter_{name}_1Stueck_Druck.step")
+    return res
+
+
+if STEP:
+    if MODE != "fdm_modular":
+        raise SystemExit("--step is only implemented for fdm_modular")
+    info["step"] = build_step()
+
 print(json.dumps(info, indent=1))
