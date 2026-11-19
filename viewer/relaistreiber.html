@@ -83,7 +83,7 @@
 </ul>
 
 <h2 id="nucleo">7. Gebaute Treiberplatine → Nucleo-F446RE</h2>
-<p><b>Lötplan als Draufsicht (Bündel, Zusatzschaltungen, Lötseite gespiegelt):</b> <a href="nucleo-heck.html">nucleo-heck.html</a></p>
+<p><b>Lötplan (seit 2026-11-19: linke Steckplatine auf CN7, rechte Seite gebaut):</b> <a href="nucleo-heck.html">nucleo-heck.html</a></p>
 <p><b>Gebaut (User, bestätigt 2026-11-07):</b> 3 Chips gesockelt nebeneinander (A, B, C), Platine ca. 3 × 6,5 × 1 cm, 20 Pull-downs 100 kΩ + 1 × 10 kΩ am äußeren Chip, Lila = IN1 (eingelötet 2026-11-07) → alle 21 Kanäle mit Pull-down. <span class="hyp">Vorschlag: diesen Chip als C beschriften.</span>. Eingangsfarben je Chip gleich, von der Kerbe aus Pin 1 → 7:</p>
 <p id="colors"></p>
 <p>Masse (Pin 8 + alle Pull-downs) = <b>ein langes weißes Kabel</b> → zentraler Massepunkt. COM (Pin 9) = <b>je Chip ein weißes Kabel</b> → zusammen auf eine 12-V-Leitung. Ausgänge Pin 10–16 noch nicht verkabelt.</p>
@@ -110,8 +110,8 @@
     PA15: 'Lüfter-PWM 25 Hz (TIM2_CH1) → 12-V-Stufe',
     PC6: 'Reserve (PWM, TIM3_CH1)', PC7: 'Reserve (PWM, TIM3_CH2)', PC8: 'Reserve (PWM, TIM3_CH3)', PC9: 'Reserve (PWM, TIM3_CH4)',
     PC12: 'Reserve', PD2: 'Reserve', PC2: 'Reserve (ADC)', PC3: 'Reserve (ADC)',
-    PC0: 'Batteriespannung (ADC, Teiler)', PC1: 'Tankgeber (ADC)',
-    PA0: 'Speeduino D47 Lüfter-Signal (Pull-up 3,3 V)', PA1: 'Warnblinkschalter Box', PB0: 'Zündschalter-Zustand', PA4: 'Kl.-15-Rückmeldung (nur Teiler, nicht 5-V-fest)',
+    PC1: 'Batteriespannung (ADC, Teiler; seit 2026-11-19, vorher PC0)', PC0: 'Tankgeber (ADC; seit 2026-11-19, vorher PC1)',
+    PA0: 'Speeduino D47 Lüfter-Signal (Pull-up 3,3 V)', PA4: 'Warnblinkschalter Box (seit 2026-11-19, vorher PA1)', PA1: 'Zündschalter-Zustand (seit 2026-11-19, vorher PB0)', PB0: 'Kl.-15-Rückmeldung (ADC, Teiler; seit 2026-11-19, vorher PA4)',
     PB7: 'ZL180-Spule Low-Side (MOSFET)', PC13: 'Reserve (Taster B1)', PH1: 'Reserve (ab Rev. C-02)'
   };
   const OFF = { PA13: 'SWD', PA14: 'SWD', PA2: 'USB-Seriell', PA3: 'USB-Seriell', PC14: 'Quarz (ab C-02)', PC15: 'Quarz (ab C-02)', PH0: 'ST-Link-Takt (ab C-02)', BOOT0: '' };
