@@ -70,6 +70,7 @@
   <button id="vBot">Lötseite (von unten, gespiegelt)</button>
   <button id="nuc" class="on">Nucleo-Umriss</button>
   <button id="grid">Raster zeigen</button>
+  <button id="fit68">Platine 6 × 8 cm einblenden</button>
   <span style="width:14px"></span>
   <button data-z="1" class="on z">Ganz</button>
   <button data-z="1.7" class="z">170 %</button>
@@ -324,6 +325,7 @@ const SYSCOL = { ser: '#30d5c8', e5v: '#e53935', pwm: '#3cb44b', zl: '#6f9bff', 
 const NETCOL = { g: '#9e9e9e', v: '#ff8fc8', 5: '#e53935', k: '#e8a33d' };
 const SYSTEMS = [['rails', 'Versorgung'], ['ser', 'Serial3'], ['pwm', 'Lüfter-PWM'], ['zl', 'ZL180'], ['d47', 'D47'], ['zs', 'Zündschalter'], ['wb', 'Warnblinker'], ['k15', 'Kl. 15'], ['bat', 'Batterie'], ['tank', 'Tank'], ['can', 'CAN'], ['all', 'Alles']];
 const sysOf = card => (card === 'gnd' || card === 'v3' || card === 'e5v') ? 'rails' : card;
+let FIT = null;
 const BOARDS = Object.entries(DATA).map(([k, b]) => ({ key: k, ...b }));
 const PARTS = [], BR = [], JP = [], PADS = [];
 BOARDS.forEach(b => {
@@ -551,6 +553,23 @@ s += T(34, ly + 40, 'Zinn nur dort, wo eine Bahn gezeichnet ist. Bauteile, die �
 s += T(34, ly + 56, 'Diode: heller Ring = Kathode. Lochangaben Sp|Re, oben links = 1|1. Gestrichelt cyan = Draht von CN10 (rechte Seite).', 'fill:#e8c547;font-size:11px');
 const svg = document.getElementById('plan');
 svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+// overlay: best placement of a 6 x 8 cm board (22 x 28 holes) over this plan, parts outside in red
+{
+  const B = BOARDS[0], ins = (c0, r0, W, H) => h => h[0] >= c0 && h[0] <= c0 + W - 1 && h[1] >= r0 && h[1] <= r0 + H - 1;
+  let best = null;
+  [[22, 28], [28, 22]].forEach(([W, H]) => { for (let c0 = -10; c0 <= 13; c0++) for (let r0 = 0; r0 <= 12; r0++) {
+    if (c0 + W - 1 < 14 || c0 + W - 1 > 33 || r0 + H - 1 < 30) continue;
+    const f = ins(c0, r0, W, H), out = PARTS.filter(p => !p.leads.every(l => f(l)));
+    if (!best || out.length < best.out.length) best = { W, H, c0, r0, out };
+  } });
+  FIT = best;
+  let o = `<g id="fitg" style="display:none"><rect x="${hx(best.c0) - 10}" y="${hy(best.r0) - 10}" width="${(best.W - 1) * P + 20}" height="${(best.H - 1) * P + 20}" rx="5" fill="#e8c547" fill-opacity="0.07" stroke="#e8c547" stroke-width="3"/>`;
+  o += T(hx(best.c0) - 10, hy(best.r0 + best.H - 1) + 30, `6 × 8 cm (22 × 28 Löcher), beste Lage: ${best.out.length} von ${PARTS.length} Bauteilen passen nicht`, 'font-size:12px;font-weight:700;fill:#e8c547');
+  best.out.forEach(p => p.leads.forEach(l => { o += `<circle cx="${hx(l[0])}" cy="${hy(l[1])}" r="7" fill="none" stroke="#ff3b3b" stroke-width="2.5"/>`; }));
+  const lim = hx(34) - 9;
+  o += `<path d="M${lim} ${hy(0)}V${hy(41)}" stroke="#ff8a80" stroke-width="2" stroke-dasharray="8 5"/>` + T(lim + 4, hy(41) + 22, 'Grenze rechte Platine (3 Löcher vor CN10)', 'font-size:10px;fill:#ff8a80');
+  s += o + `</g>`;
+}
 svg.innerHTML = s;
 
 // ---------- cards + BOM ----------
@@ -680,6 +699,8 @@ function mirror(on) {
 document.getElementById('vTop').onclick = () => mirror(false);
 document.getElementById('vBot').onclick = () => mirror(true);
 document.getElementById('nuc').onclick = e => { const off = svg.classList.toggle('nonuc'); e.target.classList.toggle('on', !off); };
+document.getElementById('fit68').onclick = e => { const g = document.getElementById('fitg'), on = g.style.display === 'none'; g.style.display = on ? '' : 'none'; e.target.classList.toggle('on', on);
+  info.innerHTML = on ? `<b>Platine 6 × 8 cm</b> (gelber Rahmen, beste Lage): außerhalb liegen ${FIT.out.map(p => p.ref).join(', ')}. Rot umkreist = Anschlüsse außerhalb.` : ''; };
 document.getElementById('grid').onclick = e => { const on = !e.target.classList.contains('on'); svg.querySelectorAll('.gridg').forEach(g => { g.style.display = on ? '' : 'none'; }); e.target.classList.toggle('on', on); };
 document.querySelectorAll('button.z').forEach(b => b.onclick = () => { document.querySelectorAll('button.z').forEach(x => x.classList.toggle('on', x === b)); svg.style.width = (+b.dataset.z * 100) + '%'; });
 svg.style.width = '100%';
