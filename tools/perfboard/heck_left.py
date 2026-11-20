@@ -63,9 +63,9 @@ def build():
     b.preroute('ZLG', [(13, 22), (12, 22), (12, 23)])
     b.part('Q2', 'TO220', 'IRLZ44N', [((11, 27), 'GATE', 'G'), ((10, 27), 'DRN', 'D'), ((9, 27), 'SRC', 'S')], 'zl',
            'stehend (außerhalb des Nucleo) direkt neben dem Ende von R6, Metallfahne nach oben, Schrift nach unten (zu J2); G-D-S von der Schrift aus = links → rechts', names=['G', 'D', 'S'])
-    b.part('R7', 'R', '10 kΩ', [((12, 32), 'GATE', 'a'), ((8, 32), 'SRC', 'b')], 'zl', 'liegend unter J2, Gate nach Source')
+    b.part('R7', 'R', '10 kΩ', [((12, 29), 'GATE', 'a'), ((8, 29), 'SRC', 'b')], 'zl', 'liegend zwischen Q2 und J2 (über J2), Gate nach Source; S/D-Bahnen laufen darunter durch')
     # J2 right under Q2 (User 2026-11-20): coil (-), source and board GND to the ground point in one 3-pin plug
-    jst(b, 'J2', 'ZL180 + Masse', [('SRC', 'Source → Massepunkt (eigene Ader)'), ('DRN', 'ZL180-Spule (−)'), ('GNDB', 'GND → Massepunkt')], (9, 30), 'zl')
+    jst(b, 'J2', 'ZL180 + Masse', [('SRC', 'Source → Massepunkt (eigene Ader)'), ('DRN', 'ZL180-Spule (−)'), ('GNDB', 'GND → Massepunkt')], (9, 31), 'zl')
 
     # ---------- inputs: strips below CN7, rails GND (row 33) and 3V3 (row 34) under the series parts ----------
     b.preroute('GNDB', [(6, 23), (6, 33), (22, 33)])
