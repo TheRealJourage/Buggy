@@ -79,7 +79,8 @@
 <div id="steps"></div>
 
 <h2>Kabel und Stecker</h2>
-<table id="conn"><thead><tr><th>Kabel</th><th>Loch</th><th>Signal</th><th>Gruppe / Ziel (Vorschlag für deinen Stecker)</th></tr></thead><tbody></tbody></table>
+<table id="conn"><thead><tr><th>Kabel</th><th>Loch</th><th>Signal</th><th>Ziel</th><th>Stecker wie gebaut (User 2026-11-20)</th></tr></thead><tbody></tbody></table>
+<p class="hint"><b>Wie gebaut (2026-11-20):</b> Die Kabel sind zu JST-XH-Steckern zusammengefasst, Lage siehe Foto vom Bau, nicht im Plan gezeichnet. Pin-Reihenfolge der 2-poligen Stecker am Bau ablesen. Weitere Abweichungen vom Plan: Q2 liegt flach (Metallfahne = Drain, berührt nichts, ggf. Schrumpfschlauch); R15–R17 kurz bei Spalte 19–22 statt lang nach oben, an denselben Bahnen; Drahtbrücke BR1 oben in das HV-Loch des Moduls, von unten am HV-Pin verlötet; C2 liegt mit dem Körper nach rechts.</p>
 <p class="hint">Weiße JST-XH-Stecker nur dort, wo sie außerhalb des Nucleo Platz haben und nichts verdrängen (User 2026-11-20). <b>J2</b> (ZL180 + Masse) sitzt unter Q2. Geprüft für J3/J7/J8: Die Gehäuse (≈ 5,75 mm tief, Hypothese) säßen auf den unteren Beinen der Längsteile bzw. an der Buchsenleiste des Pegelwandlers → überall eingelötete Kabel, im Plan orange Ringe mit Nummer. Gruppen = Kabel, die zum selben Ort laufen und sich einen Stecker am Kabelende teilen können (Vorschlag Claude). Litze ≥ 0,25 mm²; ZL180-Spule und Source führen ca. 0,5 A (gerechnet) → dort ≥ 0,5 mm².</p>
 
 <h2>Pinliste</h2>
@@ -522,6 +523,9 @@ s += `</g>`;
 s = s.replace('%%JOINTS%%', Object.entries(used).map(([k, set]) => { const [i, j] = k.split(',').map(Number); return `<circle class="joint" data-sys="${[...set].join(' ')}" cx="${hx(i)}" cy="${hy(j)}" r="3.4" fill="#f0f0f0" stroke="#000" stroke-width="0.8"/>`; }).join(''));
 // pads
 const padOrder = { L: [], R: [] };
+const BUILT = { K1: 'J3 (2-pol., links oben)', K2: 'J3 (2-pol., links oben)', K8: 'J1 (2-pol., links Mitte)', K9: 'J1 (2-pol., links Mitte)', K14: 'J5 (2-pol., unten links)', K15: 'J5 (2-pol., unten links)',
+  K11: 'J6 Pin 1 (6-pol., unten rechts)', K6: 'J6 Pin 2', K7: 'J6 Pin 3', K12: 'J6 Pin 4', K13: 'J6 Pin 5', K3: 'J6 Pin 6',
+  K4: 'Kabel, offen → 5-V-Wandler Ausgang +', K5: 'Kabel, offen → 5-V-Wandler Ausgang GND', K10: 'Kabel (Tankgeber GND)', K16: 'Kabel oder 2-pol. Stecker (offen)', K17: 'Kabel oder 2-pol. Stecker (offen)' };
 const CABLE = {
   'Speeduino D14 (TX3, rot)': 'Speeduino', 'Speeduino D15 (RX3, weiß)': 'Speeduino', 'Speeduino D47': 'Speeduino',
   '+5 V kleine Schiene': '5-V-Wandler', 'GND (5-V-Zuleitung)': '5-V-Wandler', 'Batterie +12 V': '5-V-Wandler (Eingang)',
@@ -707,8 +711,8 @@ svg.style.width = '100%';
 svg.style.minWidth = '1040px';
 
 // ---------- connector pinout table ----------
-document.querySelector('#conn tbody').innerHTML = PARTS.filter(p => p.t === 'JST').map(p => `<tr data-k="${p.id}"><td><b>${p.ref}</b> (Stecker)</td><td>${lh(p.board, p.leads[0])} …</td><td>${p.names.map((n, k) => `${k + 1}: ${n}`).join(' · ')}</td><td>${p.title}; JST XH stehend, außerhalb des Nucleo</td></tr>`).join('') +
-  WPADS.map(p => `<tr data-k="pd${p.no}"><td><b>${p.no}</b></td><td>${lh(p.board, p.at)}</td><td>${p.label}</td><td>${CABLE[p.label] || ''}</td></tr>`).join('');
+document.querySelector('#conn tbody').innerHTML = PARTS.filter(p => p.t === 'JST').map(p => `<tr data-k="${p.id}"><td><b>${p.ref}</b> (Stecker)</td><td>${lh(p.board, p.leads[0])} …</td><td>${p.names.map((n, k) => `${k + 1}: ${n}`).join(' · ')}</td><td>${p.title}</td><td>JST XH, im Plan</td></tr>`).join('') +
+  WPADS.map(p => `<tr data-k="pd${p.no}"><td><b>${p.no}</b></td><td>${lh(p.board, p.at)}</td><td>${p.label}</td><td>${CABLE[p.label] || ''}</td><td>${BUILT[p.no] || 'Kabel'}</td></tr>`).join('');
 
 // ---------- pin table ----------
 document.querySelector('#pins tbody').innerHTML = PINS.map(p => `<tr data-s="${p[5]}"><td><span class="sw" style="background:${GROUPS[p[4]][1]}"></span> <b>${p[0]}</b></td><td>${p[1]}</td><td>${p[2]}</td><td class="hint">${p[3]}</td></tr>`).join('');
