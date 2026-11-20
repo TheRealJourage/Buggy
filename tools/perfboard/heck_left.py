@@ -17,7 +17,7 @@ def jst(b, ref, title, pins, at, card, vertical=False):
 def build():
     b = Board('L', (C0, C0 + 21), (R0, R0 + 27), 'CN7')
     P = b.pin
-    P(1, 'TX3'); P(2, 'RX3'); P(6, 'E5V'); P(16, '3V3'); P(17, 'PWM'); P(19, 'GNDB'); P(21, 'ZLG')
+    P(1, 'TX3'); P(2, 'RX3'); P(6, 'E5V'); P(8, 'GND'); P(16, '3V3'); P(17, 'PWM'); P(19, 'GNDB'); P(21, 'ZLG')
     P(28, 'D47'); P(30, 'ZS'); P(32, 'WB'); P(34, 'K15'); P(36, 'BAT'); P(38, 'TANK')
 
     # ---------- Serial3: level shifter on sockets left of CN7, channel 4 (LV4 sits right at PC10) ----------
@@ -31,24 +31,47 @@ def build():
     b.preroute('TX3', [(13, 12), (11, 12)])
     b.preroute('RX3', [(14, 12), (14, 11), (13, 11)])
     b.part('R8', 'R', '10 kΩ', [((13, 11), 'RX3', 'a'), ((7, 11), 'D14', 'b')], 'ser', 'liegend, springt über die 3,3-V-Bahn zum Pegelwandler')
-    b.preroute('3V3', [(14, 19), (16, 19), (16, 10), (8, 10), (8, 12)])
-    # BR1: flat insulated wire bridge; the inner end is under the Nucleo (pin + Dupont plug would be ~14 mm, only ~8 mm free)
+    b.preroute('3V3', [(14, 19), (19, 19), (19, 10), (8, 10), (8, 12)])
+    # BR1: flat insulated wire bridge; the inner end is under the Nucleo
     for h in ((15, 14), (8, 18)):
         b.take(h, 'E5V', 'Drahtbrücke BR1')
     b.jumpers.append(dict(net='E5V', a=[15, 14], b=[8, 18], plug=True))
     b.preroute('E5V', [(8, 17), (8, 18)])
-    jst(b, 'J3', 'Speeduino Serial3', [('D14', 'D14 = TX3 (rot)'), ('D15', 'D15 = RX3 (weiß)')], (5, 13), 'ser', vertical=True)
-    jst(b, 'J4', '5 V (kleine Schiene)', [('E5V', '+5 V'), ('GNDB', 'GND')], (5, 20), 'e5v', vertical=True)
-    b.part('C1', 'C', '100 nF', [((8, 20), 'E5V', 'a'), ((8, 21), 'GNDB', 'b')], 'e5v', 'an der Einspeisung, stehend')
-    b.part('C2', 'E', '100 µF/25 V (liegend)', [((7, 20), 'E5V', '+'), ((7, 21), 'GNDB', '-')], 'e5v', 'liegend, Körper nach unten (Reihe 23–27 frei); Minus (Streifen) unten')
+    W = lambda h, net, label, card: b.pad(h, net, label, 'W', card)
+    W((5, 13), 'D14', 'Speeduino D14 (TX3, rot)', 'ser')
+    W((5, 14), 'D15', 'Speeduino D15 (RX3, weiß)', 'ser')
+    # 5 V feed right at E5V, under the Nucleo (flat parts only)
+    b.preroute('GND', [(14, 15), (16, 15)])
+    b.part('C2', 'E', '100 µF/25 V (liegend)', [((16, 14), 'E5V', '+'), ((16, 15), 'GND', '-')], 'e5v', 'liegend unter dem Nucleo, Körper nach oben (Reihe B–E); Minus (Streifen) unten')
+    b.part('C1', 'C', '100 nF', [((17, 14), 'E5V', 'a'), ((17, 15), 'GND', 'b')], 'e5v', 'stehend, flache Bauform (unter dem Nucleo)')
+    b.preroute('E5V', [(15, 14), (17, 14)])
+    W((18, 14), 'E5V', '+5 V kleine Schiene', 'e5v')
+    W((18, 15), 'GND', 'GND (5-V-Zuleitung)', 'e5v')
 
-    # ---------- cable to the second board: fan PWM + ZL180 ----------
-    jst(b, 'J9', 'Kabel zur 2. Platine (PWM + ZL180)', [('PWM', 'PA15 Lüfter-PWM'), ('GNDB', 'GND'), ('ZLG', 'PB7 ZL180')], (10, 20), 'pwm', vertical=True)
+    # ---------- fan PWM (BC547B) + ZL180 driver (IRLZ44N) left of CN7, outside the outline ----------
+    b.part('R1', 'R', '1 kΩ', [((12, 20), 'PWM', 'a'), ((8, 20), 'BASE', 'b')], 'pwm', 'liegend, Basiswiderstand')
+    b.part('R2', 'R', '10 kΩ', [((8, 21), 'BASE', 'a'), ((12, 21), 'GNDB', 'b')], 'pwm', 'liegend, Basis nach GND')
+    b.part('Q1', 'TO92', 'BC547B', [((7, 20), 'COL', 'C'), ((7, 21), 'BASE', 'B'), ((7, 22), 'GNDB', 'E')], 'pwm',
+           'stehend, flache Seite nach links; C-B-E vor dem Einlöten messen', names=['C', 'B', 'E'])
+    b.part('R3', 'R', '2 kΩ', [((6, 19), 'COL', 'a'), ((5, 19), 'KL15P', 'b')], 'pwm', 'stehend; mit R4 parallel = 1 kΩ an Kl. 15')
+    b.part('R4', 'R', '2 kΩ', [((6, 18), 'COL', 'a'), ((5, 18), 'KL15P', 'b')], 'pwm', 'stehend, parallel zu R3')
+    b.part('R5', 'R', '100 Ω', [((6, 20), 'COL', 'a'), ((5, 20), 'PWMO', 'b')], 'pwm', 'stehend, Reihenwiderstand zur Leitung')
+    b.part('D1', 'TVS', '1.5KE24A', [((5, 22), 'PWMO', 'k'), ((5, 28), 'GNDB', 'a')], 'pwm', 'liegend senkrecht, Ring oben (Leitung); Löcher ggf. auf 1,3 mm aufbohren')
+    W((5, 17), 'KL15P', 'Kl. 15 (12 V) für PWM-Pull-up', 'pwm')
+    W((5, 21), 'PWMO', 'Lüfter-PWM → J293', 'pwm')
+    b.part('R6', 'R', '1 kΩ', [((12, 23), 'ZLG', 'a'), ((12, 27), 'GATE', 'b')], 'zl', 'liegend senkrecht, Gate-Widerstand')
+    b.preroute('ZLG', [(13, 22), (12, 22), (12, 23)])
+    b.part('Q2', 'TO220', 'IRLZ44N', [((11, 29), 'GATE', 'G'), ((10, 29), 'DRN', 'D'), ((9, 29), 'SRC', 'S')], 'zl',
+           'stehend (außerhalb des Nucleo), Metallfahne nach oben; G-D-S von vorn = rechts → links', names=['G', 'D', 'S'])
+    b.part('R7', 'R', '10 kΩ', [((12, 31), 'GATE', 'a'), ((8, 31), 'SRC', 'b')], 'zl', 'liegend, Gate nach Source')
+    W((10, 30), 'DRN', 'ZL180-Spule (−)', 'zl')
+    W((8, 32), 'SRC', 'Source → Massepunkt (eigene Ader)', 'zl')
+    W((5, 29), 'GNDB', 'GND → Massepunkt', 'gnd')
 
     # ---------- inputs: strips below CN7, rails GND (row 33) and 3V3 (row 34) under the series parts ----------
-    b.preroute('GNDB', [(9, 21), (9, 33), (22, 33)])
-    b.preroute('3V3', [(12, 34), (26, 34)])
-    b.preroute('3V3', [(16, 19), (26, 19), (26, 32)])
+    b.preroute('GNDB', [(6, 23), (6, 33), (22, 33)])
+    b.preroute('3V3', [(6, 34), (26, 34)])
+    b.preroute('3V3', [(19, 19), (26, 19), (26, 32)])
 
     def series(ref, t, v, c, top, bot, card, note, r=32):
         b.part(ref, t, v, [((c, r), top, 'a'), ((c, r + 4), bot, 'k' if t == 'D' else 'b')], card, note)
@@ -74,24 +97,26 @@ def build():
     for ref, c, net, card in (('D5', 23, 'WB', 'wb'), ('D6', 24, 'ZS', 'zs'), ('D7', 25, 'D47', 'd47')):
         series(ref, 'D', '1N4148 (DO-35)', c, net, net + 'L', card, 'senkrecht, Ring unten (zur Leitung); dünne Bauform, weil die drei Dioden im 2,54-mm-Raster nebeneinander liegen')
 
-    jst(b, 'J6', 'Tankgeber', [('GNDB', 'GND (2. Ader)'), ('TANKL', 'Geber (1. Ader)')], (6, 37), 'tank')
-    jst(b, 'J7', 'Box intern', [('BATL', 'Batterie +12 V'), ('K15L', 'Kl. 15 (ZL180)')], (18, 37), 'k15')
-    jst(b, 'J8', 'Schalter + Speeduino', [('WBL', 'Warnblinkschalter'), ('ZSL', 'Zündschalter'), ('D47L', 'Speeduino D47')], (23, 37), 'zs')
+    for h, net, lab, card in (((15, 37), 'TANKL', 'Tankgeber (1. Ader)', 'tank'), ((13, 32), 'GNDB', 'Tankgeber GND (2. Ader)', 'tank'),
+                              ((17, 37), 'BATL', 'Batterie +12 V', 'bat'), ((20, 37), 'K15L', 'Kl. 15 (ZL180-Ausgang)', 'k15'),
+                              ((23, 37), 'WBL', 'Warnblinkschalter', 'wb'), ((24, 37), 'ZSL', 'Zündschalter', 'zs'), ((25, 37), 'D47L', 'Speeduino D47', 'd47')):
+        W(h, net, lab, card)
 
     # ---------- CAN module standing in a socket, bottom left (outside), wires from CN10 ----------
     can = ['3V3', 'GND', 'CTX', 'CRX', 'CANH', 'CANL']
     b.part('U2', 'MOD', 'SN65HVD230-Modul (gesteckt)', [((6 + k, 35), n if n != 'GND' else 'GNDB', n) for k, n in enumerate(can)], 'can',
            'in Buchsenleiste 6-polig, Modul steht senkrecht (außerhalb des Nucleo); Pinfolge am eigenen Modul prüfen', names=can)
-    b.pad((8, 36), 'CTX', 'PA12 → Draht von CN10-12', 'L', 'can')
-    b.pad((9, 36), 'CRX', 'PA11 ← Draht von CN10-14', 'L', 'can')
-    jst(b, 'J5', 'CAN-Bus', [('CANL', 'CAN-L'), ('CANH', 'CAN-H')], (12, 35), 'can', vertical=True)
+    W((8, 36), 'CTX', 'PA12 ← Draht von CN10-12', 'can')
+    W((9, 36), 'CRX', 'PA11 ← Draht von CN10-14', 'can')
+    W((10, 36), 'CANH', 'CAN-H (Bus)', 'can')
+    W((11, 36), 'CANL', 'CAN-L (Bus)', 'can')
 
     order = ['TX3', 'RX3', 'D14', 'D15', 'PWM', 'ZLG', 'CRX', 'CTX', 'CANH', 'CANL',
-             'TANK', 'TANKL', 'BAT', 'BATL', 'K15', 'K15L', 'WB', 'WBL', 'ZS', 'ZSL', 'D47', 'D47L', 'E5V', '3V3', 'GNDB']
+             'TANK', 'TANKL', 'BAT', 'BATL', 'K15', 'K15L', 'WB', 'WBL', 'ZS', 'ZSL', 'D47', 'D47L', 'BASE', 'COL', 'KL15P', 'PWMO', 'GATE', 'DRN', 'SRC', 'E5V', '3V3', 'GND', 'GNDB']
     return b, order
 
 
-LEG = {'GNDB': 'G', '3V3': 'V', 'E5V': '5', 'TX3': 't', 'RX3': 'r', 'D14': 'x', 'D15': 'y', 'PWM': 'p', 'ZLG': 'z',
+LEG = {'GND': 'g', 'BASE': 'b', 'COL': 'c', 'KL15P': 'k', 'PWMO': 'o', 'GATE': 'q', 'DRN': 'd', 'SRC': 's', 'GNDB': 'G', '3V3': 'V', 'E5V': '5', 'TX3': 't', 'RX3': 'r', 'D14': 'x', 'D15': 'y', 'PWM': 'p', 'ZLG': 'z',
        'CRX': 'R', 'CTX': 'T', 'CANH': 'H', 'CANL': 'L', 'TANK': '1', 'TANKL': '!', 'BAT': '2', 'BATL': '@', 'K15': '3', 'K15L': '#',
        'WB': '4', 'WBL': '$', 'ZS': '5', 'ZSL': '%', 'D47': '6', 'D47L': '^'}
 

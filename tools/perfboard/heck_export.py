@@ -1,5 +1,5 @@
 import sys, os; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import json, heck_left, heck_aux
+import json, heck_left
 CARD = {'TX3': 'ser', 'RX3': 'ser', 'D14': 'ser', 'D15': 'ser', 'E5V': 'e5v', '3V3': 'v3', 'GND': 'gnd', 'GNDB': 'gnd',
         'PWM': 'pwm', 'BASE': 'pwm', 'COL': 'pwm', 'KL15P': 'pwm', 'PWMO': 'pwm', 'ZLG': 'zl', 'GATE': 'zl', 'DRN': 'zl', 'SRC': 'zl',
         'CRX': 'can', 'CTX': 'can', 'CANH': 'can', 'CANL': 'can', 'TANK': 'tank', 'TANKL': 'tank', 'BAT': 'bat', 'BATL': 'bat',
@@ -21,6 +21,6 @@ def export(mod, dc=0, dr=0):
                 pads=[dict(p, at=mv(p['at'])) for p in b.pads])
 
 
-# CN7 plug-on board on a 6 x 8 cm perfboard; aux board drawn below it in the viewer (shifted by 45 rows)
-out = {'L': export(heck_left), 'A': export(heck_aux, 0, 45)}
+# CN7 plug-on board on a 6 x 8 cm perfboard (22 x 28 holes), all cables soldered to pads
+out = {'L': export(heck_left)}
 json.dump(out, open(sys.argv[1] if len(sys.argv) > 1 else 'heck.json', 'w'), ensure_ascii=False)
