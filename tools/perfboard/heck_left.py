@@ -95,7 +95,7 @@ def build():
     for ref, net, row, c, card in (('R15', 'D47', 25, 18, 'd47'), ('R16', 'ZS', 26, 20, 'zs'), ('R17', 'WB', 27, 22, 'wb')):
         b.part(ref, 'R', '10 kΩ', [((c, row), net, 'a'), ((c, 19), '3V3', 'b')], card, f'liegend senkrecht, lang ({row - 19} Raster), springt über die Bahnen darüber; Pull-up an 3,3 V')
     for ref, c, net, card in (('D5', 23, 'WB', 'wb'), ('D6', 24, 'ZS', 'zs'), ('D7', 25, 'D47', 'd47')):
-        series(ref, 'D', '1N4148 (DO-35)', c, net, net + 'L', card, 'senkrecht, Ring unten (zur Leitung); dünne Bauform, weil die drei Dioden im 2,54-mm-Raster nebeneinander liegen')
+        series(ref, 'D', '1N4007', c, net, net + 'L', card, 'senkrecht, Ring unten (zur Leitung); die drei 1N4007 (DO-41, ca. 2,7 mm) berühren sich im 2,54-mm-Raster leicht, unkritisch')
 
     for h, net, lab, card in (((15, 36), 'TANKL', 'Tankgeber (1. Ader)', 'tank'), ((13, 32), 'GNDB', 'Tankgeber GND (2. Ader)', 'tank'),
                               ):
