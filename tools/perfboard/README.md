@@ -8,7 +8,7 @@ genauso umgebaut werden. Alles hier ist **Vorschlag Claude**, außer was als **F
 
 | Punkt | Wert | Quelle |
 |---|---|---|
-| Platinenvorrat | **10 × 6 × 8 cm**, doppelseitig, **22 × 28 Löcher** (Zahlen 1–22 quer, Buchstaben A–AB längs), Raster 2,54 mm (Amazon, Heevhas) · **1 × 4 × 6 cm**, **14 × 20 Löcher** (Buchstaben A–T, ohne Zahlen) | User 2026-11-19, Vault `Lager/Lagerbestand.md` „Lochrasterplatinen“ |
+| Platinenvorrat | **10 × 6 × 8 cm**, doppelseitig, **22 × 27 Löcher** (Zahlen 1–22 quer, Buchstaben A–AA längs; korrigiert User 2026-11-20, vorher A–AB angenommen), Raster 2,54 mm (Amazon, Heevhas) · **1 × 4 × 6 cm**, **14 × 20 Löcher** (Buchstaben A–T, ohne Zahlen) | User 2026-11-19, Vault `Lager/Lagerbestand.md` „Lochrasterplatinen“ |
 | Kleine Platine | nur 1 Stück → nehmen, wo sie für ein Design reicht (für den Front-Controller freigehalten); sonst große | User 2026-11-19 |
 | Aufbau | **eine Platine je Morpho-Leiste** (CN7 links, CN10 rechts), von hinten auf die Stifte gesteckt, beide auf derselben Höhe; CN7 ↔ CN10 sind 26 Raster auseinander, eine 22er-Platine trägt nie beide | User 2026-11-19, gerechnet |
 | Freie Höhe zwischen Platine und Nucleo | **9,3 mm** (Rückbestätigung durch den User noch offen) | User 2026-11-20 |
@@ -25,7 +25,8 @@ genauso umgebaut werden. Alles hier ist **Vorschlag Claude**, außer was als **F
 
 - Routergitter wie `router.py`: Spalte/Reihe in Löchern. `hdr(h, n)`: CN7 ungerade = Spalte 13 (außen), gerade = 14 (innen); CN10 ungerade = 38 (innen), gerade = 39 (außen); Pin 1 in Reihe 12, Pin 37/38 in Reihe 30.
 - Nucleo-Umriss ≈ Spalte 12,2–39,8, Reihe −0,5–31,9. Alles links von Spalte 12 bzw. unterhalb Reihe 32 ist **außerhalb** (Höhe frei).
-- Eine 22 × 28-Platine längs zur Leiste: 19 Reihen belegt die Leiste, es bleiben 9 Reihen oben/unten, quer 20 Spalten.
+- Eine 22 × 27-Platine längs zur Leiste: 19 Reihen belegt die Leiste, es bleiben 8 Reihen oben/unten, quer 20 Spalten.
+- **JST-Gehäuse brauchen Platz:** ca. 5,75 mm tief (≈ 2,3 Raster, Hypothese) → sie dürfen nicht direkt neben Bauteilbeinen oder Buchsenleisten sitzen (beim Heck deshalb J3/J7/J8 wieder als Kabel).
 - Viewer zeigt Löcher als **Zahl|Buchstabe** wie auf der Platine (oben links = 1|A), `rowName()` in `viewer/nucleo-heck.html`.
 
 ## 3. Werkzeug
