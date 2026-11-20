@@ -91,8 +91,9 @@ def build():
     b.part('D4', 'D', '1N5819', [((21, 30), 'K15', 'a'), ((21, 34), '3V3', 'k')], 'k15', 'senkrecht, Ring unten (3,3 V)')
     b.part('R14', 'R', '2 kΩ', [((22, 29), 'K15', 'a'), ((22, 33), 'GNDB', 'b')], 'k15', 'senkrecht')
     strip('WB', 27, 23); strip('ZS', 26, 24); strip('D47', 25, 25)
-    b.part('RN1', 'SIP', '3 × 10 kΩ (SIP-4, gemeinsamer Pin)', [((26, 30), '3V3', '1'), ((25, 30), 'D47', '2'), ((24, 30), 'ZS', '3'), ((23, 30), 'WB', '4')], 'd47',
-           'gemeinsamer Pin 1 (Punkt) rechts an 3,3 V; Pull-ups für D47, Zündschalter, Warnblinker', names=['3V3', 'D47', 'ZS', 'WB'])
+    # pull-ups as single 1/4 W resistors, lying and long: from each lane up to the 3V3 lane (row 19), jumping over the lanes above
+    for ref, net, row, c, card in (('R15', 'D47', 25, 18, 'd47'), ('R16', 'ZS', 26, 20, 'zs'), ('R17', 'WB', 27, 22, 'wb')):
+        b.part(ref, 'R', '10 kΩ', [((c, row), net, 'a'), ((c, 19), '3V3', 'b')], card, f'liegend senkrecht, lang ({row - 19} Raster), springt über die Bahnen darüber; Pull-up an 3,3 V')
     for ref, c, net, card in (('D5', 23, 'WB', 'wb'), ('D6', 24, 'ZS', 'zs'), ('D7', 25, 'D47', 'd47')):
         series(ref, 'D', '1N4148 (DO-35)', c, net, net + 'L', card, 'senkrecht, Ring unten (zur Leitung); dünne Bauform, weil die drei Dioden im 2,54-mm-Raster nebeneinander liegen')
 
