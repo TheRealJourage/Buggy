@@ -24,7 +24,7 @@
 <body>
 <div id="bar">
   <b>Ansaug-Übergang v2 (Entwurf)</b>
-  <label>Variante <select id="variant"><option value="modular">Modular FDM (Grundteil + Schraub-Adapter K100)</option><option value="modular48">Modular FDM (Grundteil + Schraub-Adapter 48)</option><option value="power_sls">Leistung SLS (Kanal 38, Tülle 48, Stützaugen)</option><option value="power">Leistung FDM (Kanal 38, Tülle 48, 2 Hälften)</option><option value="sls">SLS (Wand 4, 3 Stützaugen, am Stück bestellen)</option><option value="fdm">FDM (Wand 6,8, 2 Hälften)</option><option value="opt">FDM optimiert (Bogen ab Dichtfläche, R 78, 2 Hälften)</option><option value="kurz">FDM kurz (Bogen R 90, 2 Hälften)</option><option value="guss">Alu-Guss (Wand 6, 6 Rohre, +1,3 %)</option></select></label>
+  <label>Variante <select id="variant"><option value="modular">Modular FDM (Grundteil + Schraub-Adapter K100)</option><option value="modular48">Modular FDM (Grundteil + Schraub-Adapter 48)</option><option value="test">Passprobe Modular: Außenrohre 1 + 6 einzeln</option><option value="power_sls">Leistung SLS (Kanal 38, Tülle 48, Stützaugen)</option><option value="power">Leistung FDM (Kanal 38, Tülle 48, 2 Hälften)</option><option value="sls">SLS (Wand 4, 3 Stützaugen, am Stück bestellen)</option><option value="fdm">FDM (Wand 6,8, 2 Hälften)</option><option value="opt">FDM optimiert (Bogen ab Dichtfläche, R 78, 2 Hälften)</option><option value="kurz">FDM kurz (Bogen R 90, 2 Hälften)</option><option value="guss">Alu-Guss (Wand 6, 6 Rohre, +1,3 %)</option></select></label>
   <span><button data-v="iso">Schräg</button> <button data-v="side">Seite</button> <button data-v="front">Vorn</button> <button data-v="top">Oben</button></span>
   <label><input id="einbau" type="checkbox"> Einbaulage (Tüllen nach oben)</label>
   <label><input id="showA" type="checkbox" checked> Hälfte A / Rohr 1–3</label>
@@ -202,6 +202,7 @@ const VARIANTS = {
     extra: ['Ansaugung_v2_FDM_Modular_komplett.stl', 'Ansaugung_v2_Adapter_K100_Tuelle41_1Stueck_Druck.stl', 'Ansaugung_v2_Adapter_48er_Tuelle48_1Stueck_Druck.stl'], tip: [136.0, 82.0] },
   modular48: { A: ['Ansaugung_v2_FDM_Modular_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_FDM_Modular_Haelfte_B_x-minus.stl'], C: ['Ansaugung_v2_Adapter_48er_Tuelle48_alle6_Einbaulage.stl'],
     extra: ['Ansaugung_v2_FDM_Modular_komplett.stl', 'Ansaugung_v2_Adapter_48er_Tuelle48_1Stueck_Druck.stl'], tip: [136.0, 82.0] },
+  test: { A: ['Ansaugung_v2_FDM_Modular_Test_Rohr1_port_x+65.2.stl'], B: ['Ansaugung_v2_FDM_Modular_Test_Rohr6_port_x-260.8.stl'], extra: [], tip: [136.0, 82.0] },
   power: { A: ['Ansaugung_v2_FDM_Leistung_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_FDM_Leistung_Haelfte_B_x-minus.stl'], extra: ['Ansaugung_v2_FDM_Leistung_komplett.stl'], tip: [125.0, 82.0] },
   power_sls: { A: ['Ansaugung_v2_SLS_Leistung_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_SLS_Leistung_Haelfte_B_x-minus.stl'], extra: ['Ansaugung_v2_SLS_Leistung_komplett.stl'], tip: [122.0, 82.0] },
   opt: { A: ['Ansaugung_v2_FDM_opt_Haelfte_A_x-plus.stl'], B: ['Ansaugung_v2_FDM_opt_Haelfte_B_x-minus.stl'], extra: ['Ansaugung_v2_FDM_opt_komplett.stl'], tip: [126.4, 83.4] },
