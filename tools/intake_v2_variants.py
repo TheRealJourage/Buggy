@@ -4,6 +4,7 @@ cast: wall 6 mm, six single runners each with its own flange segment, shrink + m
 usage: intake_v2_variants.py <fdm|fdm_kurz|fdm_opt|fdm_power|fdm_modular|sls|sls_power|cast> <outdir> [--step]
 --step (fdm_modular only): additionally build the part as BREP with build123d and export STEP
 run long jobs via run_watchdog.sh, e.g. run_watchdog.sh 900 300 out/log.txt -- python intake_v2_variants.py fdm_modular out --step
+--test-runners (fdm_modular only): additionally export fit-test pieces of the outer runners 1 and 6
 (normal: ~2.5 min mesh only, ~6 min with --step; OCC booleans can hang on near-coincident surfaces)
 """
 import sys, os, json, math, tempfile
@@ -17,6 +18,7 @@ from build123d import (import_step, export_stl, export_step, Plane, Keep, Pos, B
 
 MODE, OUT = sys.argv[1], sys.argv[2]
 STEP = "--step" in sys.argv[3:]
+TEST_RUNNERS = "--test-runners" in sys.argv[3:]
 os.makedirs(OUT, exist_ok=True)
 CFG = {
     "sls": dict(wall=4.0, spigot_od=41.0, cone=4.0, tag="SLS", eyes=True),
@@ -359,6 +361,16 @@ if MODE in ("sls", "fdm", "fdm_kurz", "fdm_opt", "fdm_power", "sls_power", "fdm_
             one = adapter(0.0, 0.0, 0.0, od, idd, bead, flare).rotate((90, 0, 0))
             info["adapter_" + name] = save(one, f"{OUT}/Ansaugung_v2_Adapter_{name}_1Stueck_Druck.stl")
         info["ends"] = [[round(v, 2) for v in e] for e in ENDS]
+    if CFG.get("modular") and TEST_RUNNERS:
+        # fit-test pieces (user 2026-11-20): one outer runner with its head-flange segment and end flange, cut from the
+        # finished part so the geometry is identical; envelope = runner outer + 1 mm, end-flange box, flange slab
+        for k, (lo, hi) in ((0, (34.0, 400.0)), (5, (-400.0, -226.6))):
+            port, xe = G.PORTS[k], G.THROTTLE_X[k]
+            env, _ = G.runner(port, xe, G.WALL + 1.0)
+            region = to_mf(env) + mf.Manifold.cube((hi - lo, 400, 23.0 + 100)).translate((lo, -200, -100))
+            ex, ey, ez = ENDS[k]
+            region += ybox(ex, ey - J["ft"] - 0.5, ey + 0.5, ez, J["fw"] + 1.0, J["fd"] + 1.0)
+            info[f"test_Rohr{k + 1}"] = save(part ^ region, f"{OUT}/Ansaugung_v2_{CFG['tag']}_Test_Rohr{k + 1}_port_x{port[0]:+.1f}.stl")
     a = part.trim_by_plane((1, 0, 0), G.SPLIT_X)
     b = part.trim_by_plane((-1, 0, 0), -G.SPLIT_X)
     info["A"] = save(a, f"{OUT}/Ansaugung_v2_{CFG['tag']}_Haelfte_A_x-plus.stl")
