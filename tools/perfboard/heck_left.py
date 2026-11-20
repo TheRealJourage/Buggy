@@ -38,8 +38,7 @@ def build():
     b.jumpers.append(dict(net='E5V', a=[15, 14], b=[8, 18], plug=True))
     b.preroute('E5V', [(8, 17), (8, 18)])
     W = lambda h, net, label, card: b.pad(h, net, label, 'W', card)
-    W((5, 13), 'D14', 'Speeduino D14 (TX3, rot)', 'ser')
-    W((5, 14), 'D15', 'Speeduino D15 (RX3, weiß)', 'ser')
+    jst(b, 'J3', 'Speeduino Serial3', [('D14', 'D14 = TX3 (rot)'), ('D15', 'D15 = RX3 (weiß)')], (5, 13), 'ser', vertical=True)
     # 5 V feed right at E5V, under the Nucleo (flat parts only)
     b.preroute('GND', [(14, 15), (16, 15)])
     b.part('C2', 'E', '100 µF/25 V (liegend)', [((16, 14), 'E5V', '+'), ((16, 15), 'GND', '-')], 'e5v', 'liegend unter dem Nucleo, Körper nach oben (Reihe B–E); Minus (Streifen) unten')
@@ -98,9 +97,10 @@ def build():
         series(ref, 'D', '1N4148 (DO-35)', c, net, net + 'L', card, 'senkrecht, Ring unten (zur Leitung); dünne Bauform, weil die drei Dioden im 2,54-mm-Raster nebeneinander liegen')
 
     for h, net, lab, card in (((15, 37), 'TANKL', 'Tankgeber (1. Ader)', 'tank'), ((13, 32), 'GNDB', 'Tankgeber GND (2. Ader)', 'tank'),
-                              ((17, 37), 'BATL', 'Batterie +12 V', 'bat'), ((20, 37), 'K15L', 'Kl. 15 (ZL180-Ausgang)', 'k15'),
-                              ((23, 37), 'WBL', 'Warnblinkschalter', 'wb'), ((24, 37), 'ZSL', 'Zündschalter', 'zs'), ((25, 37), 'D47L', 'Speeduino D47', 'd47')):
+                              ):
         W(h, net, lab, card)
+    jst(b, 'J7', 'Box intern', [('BATL', 'Batterie +12 V'), ('K15L', 'Kl. 15 (ZL180-Ausgang)')], (18, 37), 'k15')
+    jst(b, 'J8', 'Schalter + Speeduino', [('WBL', 'Warnblinkschalter'), ('ZSL', 'Zündschalter'), ('D47L', 'Speeduino D47')], (23, 37), 'zs')
 
     # ---------- CAN module standing in a socket, bottom left (outside), wires from CN10 ----------
     can = ['3V3', 'GND', 'CTX', 'CRX', 'CANH', 'CANL']
