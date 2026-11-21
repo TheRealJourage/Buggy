@@ -53,10 +53,13 @@ in `Relaisbox.md` eintragen.
    Metallfahne Q2 (Drain) gegen GND: kein Durchgang.
 2. **Keine Lasten an den Relais** beim ersten Test. 12 V nur über ein Labornetzteil mit Strombegrenzung (z. B. 0,5 A,
    für Test 7 mehr).
-3. **Stromversorgung des Nucleo:** Für Test 1–3 und 5–8 reicht USB (Jumper JP5 in Werkseinstellung). Für **Test 4
-   (Serial3)** braucht die HV-Seite des Pegelwandlers 5 V an E5V: kleine 5-V-Quelle an K4/K5 und JP5 auf E5V.
-   Reihenfolge und Jumper **vorher in UM1724 (Kapitel Stromversorgung, JP5/E5V) nachlesen** — nicht geprüft, ob E5V bei
-   USB-Versorgung Spannung führt.
+3. **Stromversorgung des Nucleo (UM1724 Rev 14, Abschnitt 6.3.2, Tabelle 7/8):**
+   - **USB (Werkseinstellung):** JP5 auf **1–2 (U5V)**. Reicht für Test 1–3 und 5–8. Laut Jumperbild hängt E5V dann
+     nur an JP5 Pin 3 und nicht an +5V → die HV-Seite des Pegelwandlers hat keine 5 V (Folgerung, nicht gemessen).
+   - **E5V (wie im Fahrzeug, nötig für Test 4):** JP5 auf **2–3 (E5V)**, **JP1 abziehen**, 5 V (4,75–5,25 V, max.
+     500 mA) an K4 (+) / K5 (GND). Reihenfolge laut UM1724: Jumper setzen → JP1 ab → 5 V anschließen und einschalten
+     → LD3 leuchtet → **erst dann** USB einstecken. Sonst versorgt der PC das Board zuerst (Risiko für den USB-Port,
+     Enumeration kann scheitern).
 4. Alle Massen verbinden: Labornetzteil-GND an die Platinen-GND (z. B. J2 Pin 3).
 5. Firmware startet mit allen Ausgängen aus. Befehl `a` schaltet jederzeit alles ab.
 
