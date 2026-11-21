@@ -60,8 +60,12 @@ in `Relaisbox.md` eintragen.
      500 mA) an K4 (+) / K5 (GND). Reihenfolge laut UM1724: Jumper setzen → JP1 ab → 5 V anschließen und einschalten
      → LD3 leuchtet → **erst dann** USB einstecken. Sonst versorgt der PC das Board zuerst (Risiko für den USB-Port,
      Enumeration kann scheitern).
-4. Alle Massen verbinden: Labornetzteil-GND an die Platinen-GND (z. B. J2 Pin 3).
-5. Firmware startet mit allen Ausgängen aus. Befehl `a` schaltet jederzeit alles ab.
+4. **Diodenrichtung prüfen (Zeichnung war bis 2026-11-21 falsch, Ring an der Anode gezeichnet):** Multimeter im
+   Dioden-Modus, rot = Anode. D2–D4 (1N5819): Pin-Bahn (Reihe U) → 3,3-V-Schiene (Reihe Y) ≈ 0,2–0,3 V, umgekehrt OL.
+   D5–D7 (1N4007): oben (Reihe V) → unten (Reihe Z, Kabel) ≈ 0,5–0,6 V, umgekehrt OL. Falsch herum → umlöten
+   (Ring = Kathode: D2–D4 an 3,3 V, D5–D7 zum Kabel). **Test 2b (12 V an Digitaleingang) erst danach.**
+5. Alle Massen verbinden: Labornetzteil-GND an die Platinen-GND (z. B. J2 Pin 3).
+6. Firmware startet mit allen Ausgängen aus. Befehl `a` schaltet jederzeit alles ab.
 
 ## 4. Bauen, flashen, Monitor
 

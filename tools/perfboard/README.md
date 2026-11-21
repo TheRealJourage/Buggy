@@ -58,6 +58,9 @@ Ablauf:
 
 ## 5. Viewer
 
+**Dioden:** Der Ring (Kathode) wird an dem Anschluss gezeichnet, der in `part()` als `'k'` markiert ist (seit 2026-11-21; vorher immer am ersten Anschluss → beim Heck D2–D7 falsch herum gezeichnet und so gelötet).
+
+
 `viewer/nucleo-heck.html` ist aus `viewer/nucleo-front.html` entstanden und kann zurückportiert werden. Zusätzliche Teiltypen: `TVS`, `TO92`, `TO220`, `MOD` (gesteckte Module), senkrechte `JST`, Pads `side: 'W'` (Kabel mit K-Nummer, Tabelle „Kabel und Stecker“ nach Ziel gruppiert über `CABLE`/`GROUP_ORDER`), Drahtbrücke mit `plug: true`, gebaute Gegenseite als Umriss. Karten (`CARDS`) = Schaltbild + Stückliste je Leitung, Stückliste summiert sich daraus.
 
 ## 6. Nach der Arbeit nachziehen
