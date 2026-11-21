@@ -98,9 +98,10 @@ Ursache nur nennen, wenn gemessen; sonst als Hypothese kennzeichnen.
 
 | # | Ergebnis | Messwerte | Bemerkung |
 |---|---|---|---|
-| 1 | | | |
-| 2 | | | |
-| 3 | | Faktor: | R12/R14 = ? Ω |
+| 0 | ✓ 2026-11-21 | stromlose Durchgangsprüfung Abschnitt 3.1 alles wie erwartet | |
+| 1 | ✓ 2026-11-21 | Befehlsliste kommt (COM10) | Vorsicht: erst F091RC angesteckt, Laufwerkname `NOD_F446RE` vor dem Flashen prüfen |
+| 2 | ✓ 2026-11-21 | WB/ZS/D47 offen HIGH, gegen GND LOW | erst nach Drehen von D5–D7 |
+| 3 | offen | K15 offen 0,02 V ✓; BAT offen 3,16 V ✗ | D3 noch verdreht; R12/R14 = ? Ω |
 | 3b | | | |
 | 4 | | | |
 | 5 | | | |
